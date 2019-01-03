@@ -16,7 +16,7 @@ def start():
     today = datetime.date.today()
     global record
     record = "{0}-{1}-{2}_room{3}-{4}".format(today.day, today.month, today.year, room, campus) + ".mp4"
-    process = subprocess.Popen("ffmpeg -i rtsp://192.168.11." + cameraIndex + "2 -c copy -f mp4  c:\\driveAPI\\" + record)
+    process = subprocess.Popen("ffmpeg -i rtsp://192.168.11." + cameraIndex + "2 -c copy -f mp4  c:\\2019-NVR2\\driveAPI\\" + record)
 
 def stop():
     subprocess.Popen.kill(process)
