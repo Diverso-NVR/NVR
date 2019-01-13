@@ -9,9 +9,9 @@ SCOPES = 'https://www.googleapis.com/auth/drive'
 """Shows basic usage of the Drive v3 API.
     Prints the names and ids of the first 10 files the user has access to.
     """
- # The file token.json stores the user's access and refresh tokens, and is
- # created automatically when the authorization flow completes for the first
- # time.
+# The file token.json stores the user's access and refresh tokens, and is
+# created automatically when the authorization flow completes for the first
+# time.
 store = file.Storage('token.json')
 creds = store.get()
 if not creds or creds.invalid:
@@ -33,6 +33,11 @@ items = results.get('files', [])
 
 
 def upload(fileName):
-    fileData = {"name": fileName}
-    media = MediaFileUpload(fileName, mimetype="video/mp4")
-    file = service.files().create(body=fileData, media_body=media, fields= 'id').execute()
+    rooms = {"513-MIEM": "1EkXrlRNtXp-YBF1-8SGanCvZRLThy3e_", "P500": "1EbJg0IzJLP788qWVr0u_Y9SmZ8ygzKwr",
+             "P505": "15Ant5hntmfl84Rrkzr9dep2nh13sbXft", "C401": "1L4icf2QJsv7dBBDygNNXCG9dOnPwxY9r"}
+    room = fileName.split('-')[3]
+    media = MediaFileUpload(fileName, mimetype="video/mp4", resumable=True)
+    fileData = {"name": fileName,
+                "parents": [rooms[room]]
+                }
+    file = service.files().create(body=fileData, media_body=media, fields='id').execute()
