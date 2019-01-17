@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang = "ru">
+<head>
+	<meta charset="UTF-8">
+	<title>Сервис потоковой видеозаписи</title>
+	<link rel="stylesheet" href="../static/style.css">
+	<link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+	<link rel="shortcut icon" href="../static/img/logo.ico" type="image/x-icon">
+</head>
+
+<body> 
+	<header>
+		<div class = "logo">
+			<a href="index.html"><img class="graficlogo" src="../static/img/logo.png" alt="Logo"></a>
+		</div>
+
+		<nav>
+			<div class = "topnav">
+				<a href="index.html">Главная</a>
+				<a>Видеозаписи</a>
+				<a id="menu" href="#" class="icon">&#9776</a>
+			</div>
+		</nav>
+	</header>
+
+	<main>
+		<table>
+			<thead>
+				<tr>
+			        <th>Аудитория</th>
+			        <th>Источник звука</th>
+			        <th>Мгновенная запись</th>
+			        <th>Запись по расписанию</th>
+			        <th>Статус</th>
+			        <th>Время</th>
+			        <th>Google Drive</th>
+		        </tr>
+	        </thead>
+	        <tbody>
+		        <tr>
+			        <td>П505/ФКМД</td>
+			        <td>
+		        		<form>
+							 <p><input name="enc_cam" type="radio" value="enc">Кодер</p>
+							 <p><input name="enc_cam" type="radio" value="cam" checked>Камера</p>
+		        		</form>
+			        </td>
+			        <td>
+			        	<form action="/start_stop" method="post">
+                            <button type="submit" class="btn_start" name="index" value="start 1">Start</button>
+                            <button type="submit" class="btn_stop" name="index" value="stop">Stop</button>
+                        </form>
+			        </td>
+			        <td>
+			        	<form action="https://calendar.google.com/calendar/b/1/r?tab=oc" target="_blank">
+							<button type="submit"><img src="../static/img/calendar2.png" width="30" height="30" alt="Calendar"></button>
+						</form>
+			        </td>
+			        <td>
+			        	<div class="status">Готов</div>
+			        </td>
+			        <td></td>
+			        <td>
+			        	<form action="https://drive.google.com/drive/u/2/my-drive" target="_blank">
+			        		<button type="submit"><img src="../static/img/drive.svg" width="30" height="30" alt="Calendar"></button>
+			        	</form>
+			        </td>
+		        </tr>
+		        <tr>
+			        <td>П500/ФКМД</td>
+			        <td>
+		        		<form>
+							 <p><input name="enc_cam" type="radio" value="enc">Кодер</p>
+							 <p><input name="enc_cam" type="radio" value="cam" checked>Камера</p>
+		        		</form>
+			        </td>
+			        <td>
+			        	<form action="/start_stop" method="post">
+			        		<button type="submit" class="btn_start" name="index" value="start 3">Start</button> <!-- 3 - рандом, перепроверить -->
+				        	<button type="submit" class="btn_stop" name="index" value="stop">Stop</button>
+			        	</form>
+			        	<!-- <div class="record_now">Recording time:</div> -->
+			        </td>
+			        <td>
+			        	<form action="https://calendar.google.com/calendar/b/1/r?tab=oc" target="_blank">
+							<button type="submit"><img src="../static/img/calendar2.png" width="30" height="30" alt="Calendar"></button>
+						</form>
+			        </td>
+			        <td>
+			        	<div class="status">Готов</div>
+			        </td>
+			        <td></td>
+			        <td>
+			        	<form action="https://drive.google.com/drive/u/2/my-drive" target="_blank">
+			        		<button type="submit"><img src="../static/img/drive.svg" width="30" height="30" alt="Calendar"></button>
+			        	</form>
+			        </td>
+		        </tr>
+		        <tr>
+			        <td>С401/ФКМД</td>
+			        <td>
+		        		<form>
+							 <p><input name="enc_cam" type="radio" value="enc">Кодер</p>
+							 <p><input name="enc_cam" type="radio" value="cam" checked>Камера</p>
+		        		</form>
+			        </td>
+			        <td>
+			        	<form action="/start_stop" method="post">
+			        		<button type="submit" class="btn_start" name="index" value="start 3">Start</button> <!-- тут 3 тоже рандомная, нужно узнать и изменить -->
+				        	<button type="submit" class="btn_stop" name="index" value="stop">Stop</button>
+			        	</form>
+			        	<!-- <div class="record_now">Recording time:</div> -->
+			        </td>
+			        <td>
+			        	<form action="https://calendar.google.com/calendar/b/1/r?tab=oc" target="_blank">
+							<button type="submit"><img src="../static/img/calendar2.png" width="30" height="30" alt="Calendar"></button>
+						</form>
+			        </td>
+			        <td>
+			        	<div class="status">Готов</div>
+			        </td>
+			        <td></td>
+			        <td>
+			        	<form action="https://drive.google.com/drive/u/2/my-drive" target="_blank">
+			        		<button type="submit"><img src="../static/img/drive.svg" width="30" height="30" alt="Calendar"></button>
+			        	</form>
+			        </td>
+		        </tr>
+
+		        <tr>
+			        <td>513/МИЭМ</td>
+			        <td>
+		        		<form>
+							 <p><input name="enc_cam" type="radio" value="enc">Кодер</p>
+							 <p><input name="enc_cam" type="radio" value="cam" checked>Камера</p>
+		        		</form>
+			        </td>
+			        <td>
+			        	<form action="/start_stop" method="post">
+				        	<button type="submit" class="btn_start" name="index" value="start 4">Start</button>
+				        	<button type="submit" class="btn_stop" name="index" value="stop">Stop</button>
+			        	</form>
+			        	<!-- <div class="record_now">Recording time:</div> -->
+			    	</td>
+			        <td>
+				        <form action="https://calendar.google.com/calendar/b/1/r?tab=oc" target="_blank">
+							<button type="submit"><img src="../static/img/calendar2.png" width="30" height="30" alt="Calendar"></button>
+						</form>
+			    	</td>
+			    	<td>
+			        	<div class="status">Готов</div>
+			        </td>
+			        <td></td>
+			        <td>
+			        	<form action="https://drive.google.com/drive/u/2/my-drive" target="_blank">
+			        		<button type="submit"><img src="../static/img/drive.svg" width="30" height="30" alt="Calendar"></button>
+			        	</form>
+			        </td>
+		        </tr>
+	        </tbody>
+		</table>
+	</main>
+
+	<footer>
+		<div class="f_menu">
+			<ul class="f_list">
+				<li><a>МИЭМ ВШЭ 2019</a></li>
+			    <li><a>Contacts: hsenvrproject@gmail.com</a></li>
+  			</ul>
+		</div>
+	</footer>
+
+	<script src="../static/js/script.js"></script>
+</body>
+</html>
