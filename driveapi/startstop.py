@@ -21,4 +21,3 @@ def stop():
     subprocess.Popen.kill(process)
     upload(record)
     sys.exit()
-    print('stop')
