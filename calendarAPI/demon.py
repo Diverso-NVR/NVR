@@ -28,7 +28,7 @@ class Daemon():
                     driveAPI.startstop.start("4")
                     time.sleep(30)
                     driveAPI.startstop.stop()
-                    sys.exit()
+                    return
             time.sleep(1)
 
 

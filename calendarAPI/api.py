@@ -13,8 +13,8 @@ def addEvent(room, name, start, end):
     GMT_OFF = "+03:00"
     EVENT = {
         "summary": name,
-        "start": {"dateTime": "2019-01-15T12:00:00%s" % GMT_OFF},
-        "end": {"dateTime": "2019-01-15T16:00:00%s" % GMT_OFF}
+        "start": {"dateTime": "2019-01-19T12:00:00%s" % GMT_OFF},
+        "end": {"dateTime": "2019-01-19T16:00:00%s" % GMT_OFF}
     }
 
     e = service.events().insert(calendarId=rooms[room],
