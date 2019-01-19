@@ -5,7 +5,7 @@ from httplib2 import Http
 from oauth2client import file, client, tools
 
 
-rooms = {"513-MIEM": "qbfmrdsip9nr7aknlj2om9ebsc@group.calendar.google.com", "P500": "cfqf9t99a65oi1jd3sbcccp9k0@group.calendar.google.com",
+rooms = {"513MIEM": "hsenvrproject@gmail.com", "P500": "cfqf9t99a65oi1jd3sbcccp9k0@group.calendar.google.com",
          "P505": "33e4j4htl0bvmmuc3t45ehsphk@group.calendar.google.com", "C401": "adfevhq6dbe00or14dkhfkq68k@group.calendar.google.com"}
 
 
@@ -32,23 +32,25 @@ def parseDate(date):
     hour = date[11:13]
     minute = date[14:16]
     second = date[17:19]
-    return {"year": year, "month": month, "day": day, "hour": hour, "minute": minute, "second": second}
+    return "{}-{}-{} {}:{}".format(year, month, day, hour, minute)
 
 
 def getEvents(room):
     now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
-    print('Getting the upcoming 10 events')
+    # print('Getting the upcoming 10 events')
     events_result = service.events().list(calendarId=rooms[room], timeMin=now,
                                           maxResults=10, singleEvents=True,
                                           orderBy='startTime').execute()
     events = events_result.get('items', [])
 
-    if not events:
-        print('No upcoming events found.')
-    for event in events:
-        start = event['start'].get('dateTime', event['start'].get('date'))
-        end = event['end'].get('dateTime', event['end'].get('date'))
-        print(start, end, event['summary'])
+    # if not events:
+    #     print('No upcoming events found.')
+    # for event in events:
+    #     start = event['start'].get('dateTime', event['start'].get('date'))
+    #     end = event['end'].get('dateTime', event['end'].get('date'))
+    #     print(start, end, event['summary'])
+
+    return events
 
 
 # If modifying these scopes, delete the file token.json.
