@@ -1,6 +1,7 @@
 import time
 from datetime import datetime
-from driveAPI.startstop import start, stop
+import sys
+import driveAPI.startstop
 from calendarAPI.api import getEvents, parseDate
 
 
@@ -24,10 +25,11 @@ class Daemon():
                 end = parseDate(event['end'].get(
                     'dateTime', event['end'].get('date')))
                 if startt == datetime.strftime(today, "%Y-%m-%d %H:%M"):
-                    start("4")
-                elif end == datetime.strftime(today, "%Y-%m-%d %H:%M"):
-                    stop()
-            time.sleep()
+                    driveAPI.startstop.start("4")
+                    time.sleep(30)
+                    driveAPI.startstop.stop()
+                    sys.exit()
+            time.sleep(1)
 
 
 daemon = Daemon()

@@ -20,9 +20,9 @@ if not creds or creds.invalid:
 service = build('drive', 'v3', http=creds.authorize(Http()))
 
 # Call the Drive v3 API
-results = service.files().list(
-    pageSize=10, fields="nextPageToken, files(id, name)").execute()
-items = results.get('files', [])
+# results = service.files().list(
+#     pageSize=10, fields="nextPageToken, files(id, name)").execute()
+# items = results.get('files', [])
 
 # if not items:
 #     print('No files found.')
@@ -36,7 +36,7 @@ def upload(filename):
     rooms = {"513MIEM": "1EkXrlRNtXp-YBF1-8SGanCvZRLThy3e_", "P500": "1EbJg0IzJLP788qWVr0u_Y9SmZ8ygzKwr",
              "P505": "15Ant5hntmfl84Rrkzr9dep2nh13sbXft", "S401": "1L4icf2QJsv7dBBDygNNXCG9dOnPwxY9r"}
     room = filename.split('-')[3]
-    media = MediaFileUpload(filename, mimetype="video/mp4", resumable=True)
+    media = MediaFileUpload(filename, mimetype="video/mp4")
     fileData = {"name": filename,
                 "parents": [rooms[room]]
                 }

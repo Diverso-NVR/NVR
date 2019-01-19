@@ -31,7 +31,7 @@ def parseDate(date):
     day = date[8:10]
     hour = date[11:13]
     minute = date[14:16]
-    second = date[17:19]
+    # second = date[17:19]
     return "{}-{}-{} {}:{}".format(year, month, day, hour, minute)
 
 
@@ -68,9 +68,6 @@ if not creds or creds.invalid:
     flow = client.flow_from_clientsecrets('credentials.json', SCOPES)
     creds = tools.run_flow(flow, store)
 service = build('calendar', 'v3', http=creds.authorize(Http()))
-
-
-getEvents('P500')
 
 # addEvent("P500",
 #          "Math conference", 0, 0)
