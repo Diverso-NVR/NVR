@@ -1,6 +1,5 @@
 import time
 from datetime import datetime
-import sys
 import driveAPI.startstop
 from calendarAPI.api import getEvents, parseDate
 
