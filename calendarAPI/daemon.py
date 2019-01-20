@@ -1,7 +1,7 @@
 import time
 from datetime import datetime
 import driveAPI.startstop
-from calendarAPI.api import getEvents, parseDate
+from calendarAPI.calendarSettings import getEvents, parseDate
 
 
 dates = getEvents("513MIEM")
