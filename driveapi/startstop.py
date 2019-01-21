@@ -2,7 +2,7 @@ import datetime
 from subprocess import Popen
 import os
 
-from driveAPI.driveSettings import upload
+from driveapi.driveSettings import upload
 
 def start(roomIndex):
     rooms = {"1": "P505", "2": "P500", "3": "S401", "4": "513MIEM"}
