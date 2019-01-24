@@ -27,7 +27,6 @@ class Daemon():
                     startstop.start("4")
                     time.sleep(10)
                     startstop.stop()
-                    return
             time.sleep(1)
 
 

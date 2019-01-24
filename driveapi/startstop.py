@@ -26,7 +26,7 @@ def start(roomIndex):
 
 def stop():
     os.killpg(os.getpgid(process.pid), signal.SIGTERM)
-    # upload(record)
+    upload(record)
 
 # def get_sound(cam_num):
 #     os.system('ffmpeg -i c:/temp/record' + str(cam_num) + '.mp4 -vn c:/temp/record_sound' + str(cam_num) + '.mp3')
