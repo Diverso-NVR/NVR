@@ -25,7 +25,7 @@ class Daemon():
                     'dateTime', event['end'].get('date')))
                 if startt == datetime.strftime(today, "%Y-%m-%d %H:%M"):
                     startstop.start("4")
-                    time.sleep(30)
+                    time.sleep(10)
                     startstop.stop()
                     return
             time.sleep(1)
