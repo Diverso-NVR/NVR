@@ -1,23 +1,36 @@
 import datetime
 import subprocess
-import sys
 import os
+import signal
 
-from driveapi.api import upload
-
+from driveapi.driveSettings import upload
 
 def start(roomIndex):
-    rooms = {"4": "513MIEM", "1": "P500", "3": "P500", "2": "S401"}
+    rooms = {"1": "P505", "2": "P500", "3": "S401", "4": "513MIEM"}
     global process
     today = datetime.date.today()
     global record
     record = "{0}-{1}-{2}-{3}-{4}".format(
-        today.day, today.month, today.year, rooms[roomIndex], "HSE") + ".mp4"
+        today.year, today.month, today.day, rooms[roomIndex], "HSE") + ".mp4"
     process = subprocess.Popen("ffmpeg -i rtsp://192.168.11." +
-                               roomIndex + "2 -c copy -f mp4 " + os.getcwd() + "\\" + record)
+                    roomIndex + "3 -y -c:v copy -f mp4 " + os.getcwd() + "/" + record, shell=True, preexec_fn=os.setsid)
+
+
+# def start(roomIndex):
+#     global proc
+#     proc = multiprocessing.Process(target=startProcess, args=(roomIndex,))
+#     proc.start()
 
 
 def stop():
-    subprocess.Popen.kill(process)
+    os.killpg(os.getpgid(process.pid), signal.SIGTERM)
     upload(record)
-    sys.exit()
+
+# def get_sound(cam_num):
+#     os.system('ffmpeg -i c:/temp/record' + str(cam_num) + '.mp4 -vn c:/temp/record_sound' + str(cam_num) + '.mp3')
+#
+#
+# def add_sound(video_cam_num, audio_cam_num):
+#     os.system('ffmpeg -i c:/temp/record' + str(video_cam_num) + '.mp4 -i c:/temp/record_sound' + str(
+#         audio_cam_num) + '.mp3 c:/temp/record_full' + str(video_cam_num) + '.mp4')
+#
