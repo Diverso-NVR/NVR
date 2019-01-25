@@ -1,8 +1,6 @@
 import datetime
 import subprocess
 import os
-import time
-import multiprocessing
 import signal
 
 from driveapi.driveSettings import upload
