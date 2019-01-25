@@ -6,9 +6,9 @@ from googleapiclient.http import MediaFileUpload
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = 'https://www.googleapis.com/auth/drive'
-"""Shows basic usage of the Drive v3 API.
-    Prints the names and ids of the first 10 files the user has access to.
-    """
+"""
+Setting up drive
+"""
 # The file token.json stores the user's access and refresh tokens, and is
 # created automatically when the authorization flow completes for the first
 # time.
@@ -33,6 +33,9 @@ service = build('drive', 'v3', http=creds.authorize(Http()))
 
 
 def upload(filename):
+    """
+    Upload file "filename" on drive
+    """
     rooms = {"513MIEM": "1EkXrlRNtXp-YBF1-8SGanCvZRLThy3e_", "P500": "1EbJg0IzJLP788qWVr0u_Y9SmZ8ygzKwr",
              "P505": "15Ant5hntmfl84Rrkzr9dep2nh13sbXft", "S401": "1L4icf2QJsv7dBBDygNNXCG9dOnPwxY9r"}
     room = filename.split('-')[3]

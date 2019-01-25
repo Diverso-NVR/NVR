@@ -9,10 +9,13 @@ rooms = {"513MIEM": "hsenvrproject@gmail.com", "P500": "cfqf9t99a65oi1jd3sbcccp9
          "P505": "33e4j4htl0bvmmuc3t45ehsphk@group.calendar.google.com", "C401": "adfevhq6dbe00or14dkhfkq68k@group.calendar.google.com"}
 
 
-def addEvent(room, name, start, end):
+def addEvent(room, summary, start, end):
+    """
+    Creates an event in "room" with title "summary", starts at "start, ends at "end"
+    """
     GMT_OFF = "+03:00"
     EVENT = {
-        "summary": name,
+        "summary": summary,
         "start": {"dateTime": "2019-01-19T12:00:00%s" % GMT_OFF},
         "end": {"dateTime": "2019-01-19T16:00:00%s" % GMT_OFF}
     }
@@ -26,6 +29,9 @@ def addEvent(room, name, start, end):
 
 
 def parseDate(date):
+    """
+    Parses date in YYYY-MM-DD hh-mm format
+    """
     year = date[0:4]
     month = date[5:7]
     day = date[8:10]
@@ -36,6 +42,9 @@ def parseDate(date):
 
 
 def getEvents(room):
+    """
+    Prints the start and name of the next 10 events on the "room" calendar.
+    """
     now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
     # print('Getting the upcoming 10 events')
     events_result = service.events().list(calendarId=rooms[room], timeMin=now,
@@ -55,10 +64,9 @@ def getEvents(room):
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = 'https://www.googleapis.com/auth/calendar'
-
-"""Shows basic usage of the Google Calendar API.
-    Prints the start and name of the next 10 events on the user's calendar.
-    """
+"""
+Setting up calendar
+"""
 # The file token.json stores the user's access and refresh tokens, and is
 # created automatically when the authorization flow completes for the first
 # time.
@@ -68,6 +76,3 @@ if not creds or creds.invalid:
     flow = client.flow_from_clientsecrets('/home/kuder/2019-NVR2/credentials.json', SCOPES)
     creds = tools.run_flow(flow, store)
 service = build('calendar', 'v3', http=creds.authorize(Http()))
-
-# addEvent("P500",
-#          "Math conference", 0, 0)
