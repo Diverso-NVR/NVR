@@ -5,13 +5,6 @@ from calendarAPI.calendarSettings import getEvents, parseDate
 
 
 dates = getEvents("513MIEM")
-for event in dates:
-    start = parseDate(event['start'].get(
-        'dateTime', event['start'].get('date')))
-    end = parseDate(event['end'].get(
-        'dateTime', event['end'].get('date')))
-    print(start, end, event['summary'])
-
 
 class Daemon():
     def run(self):
