@@ -1,175 +1,175 @@
 <!DOCTYPE html>
-<html lang = "ru">
+<html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<title>Сервис потоковой видеозаписи</title>
-	<link rel="stylesheet" href="../static/style.css">
-	<link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
-	<link rel="shortcut icon" href="../static/img/logo.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <title>Project</title>
+    <link rel="stylesheet" href="../static/style.css">
+    <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+    <link rel="shortcut icon" href="../static/img/logo.ico" type="image/x-icon">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.22/vue.js"
+            integrity="sha256-GmgFjvxj3EgNe3TECaFoMnNKxVc3zY7Ouiyd+K4tqc8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"
+            integrity="sha256-mpnrJ5DpEZZkwkE1ZgkEQQJW/46CSEh/STrZKOB/qoM=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"
+          integrity="sha256-9mbkOfVho3ZPXfM7W8sV2SndrGDuh7wuyLjtsWeTI1Q=" crossorigin="anonymous"/>
 </head>
 
-<body> 
-	<header>
-		<div class = "logo">
-			<a href="index.html"><img class="graficlogo" src="../static/img/logo.png" alt="Logo"></a>
-		</div>
+<body>
+<header>
+    <a href="/">
+        <img class="logo" src="../static/img/logo.png" alt="Logo">
+    </a>
+</header>
 
-		<nav>
-			<div class = "topnav">
-				<a href="index.html">Главная</a>
-				<a>Видеозаписи</a>
-				<a id="menu" href="#" class="icon">&#9776</a>
-			</div>
-		</nav>
-	</header>
+<!-- <nav>
+    <div class="ui secondary  menu">
+        <a class="item active">
+            Home
+        </a>
+        <a class="item">
+            Records
+        </a>
+        <a class="item">
+            Friends
+        </a>
+    </div>
+</nav> -->
 
-	<main>
-		<table>
-			<thead>
-				<tr>
-			        <th>Аудитория</th>
-			        <th>Источник звука</th>
-			        <th>Мгновенная запись</th>
-			        <th>Запись по расписанию</th>
-			        <th>Статус</th>
-			        <th>Время</th>
-			        <th>Google Drive</th>
-		        </tr>
-	        </thead>
-	        <tbody>
-		        <tr>
-			        <td>П505/ФКМД</td>
-			        <td>
-		        		<form>
-							 <p><input name="enc_cam" type="radio" value="enc">Кодер</p>
-							 <p><input name="enc_cam" type="radio" value="cam" checked>Камера</p>
-		        		</form>
-			        </td>
-			        <td>
-			        	<form action="/start_stop" method="post">
-                            <button type="submit" class="btn_start" name="index" value="start 1">Start</button>
-                            <button type="submit" class="btn_stop" name="index" value="stop">Stop</button>
-                        </form>
-			        </td>
-			        <td>
-			        	<form action="https://calendar.google.com/calendar/b/1/r?tab=oc" target="_blank">
-							<button type="submit"><img src="../static/img/calendar2.png" width="30" height="30" alt="Calendar"></button>
-						</form>
-			        </td>
-			        <td>
-			        	<div class="status">Готов</div>
-			        </td>
-			        <td></td>
-			        <td>
-			        	<form action="https://drive.google.com/drive/u/2/my-drive" target="_blank">
-			        		<button type="submit"><img src="../static/img/drive.svg" width="30" height="30" alt="Calendar"></button>
-			        	</form>
-			        </td>
-		        </tr>
-		        <tr>
-			        <td>П500/ФКМД</td>
-			        <td>
-		        		<form>
-							 <p><input name="enc_cam" type="radio" value="enc">Кодер</p>
-							 <p><input name="enc_cam" type="radio" value="cam" checked>Камера</p>
-		        		</form>
-			        </td>
-			        <td>
-			        	<form action="/start_stop" method="post">
-			        		<button type="submit" class="btn_start" name="index" value="start 2">Start</button> <!-- 3 - рандом, перепроверить -->
-				        	<button type="submit" class="btn_stop" name="index" value="stop">Stop</button>
-			        	</form>
-			        	<!-- <div class="record_now">Recording time:</div> -->
-			        </td>
-			        <td>
-			        	<form action="https://calendar.google.com/calendar/b/1/r?tab=oc" target="_blank">
-							<button type="submit"><img src="../static/img/calendar2.png" width="30" height="30" alt="Calendar"></button>
-						</form>
-			        </td>
-			        <td>
-			        	<div class="status">Готов</div>
-			        </td>
-			        <td></td>
-			        <td>
-			        	<form action="https://drive.google.com/drive/u/2/my-drive" target="_blank">
-			        		<button type="submit"><img src="../static/img/drive.svg" width="30" height="30" alt="Calendar"></button>
-			        	</form>
-			        </td>
-		        </tr>
-		        <tr>
-			        <td>С401/ФКМД</td>
-			        <td>
-		        		<form>
-							 <p><input name="enc_cam" type="radio" value="enc">Кодер</p>
-							 <p><input name="enc_cam" type="radio" value="cam" checked>Камера</p>
-		        		</form>
-			        </td>
-			        <td>
-			        	<form action="/start_stop" method="post">
-			        		<button type="submit" class="btn_start" name="index" value="start 3">Start</button> <!-- тут 3 тоже рандомная, нужно узнать и изменить -->
-				        	<button type="submit" class="btn_stop" name="index" value="stop">Stop</button>
-			        	</form>
-			        	<!-- <div class="record_now">Recording time:</div> -->
-			        </td>
-			        <td>
-			        	<form action="https://calendar.google.com/calendar/b/1/r?tab=oc" target="_blank">
-							<button type="submit"><img src="../static/img/calendar2.png" width="30" height="30" alt="Calendar"></button>
-						</form>
-			        </td>
-			        <td>
-			        	<div class="status">Готов</div>
-			        </td>
-			        <td></td>
-			        <td>
-			        	<form action="https://drive.google.com/drive/u/2/my-drive" target="_blank">
-			        		<button type="submit"><img src="../static/img/drive.svg" width="30" height="30" alt="Calendar"></button>
-			        	</form>
-			        </td>
-		        </tr>
 
-		        <tr>
-			        <td>513/МИЭМ</td>
-			        <td>
-		        		<form>
-							 <p><input name="enc_cam" type="radio" value="enc">Кодер</p>
-							 <p><input name="enc_cam" type="radio" value="cam" checked>Камера</p>
-		        		</form>
-			        </td>
-			        <td>
-			        	<form action="/start_stop" method="post">
-				        	<button type="submit" class="btn_start" name="index" value="start 4">Start</button>
-				        	<button type="submit" class="btn_stop" name="index" value="stop">Stop</button>
-			        	</form>
-			        	<!-- <div class="record_now">Recording time:</div> -->
-			    	</td>
-			        <td>
-				        <form action="https://calendar.google.com/calendar/b/1/r?tab=oc" target="_blank">
-							<button type="submit"><img src="../static/img/calendar2.png" width="30" height="30" alt="Calendar"></button>
-						</form>
-			    	</td>
-			    	<td>
-			        	<div class="status">Готов</div>
-			        </td>
-			        <td></td>
-			        <td>
-			        	<form action="https://drive.google.com/drive/u/2/my-drive" target="_blank">
-			        		<button type="submit"><img src="../static/img/drive.svg" width="30" height="30" alt="Calendar"></button>
-			        	</form>
-			        </td>
-		        </tr>
-	        </tbody>
-		</table>
-	</main>
+<main id="app" class="ui container">
+    <table class="ui celled striped center table">
+        <thead>
+        <tr>
+            <th>Auditorium</th>
+            <th>Sound source</th>
+            <th>Record now</th>
+            <th>Record later</th>
+            <th>Status</th>
+            <th>Time</th>
+            <th>Drive</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="camera in cameras">
+            <td>[[ camera.building ]]-[[camera.auditorium]]</td>
+            <td>
+                <div class="ui buttons">
+                    <button class="ui button" :class="{active: camera.sound_source==='enc', disabled: camera.status === 'busy'}"
+                            @click="camera.sound_source = 'enc'">Encoder
+                    </button>
+                    <button class="ui button" :class="{active: camera.sound_source==='cam', disabled: camera.status === 'busy'}"
+                            @click="camera.sound_source = 'cam'">Camera
+                    </button>
+                </div>
+            </td>
+            <td>
+                <form>
+                    <button class="ui button green" :class="{disabled: camera.status === 'busy'}"
+                            @click.prevent="startCamera(camera)">Start
+                    </button>
+                    <button class="ui button red" :class="{disabled: camera.status === 'free'}"
+                            @click.prevent="stopCamera(camera)">Stop
+                    </button>
+                </form>
+            </td>
+            <td>
+                <a href="https://calendar.google.com/calendar/b/1/r?tab=oc" target="_blank" class="ui icon button">
+                    <i class="calendar alternate outline icon"></i>
+                </a>
+            </td>
+            <td :class="[camera.status==='free' ? 'positive' : 'negative']">
+                <div class="status" v-if="camera.status==='free'">Ready</div>
+                <div class="status busy" v-if="camera.status==='busy'">Busy</div>
+            </td>
+            <td>
+                <div v-if="camera.status==='busy'">
+                    [[getTsSting(camera.work_duration)]]
+                </div>
+            </td>
+            <td>
+                <a v-bind:href="camera.source" target="_blank"
+                   class="ui icon button">
+                    <i class="google drive icon"></i>
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</main>
 
-	<footer>
-		<div class="f_menu">
-			<ul class="f_list">
-				<li><a>МИЭМ ВШЭ 2019</a></li>
-			    <li><a>Contacts: hsenvrproject@gmail.com</a></li>
-  			</ul>
-		</div>
-	</footer>
+<footer>
+    <ul>
+        <li><a>HSE MIEM 2019</a></li>
+        <li><a>hsenvrproject@gmail.com</a></li>
+    </ul>
+</footer>
 
-	<script src="../static/js/script.js"></script>
+<script>
+
+    let app = new Vue({
+        el: '#app',
+        data: () => ({
+            cameras: []
+        }),
+        delimiters: ['[[',']]'],
+        computed: {
+            getCamName(camera) {
+                return '123' //camera.building + '-' + camera.auditorium
+            }
+        },
+        methods: {
+            getTsSting(ts) {
+                let h = Math.floor(ts / 60 / 60)
+                ts -= h * 60 * 60
+                let m = Math.floor(ts / 60)
+                ts -= m * 60
+                return `${h} ч. ${m} м. ${ts} с.`
+            },
+            fetchData() {
+                axios.get('http://')
+            },
+            startCamera(camera) {
+                axios.post('/cameras/' + camera.id + '/start', {
+                    sound_source: camera.sound_source
+                }).then(res => {
+                    camera.status = 'busy'
+                })
+            },
+            stopCamera(camera) {
+                axios.post('/cameras/' + camera.id + '/stop').then(res => {
+                    camera.status = 'free'
+                    camera.timestamp = 0
+                })
+            }
+        },
+        created() {
+            axios.get('/status').then(res => {
+                res.data.forEach(camera => {
+                    this.cameras.push(Object.assign({
+                        id: 0,
+                        building: '',
+                        auditorium: '',
+                        status: '',
+                        timestamp: 0,
+                        work_duration: '',
+                        sound_source: 'enc'
+                    }, camera))
+                })
+                let updateTime = () => {
+                    this.cameras
+                        .forEach(camera => {
+                            camera.work_duration = camera.status === 'busy' ?
+                                camera.timestamp++ : ''
+                        })
+                    this.cameras = [...this.cameras]
+                }
+                updateTime()
+                setInterval(() => {
+                    updateTime()
+                }, 1000)
+            })
+        }
+    })
+</script>
 </body>
 </html>
