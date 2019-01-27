@@ -2,6 +2,7 @@ import datetime
 import subprocess
 import os
 import signal
+import time
 
 from driveapi.driveSettings import upload
 
@@ -14,16 +15,12 @@ def start(roomIndex):
         today.year, today.month, today.day, rooms[roomIndex], "HSE") + ".mp4"
     process = subprocess.Popen("ffmpeg -i rtsp://192.168.11." +
                     roomIndex + "3 -y -c:v copy -f mp4 " + os.getcwd() + "/" + record, shell=True, preexec_fn=os.setsid)
-
-
-# def start(roomIndex):
-#     global proc
-#     proc = multiprocessing.Process(target=startProcess, args=(roomIndex,))
-#     proc.start()
+    # TODO: Add multiprocessing
 
 
 def stop():
     os.killpg(os.getpgid(process.pid), signal.SIGTERM)
+    time.sleep(1)
     upload(record)
 
 # def get_sound(cam_num):
