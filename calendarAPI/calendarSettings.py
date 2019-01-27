@@ -52,8 +52,6 @@ def getEvents(room):
                                           orderBy='startTime').execute()
     events = events_result.get('items', [])
 
-    # if not events:
-    #     print('No upcoming events found.')
     # for event in events:
     #     start = event['start'].get('dateTime', event['start'].get('date'))
     #     end = event['end'].get('dateTime', event['end'].get('date'))
@@ -70,9 +68,9 @@ Setting up calendar
 # The file token.json stores the user's access and refresh tokens, and is
 # created automatically when the authorization flow completes for the first
 # time.
-store = file.Storage('tokenCalendar.json')
+store = file.Storage('../tokenCalendar.json')
 creds = store.get()
 if not creds or creds.invalid:
-    flow = client.flow_from_clientsecrets('credentials.json', SCOPES)
+    flow = client.flow_from_clientsecrets('../credentials.json', SCOPES)
     creds = tools.run_flow(flow, store)
 service = build('calendar', 'v3', http=creds.authorize(Http()))
