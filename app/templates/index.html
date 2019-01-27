@@ -1,4 +1,4 @@
-<!Doctype html> <!--Doctype сообщает, согласно какому стандарту отображать веб-страницу. Здесь это HTML5 -->
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -87,7 +87,7 @@
                 </div>
             </td>
             <td>
-                <a href="https://drive.google.com/drive/u/3/folders/15Ant5hntmfl84Rrkzr9dep2nh13sbXft" target="_blank"
+                <a v-bind:href="camera.source" target="_blank"
                    class="ui icon button">
                     <i class="google drive icon"></i>
                 </a>
@@ -129,14 +129,14 @@
                 axios.get('http://')
             },
             startCamera(camera) {
-                axios.post('/cameras/1/start', {
+                axios.post('/cameras/' + camera.id + '/start', {
                     sound_source: camera.sound_source
                 }).then(res => {
                     camera.status = 'busy'
                 })
             },
             stopCamera(camera) {
-                axios.post('/cameras/1/stop').then(res => {
+                axios.post('/cameras/' + camera.id + '/stop').then(res => {
                     camera.status = 'free'
                     camera.timestamp = 0
                 })

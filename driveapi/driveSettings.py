@@ -40,7 +40,7 @@ def upload(filename):
              "P505": "15Ant5hntmfl84Rrkzr9dep2nh13sbXft", "S401": "1L4icf2QJsv7dBBDygNNXCG9dOnPwxY9r"}
     room = filename.split('-')[3]
     media = MediaFileUpload(filename, mimetype="video/mp4", resumable=True)
-    fileData = {"name": filename,
+    fileData = {"name": filename.split('/')[2],
                 "parents": [rooms[room]]
                 }
     file = service.files().create(body=fileData, media_body=media, fields='id').execute()
