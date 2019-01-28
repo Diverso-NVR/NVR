@@ -19,9 +19,13 @@ def start(roomIndex):
 
 
 def stop():
-    os.killpg(os.getpgid(process.pid), signal.SIGTERM)
-    time.sleep(1)
-    upload('../vids/' + record)
+    try:
+        os.killpg(os.getpgid(process.pid), signal.SIGTERM)
+        time.sleep(1)
+        upload('../vids/' + record)
+    except Exception:
+        pass
+
 
 # def get_sound(cam_num):
 #     os.system('ffmpeg -i c:/temp/record' + str(cam_num) + '.mp4 -vn c:/temp/record_sound' + str(cam_num) + '.mp3')

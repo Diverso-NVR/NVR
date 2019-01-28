@@ -1,5 +1,5 @@
 from driveapi.startstop import start, stop
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, jsonify
 from time import time
 
 app = Flask(__name__)
@@ -18,9 +18,9 @@ def status():
          {'id': 2, 'building': 'FCMD', 'auditorium': 'П500', 'status': 'free', 'timestamp': 0,
           'source': 'https://drive.google.com/drive/folders/1EbJg0IzJLP788qWVr0u_Y9SmZ8ygzKwr'},
          {'id': 3, 'building': 'FCMD', 'auditorium': 'С401', 'status': 'free', 'timestamp': 0,
-          'source': 'https://drive.google.com/drive/folders/1L4icf2QJsv7dBBDygNNXCG9dOnPwxY9r'},
-         {'id': 4, 'building': 'MIEM', 'auditorium': '513', 'status': 'free', 'timestamp': 0,
-          'source': 'https://drive.google.com/drive/folders/1EkXrlRNtXp-YBF1-8SGanCvZRLThy3e_'}
+          'source': 'https://drive.google.com/drive/folders/1L4icf2QJsv7dBBDygNNXCG9dOnPwxY9r'}
+         # {'id': 4, 'building': 'MIEM', 'auditorium': '513', 'status': 'free', 'timestamp': 0,
+         #  'source': 'https://drive.google.com/drive/folders/1EkXrlRNtXp-YBF1-8SGanCvZRLThy3e_'}
     ])
 
 
