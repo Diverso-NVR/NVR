@@ -108,7 +108,6 @@
 <script>
 
     function auth(){
-        var loginOk = false;
         var data = {
                 "login": "hsenvr",
                 "password": 1337
@@ -116,11 +115,7 @@
 
         login = prompt("Логин","");
         password = prompt("Пароль","");
-        if(login == data["login"] && password == data["password"]){
-            loginOk = true;
-        }
-
-        if(loginOk == false) {
+        if(login != data["login"] || password != data["password"]){
             alert("Неверно");
             return auth();
         }
