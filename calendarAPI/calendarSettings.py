@@ -5,7 +5,7 @@ from httplib2 import Http
 from oauth2client import file, client, tools
 
 
-rooms = {"513MIEM": "hsenvrproject@gmail.com", "P500": "cfqf9t99a65oi1jd3sbcccp9k0@group.calendar.google.com",
+rooms = {"P500": "hsenvrproject@gmail.com",
          "P505": "33e4j4htl0bvmmuc3t45ehsphk@group.calendar.google.com", "C401": "adfevhq6dbe00or14dkhfkq68k@group.calendar.google.com"}
 
 
@@ -37,7 +37,6 @@ def parseDate(date):
     day = date[8:10]
     hour = date[11:13]
     minute = date[14:16]
-    # second = date[17:19]
     return "{}-{}-{} {}:{}".format(year, month, day, hour, minute)
 
 
@@ -65,7 +64,7 @@ SCOPES = 'https://www.googleapis.com/auth/calendar'
 """
 Setting up calendar
 """
-# The file token.json stores the user's access and refresh tokens, and is
+# The file tokenCalendar.json stores the user's access and refresh tokens, and is
 # created automatically when the authorization flow completes for the first
 # time.
 store = file.Storage('tokenCalendar.json')

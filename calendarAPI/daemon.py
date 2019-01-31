@@ -6,7 +6,7 @@ from calendarAPI.calendarSettings import getEvents, parseDate
 
 def events():
     dates = []
-    for room in ["P505", "P500", "C401", "513MIEM"]:
+    for room in ["P505", "P500", "C401"]:
         try:
             i = getEvents(room)
             dates.append(i[0])

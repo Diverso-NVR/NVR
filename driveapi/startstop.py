@@ -7,7 +7,7 @@ import time
 from driveapi.driveSettings import upload
 
 def start(roomIndex):
-    rooms = {"1": "P505", "2": "P500", "3": "S401", "4": "513MIEM"}
+    rooms = {"1": "P505", "2": "P500", "3": "S401"}
     global process
     today = datetime.date.today()
     global record
@@ -26,7 +26,7 @@ def stop():
     except Exception:
         pass
 
-
+# TODO: Synchronization
 # def get_sound(cam_num):
 #     os.system('ffmpeg -i c:/temp/record' + str(cam_num) + '.mp4 -vn c:/temp/record_sound' + str(cam_num) + '.mp3')
 #
