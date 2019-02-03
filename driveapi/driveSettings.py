@@ -12,10 +12,10 @@ Setting up drive
 # The file token.json stores the user's access and refresh tokens, and is
 # created automatically when the authorization flow completes for the first
 # time.
-store = file.Storage('tokenDrive.json')
+store = file.Storage('../tokenDrive.json')
 creds = store.get()
 if not creds or creds.invalid:
-    flow = client.flow_from_clientsecrets('credentials.json', SCOPES)
+    flow = client.flow_from_clientsecrets('../credentials.json', SCOPES)
     creds = tools.run_flow(flow, store)
 service = build('drive', 'v3', http=creds.authorize(Http()))
 
@@ -36,11 +36,12 @@ def upload(filename):
     """
     Upload file "filename" on drive
     """
-    rooms = {"513MIEM": "1EkXrlRNtXp-YBF1-8SGanCvZRLThy3e_", "P500": "1EbJg0IzJLP788qWVr0u_Y9SmZ8ygzKwr",
-             "P505": "15Ant5hntmfl84Rrkzr9dep2nh13sbXft", "S401": "1L4icf2QJsv7dBBDygNNXCG9dOnPwxY9r"}
+    rooms = {"P500": "1EbJg0IzJLP788qWVr0u_Y9SmZ8ygzKwr",
+             "P505": "15Ant5hntmfl84Rrkzr9dep2nh13sbXft",
+             "S401": "1L4icf2QJsv7dBBDygNNXCG9dOnPwxY9r"}
     room = filename.split('-')[3]
     media = MediaFileUpload(filename, mimetype="video/mp4", resumable=True)
-    fileData = {"name": filename.split('/')[2],
+    fileData = {"name": filename.split('/')[3],
                 "parents": [rooms[room]]
                 }
     file = service.files().create(body=fileData, media_body=media, fields='id').execute()

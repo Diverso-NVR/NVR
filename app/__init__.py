@@ -1,7 +1,6 @@
 from driveapi.startstop import start, stop
 from flask import Flask, render_template, jsonify
 from time import time
-
 app = Flask(__name__)
 
 
