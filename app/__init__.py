@@ -1,4 +1,5 @@
 from driveapi.startstop import start, stop
+import daemon, time
 from flask import Flask, render_template, jsonify
 from time import time
 app = Flask(__name__)
@@ -33,6 +34,15 @@ def startRec(camera):
 def stopRec(camera):
     stop()
     return jsonify([{'timestamp': None}])
+
+
+def do_shit():
+    s = 0
+    while True:
+        s += 1
+        with open("home/kuder/test.txt", "w") as f:
+            f.write(str(s))
+        time.sleep(1)
 
 
 if __name__ == '__main__':
