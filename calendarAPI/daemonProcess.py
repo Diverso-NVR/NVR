@@ -39,9 +39,9 @@ def run():
             end = parseDate(dates[i]['end'].get(
                 'dateTime', dates[i]['end'].get('date')))
             if startt == datetime.strftime(today, "%Y-%m-%d %H:%M"):
-                startstop.start(str(i + 1))
+                startstop.start(str(i + 1), "enc")
                 time.sleep(duration(end) - duration(startt))
-                startstop.stop()
+                startstop.stop(str(i + 1))
         time.sleep(1)
 
 

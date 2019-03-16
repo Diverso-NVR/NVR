@@ -1,5 +1,4 @@
 from driveapi.startstop import start, stop
-import daemon, time
 from flask import Flask, render_template, jsonify
 from time import time
 app = Flask(__name__)
@@ -26,23 +25,14 @@ def status():
 
 @app.route('/cameras/<camera>/start', methods=['POST'])
 def startRec(camera):
-    start(camera)
+    start(camera, "enc")
     return jsonify([{'timestamp': time()}])
 
 
 @app.route('/cameras/<camera>/stop', methods=['POST'])
 def stopRec(camera):
-    stop()
+    stop(camera)
     return jsonify([{'timestamp': None}])
-
-
-def do_shit():
-    s = 0
-    while True:
-        s += 1
-        with open("home/kuder/test.txt", "w") as f:
-            f.write(str(s))
-        time.sleep(1)
 
 
 if __name__ == '__main__':

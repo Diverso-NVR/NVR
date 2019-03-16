@@ -39,7 +39,7 @@ def upload(filename):
     rooms = {"P500": "1EbJg0IzJLP788qWVr0u_Y9SmZ8ygzKwr",
              "P505": "15Ant5hntmfl84Rrkzr9dep2nh13sbXft",
              "S401": "1L4icf2QJsv7dBBDygNNXCG9dOnPwxY9r"}
-    room = filename.split('-')[3]
+    room = filename.split('-')[5]
     media = MediaFileUpload(filename, mimetype="video/mp4", resumable=True)
     fileData = {"name": filename.split('/')[3],
                 "parents": [rooms[room]]
