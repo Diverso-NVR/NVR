@@ -30,7 +30,6 @@ def run():
     while True:
         dates = events()
         today = datetime.now()
-        print(today)
         for i in range(len(dates)):
             if dates[i] == {}:
                 continue
