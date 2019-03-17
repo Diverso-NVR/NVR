@@ -12,10 +12,10 @@ Setting up drive
 # The file token.json stores the user's access and refresh tokens, and is
 # created automatically when the authorization flow completes for the first
 # time.
-store = file.Storage('../tokenDrive.json')
+store = file.Storage('tokenDrive.json')
 creds = store.get()
 if not creds or creds.invalid:
-    flow = client.flow_from_clientsecrets('../credentials.json', SCOPES)
+    flow = client.flow_from_clientsecrets('credentials.json', SCOPES)
     creds = tools.run_flow(flow, store)
 service = build('drive', 'v3', http=creds.authorize(Http()))
 
@@ -41,7 +41,7 @@ def upload(filename):
              "S401": "1L4icf2QJsv7dBBDygNNXCG9dOnPwxY9r"}
     room = filename.split('-')[5]
     media = MediaFileUpload(filename, mimetype="video/mp4", resumable=True)
-    fileData = {"name": filename.split('/')[3],
+    fileData = {"name": filename.split('/')[2],
                 "parents": [rooms[room]]
                 }
     file = service.files().create(body=fileData, media_body=media, fields='id').execute()

@@ -24,8 +24,8 @@ def status():
 
 
 @app.route('/cameras/<camera>/start', methods=['POST'])
-def startRec(camera):
-    start(camera, "enc")
+def startRec(camera, sound):
+    start(camera, sound)
     return jsonify([{'timestamp': time()}])
 
 

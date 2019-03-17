@@ -29,7 +29,7 @@ def start(room_index, sound):
     else:
         # cams *2 throw 401: unauthorized error in S401 and P500
         cam = subprocess.Popen("ffmpeg -i rtsp://192.168.11." +
-                               room_index + "2 -y -c:v copy -f mp4 .~/vids/snd-"
+                               room_index + "2 -y -c:v copy -f mp4 ~/vids/snd-"
                                + records[room_index] + ".mp4", shell=True, preexec_fn=os.setsid)
         processes[room_index].append(cam)
 
@@ -48,7 +48,7 @@ def stop(roomIndex):
         for i in range(3, 7):
             add_sound(str(i) + "-" + records[roomIndex], records[roomIndex])
         for i in range(3, 7):
-            upload('../../vids/result-' + str(i) + "-" + records[roomIndex] + ".mp4")
+            upload('../vids/result-' + str(i) + "-" + records[roomIndex] + ".mp4")
     except Exception:
         pass
 
@@ -59,5 +59,5 @@ def get_sound(record):
 
 def add_sound(video_cam_num, audio_cam_num):
     os.system(
-        "ffmpeg -y -i ../../vids/" + video_cam_num + ".mp4" + " -i ../../vids/sound" + audio_cam_num
-        + ".mp3 " + "../../vids/result-" + video_cam_num + ".mp4")
+        "ffmpeg -y -i ../vids/" + video_cam_num + ".mp4" + " -i ../vids/sound" + audio_cam_num
+        + ".mp3 " + "../vids/result-" + video_cam_num + ".mp4")
