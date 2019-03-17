@@ -63,8 +63,8 @@
                         <button class="ui button green" :class="{disabled: camera.status === 'busy'}"
                                 @click.prevent="startCamera(camera)">Start
                         </button>
-                        <button class="ui button red" :class="{disabled: camera.status === 'free'}"
-                                @click.prevent="stopCamera(camera)">Stop
+                        <button class="ui button red" :class="{disabled: camera.status === 'free' || camera.is_stopped === 'yes'}"
+                                @click.prevent="stopCamera(camera)" @click="stopTimer(camera)">Stop
                         </button>
                     </form>
                 </td>
@@ -104,83 +104,92 @@
         </div>
     </div>-->
 
-    <script>
-        function auth(){
-            var data = {
-                    "login": "hsenvr",
-                    "password": 1337
-            };
-            login = prompt("Логин","");
-            password = prompt("Пароль","");
-            if(login != data["login"] || password != data["password"]){
-                alert("Неверно");
-                return auth();
-            }
+<script>
+
+    function auth(){
+        var data = {
+                "login": "hsenvr",
+                "password": 1337
+        };
+
+        login = prompt("Логин","");
+        password = prompt("Пароль","");
+        if(login != data["login"] || password != data["password"]){
+            alert("Неверно");
+            return auth();
         }
-        let app = new Vue({
-            el: '#app',
-            data: () => ({
-                cameras: []
-            }),
-            delimiters: ['[[',']]'],
-            computed: {
-                getCamName(camera) {
-                    return '123' //camera.building + '-' + camera.auditorium
-                }
+    }
+
+    let app = new Vue({
+        el: '#app',
+        data: () => ({
+            cameras: []
+        }),
+        delimiters: ['[[',']]'],
+        computed: {
+            getCamName(camera) {
+                return camera.building + '-' + camera.auditorium
+            }
+        },
+        methods: {
+            getTsSting(ts) {
+                let h = Math.floor(ts / 60 / 60)
+                ts -= h * 60 * 60
+                let m = Math.floor(ts / 60)
+                ts -= m * 60
+                return `${h} ч. ${m} м. ${ts} с.`
             },
-            methods: {
-                getTsSting(ts) {
-                    let h = Math.floor(ts / 60 / 60)
-                    ts -= h * 60 * 60
-                    let m = Math.floor(ts / 60)
-                    ts -= m * 60
-                    return `${h} ч. ${m} м. ${ts} с.`
-                },
-                fetchData() {
-                    axios.get('http://')
-                },
-                startCamera(camera) {
-                    axios.post('/cameras/' + camera.id + '/start', {
-                        sound_source: camera.sound_source
-                    }).then(res => {
-                        camera.status = 'busy'
-                    })
-                },
-                stopCamera(camera) {
-                    axios.post('/cameras/' + camera.id + '/stop').then(res => {
-                        camera.status = 'free'
-                        camera.timestamp = 0
-                    })
-                }
+            fetchData() {
+                axios.get('http://')
             },
-            created() {
-                axios.get('/status').then(res => {
-                    res.data.forEach(camera => {
-                        this.cameras.push(Object.assign({
-                            id: 0,
-                            building: '',
-                            auditorium: '',
-                            status: '',
-                            timestamp: 0,
-                            work_duration: '',
-                            sound_source: 'enc'
-                        }, camera))
-                    })
-                    let updateTime = () => {
-                        this.cameras
-                            .forEach(camera => {
-                                camera.work_duration = camera.status === 'busy' ?
-                                    camera.timestamp++ : ''
-                            })
-                        this.cameras = [...this.cameras]
-                    }
-                    updateTime()
-                    setInterval(() => {
-                        updateTime()
-                    }, 1000)
+            startCamera(camera) {
+                axios.post('/cameras/' + camera.id + '/' + camera.sound_source + '/start', {
+                    sound_source: camera.sound_source
+                }).then(res => {
+                    camera.status = 'busy'
+                })
+            },
+            stopTimer(camera) {
+                camera.is_stopped = 'yes'
+            },
+            stopCamera(camera) {
+                axios.post('/cameras/' + camera.id + '/' + camera.sound_source  + '/stop').then(res => {
+                    camera.status = 'free'
+                    camera.is_stopped = 'no'
+                    camera.timestamp = 0
+                    camera.work_duration = ''
                 })
             }
-        })
-    </script>
-    </body>
+        },
+        created() {
+            axios.get('/status').then(res => {
+                res.data.forEach(camera => {
+                    this.cameras.push(Object.assign({
+                        id: 0,
+                        building: '',
+                        auditorium: '',
+                        status: '',
+                        timestamp: 0,
+                        work_duration: '',
+                        sound_source: 'enc',
+                        is_stopped: 'no'
+                    }, camera))
+                })
+                let updateTime = () => {
+                    this.cameras
+                        .forEach(camera => {
+                            camera.work_duration = camera.status === 'busy' && camera.is_stopped === 'no' ?
+                                camera.timestamp++: camera.timestamp
+                        })
+                    this.cameras = [...this.cameras]
+                }
+                updateTime()
+                setInterval(() => {
+                    updateTime()
+                }, 1000)
+            })
+        }
+    })
+</script>
+</body>
 </html>
