@@ -24,16 +24,18 @@ def status():
     ])
 
 
-@app.route('/cameras/<camera>/start', methods=['POST'])
-def startRec(camera):
-    start(camera)
+@app.route('/cameras/<camera>/<soundType>/start', methods=['POST'])
+def startRec(camera, soundType):
+    start(camera, soundType)
+    # TODO
     return jsonify([{'timestamp': time()}])
 
 
-@app.route('/cameras/<camera>/stop', methods=['POST'])
-def stopRec(camera):
+@app.route('/cameras/<camera>/<soundType>/stop', methods=['POST'])
+def stopRec(camera, soundType):
     stop()
-    return jsonify([{'timestamp': None}])
+    # TODO
+    return jsonify([{'timestamp': time()}])
 
 
 if __name__ == '__main__':

@@ -129,7 +129,7 @@
         delimiters: ['[[',']]'],
         computed: {
             getCamName(camera) {
-                return '123' //camera.building + '-' + camera.auditorium
+                return camera.building + '-' + camera.auditorium
             }
         },
         methods: {
@@ -144,14 +144,14 @@
                 axios.get('http://')
             },
             startCamera(camera) {
-                axios.post('/cameras/' + camera.id + '/start', {
+                axios.post('/cameras/' + camera.id + '/' + camera.sound_source + '/start', {
                     sound_source: camera.sound_source
                 }).then(res => {
                     camera.status = 'busy'
                 })
             },
             stopCamera(camera) {
-                axios.post('/cameras/' + camera.id + '/stop').then(res => {
+                axios.post('/cameras/' + camera.id + '/' + camera.sound_source  + '/stop').then(res => {
                     camera.status = 'free'
                     camera.timestamp = 0
                 })
