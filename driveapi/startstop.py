@@ -59,7 +59,7 @@ def stop(roomIndex):
 
 
 def get_sound(record):
-    os.system("ffmpeg -i ../vids/sound-source-" + record + ".mp4 -y -vn -f mp4 ../vids/sound-" + record + ".mp3")
+    os.system("ffmpeg -i ../vids/sound-source-" + record + ".mp4 -y -f mp4 -vn -f mp4 ../vids/sound-" + record + ".mp3")
 
 
 def add_sound(video_cam_num, audio_cam_num):
