@@ -63,8 +63,8 @@
                         <button class="ui button green" :class="{disabled: camera.status === 'busy'}"
                                 @click.prevent="startCamera(camera)">Start
                         </button>
-                        <button class="ui button red" :class="{disabled: camera.status === 'free'}"
-                                @click.prevent="stopCamera(camera)">Stop
+                        <button class="ui button red" :class="{disabled: camera.status === 'free' || camera.is_stopped === 'yes'}"
+                                @click.prevent="stopCamera(camera)" @click="stopTimer(camera)">Stop
                         </button>
                     </form>
                 </td>
@@ -149,10 +149,15 @@
                     camera.status = 'busy'
                 })
             },
+            stopTimer(camera) {
+                camera.is_stopped = 'yes'
+            },
             stopCamera(camera) {
                 axios.post('/cameras/' + camera.id + '/' + camera.sound_source  + '/stop').then(res => {
                     camera.status = 'free'
+                    camera.is_stopped = 'no'
                     camera.timestamp = 0
+                    camera.work_duration = ''
                 })
             }
         },
@@ -166,14 +171,15 @@
                         status: '',
                         timestamp: 0,
                         work_duration: '',
-                        sound_source: 'enc'
+                        sound_source: 'enc',
+                        is_stopped: 'no'
                     }, camera))
                 })
                 let updateTime = () => {
                     this.cameras
                         .forEach(camera => {
-                            camera.work_duration = camera.status === 'busy' ?
-                                camera.timestamp++ : ''
+                            camera.work_duration = camera.status === 'busy' && camera.is_stopped === 'no' ?
+                                camera.timestamp++: camera.timestamp
                         })
                     this.cameras = [...this.cameras]
                 }
