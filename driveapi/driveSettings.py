@@ -9,7 +9,7 @@ SCOPES = 'https://www.googleapis.com/auth/drive'
 """
 Setting up drive
 """
-# The file tokenDrive.json stores the user's access and refresh tokens, and is
+# The file token.json stores the user's access and refresh tokens, and is
 # created automatically when the authorization flow completes for the first
 # time.
 store = file.Storage('tokenDrive.json')
@@ -37,8 +37,9 @@ def upload(filename):
     Upload file "filename" on drive
     """
     rooms = {"P500": "1EbJg0IzJLP788qWVr0u_Y9SmZ8ygzKwr",
-             "P505": "15Ant5hntmfl84Rrkzr9dep2nh13sbXft", "S401": "1L4icf2QJsv7dBBDygNNXCG9dOnPwxY9r"}
-    room = filename.split('-')[3]
+             "P505": "15Ant5hntmfl84Rrkzr9dep2nh13sbXft",
+             "S401": "1L4icf2QJsv7dBBDygNNXCG9dOnPwxY9r"}
+    room = filename.split('-')[5]
     media = MediaFileUpload(filename, mimetype="video/mp4", resumable=True)
     fileData = {"name": filename.split('/')[2],
                 "parents": [rooms[room]]
