@@ -24,23 +24,23 @@ def start(roomIndex, soundType):
         today.year, today.month, today.day, formattedTime,rooms[roomIndex], "HSE")
     if soundType == "enc":
         enc = subprocess.Popen("ffmpeg -i rtsp://192.168.11." +
-                               roomIndex + "1/main -y -c copy -f mp4 ~/vids/sound-source-"
+                               roomIndex + "1/main -y -c copy -f mp4 ../vids/sound-source-"
                                + records[roomIndex] + ".mp4", shell=True, preexec_fn=os.setsid)
         processes[roomIndex].append(enc)
     else:
         # cams *2 throw 401: unauthorized error in S401 and P500
         cam = subprocess.Popen("ffmpeg -i rtsp://192.168.11." +
-                               roomIndex + "2 -y -c:v copy -f mp4 ~/vids/sound-source-"
+                               roomIndex + "2 -y -c:v copy -f mp4 ../vids/sound-source-"
                                + records[roomIndex] + ".mp4", shell=True, preexec_fn=os.setsid)
         processes[roomIndex].append(cam)
 
     proc = subprocess.Popen("ffmpeg -i rtsp://192.168.11." +
-                               roomIndex + "1/main -y -c:v copy -f mp4 ~/vids/1-" +
+                               roomIndex + "1/main -y -c:v copy -f mp4 ../vids/1-" +
                             records[roomIndex] + ".mp4", shell=True, preexec_fn=os.setsid)
     processes[roomIndex].append(proc)
     for i in range(2, 7):
         process = subprocess.Popen("ffmpeg -i rtsp://192.168.11." +
-                                   roomIndex + str(i) + " -y -c:v copy -f mp4 ~/vids/"
+                                   roomIndex + str(i) + " -y -c:v copy -f mp4 ../vids/"
                                    + str(i) + "-" + records[roomIndex] + ".mp4", shell=True, preexec_fn=os.setsid)
         processes[roomIndex].append(process)
 
@@ -59,7 +59,7 @@ def stop(roomIndex):
 
 
 def get_sound(record):
-    os.system("ffmpeg -y -i ~/vids/sound-source-" + record + ".mp4" + " -vn ~/vids/sound-" + record + ".mp3")
+    os.system("ffmpeg -y -i ../vids/sound-source-" + record + ".mp4" + " -vn ../vids/sound-" + record + ".mp3")
 
 
 def add_sound(video_cam_num, audio_cam_num):
