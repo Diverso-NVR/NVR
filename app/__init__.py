@@ -1,6 +1,7 @@
 from driveapi.startstop import start, stop
 from flask import Flask, render_template, jsonify
 from time import time
+
 app = Flask(__name__)
 
 
@@ -23,16 +24,18 @@ def status():
     ])
 
 
-@app.route('/cameras/<camera>/start', methods=['POST'])
-def startRec(camera, sound):
-    start(camera, sound)
+@app.route('/cameras/<camera>/<soundType>/start', methods=['POST'])
+def startRec(camera, soundType):
+    start(camera, soundType)
+    # TODO
     return jsonify([{'timestamp': time()}])
 
 
-@app.route('/cameras/<camera>/stop', methods=['POST'])
-def stopRec(camera):
-    stop(camera)
-    return jsonify([{'timestamp': None}])
+@app.route('/cameras/<camera>/<soundType>/stop', methods=['POST'])
+def stopRec(camera, soundType):
+    stop()
+    # TODO
+    return jsonify([{'timestamp': time()}])
 
 
 if __name__ == '__main__':
