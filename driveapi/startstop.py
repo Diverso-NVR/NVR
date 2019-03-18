@@ -62,7 +62,8 @@ def get_sound(record):
     os.system("ffmpeg -y -i ../vids/sound-source-" + record + ".mp4" + " -vn -f mp3 ../vids/sound-" + record + ".mp3")
 
 
+
 def add_sound(video_cam_num, audio_cam_num):
     os.system(
-        "ffmpeg -y -i ../vids/" + video_cam_num + ".mp4" + " -i ../vids/sound-" + audio_cam_num
-        + ".mp3 " + "../vids/result-" + video_cam_num + ".mp4")
+        "ffmpeg -i ../vids/" + video_cam_num + ".mp4 -i ../vids/sound-" + audio_cam_num
+        + ".mp3 -y ../vids/result-" + video_cam_num + ".mp4")
