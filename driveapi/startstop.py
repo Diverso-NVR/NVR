@@ -63,6 +63,7 @@ def get_sound(record):
 
 
 def add_sound(video_cam_num, audio_cam_num):
-    os.system(
+    proc = subprocess.Popen(
         "ffmpeg -i ../vids/" + video_cam_num + ".mp4 -i ../vids/sound-" + audio_cam_num
-        + ".mp3 -y ../vids/result-" + video_cam_num + ".mp4")
+        + ".mp3 -y ../vids/result-" + video_cam_num + ".mp4", shell=True, preexec_fn=os.setsid)
+    proc.wait()
