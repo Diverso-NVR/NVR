@@ -24,13 +24,13 @@ def start(roomIndex, soundType):
         today.year, today.month, today.day, formattedTime,rooms[roomIndex], "HSE")
     if soundType == "enc":
         enc = subprocess.Popen("ffmpeg -i rtsp://192.168.11." +
-                               roomIndex + "1/main -y -c:a copy -vn -f mp3 ../vids/sound-source-"
+                               roomIndex + "1/main -y -c:a copy -vn -f mp4 ../vids/sound-source-"
                                + records[roomIndex] + ".mp3", shell=True, preexec_fn=os.setsid)
         processes[roomIndex].append(enc)
     else:
         # cams *2 throw 401: unauthorized error in S401 and P500
         cam = subprocess.Popen("ffmpeg -i rtsp://192.168.11." +
-                               roomIndex + "2 -y -c:a copy -vn -f mp3 ../vids/sound-source-"
+                               roomIndex + "2 -y -c:a copy -vn -f mp4 ../vids/sound-source-"
                                + records[roomIndex] + ".mp3", shell=True, preexec_fn=os.setsid)
         processes[roomIndex].append(cam)
 
