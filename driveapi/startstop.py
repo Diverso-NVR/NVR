@@ -46,15 +46,15 @@ def start(roomIndex, soundType):
 
 
 def stop(roomIndex):
-    try:
-        for process in processes[roomIndex]:
-            os.killpg(os.getpgid(process.pid), signal.SIGTERM)
-        for i in range(1, 7):
-            add_sound(str(i) + "-" + records[roomIndex], records[roomIndex])
-        for i in range(1, 7):
+    for process in processes[roomIndex]:
+        os.killpg(os.getpgid(process.pid), signal.SIGTERM)
+    for i in range(1, 7):
+        add_sound(str(i) + "-" + records[roomIndex], records[roomIndex])
+    for i in range(1, 7):
+        try:
             upload('../vids/result-' + str(i) + "-" + records[roomIndex] + ".mp4", roomIndex)
-    except Exception:
-        pass
+        except Exception:
+            pass
 
 
 def add_sound(video_cam_num, audio_cam_num):
