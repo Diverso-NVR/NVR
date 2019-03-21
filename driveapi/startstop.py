@@ -2,6 +2,7 @@ import datetime
 import subprocess
 import os
 import signal
+import time
 
 from driveapi.driveSettings import upload
 
@@ -48,6 +49,7 @@ def start(roomIndex, soundType):
 def stop(roomIndex):
     for process in processes[roomIndex]:
         os.killpg(os.getpgid(process.pid), signal.SIGTERM)
+    time.sleep(2)
     for i in range(1, 7):
         add_sound(str(i) + "-" + records[roomIndex], records[roomIndex])
     for i in range(1, 7):
