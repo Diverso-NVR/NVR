@@ -50,6 +50,7 @@ def start(roomIndex, soundType):
 def stop(roomIndex):
     for process in processes[roomIndex]:
         os.killpg(os.getpgid(process.pid), signal.SIGTERM)
+        process.wait()
     for i in range(1, 7):
         add_sound(str(i) + "-" + records[roomIndex], records[roomIndex])
     # for i in range(1, 7):
