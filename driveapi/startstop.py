@@ -49,17 +49,17 @@ def start(roomIndex, soundType):
 def stop(roomIndex):
     for process in processes[roomIndex]:
         os.killpg(os.getpgid(process.pid), signal.SIGTERM)
-    time.sleep(2)
     for i in range(1, 7):
         add_sound(str(i) + "-" + records[roomIndex], records[roomIndex])
-    for i in range(1, 7):
-        try:
-            upload('../vids/result-' + str(i) + "-" + records[roomIndex] + ".mp4", roomIndex)
-        except Exception:
-            pass
+    # for i in range(1, 7):
+    #     try:
+    #         upload('../vids/result-' + str(i) + "-" + records[roomIndex] + ".mp4", roomIndex)
+    #     except Exception:
+    #         pass
 
 
 def add_sound(video_cam_num, audio_cam_num):
-    os.system(
-        "ffmpeg -i ../vids/sound-source-" + audio_cam_num + ".mp3 "
-        + "-i ../vids/" + video_cam_num + ".mp4" + " ../vids/result-" + video_cam_num + ".mp4")
+    proc = subprocess.Popen(
+            "ffmpeg -i ../vids/sound-source-" + audio_cam_num + ".mp3 "
+            + "-i ../vids/" + video_cam_num + ".mp4" + " ../vids/result-" + video_cam_num + ".mp4"
+            , shell=True, preexec_fn=os.setsid)
