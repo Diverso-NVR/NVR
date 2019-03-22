@@ -47,16 +47,9 @@ def start(roomIndex, soundType):
         processes[roomIndex].append(process)
 
 
-def kill(process):
-    os.kill(os.getpgid(process.pid), signal.SIGTERM)
-    while True:
-        if int(process.pid) not in psutil.pids():
-            return
-
-
 def stop(roomIndex):
     for process in processes[roomIndex]:
-        kill(process)
+        os.killpg(os.getpgid(process.pid), signal.SIGTERM)
     for i in range(1, 7):
         add_sound(str(i) + "-" + records[roomIndex], records[roomIndex])
     # for i in range(1, 7):
