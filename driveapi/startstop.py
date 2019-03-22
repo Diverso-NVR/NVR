@@ -2,6 +2,7 @@ import datetime
 import subprocess
 import os
 import signal
+import psutil
 import time
 
 from driveapi.driveSettings import upload
@@ -46,9 +47,16 @@ def start(roomIndex, soundType):
         processes[roomIndex].append(process)
 
 
+def kill(process):
+    os.kill(os.getpgid(process.pid), signal.SIGTERM)
+    while True:
+        if int(process.pid) not in psutil.pids():
+            return
+
+
 def stop(roomIndex):
     for process in processes[roomIndex]:
-        os.killpg(os.getpgid(process.pid), signal.SIGTERM)
+        kill(process)
     for i in range(1, 7):
         add_sound(str(i) + "-" + records[roomIndex], records[roomIndex])
     # for i in range(1, 7):
@@ -62,5 +70,5 @@ def stop(roomIndex):
 def add_sound(video_cam_num, audio_cam_num):
     proc = subprocess.Popen(
             "ffmpeg -i ../vids/sound-source-" + audio_cam_num + ".mp3 "
-            + "-i ../vids/" + video_cam_num + ".mp4" + " ../vids/result-" + video_cam_num + ".mp4"
+            + "-i ../vids/" + video_cam_num + ".mp4" + " -shortest ../vids/result-" + video_cam_num + ".mp4"
             , shell=True, preexec_fn=os.setsid)
