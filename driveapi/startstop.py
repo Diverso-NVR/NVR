@@ -64,5 +64,5 @@ def stop(roomIndex):
 def add_sound(video_cam_num, audio_cam_num):
     proc = subprocess.Popen(
             "ffmpeg -i ../vids/sound-source-" + audio_cam_num + ".mp3 "
-            + "-i ../vids/" + video_cam_num + ".mp4" + " -shortest ../vids/result-" + video_cam_num + ".mp4"
+            + "-i ../vids/" + video_cam_num + ".mp4" + " -shortest -c copy ../vids/result-" + video_cam_num + ".mp4"
             , shell=True, preexec_fn=os.setsid)
