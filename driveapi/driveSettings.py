@@ -36,9 +36,9 @@ def upload(filename, room):
     """
     Upload file "filename" on drive
     """
-    rooms = {"1": "15Ant5hntmfl84Rrkzr9dep2nh13sbXft",
-             "2": "1EbJg0IzJLP788qWVr0u_Y9SmZ8ygzKwr",
-             "3": "1L4icf2QJsv7dBBDygNNXCG9dOnPwxY9r"}
+    rooms = {"P505": "15Ant5hntmfl84Rrkzr9dep2nh13sbXft",
+             "P500": "1EbJg0IzJLP788qWVr0u_Y9SmZ8ygzKwr",
+             "C401": "1L4icf2QJsv7dBBDygNNXCG9dOnPwxY9r"}
     media = MediaFileUpload(filename, mimetype="video/mp4", resumable=True)
     fileData = {"name": filename.split('/')[2],
                 "parents": [rooms[room]]

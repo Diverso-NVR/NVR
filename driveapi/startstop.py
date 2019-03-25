@@ -2,8 +2,7 @@ import datetime
 import subprocess
 import os
 import signal
-import psutil
-import time
+
 
 from driveapi.driveSettings import upload
 
@@ -17,52 +16,50 @@ processes = {}
 records = {}
 
 
-def start(roomIndex, soundType):
-    processes[roomIndex] = []
+def start(room_index, sound_type):
+    processes[room_index] = []
     today = datetime.date.today()
-    currTime = datetime.datetime.now().time()
-    formattedTime = str(currTime.hour) + ':' + str(currTime.minute)
-    records[roomIndex] = "{0}-{1}-{2}-{3}-{4}-{5}".format(
-        today.year, today.month, today.day, formattedTime,rooms[roomIndex], "HSE")
-    if soundType == "enc":
+    curr_time = datetime.datetime.now().time()
+    formatted_time = str(curr_time.hour) + ':' + str(curr_time.minute)
+    records[room_index] = "{0}-{1}-{2}-{3}-{4}-{5}".format(
+        today.year, today.month, today.day, formatted_time, rooms[room_index], "HSE")
+    if sound_type == "enc":
         enc = subprocess.Popen("ffmpeg -i rtsp://192.168.11." +
-                               roomIndex + "1/main -y -c:a copy -vn -f mp4 ../vids/sound-source-"
-                               + records[roomIndex] + ".mp3", shell=True, preexec_fn=os.setsid)
-        processes[roomIndex].append(enc)
+                               room_index + "1/main -y -c:a copy -vn -f mp4 ../vids/sound-source-"
+                               + records[room_index] + ".mp3", shell=True, preexec_fn=os.setsid)
+        processes[room_index].append(enc)
     else:
         # cams *2 throw 401: unauthorized error in S401 and P500
         cam = subprocess.Popen("ffmpeg -i rtsp://192.168.11." +
-                               roomIndex + "2 -y -c:a copy -vn -f mp4 ../vids/sound-source-"
-                               + records[roomIndex] + ".mp3", shell=True, preexec_fn=os.setsid)
-        processes[roomIndex].append(cam)
+                               room_index + "2 -y -c:a copy -vn -f mp4 ../vids/sound-source-"
+                               + records[room_index] + ".mp3", shell=True, preexec_fn=os.setsid)
+        processes[room_index].append(cam)
 
     proc = subprocess.Popen("ffmpeg -i rtsp://192.168.11." +
-                               roomIndex + "1/main -y -c copy -f mp4 ../vids/1-" +
-                            records[roomIndex] + ".mp4", shell=True, preexec_fn=os.setsid)
-    processes[roomIndex].append(proc)
+                            room_index + "1/main -y -c copy -f mp4 ../vids/1-" +
+                            records[room_index] + ".mp4", shell=True, preexec_fn=os.setsid)
+    processes[room_index].append(proc)
     for i in range(2, 7):
         process = subprocess.Popen("ffmpeg -i rtsp://192.168.11." +
-                                   roomIndex + str(i) + " -y -c:v copy -an -f mp4 ../vids/"
-                                   + str(i) + "-" + records[roomIndex] + ".mp4", shell=True, preexec_fn=os.setsid)
-        processes[roomIndex].append(process)
+                                   room_index + str(i) + " -y -c:v copy -an -f mp4 ../vids/"
+                                   + str(i) + "-" + records[room_index] + ".mp4", shell=True, preexec_fn=os.setsid)
+        processes[room_index].append(process)
 
 
-def stop(roomIndex):
-    for process in processes[roomIndex]:
+def stop(room_index):
+    for process in processes[room_index]:
         os.killpg(os.getpgid(process.pid), signal.SIGTERM)
-        process.wait()
     for i in range(1, 7):
-        add_sound(str(i) + "-" + records[roomIndex], records[roomIndex])
+        add_sound(str(i) + "-" + records[room_index], records[room_index])
     # for i in range(1, 7):
     #     try:
-    #         upload('../vids/result-' + str(i) + "-" + records[roomIndex] + ".mp4", roomIndex)
-    #     except Exception:
+    #         upload('../vids/result-' + str(i) + "-" + records[room_index] + ".mp4", room_index)
+    #     except FileNotFoundError:
     #         pass
 
 
-
 def add_sound(video_cam_num, audio_cam_num):
-    proc = subprocess.Popen(
-            "ffmpeg -i ../vids/sound-source-" + audio_cam_num + ".mp3 "
-            + "-i ../vids/" + video_cam_num + ".mp4" + " -shortest -c copy ../vids/result-" + video_cam_num + ".mp4"
-            , shell=True, preexec_fn=os.setsid)
+    subprocess.Popen(
+        "ffmpeg -i ../vids/sound-source-" + audio_cam_num + ".mp3 "
+        + "-i ../vids/" + video_cam_num + ".mp4" + " -shortest -c copy ../vids/result-" + video_cam_num + ".mp4",
+        shell=True, preexec_fn=os.setsid)
