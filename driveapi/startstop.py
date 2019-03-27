@@ -2,6 +2,7 @@ import datetime
 import subprocess
 import os
 import signal
+import psutil
 
 
 from driveapi.driveSettings import upload
@@ -51,11 +52,11 @@ def stop(room_index):
         os.killpg(os.getpgid(process.pid), signal.SIGTERM)
     for i in range(1, 7):
         add_sound(str(i) + "-" + records[room_index], records[room_index])
-    # for i in range(1, 7):
-    #     try:
-    #         upload('../vids/result-' + str(i) + "-" + records[room_index] + ".mp4", room_index)
-    #     except FileNotFoundError:
-    #         pass
+    for i in range(1, 7):
+        try:
+            upload('../vids/result-' + str(i) + "-" + records[room_index] + ".mp4", room_index)
+        except Exception:
+            pass
 
 
 def add_sound(video_cam_num, audio_cam_num):
