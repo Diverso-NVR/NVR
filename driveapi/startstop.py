@@ -50,12 +50,13 @@ def start(room_index, sound_type):
 def stop(room_index):
     for process in processes[room_index]:
         os.killpg(os.getpgid(process.pid), signal.SIGTERM)
+        process.wait()
     for i in range(1, 7):
         add_sound(str(i) + "-" + records[room_index], records[room_index])
     for i in range(1, 7):
         try:
             upload('../vids/result-' + str(i) + "-" + records[room_index] + ".mp4", room_index)
-        except Exception:
+        except FileNotFoundError:
             pass
 
 
