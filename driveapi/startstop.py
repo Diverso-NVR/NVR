@@ -1,6 +1,6 @@
 import datetime
 import subprocess
-import psutil
+import psutil, os, signal
 
 
 from driveapi.driveSettings import upload
@@ -44,16 +44,35 @@ def start(room_index, sound_type):
         processes[room_index].append(process)
 
 
-def killproc(proc_pid):
-    process = psutil.Process(proc_pid)
-    for proc in process.children(recursive=True):
-        proc.terminate()
-    process.terminate()
+# def killproc(proc_pid):
+#     process = psutil.Process(proc_pid)
+#     for proc in process.children(recursive=True):
+#         proc.terminate()
+#     process.terminate()
+
+
+def kill_proc_tree(pid, sig=signal.SIGTERM, include_parent=True,
+                   timeout=None, on_terminate=None):
+    """Kill a process tree (including grandchildren) with signal
+    "sig" and return a (gone, still_alive) tuple.
+    "on_terminate", if specified, is a callabck function which is
+    called as soon as a child terminates.
+    """
+    assert pid != os.getpid(), "won't kill myself"
+    parent = psutil.Process(pid)
+    children = parent.children(recursive=True)
+    if include_parent:
+        children.append(parent)
+    for p in children:
+        p.send_signal(sig)
+    gone, alive = psutil.wait_procs(children, timeout=timeout,
+                                    callback=on_terminate)
+    return (gone, alive)
 
 
 def stop(room_index):
     for process in processes[room_index]:
-        killproc(process.pid)
+        kill_proc_tree(process.pid)
     for i in range(1, 7):
         add_sound(str(i) + "-" + records[room_index], records[room_index])
     for i in range(1, 7):
@@ -61,6 +80,7 @@ def stop(room_index):
             upload('../vids/result-' + str(i) + "-" + records[room_index] + ".mp4", room_index)
         except Exception:
             pass
+
 
 def add_sound(video_cam_num, audio_cam_num):
     subprocess.Popen(
