@@ -27,40 +27,45 @@ def start(room_index, sound_type):
     if sound_type == "enc":
         enc = subprocess.Popen("ffmpeg -i rtsp://192.168.11." +
                                room_index + "1/main -y -c:a copy -vn -f mp4 ../vids/sound-source-"
-                               + records[room_index] + ".mp3", shell=True, start_new_session=True)
+                               + records[room_index] + ".mp3", shell=True)
         processes[room_index].append(enc)
     else:
-        # cams *2 throw 401: unauthorized error in S401 and P500
-        cam = subprocess.Popen("ffmpeg -i rtsp://192.168.11." +
+        cam = subprocess.Popen("ffmpeg -i rtsp://admin:Supervisor@192.168.11." +
                                room_index + "2 -y -c:a copy -vn -f mp4 ../vids/sound-source-"
-                               + records[room_index] + ".mp3", shell=True, start_new_session=True)
+                               + records[room_index] + ".mp3", shell=True)
         processes[room_index].append(cam)
 
     proc = subprocess.Popen("ffmpeg -i rtsp://192.168.11." +
                             room_index + "1/main -y -c copy -f mp4 ../vids/1-" +
-                            records[room_index] + ".mp4", shell=True, start_new_session=True)
+                            records[room_index] + ".mp4", shell=True)
     processes[room_index].append(proc)
     for i in range(2, 7):
-        process = subprocess.Popen("ffmpeg -i rtsp://192.168.11." +
+        process = subprocess.Popen("ffmpeg -i rtsp://admin:Supervisor@192.168.11." +
                                    room_index + str(i) + " -y -c:v copy -an -f mp4 ../vids/"
-                                   + str(i) + "-" + records[room_index] + ".mp4", shell=True, start_new_session=True)
+                                   + str(i) + "-" + records[room_index] + ".mp4", shell=True)
         processes[room_index].append(process)
 
 
-def stop(room_index):
-    for process in processes[room_index]:
-        os.killpg(os.getpgid(process.pid), signal.SIGTERM)
-    for i in range(1, 7):
-        add_sound(str(i) + "-" + records[room_index], records[room_index])
-    for i in range(1, 7):
-        try:
-            upload('../vids/result-' + str(i) + "-" + records[room_index] + ".mp4", room_index)
-        except FileNotFoundError:
-            pass
+def killproc(proc_pid):
+    process = psutil.Process(proc_pid)
+    for proc in process.children(recursive=True):
+        proc.terminate()
+    process.kill()
 
+
+def stop(room_index):
+    try:
+        for process in processes[room_index]:
+            killproc(process.pid)
+        for i in range(1, 7):
+            add_sound(str(i) + "-" + records[room_index], records[room_index])
+        for i in range(1, 7):
+            upload('../vids/result-' + str(i) + "-" + records[room_index] + ".mp4", room_index)
+    except Exception:
+        pass
 
 def add_sound(video_cam_num, audio_cam_num):
     subprocess.Popen(
         "ffmpeg -i ../vids/sound-source-" + audio_cam_num + ".mp3 "
         + "-i ../vids/" + video_cam_num + ".mp4" + " -shortest -c copy ../vids/result-" + video_cam_num + ".mp4",
-        shell=True, start_new_session=True)
+        shell=True)
