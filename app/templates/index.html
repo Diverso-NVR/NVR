@@ -10,6 +10,10 @@
             integrity="sha256-GmgFjvxj3EgNe3TECaFoMnNKxVc3zY7Ouiyd+K4tqc8="
             crossorigin="anonymous">
     </script>
+{#    Should use this script for production, not the one above:                  #}
+{#    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js" #}
+{#            integrity="sha256-chlNFSVx3TdcQ2Xlw7SvnbLAavAQLO0Y/LBiWX04viY="    #}
+{#            crossorigin="anonymous"></script>                                  #}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"
             integrity="sha256-mpnrJ5DpEZZkwkE1ZgkEQQJW/46CSEh/STrZKOB/qoM="
             crossorigin="anonymous">
@@ -20,7 +24,7 @@
           crossorigin="anonymous"/>
 </head>
 
-<body onload="auth()">
+<body>
     <header>
         <div class="ui stackable inverted menu">
             <div class="item">
@@ -79,7 +83,7 @@
                 </td>
                 <td>
                     <div v-if="camera.status==='busy'">
-                        [[getTsSting(camera.work_duration)]]
+                        [[getTsSting(camera.timestamp)]]
                     </div>
                 </td>
                 <td>
@@ -105,21 +109,6 @@
     </div>-->
 
 <script>
-
-    function auth(){
-        var data = {
-                "login": "hsenvr",
-                "password": 1337
-        };
-
-        login = prompt("Логин","");
-        password = prompt("Пароль","");
-        if(login != data["login"] || password != data["password"]){
-            alert("Неверно");
-            return auth();
-        }
-    }
-
     let app = new Vue({
         el: '#app',
         data: () => ({
@@ -139,9 +128,6 @@
                 ts -= m * 60
                 return `${h} ч. ${m} м. ${ts} с.`
             },
-            fetchData() {
-                axios.get('http://')
-            },
             startCamera(camera) {
                 axios.post('/cameras/' + camera.id + '/' + camera.sound_source + '/start', {
                     sound_source: camera.sound_source
@@ -150,44 +136,49 @@
                 })
             },
             stopTimer(camera) {
-                camera.is_stopped = 'yes'
+                axios.post('/cameras/' + camera.id + '/' + camera.sound_source  + '/is_stopped').then(res => {
+                    camera.is_stopped = 'yes'
+                })
             },
             stopCamera(camera) {
                 axios.post('/cameras/' + camera.id + '/' + camera.sound_source  + '/stop').then(res => {
                     camera.status = 'free'
                     camera.is_stopped = 'no'
                     camera.timestamp = 0
-                    camera.work_duration = ''
                 })
             }
         },
         created() {
             axios.get('/status').then(res => {
-                res.data.forEach(camera => {
-                    this.cameras.push(Object.assign({
-                        id: 0,
-                        building: '',
-                        auditorium: '',
-                        status: '',
-                        timestamp: 0,
-                        work_duration: '',
-                        sound_source: 'enc',
-                        is_stopped: 'no'
-                    }, camera))
+                    res.data.forEach(camera => {
+                        this.cameras.push(Object.assign({
+                            id: 0,
+                            building: '',
+                            auditorium: '',
+                            status: '',
+                            timestamp: 0,
+                            sound_source: 'enc',
+                            is_stopped: 'no'
+                        }, camera))
+                    })
                 })
-                let updateTime = () => {
-                    this.cameras
-                        .forEach(camera => {
-                            camera.work_duration = camera.status === 'busy' && camera.is_stopped === 'no' ?
-                                camera.timestamp++: camera.timestamp
+            let updateStatus = () => {
+                axios.get('/status').then(res => {
+                    res.data.forEach(cam => {
+                        this.cameras.forEach(camera => {
+                            if (camera.id === cam.id) {
+                                camera.status = cam.status
+                                camera.timestamp = cam.timestamp
+                                camera.is_stopped = cam.is_stopped
+                            }
                         })
-                    this.cameras = [...this.cameras]
-                }
-                updateTime()
-                setInterval(() => {
-                    updateTime()
-                }, 1000)
-            })
+                    })
+                })
+            }
+            updateStatus()
+            setInterval(() => {
+                updateStatus()
+            }, 1000)
         }
     })
 </script>
