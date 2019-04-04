@@ -30,8 +30,7 @@ def start(room_index, sound_type):
                                + records[room_index] + ".mp3", shell=True, start_new_session=True)
         processes[room_index].append(enc)
     else:
-        # cams *2 throw 401: unauthorized error in S401 and P500
-        cam = subprocess.Popen("ffmpeg -i rtsp://192.168.11." +
+        cam = subprocess.Popen("ffmpeg -i rtsp://admin:Supervisor@192.168.11." +
                                room_index + "2 -y -c:a copy -vn -f mp4 ../vids/sound-source-"
                                + records[room_index] + ".mp3", shell=True, start_new_session=True)
         processes[room_index].append(cam)
@@ -41,7 +40,7 @@ def start(room_index, sound_type):
                             records[room_index] + ".mp4", shell=True, start_new_session=True)
     processes[room_index].append(proc)
     for i in range(2, 7):
-        process = subprocess.Popen("ffmpeg -i rtsp://192.168.11." +
+        process = subprocess.Popen("ffmpeg -i rtsp://admin:Supervisor@192.168.11." +
                                    room_index + str(i) + " -y -c:v copy -an -f mp4 ../vids/"
                                    + str(i) + "-" + records[room_index] + ".mp4", shell=True, start_new_session=True)
         processes[room_index].append(process)
