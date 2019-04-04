@@ -48,7 +48,7 @@ def killproc(proc_pid):
     process = psutil.Process(proc_pid)
     for proc in process.children(recursive=True):
         proc.terminate()
-    process.kill()
+    process.terminate()
 
 
 def stop(room_index):
