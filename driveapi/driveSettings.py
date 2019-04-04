@@ -3,6 +3,7 @@ from googleapiclient.discovery import build
 from httplib2 import Http
 from oauth2client import file, client, tools
 from googleapiclient.http import MediaFileUpload
+import time
 
 
 # If modifying these scopes, delete the file token.json.
@@ -37,7 +38,7 @@ def upload(filename, room):
     """
     Upload file "filename" on drive
     """
-
+    time.sleep(0.5)
     rooms = {"1": "15Ant5hntmfl84Rrkzr9dep2nh13sbXft",
              "2": "1EbJg0IzJLP788qWVr0u_Y9SmZ8ygzKwr",
              "3": "1L4icf2QJsv7dBBDygNNXCG9dOnPwxY9r"}
