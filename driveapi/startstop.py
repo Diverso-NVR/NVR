@@ -1,7 +1,5 @@
 import datetime
 import subprocess
-import os
-import signal
 import psutil
 
 
@@ -54,15 +52,15 @@ def killproc(proc_pid):
 
 
 def stop(room_index):
-    try:
-        for process in processes[room_index]:
-            killproc(process.pid)
-        for i in range(1, 7):
-            add_sound(str(i) + "-" + records[room_index], records[room_index])
-        for i in range(1, 7):
+    for process in processes[room_index]:
+        killproc(process.pid)
+    for i in range(1, 7):
+        add_sound(str(i) + "-" + records[room_index], records[room_index])
+    for i in range(1, 7):
+        try:
             upload('../vids/result-' + str(i) + "-" + records[room_index] + ".mp4", room_index)
-    except Exception:
-        pass
+        except Exception:
+            pass
 
 def add_sound(video_cam_num, audio_cam_num):
     subprocess.Popen(
