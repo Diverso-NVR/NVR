@@ -1,6 +1,8 @@
 import datetime
 import subprocess
-import psutil, os, signal
+import psutil
+import time
+import threading
 
 
 from driveapi.driveSettings import upload
@@ -13,9 +15,13 @@ from driveapi.driveSettings import upload
 rooms = {"1": "P505", "2": "P500", "3": "S401"}
 processes = {}
 records = {}
+t = {}
 
 
-def start(room_index, sound_type):
+def start(data, room_index, sound_type):
+    data[int(room_index) - 1]['status'] = 'busy'
+    t[room_index] = threading.Thread(target=startTimer, args=(data, room_index), daemon=True)
+    t[room_index].start()
     processes[room_index] = []
     today = datetime.date.today()
     curr_time = datetime.datetime.now().time()
@@ -51,7 +57,8 @@ def killproc(proc_pid):
     process.terminate()
 
 
-def stop(room_index):
+def stop(data, room_index):
+    data[int(room_index) - 1]['timestamp'] = 0
     for process in processes[room_index]:
         killproc(process.pid)
     for i in range(1, 7):
@@ -61,6 +68,8 @@ def stop(room_index):
             upload('../vids/result-' + str(i) + "-" + records[room_index] + ".mp4", room_index)
         except Exception:
             pass
+    data[int(room_index) - 1]['is_stopped'] = 'no'
+    data[int(room_index) - 1]['status'] = 'free'
 
 
 def add_sound(video_cam_num, audio_cam_num):
@@ -68,3 +77,12 @@ def add_sound(video_cam_num, audio_cam_num):
         "ffmpeg -i ../vids/sound-source-" + audio_cam_num + ".mp3 "
         + "-i ../vids/" + video_cam_num + ".mp4" + " -shortest -c copy ../vids/result-" + video_cam_num + ".mp4",
         shell=True)
+
+
+def startTimer(data, room_index):
+    counter = 0
+    while data[int(room_index) - 1]['is_stopped'] == 'no':
+        time.sleep(1)
+        counter += 1
+        data[int(room_index) - 1]['timestamp'] = counter
+
