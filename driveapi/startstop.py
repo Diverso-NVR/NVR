@@ -12,15 +12,17 @@ from driveapi.driveSettings import upload
     P500: 21 22 23 24 25 26
     S401: 31 32 33 34
 """
-rooms = {"1": "P505", "2": "P500", "3": "S401"}
+roomsFCMD = {"1": "P505", "2": "P500", "3": "S401"}
+roomsMIEM = {"1": "504"}
 processes = {}
 records = {}
 t = {}
 
 
-def start(data, room_index, sound_type):
+def start(data, room_index, sound_type, building):
     data[int(room_index) - 1]['status'] = 'busy'
-    t[room_index] = threading.Thread(target=startTimer, args=(data, room_index), daemon=True)
+    t[room_index] = threading.Thread(
+        target=startTimer, args=(data, room_index), daemon=True)
     t[room_index].start()
     processes[room_index] = []
     today = datetime.date.today()
@@ -45,7 +47,8 @@ def start(data, room_index, sound_type):
     processes[room_index].append(proc)
     for i in range(2, 7):
         process = subprocess.Popen("ffmpeg -i rtsp://admin:Supervisor@192.168.11." +
-                                   room_index + str(i) + " -y -c:v copy -an -f mp4 ../vids/"
+                                   room_index +
+                                   str(i) + " -y -c:v copy -an -f mp4 ../vids/"
                                    + str(i) + "-" + records[room_index] + ".mp4", shell=True)
         processes[room_index].append(process)
 
@@ -65,7 +68,8 @@ def stop(data, room_index):
         add_sound(str(i) + "-" + records[room_index], records[room_index])
     for i in range(1, 7):
         try:
-            upload('../vids/result-' + str(i) + "-" + records[room_index] + ".mp4", room_index)
+            upload('../vids/result-' + str(i) + "-" +
+                   records[room_index] + ".mp4", room_index)
         except Exception:
             pass
     data[int(room_index) - 1]['is_stopped'] = 'no'
@@ -75,7 +79,8 @@ def stop(data, room_index):
 def add_sound(video_cam_num, audio_cam_num):
     subprocess.Popen(
         "ffmpeg -i ../vids/sound-source-" + audio_cam_num + ".mp3 "
-        + "-i ../vids/" + video_cam_num + ".mp4" + " -shortest -c copy ../vids/result-" + video_cam_num + ".mp4",
+        + "-i ../vids/" + video_cam_num + ".mp4" +
+        " -shortest -c copy ../vids/result-" + video_cam_num + ".mp4",
         shell=True)
 
 
@@ -85,4 +90,3 @@ def startTimer(data, room_index):
         time.sleep(1)
         counter += 1
         data[int(room_index) - 1]['timestamp'] = counter
-

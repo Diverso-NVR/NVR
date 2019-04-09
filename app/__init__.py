@@ -13,6 +13,9 @@ data = [{'id': 1, 'building': 'ФКМД', 'auditorium': 'П505', 'status': 'free
          'is_stopped': 'no'},
         {'id': 3, 'building': 'ФКМД', 'auditorium': 'С401', 'status': 'free', 'timestamp': 0,
          'source': 'https://drive.google.com/drive/folders/1L4icf2QJsv7dBBDygNNXCG9dOnPwxY9r',
+         'is_stopped': 'no'},
+        {'id': 1, 'building': 'МИЭМ', 'auditorium': '513', 'status': 'free', 'timestamp': 0,
+         'source': 'https://drive.google.com/drive/u/2/folders/1NjJIEr0bOK0MNfFKjzzYF3NRUghjIiZz',
          'is_stopped': 'no'}]
 
 
@@ -26,15 +29,15 @@ def status():
     return jsonify(data)
 
 
-@app.route('/cameras/<camera>/<soundType>/start', methods=['POST'])
-def startRec(camera, soundType):
+@app.route('/cameras/<camera>/<soundType>/<building>/start', methods=['POST'])
+def startRec(camera, soundType, building):
     start(data, camera, soundType)
     return jsonify([{'timestamp': time()}])
 
 
-@app.route('/cameras/<camera>/<soundType>/stop', methods=['POST'])
+@app.route('/cameras/<camera>/<soundType>/<building>/stop', methods=['POST'])
 def stopRec(camera, soundType):
-    stop(data, camera)
+    stop(data, camera, building)
     return jsonify([{'timestamp': time()}])
 
 

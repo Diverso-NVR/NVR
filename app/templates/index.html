@@ -62,7 +62,6 @@
           <tr>
             <th>Аудитория</th>
             <th>Источник звука</th>
-            <th>Режим презентации</th>
             <th>Запись</th>
             <th>Статус</th>
             <th>Время записи</th>
@@ -89,14 +88,6 @@
                 >
                   Камера
                 </button>
-              </div>
-            </td>
-            <td>
-              <div class="ui grid">
-                <div class="four wide column"></div>
-                <div class="four wide column"></div>
-                <div class="four wide column"></div>
-                <div class="four wide column"></div>
               </div>
             </td>
             <td>
@@ -184,7 +175,13 @@
           startCamera(camera) {
             axios
               .post(
-                "/cameras/" + camera.id + "/" + camera.sound_source + "/start",
+                "/cameras/" +
+                  camera.id +
+                  "/" +
+                  camera.sound_source +
+                  "/" +
+                  camera.building +
+                  "/start",
                 {
                   sound_source: camera.sound_source
                 }
@@ -209,7 +206,13 @@
           stopCamera(camera) {
             axios
               .post(
-                "/cameras/" + camera.id + "/" + camera.sound_source + "/stop"
+                "/cameras/" +
+                  camera.id +
+                  "/" +
+                  camera.sound_source +
+                  "/" +
+                  camera.building +
+                  "/stop"
               )
               .then(res => {
                 camera.status = "free";
