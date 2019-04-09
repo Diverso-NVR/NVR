@@ -2,6 +2,7 @@ import time
 from datetime import datetime
 from driveapi import startstop
 from calendarAPI.calendarSettings import getEvents, parseDate
+import threading
 
 
 def events():
@@ -26,9 +27,15 @@ def duration(date):
     return hour + minute
 
 
+def record(num, startt, end):
+    startstop.start(str(num), "cam")
+    time.sleep(duration(end) - duration(startt))
+    startstop.stop(str(num))
+
+
 def run():
+    dates = events()
     while True:
-        dates = events()
         today = datetime.now()
         for i in range(len(dates)):
             if dates[i] == {}:
@@ -38,9 +45,9 @@ def run():
             end = parseDate(dates[i]['end'].get(
                 'dateTime', dates[i]['end'].get('date')))
             if startt == datetime.strftime(today, "%Y-%m-%d %H:%M"):
-                startstop.start(str(i + 1), "enc")
-                time.sleep(duration(end) - duration(startt))
-                startstop.stop(str(i + 1))
+                t = threading.Thread(target=record, args=(i+1, startt, end), daemon=True)
+                t.start()
+                dates = events()
         time.sleep(1)
 
 
