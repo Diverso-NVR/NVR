@@ -12,14 +12,14 @@ from driveapi.driveSettings import upload
     P500: 21 22 23 24 25 26
     S401: 31 32 33 34
 """
-roomsFCMD = {"1": "P505", "2": "P500", "3": "S401"}
+rooms = {"1": "P505", "2": "P500", "3": "S401"}
 roomsMIEM = {"1": "504"}
 processes = {}
 records = {}
 t = {}
 
 
-def start(data, room_index, sound_type, building):
+def start(data, room_index, sound_type):
     data[int(room_index) - 1]['status'] = 'busy'
     t[room_index] = threading.Thread(
         target=startTimer, args=(data, room_index), daemon=True)

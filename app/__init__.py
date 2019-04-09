@@ -36,8 +36,8 @@ def startRec(camera, soundType, building):
 
 
 @app.route('/cameras/<camera>/<soundType>/<building>/stop', methods=['POST'])
-def stopRec(camera, soundType):
-    stop(data, camera, building)
+def stopRec(camera, soundType, building):
+    stop(data, camera)
     return jsonify([{'timestamp': time()}])
 
 
