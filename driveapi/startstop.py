@@ -8,10 +8,18 @@ import threading
 from driveapi.driveSettings import upload
 
 """
+    192.168.11.
     P505: 11 12 13 14
     P500: 21 22 23 24 25 26
     S401: 31 32 33 34
+    
+    192.168.13.
+    
+    
+    192.168.15.
+    
 """
+
 rooms = {"1": "P505", "2": "P500", "3": "S401"}
 roomsMIEM = {"1": "504"}
 processes = {}
