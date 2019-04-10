@@ -34,10 +34,10 @@ def stopRec(camera, soundType, building):
     return jsonify([{'timestamp': time()}])
 
 
-# @app.route('/cameras/<camera>/<soundType>/<building>/is_stopped', methods=['POST'])
-# def stopClicked(camera, soundType):
-#     data[int(camera) - 1]['is_stopped'] = 'yes'
-#     return jsonify([{'timestamp': time()}])
+@app.route('/cameras/<camera>/<soundType>/<building>/is_stopped', methods=['POST'])
+def stopClicked(camera, soundType, building):
+    data[building][int(camera) - 1]['is_stopped'] = 'yes'
+    return jsonify([{'timestamp': time()}])
 
 
 if __name__ == '__main__':
