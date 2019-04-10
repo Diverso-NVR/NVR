@@ -223,34 +223,36 @@
         },
         created() {
           axios.get("/status").then(res => {
-            res.data.forEach(camera => {
-              this.cameras.push(
-                Object.assign(
-                  {
-                    id: 0,
-                    building: "",
-                    auditorium: "",
-                    status: "",
-                    timestamp: 0,
-                    sound_source: "enc",
-                    is_stopped: "no"
-                  },
-                  camera
-                )
-              );
-            });
+            for (building in res.data)
+              res.data[building].forEach(camera => {
+                this.cameras.push(
+                  Object.assign(
+                    {
+                      id: 0,
+                      building: "",
+                      auditorium: "",
+                      status: "",
+                      timestamp: 0,
+                      sound_source: "enc",
+                      is_stopped: "no"
+                    },
+                    camera
+                  )
+                );
+              });
           });
           let updateStatus = () => {
             axios.get("/status").then(res => {
-              res.data.forEach(cam => {
-                this.cameras.forEach(camera => {
-                  if (camera.id === cam.id) {
-                    camera.status = cam.status;
-                    camera.timestamp = cam.timestamp;
-                    camera.is_stopped = cam.is_stopped;
-                  }
+              for (building in res.data)
+                res.data[building].forEach(cam => {
+                  this.cameras.forEach(camera => {
+                    if (camera.id === cam.id) {
+                      camera.status = cam.status;
+                      camera.timestamp = cam.timestamp;
+                      camera.is_stopped = cam.is_stopped;
+                    }
+                  });
                 });
-              });
             });
           };
           updateStatus();

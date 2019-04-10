@@ -28,10 +28,10 @@ t = {}
 
 
 def start(data, room_index, sound_type):
-    data[int(room_index) - 1]['status'] = 'busy'
-    t[room_index] = threading.Thread(
-        target=startTimer, args=(data, room_index), daemon=True)
-    t[room_index].start()
+    # data[int(room_index) - 1]['status'] = 'busy'
+    # t[room_index] = threading.Thread(
+    #     target=startTimer, args=(data, room_index), daemon=True)
+    # t[room_index].start()
     processes[room_index] = []
     today = datetime.date.today()
     curr_time = datetime.datetime.now().time()
@@ -55,7 +55,8 @@ def start(data, room_index, sound_type):
     processes[room_index].append(proc)
     for i in range(2, 7):
         process = subprocess.Popen("ffmpeg -i rtsp://admin:Supervisor@192.168.11." +
-                                   room_index + str(i) + " -y -c:v copy -an -f mp4 ../vids/"
+                                   room_index +
+                                   str(i) + " -y -c:v copy -an -f mp4 ../vids/"
                                    + str(i) + "-" + records[room_index] + ".mp4", shell=True)
         processes[room_index].append(process)
 
@@ -68,7 +69,7 @@ def killproc(proc_pid):
 
 
 def stop(data, room_index):
-    data[int(room_index) - 1]['timestamp'] = 0
+    # data[int(room_index) - 1]['timestamp'] = 0
     for process in processes[room_index]:
         killproc(process.pid)
     for i in range(1, 7):
@@ -79,8 +80,8 @@ def stop(data, room_index):
                    records[room_index] + ".mp4", room_index)
         except Exception:
             pass
-    data[int(room_index) - 1]['is_stopped'] = 'no'
-    data[int(room_index) - 1]['status'] = 'free'
+    # data[int(room_index) - 1]['is_stopped'] = 'no'
+    # data[int(room_index) - 1]['status'] = 'free'
 
 
 def add_sound(video_cam_num, audio_cam_num):
