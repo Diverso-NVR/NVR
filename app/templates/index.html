@@ -8,11 +8,6 @@
       href="https://fonts.googleapis.com/css?family=Raleway"
       rel="stylesheet"
     />
-    <link
-      rel="shortcut icon"
-      href="../static/img/logo.ico"
-      type="image/x-icon"
-    />
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.22/vue.js"
       integrity="sha256-GmgFjvxj3EgNe3TECaFoMnNKxVc3zY7Ouiyd+K4tqc8="
@@ -46,7 +41,6 @@
     <header>
       <div class="ui stackable inverted menu">
         <div class="item">
-          <!--<img src="../static/img/logo.png">-->
           <i class="inverted large video icon"></i>
         </div>
 
@@ -141,126 +135,6 @@
       </table>
     </main>
 
-    <!--    <div class="ui horizontal inverted footer segment">
-        <div id="foo">
-            <div class="ui left_u">
-                HSE MIEM 2019
-            </div>
-            <div class="ui rightblock">
-                hsenvrproject@gmail.com
-            </div>
-        </div>
-    </div>-->
-
-    <script>
-      let app = new Vue({
-        el: "#app",
-        data: () => ({
-          cameras: []
-        }),
-        delimiters: ["[[", "]]"],
-        computed: {
-          getCamName(camera) {
-            return camera.building + "-" + camera.auditorium;
-          }
-        },
-        methods: {
-          getTsSting(ts) {
-            let h = Math.floor(ts / 60 / 60);
-            ts -= h * 60 * 60;
-            let m = Math.floor(ts / 60);
-            ts -= m * 60;
-            return `${h} ч. ${m} м. ${ts} с.`;
-          },
-          startCamera(camera) {
-            axios
-              .post(
-                "/cameras/" +
-                  camera.id +
-                  "/" +
-                  camera.sound_source +
-                  "/" +
-                  camera.building +
-                  "/start",
-                {
-                  sound_source: camera.sound_source
-                }
-              )
-              .then(res => {
-                camera.status = "busy";
-              });
-          },
-          stopTimer(camera) {
-            axios
-              .post(
-                "/cameras/" +
-                  camera.id +
-                  "/" +
-                  camera.sound_source +
-                  "/is_stopped"
-              )
-              .then(res => {
-                camera.is_stopped = "yes";
-              });
-          },
-          stopCamera(camera) {
-            axios
-              .post(
-                "/cameras/" +
-                  camera.id +
-                  "/" +
-                  camera.sound_source +
-                  "/" +
-                  camera.building +
-                  "/stop"
-              )
-              .then(res => {
-                camera.status = "free";
-                camera.is_stopped = "no";
-                camera.timestamp = 0;
-              });
-          }
-        },
-        created() {
-          axios.get("/status").then(res => {
-            for (building in res.data)
-              res.data[building].forEach(camera => {
-                this.cameras.push(
-                  Object.assign(
-                    {
-                      id: 0,
-                      building: "",
-                      auditorium: "",
-                      status: "",
-                      timestamp: 0,
-                      sound_source: "enc",
-                      is_stopped: "no"
-                    },
-                    camera
-                  )
-                );
-              });
-          });
-          let updateStatus = () => {
-            axios.get("/status").then(res => {
-              for (building in res.data)
-                res.data[building].forEach(cam => {
-                  this.cameras.forEach(camera => {
-                    if (camera.id === cam.id) {
-                      camera.status = cam.status;
-                      camera.timestamp = cam.timestamp;
-                      camera.is_stopped = cam.is_stopped;
-                    }
-                  });
-                });
-            });
-          };
-          updateStatus();
-          setInterval(() => {
-            updateStatus();
-          }, 1000);
-        }
-      });
-    </script>
+    <script src="../static/custom.js"></script>
   </body>
 </html>

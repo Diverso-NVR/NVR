@@ -17,17 +17,19 @@ from driveapi.driveSettings import upload
     
     
     192.168.15.
-    
+    Для тестов 42 43 56-кодер
+    45 47  51 52 53 54 55 84-кодер 206  
 """
 
 rooms = {"1": "P505", "2": "P500", "3": "S401"}
-roomsMIEM = {"1": "504"}
+# rooms = {"ФКМД": {"1": "P505", "2": "P500", "3": "S401"},
+#          "МИЭМ": {"1": "504", "4": "513"}}
 processes = {}
 records = {}
 t = {}
 
 
-def start(data, room_index, sound_type):
+def start(data, room_index, sound_type, building):
     # data[int(room_index) - 1]['status'] = 'busy'
     # t[room_index] = threading.Thread(
     #     target=startTimer, args=(data, room_index), daemon=True)
@@ -68,7 +70,7 @@ def killproc(proc_pid):
     process.terminate()
 
 
-def stop(data, room_index):
+def stop(data, room_index, building):
     # data[int(room_index) - 1]['timestamp'] = 0
     for process in processes[room_index]:
         killproc(process.pid)
