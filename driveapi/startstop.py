@@ -31,7 +31,7 @@ t = {"ФКМД": {}, "МИЭМ": {}}
 def start(data, room_index, sound_type, building):
     data[building][int(room_index) - 1]['status'] = 'busy'
     t[building][room_index] = threading.Thread(
-        target=startTimer, args=(data, room_index), daemon=True)
+        target=startTimer, args=(data, room_index, building), daemon=True)
     t[building][room_index].start()
     processes[building][room_index] = []
     today = datetime.date.today()
