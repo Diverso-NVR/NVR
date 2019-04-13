@@ -30,21 +30,21 @@
   ],
   "МИЭМ": [
     {
-      "id": 4,
-      "building": "МИЭМ",
-      "auditorium": "513",
-      "status": "free",
-      "timestamp": 0,
-      "source": "https://drive.google.com/drive/u/2/folders/1NjJIEr0bOK0MNfFKjzzYF3NRUghjIiZz",
-      "is_stopped": "no"
-    },
-    {
       "id": 1,
       "building": "МИЭМ",
       "auditorium": "504",
       "status": "free",
       "timestamp": 0,
       "source": "https://drive.google.com/drive/u/2/folders/13zC6Cm2vUsS-sYUPA9dVwN5ZGTwJAm_s",
+      "is_stopped": "no"
+    },
+    {
+      "id": 4,
+      "building": "МИЭМ",
+      "auditorium": "513",
+      "status": "free",
+      "timestamp": 0,
+      "source": "https://drive.google.com/drive/u/2/folders/1NjJIEr0bOK0MNfFKjzzYF3NRUghjIiZz",
       "is_stopped": "no"
     }
   ]

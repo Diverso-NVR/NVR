@@ -17,8 +17,6 @@ def load_main_page():
 
 @app.route('/status', methods=['GET'])
 def status():
-    with open("app/data.json", "r") as f:
-        data = json.loads(f.read())
     return jsonify(data)
 
 

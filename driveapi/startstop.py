@@ -2,6 +2,8 @@ import datetime
 import subprocess
 import psutil
 import time
+import signal
+import os
 import threading
 
 
@@ -21,6 +23,7 @@ from driveapi.driveSettings import upload
     45 47  51 52 53 54 55 84-кодер 206  
 """
 
+network = {"ФКМД": "11", "": "13", "МИЭМ": "15"}
 rooms = {"ФКМД": {"1": "P505", "2": "P500", "3": "S401"},
          "МИЭМ": {"1": "504", "4": "513"}}
 processes = {"ФКМД": {}, "МИЭМ": {}}
@@ -40,39 +43,39 @@ def start(data, room_index, sound_type, building):
     records[building][room_index] = "{0}-{1}-{2}-{3}-{4}-{5}".format(
         today.year, today.month, today.day, formatted_time, rooms[building][room_index], "HSE")
     if sound_type == "enc":
-        enc = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168.11." +
+        enc = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168." + network[building] + "." +
                                room_index + "1/main -y -c:a copy -vn -f mp4 ../vids/sound-source-"
                                + records[building][room_index] + ".mp3", shell=True)
         processes[building][room_index].append(enc)
     else:
-        cam = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://admin:Supervisor@192.168.11." +
+        cam = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://admin:Supervisor@192.168." + network[building] + "." +
                                room_index + "2 -y -c:a copy -vn -f mp4 ../vids/sound-source-"
                                + records[building][room_index] + ".mp3", shell=True)
         processes[building][room_index].append(cam)
 
-    proc = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168.11." +
-                            room_index + "1/main -y -c copy -f mp4 ../vids/1-" +
+    proc = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168." + network[building] + "." +
+                            room_index + "1/main -y -c copy -f mp4 ../vids/1-" +  # -c:v copy -an
                             records[building][room_index] + ".mp4", shell=True)
     processes[building][room_index].append(proc)
     for i in range(2, 7):
-        process = subprocess.Popen("ffmpeg -i rtsp://admin:Supervisor@192.168.11." +
+        process = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://admin:Supervisor@192.168." + network[building] + "." +
                                    room_index +
                                    str(i) + " -y -c:v copy -an -f mp4 ../vids/"
                                    + str(i) + "-" + records[building][room_index] + ".mp4", shell=True)
         processes[building][room_index].append(process)
 
 
-def killproc(proc_pid):
-    process = psutil.Process(proc_pid)
-    for proc in process.children(recursive=True):
-        proc.terminate()
-    process.terminate()
+# def killproc(proc_pid):
+#     process = psutil.Process(proc_pid)
+#     for proc in process.children(recursive=True):
+#         proc.terminate()
+#     process.terminate()
 
 
 def stop(data, room_index, building):
     data[building][int(room_index) - 1]['timestamp'] = 0
     for process in processes[building][room_index]:
-        killproc(process.pid)
+        os.killpg(os.getpgid(process.pid), signal.SIGTERM)
     for i in range(1, 7):
         add_sound(str(i) + "-" + records[building]
                   [room_index], records[building][room_index])
