@@ -65,17 +65,17 @@ def start(data, room_index, sound_type, building):
         processes[building][room_index].append(process)
 
 
-# def killproc(proc_pid):
-#     process = psutil.Process(proc_pid)
-#     for proc in process.children(recursive=True):
-#         proc.terminate()
-#     process.terminate()
+def killproc(proc_pid):
+    process = psutil.Process(proc_pid)
+    for proc in process.children(recursive=True):
+        proc.terminate()
+    process.terminate()
 
 
 def stop(data, room_index, building):
     data[building][int(room_index) - 1]['timestamp'] = 0
     for process in processes[building][room_index]:
-        os.killpg(os.getpgid(process.pid), signal.SIGTERM)
+        killproc(process.pid)
     for i in range(1, 7):
         add_sound(str(i) + "-" + records[building]
                   [room_index], records[building][room_index])

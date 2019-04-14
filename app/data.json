@@ -5,7 +5,6 @@
       "building": "ФКМД",
       "auditorium": "П505",
       "status": "free",
-      "timestamp": 0,
       "source": "https://drive.google.com/drive/folders/15Ant5hntmfl84Rrkzr9dep2nh13sbXft",
       "is_stopped": "no"
     },
@@ -14,7 +13,6 @@
       "building": "ФКМД",
       "auditorium": "П500",
       "status": "free",
-      "timestamp": 0,
       "source": "https://drive.google.com/drive/folders/1EbJg0IzJLP788qWVr0u_Y9SmZ8ygzKwr",
       "is_stopped": "no"
     },
@@ -23,7 +21,6 @@
       "building": "ФКМД",
       "auditorium": "С401",
       "status": "free",
-      "timestamp": 0,
       "source": "https://drive.google.com/drive/folders/1L4icf2QJsv7dBBDygNNXCG9dOnPwxY9r",
       "is_stopped": "no"
     }
@@ -34,7 +31,6 @@
       "building": "МИЭМ",
       "auditorium": "504",
       "status": "free",
-      "timestamp": 0,
       "source": "https://drive.google.com/drive/u/2/folders/13zC6Cm2vUsS-sYUPA9dVwN5ZGTwJAm_s",
       "is_stopped": "no"
     },
@@ -43,7 +39,6 @@
       "building": "МИЭМ",
       "auditorium": "513",
       "status": "free",
-      "timestamp": 0,
       "source": "https://drive.google.com/drive/u/2/folders/1NjJIEr0bOK0MNfFKjzzYF3NRUghjIiZz",
       "is_stopped": "no"
     }

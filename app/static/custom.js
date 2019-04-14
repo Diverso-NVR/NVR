@@ -35,21 +35,21 @@ let app = new Vue({
           camera.status = "busy";
         });
     },
-    stopTimer(camera) {
-      axios
-        .post(
-          "/cameras/" +
-            camera.id +
-            "/" +
-            camera.sound_source +
-            "/" +
-            camera.building +
-            "/is_stopped"
-        )
-        .then(res => {
-          camera.is_stopped = "yes";
-        });
-    },
+    // stopTimer(camera) {
+    //   axios
+    //     .post(
+    //       "/cameras/" +
+    //         camera.id +
+    //         "/" +
+    //         camera.sound_source +
+    //         "/" +
+    //         camera.building +
+    //         "/is_stopped"
+    //     )
+    //     .then(res => {
+    //       camera.is_stopped = "yes";
+    //     });
+    // },
     stopCamera(camera) {
       axios
         .post(
@@ -63,7 +63,7 @@ let app = new Vue({
         )
         .then(res => {
           camera.status = "free";
-          camera.is_stopped = "no";
+          camera.is_stopped = "yes";
           camera.timestamp = 0;
         });
     }
@@ -79,7 +79,6 @@ let app = new Vue({
                 building: "",
                 auditorium: "",
                 status: "",
-                timestamp: 0,
                 sound_source: "enc",
                 is_stopped: "no"
               },

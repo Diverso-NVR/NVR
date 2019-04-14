@@ -6,8 +6,10 @@ import json
 app = Flask(__name__)
 
 
-with open("app/data.json", "r") as f:
+with open('app/data.json', 'r') as f:
     data = json.loads(f.read())
+with open('app/tempData.json', 'w') as f:
+    json.dump(data, f)
 
 
 @app.route('/')
@@ -17,25 +19,44 @@ def load_main_page():
 
 @app.route('/status', methods=['GET'])
 def status():
+    with open('app/tempData.json', 'r') as f:
+        data = json.loads(f.read())
     return jsonify(data)
 
 
 @app.route('/cameras/<camera>/<soundType>/<building>/start', methods=['POST'])
 def startRec(camera, soundType, building):
+    camId = 0
+    for i in data[building]:
+        if i['id'] == int(camera):
+            break
+        camId += 1
+    data[building][camId]["status"] = "busy"
+    with open('app/tempData.json', 'w') as f:
+        json.dump(data, f)
     start(data, camera, soundType, building)
     return jsonify([{'timestamp': time()}])
 
 
 @app.route('/cameras/<camera>/<soundType>/<building>/stop', methods=['POST'])
 def stopRec(camera, soundType, building):
+    camId = 0
+    for i in data[building]:
+        if i['id'] == int(camera):
+            break
+        camId += 1
+    data[building][camId]["status"] = "free"
+    data[building][camId]['is_stopped'] = 'yes'
+    with open('app/tempData.json', 'w') as f:
+        json.dump(data, f)
     stop(data, camera, building)
     return jsonify([{'timestamp': time()}])
 
 
-@app.route('/cameras/<camera>/<soundType>/<building>/is_stopped', methods=['POST'])
-def stopClicked(camera, soundType, building):
-    data[building][int(camera) - 1]['is_stopped'] = 'yes'
-    return jsonify([{'timestamp': time()}])
+# @app.route('/cameras/<camera>/<soundType>/<building>/is_stopped', methods=['POST'])
+# def stopClicked(camera, soundType, building):
+#     data[building]["camera"]['is_stopped'] = 'yes'
+#     return jsonify([{'timestamp': time()}])
 
 
 if __name__ == '__main__':
