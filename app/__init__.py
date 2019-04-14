@@ -31,6 +31,7 @@ def status():
 @app.route('/cameras/<camera>/<soundType>/is_started', methods=['POST'])
 def startClicked(camera, soundType):
     data[int(camera) - 1]['is_started'] = 'yes'
+    data[int(camera) - 1]['status'] = 'busy'
     return 'Recording starts'
 
 

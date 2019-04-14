@@ -4,6 +4,7 @@ import psutil
 import time
 import threading
 import os
+import signal
 
 
 from driveapi.driveSettings import upload
@@ -30,7 +31,6 @@ t = {}
 
 
 def start(data, room_index, sound_type):
-    data[int(room_index) - 1]['status'] = 'busy'
     t[room_index] = threading.Thread(
         target=startTimer, args=(data, room_index), daemon=True)
     t[room_index].start()
@@ -73,17 +73,17 @@ def start(data, room_index, sound_type):
         processes[room_index].append(camVid)
 
 
-def killproc(proc_pid):
-    process = psutil.Process(proc_pid)
-    for proc in process.children(recursive=True):
-        proc.terminate()
-    process.terminate()
+# def killproc(proc_pid):
+#     process = psutil.Process(proc_pid)
+#     for proc in process.children(recursive=True):
+#         proc.terminate()
+#     process.terminate()
 
 
 def stop(data, room_index):
     data[int(room_index) - 1]['timestamp'] = 0
     for process in processes[room_index]:
-        killproc(process.pid)
+        os.kill(process.pid, signal.SIGTERM)
     if os.path.isfile("../vids/sound-source-" + records[room_index] + ".mp3"):
         for i in range(1, 7):
             add_sound(str(i) + "-" + records[room_index], records[room_index])
