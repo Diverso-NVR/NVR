@@ -1,6 +1,5 @@
 import datetime
 import subprocess
-import psutil
 import time
 import threading
 import os
@@ -19,7 +18,7 @@ from driveapi.driveSettings import upload
     
     
     192.168.15.
-    
+    513: 56 42 43
 """
 
 # Room 4 is a temporary solution
@@ -71,17 +70,11 @@ def start(data, room_index, sound_type):
                                     "-f mp4 ../vids/1-" + records[room_index] + ".mp4",
                                     shell=True, preexec_fn=os.setsid)
         processes[room_index].append(coderVid)
-        camVid = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168.15.43 -y -c:v copy -an " +
-                                  "-f mp4 ../vids/2-" + records[room_index] + ".mp4",
-                                  shell=True, preexec_fn=os.setsid)
-        processes[room_index].append(camVid)
-
-
-# def killproc(proc_pid):
-#     process = psutil.Process(proc_pid)
-#     for proc in process.children(recursive=True):
-#         proc.terminate()
-#     process.terminate()
+        for i in range(2, 4):
+            camVid = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168.15.4" + str(i) + " -y -c:v copy " +
+                                      "-an -f mp4 ../vids/" + str(i) + "-" + records[room_index] + ".mp4",
+                                      shell=True, preexec_fn=os.setsid)
+            processes[room_index].append(camVid)
 
 
 def stop(data, room_index):
