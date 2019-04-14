@@ -35,21 +35,6 @@ let app = new Vue({
           camera.status = "busy";
         });
     },
-    // stopTimer(camera) {
-    //   axios
-    //     .post(
-    //       "/cameras/" +
-    //         camera.id +
-    //         "/" +
-    //         camera.sound_source +
-    //         "/" +
-    //         camera.building +
-    //         "/is_stopped"
-    //     )
-    //     .then(res => {
-    //       camera.is_stopped = "yes";
-    //     });
-    // },
     stopCamera(camera) {
       axios
         .post(
@@ -79,8 +64,9 @@ let app = new Vue({
                 building: "",
                 auditorium: "",
                 status: "",
-                sound_source: "enc",
-                is_stopped: "no"
+                is_stopped: "no",
+                timestamp: 0,
+                sound_source: "enc"
               },
               camera
             )

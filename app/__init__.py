@@ -21,6 +21,7 @@ def load_main_page():
 def status():
     with open('app/tempData.json', 'r') as f:
         data = json.loads(f.read())
+
     return jsonify(data)
 
 
@@ -31,10 +32,15 @@ def startRec(camera, soundType, building):
         if i['id'] == int(camera):
             break
         camId += 1
+
     data[building][camId]["status"] = "busy"
+    data[building][camId]["is_stoped"] = "no"
+
     with open('app/tempData.json', 'w') as f:
         json.dump(data, f)
+
     start(data, camera, soundType, building)
+
     return jsonify([{'timestamp': time()}])
 
 
@@ -45,18 +51,17 @@ def stopRec(camera, soundType, building):
         if i['id'] == int(camera):
             break
         camId += 1
+
     data[building][camId]["status"] = "free"
     data[building][camId]['is_stopped'] = 'yes'
+    data[building][camId]['timestamp'] = 0
+
     with open('app/tempData.json', 'w') as f:
         json.dump(data, f)
+
     stop(data, camera, building)
+
     return jsonify([{'timestamp': time()}])
-
-
-# @app.route('/cameras/<camera>/<soundType>/<building>/is_stopped', methods=['POST'])
-# def stopClicked(camera, soundType, building):
-#     data[building]["camera"]['is_stopped'] = 'yes'
-#     return jsonify([{'timestamp': time()}])
 
 
 if __name__ == '__main__':

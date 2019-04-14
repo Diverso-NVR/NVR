@@ -5,6 +5,7 @@ import time
 import signal
 import os
 import threading
+import json
 
 
 from driveapi.driveSettings import upload
@@ -32,7 +33,6 @@ t = {"ФКМД": {}, "МИЭМ": {}}
 
 
 def start(data, room_index, sound_type, building):
-    data[building][int(room_index) - 1]['status'] = 'busy'
     t[building][room_index] = threading.Thread(
         target=startTimer, args=(data, room_index, building), daemon=True)
     t[building][room_index].start()
@@ -45,37 +45,29 @@ def start(data, room_index, sound_type, building):
     if sound_type == "enc":
         enc = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168." + network[building] + "." +
                                room_index + "1/main -y -c:a copy -vn -f mp4 ../vids/sound-source-"
-                               + records[building][room_index] + ".mp3", shell=True)
+                               + records[building][room_index] + ".mp3", shell=True, preexec_fn=os.setsid)
         processes[building][room_index].append(enc)
     else:
         cam = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://admin:Supervisor@192.168." + network[building] + "." +
                                room_index + "2 -y -c:a copy -vn -f mp4 ../vids/sound-source-"
-                               + records[building][room_index] + ".mp3", shell=True)
+                               + records[building][room_index] + ".mp3", shell=True, preexec_fn=os.setsid)
         processes[building][room_index].append(cam)
 
     proc = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168." + network[building] + "." +
                             room_index + "1/main -y -c copy -f mp4 ../vids/1-" +  # -c:v copy -an
-                            records[building][room_index] + ".mp4", shell=True)
+                            records[building][room_index] + ".mp4", shell=True, preexec_fn=os.setsid)
     processes[building][room_index].append(proc)
     for i in range(2, 7):
         process = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://admin:Supervisor@192.168." + network[building] + "." +
                                    room_index +
                                    str(i) + " -y -c:v copy -an -f mp4 ../vids/"
-                                   + str(i) + "-" + records[building][room_index] + ".mp4", shell=True)
+                                   + str(i) + "-" + records[building][room_index] + ".mp4", shell=True, preexec_fn=os.setsid)
         processes[building][room_index].append(process)
 
 
-def killproc(proc_pid):
-    process = psutil.Process(proc_pid)
-    for proc in process.children(recursive=True):
-        proc.terminate()
-    process.terminate()
-
-
 def stop(data, room_index, building):
-    data[building][int(room_index) - 1]['timestamp'] = 0
     for process in processes[building][room_index]:
-        killproc(process.pid)
+        os.killpg(process.pid, signal.SIGTERM)
     for i in range(1, 7):
         add_sound(str(i) + "-" + records[building]
                   [room_index], records[building][room_index])
@@ -85,8 +77,6 @@ def stop(data, room_index, building):
                    records[building][room_index] + ".mp4", room_index)
         except Exception:
             pass
-    data[building][int(room_index) - 1]['is_stopped'] = 'no'
-    data[building][int(room_index) - 1]['status'] = 'free'
 
 
 def add_sound(video_cam_num, audio_cam_num):
@@ -98,8 +88,13 @@ def add_sound(video_cam_num, audio_cam_num):
 
 
 def startTimer(data, room_index, building):
-    counter = 0
-    while data[building][int(room_index) - 1]['is_stopped'] == 'no':
+    camId = 0
+    for i in data[building]:
+        if i['id'] == int(room_index):
+            break
+        camId += 1
+    while data[building][camId]['is_stopped'] == 'no':
         time.sleep(1)
-        counter += 1
-        data[building][int(room_index) - 1]['timestamp'] = counter
+        data[building][camId]['timestamp'] += 1
+        with open('app/tempData.json', 'w') as f:
+            json.dump(data, f)
