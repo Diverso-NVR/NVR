@@ -10,8 +10,7 @@ body {
   align-items: center;
   justify-content: stretch;
 }
-header,
-footer {
+header {
   background: #1b1e21;
   width: 100%;
 }
@@ -24,10 +23,6 @@ nav {
 main {
   flex: 1;
   padding: 20px 0;
-}
-
-.logo {
-  max-height: 50px;
 }
 
 th {
