@@ -3,6 +3,7 @@ import subprocess
 import psutil
 import time
 import threading
+import os
 
 
 from driveapi.driveSettings import upload
@@ -20,7 +21,8 @@ from driveapi.driveSettings import upload
     
 """
 
-rooms = {"1": "P505", "2": "P500", "3": "S401"}
+# Room 4 is a temporary solution
+rooms = {"1": "P505", "2": "P500", "3": "S401", "4": "MIEM"}
 roomsMIEM = {"1": "504"}
 processes = {}
 records = {}
@@ -38,26 +40,37 @@ def start(data, room_index, sound_type):
     formatted_time = str(curr_time.hour) + ':' + str(curr_time.minute)
     records[room_index] = "{0}-{1}-{2}-{3}-{4}-{5}".format(
         today.year, today.month, today.day, formatted_time, rooms[room_index], "HSE")
-    if sound_type == "enc":
-        enc = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168.11." +
-                               room_index + "1/main -y -c:a copy -vn -f mp4 ../vids/sound-source-"
-                               + records[room_index] + ".mp3", shell=True)
-        processes[room_index].append(enc)
-    else:
-        cam = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://admin:Supervisor@192.168.11." +
-                               room_index + "2 -y -c:a copy -vn -f mp4 ../vids/sound-source-"
-                               + records[room_index] + ".mp3", shell=True)
-        processes[room_index].append(cam)
+    if room_index in ["1", "2", "3"]:
+        if sound_type == "enc":
+            enc = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168.11." +
+                                   room_index + "1/main -y -c:a copy -vn -f mp4 ../vids/sound-source-"
+                                   + records[room_index] + ".mp3", shell=True)
+            processes[room_index].append(enc)
+        else:
+            cam = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://admin:Supervisor@192.168.11." +
+                                   room_index + "2 -y -c:a copy -vn -f mp4 ../vids/sound-source-"
+                                   + records[room_index] + ".mp3", shell=True)
+            processes[room_index].append(cam)
 
-    proc = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168.11." +
-                            room_index + "1/main -y -c copy -f mp4 ../vids/1-" +
-                            records[room_index] + ".mp4", shell=True)
-    processes[room_index].append(proc)
-    for i in range(2, 7):
-        process = subprocess.Popen("ffmpeg -i rtsp://admin:Supervisor@192.168.11." +
-                                   room_index + str(i) + " -y -c:v copy -an -f mp4 ../vids/"
-                                   + str(i) + "-" + records[room_index] + ".mp4", shell=True)
-        processes[room_index].append(process)
+        proc = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168.11." +
+                                room_index + "1/main -y -c:v copy -an -f mp4 ../vids/1-" +
+                                records[room_index] + ".mp4", shell=True)
+        processes[room_index].append(proc)
+        for i in range(2, 7):
+            process = subprocess.Popen("ffmpeg -i rtsp://admin:Supervisor@192.168.11." +
+                                       room_index + str(i) + " -y -c:v copy -an -f mp4 ../vids/"
+                                       + str(i) + "-" + records[room_index] + ".mp4", shell=True)
+            processes[room_index].append(process)
+    else:
+        snd = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168.15.56/main -y -c:a copy -vn " +
+                               "-f mp4 ../vids/sound-source-" + records[room_index] + ".mp3", shell=True)
+        processes[room_index].append(snd)
+        coderVid = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168.15.56/main -y -c:v copy -an " +
+                                    "-f mp4 ../vids/1-" + records[room_index] + ".mp4", shell=True)
+        processes[room_index].append(coderVid)
+        camVid = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168.15.43 -y -c:v copy -an " +
+                                  "-f mp4 ../vids/2-" + records[room_index] + ".mp4", shell=True)
+        processes[room_index].append(camVid)
 
 
 def killproc(proc_pid):
@@ -71,8 +84,16 @@ def stop(data, room_index):
     data[int(room_index) - 1]['timestamp'] = 0
     for process in processes[room_index]:
         killproc(process.pid)
-    for i in range(1, 7):
-        add_sound(str(i) + "-" + records[room_index], records[room_index])
+    if os.path.isfile("../vids/sound-source-" + records[room_index] + ".mp3"):
+        for i in range(1, 7):
+            add_sound(str(i) + "-" + records[room_index], records[room_index])
+    else:
+        for i in range(1, 7):
+            try:
+                os.rename("../vids/" + str(i) + "-" + records[room_index] + ".mp4", "../vids/result-" + str(i) + "-" +
+                          records[room_index] + ".mp4")
+            except FileNotFoundError:
+                pass
     for i in range(1, 7):
         try:
             upload('../vids/result-' + str(i) + "-" +
@@ -80,6 +101,7 @@ def stop(data, room_index):
         except Exception:
             pass
     data[int(room_index) - 1]['is_stopped'] = 'no'
+    data[int(room_index) - 1]['is_started'] = 'no'
     data[int(room_index) - 1]['status'] = 'free'
 
 

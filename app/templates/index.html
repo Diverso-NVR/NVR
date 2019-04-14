@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>Project</title>
-    <link rel="stylesheet" href="../static/style.css" />
+    <link rel="stylesheet" href="../static/style.css"/>
     <link
       href="https://fonts.googleapis.com/css?family=Raleway"
       rel="stylesheet"
@@ -103,7 +103,6 @@
                   class="ui button red"
                   :class="{disabled: camera.status === 'free' || camera.is_stopped === 'yes'}"
                   @click.prevent="stopCamera(camera)"
-                  @click="stopTimer(camera)"
                 >
                   Стоп
                 </button>
@@ -159,11 +158,6 @@
           cameras: []
         }),
         delimiters: ["[[", "]]"],
-        computed: {
-          getCamName(camera) {
-            return camera.building + "-" + camera.auditorium;
-          }
-        },
         methods: {
           getTsSting(ts) {
             let h = Math.floor(ts / 60 / 60);
@@ -173,52 +167,29 @@
             return `${h} ч. ${m} м. ${ts} с.`;
           },
           startCamera(camera) {
-            axios
-              .post(
-                "/cameras/" +
-                  camera.id +
-                  "/" +
-                  camera.sound_source +
-                  "/" +
-                  camera.building +
-                  "/start",
-                {
-                  sound_source: camera.sound_source
-                }
-              )
-              .then(res => {
-                camera.status = "busy";
-              });
-          },
-          stopTimer(camera) {
-            axios
-              .post(
-                "/cameras/" +
-                  camera.id +
-                  "/" +
-                  camera.sound_source +
-                  "/is_stopped"
-              )
-              .then(res => {
-                camera.is_stopped = "yes";
-              });
+            axios.post(
+              "/cameras/" + camera.id + "/" + camera.sound_source + "/is_started"
+            ).then(res => {
+              camera.status = "busy";
+            });
+            axios.post(
+              "/cameras/" + camera.id + "/" + camera.sound_source + "/start"
+            )
           },
           stopCamera(camera) {
-            axios
-              .post(
-                "/cameras/" +
-                  camera.id +
-                  "/" +
-                  camera.sound_source +
-                  "/" +
-                  camera.building +
-                  "/stop"
-              )
-              .then(res => {
-                camera.status = "free";
-                camera.is_stopped = "no";
-                camera.timestamp = 0;
-              });
+            axios.post(
+              "/cameras/" + camera.id + "/" + camera.sound_source + "/is_stopped"
+            ).then(res => {
+              camera.is_stopped = "yes";
+            });
+            axios.post(
+                "/cameras/" + camera.id + "/" + camera.sound_source + "/stop"
+            ).then(res => {
+              camera.is_started = "no"
+              camera.status = "free";
+              camera.is_stopped = "no";
+              camera.timestamp = 0;
+            });
           }
         },
         created() {
@@ -233,7 +204,8 @@
                     status: "",
                     timestamp: 0,
                     sound_source: "enc",
-                    is_stopped: "no"
+                    is_stopped: "no",
+                    is_started: "no"
                   },
                   camera
                 )
