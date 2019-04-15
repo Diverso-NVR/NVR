@@ -10,23 +10,23 @@ rooms = {"P500": "hsenvrproject@gmail.com",
          "C401": "adfevhq6dbe00or14dkhfkq68k@group.calendar.google.com"}
 
 
-def addEvent(room, summary, start, end):
-    """
-    Creates an event in "room" with title "summary", starts at "start, ends at "end"
-    """
-    GMT_OFF = "+03:00"
-    EVENT = {
-        "summary": summary,
-        "start": {"dateTime": "2019-01-19T12:00:00%s" % GMT_OFF},
-        "end": {"dateTime": "2019-01-19T16:00:00%s" % GMT_OFF}
-    }
+# def addEvent(room, summary, start, end):
+#     """
+#     Creates an event in "room" with title "summary", starts at "start, ends at "end"
+#     """
+#     GMT_OFF = "+03:00"
+#     EVENT = {
+#         "summary": summary,
+#         "start": {"dateTime": "2019-01-19T12:00:00%s" % GMT_OFF},
+#         "end": {"dateTime": "2019-01-19T16:00:00%s" % GMT_OFF}
+#     }
 
-    e = service.events().insert(calendarId=rooms[room],
-                                sendNotifications=True, body=EVENT).execute()
-    print('''*** %r event added:
-        Start: %s
-        End: %s''' % (e["summary"].encode('utf-8'),
-                      e['start']['dateTime'], e['end']['dateTime']))
+#     e = service.events().insert(calendarId=rooms[room],
+#                                 sendNotifications=True, body=EVENT).execute()
+#     print('''*** %r event added:
+#         Start: %s
+#         End: %s''' % (e["summary"].encode('utf-8'),
+#                       e['start']['dateTime'], e['end']['dateTime']))
 
 
 def parseDate(date):

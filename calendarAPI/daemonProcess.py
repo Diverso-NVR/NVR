@@ -45,7 +45,8 @@ def run():
             end = parseDate(dates[i]['end'].get(
                 'dateTime', dates[i]['end'].get('date')))
             if startt == datetime.strftime(today, "%Y-%m-%d %H:%M"):
-                t = threading.Thread(target=record, args=(i+1, startt, end), daemon=True)
+                t = threading.Thread(target=record, args=(
+                    i+1, startt, end), daemon=True)
                 t.start()
                 dates = events()
         time.sleep(1)

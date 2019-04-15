@@ -4,10 +4,6 @@
     <meta charset="UTF-8" />
     <title>NVR</title>
     <link rel="stylesheet" href="../static/style.css" />
-    <link
-      href="https://fonts.googleapis.com/css?family=Raleway"
-      rel="stylesheet"
-    />
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.22/vue.js"
       integrity="sha256-GmgFjvxj3EgNe3TECaFoMnNKxVc3zY7Ouiyd+K4tqc8="
@@ -83,7 +79,7 @@
               </div>
             </td>
             <td>
-              <form>
+              <div class="ui buttons">
                 <button
                   class="ui button green"
                   :class="{disabled: camera.status === 'busy'}"
@@ -99,7 +95,7 @@
                 >
                   Стоп
                 </button>
-              </form>
+              </div>
             </td>
             <td :class="[camera.status==='free' ? 'positive' : 'negative']">
               <div class="status" v-if="camera.status==='free'">Готов</div>
