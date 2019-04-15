@@ -103,11 +103,12 @@ def stop(data, room_index):
 
 
 def add_sound(video_cam_num, audio_cam_num):
-    subprocess.Popen(
+    proc = subprocess.Popen(
         "ffmpeg -i ../vids/sound-source-" + audio_cam_num + ".mp3 "
         + "-i ../vids/" + video_cam_num + ".mp4" +
         " -shortest -c copy ../vids/result-" + video_cam_num + ".mp4",
         shell=True)
+    proc.wait()
 
 
 def startTimer(data, room_index):
