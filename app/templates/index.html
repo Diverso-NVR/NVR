@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
   <head>
     <meta charset="UTF-8" />
     <title>NVR</title>
@@ -9,7 +9,7 @@
       integrity="sha256-GmgFjvxj3EgNe3TECaFoMnNKxVc3zY7Ouiyd+K4tqc8="
       crossorigin="anonymous"
     ></script>
-    {# Should use this script for production, not the one above: #} {#
+    {# Should use this script for production, flnot the one above: #} {#
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js"
       #}
@@ -34,6 +34,7 @@
   </head>
 
   <body>
+    <!-- 767px > -- жмыкает -->
     <header>
       <div class="ui stackable inverted menu">
         <div class="item">
@@ -44,7 +45,7 @@
       </div>
     </header>
 
-    <main id="app" class="ui container" style="width: 90%;">
+    <main id="app" class="ui container" style="width: 90vw;">
       <table class="ui celled striped center table" style="text-align:center;">
         <thead>
           <tr>
@@ -117,7 +118,7 @@
             </td>
             <td>
               <a
-                v-bind:href="camera.source"
+                v-bind:href="camera.drive"
                 target="_blank"
                 class="ui icon button"
               >

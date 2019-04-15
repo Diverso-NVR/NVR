@@ -1,13 +1,13 @@
 import time
 from datetime import datetime
 from driveapi import startstop
-from calendarAPI.calendarSettings import getEvents, parseDate
+from calendarAPI.calendarSettings import getEvents, parseDate, rooms
 import threading
 
 
 def events():
     dates = []
-    for room in ["P505", "P500", "C401"]:
+    for room in rooms:
         try:
             i = getEvents(room)
             dates.append(i[0])

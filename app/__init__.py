@@ -21,7 +21,6 @@ def load_main_page():
 def status():
     with open('app/tempData.json', 'r') as f:
         data = json.loads(f.read())
-
     return jsonify(data)
 
 

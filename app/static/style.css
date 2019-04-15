@@ -12,7 +12,7 @@ body {
 }
 header {
   background: #1b1e21;
-  width: 100%;
+  width: 100vw;
 }
 footer {
   text-align: center;

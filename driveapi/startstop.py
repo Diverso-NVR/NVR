@@ -24,18 +24,27 @@ from driveapi.driveSettings import upload
     45 47  51 52 53 54 55 84-кодер 206  
 """
 
+f = open("app/data.json", 'r')
+data = json.loads(f.read())
+
 network = {"ФКМД": "11", "": "13", "МИЭМ": "15"}
-rooms = {"ФКМД": {"1": "P505", "2": "P500", "3": "S401"},
-         "МИЭМ": {"1": "504", "4": "513"}}
-processes = {"ФКМД": {}, "МИЭМ": {}}
-records = {"ФКМД": {}, "МИЭМ": {}}
-t = {"ФКМД": {}, "МИЭМ": {}}
+rooms = {}
+processes = {}
+records = {}
+threads = {}
+for building in data:
+    rooms[building] = {}
+    processes[building] = {}
+    records[building] = {}
+    threads[building] = {}
+    for room in data[building]:
+        rooms[building][str(room['id'])] = room['auditorium']
 
 
 def start(data, room_index, sound_type, building):
-    t[building][room_index] = threading.Thread(
+    threads[building][room_index] = threading.Thread(
         target=startTimer, args=(data, room_index, building), daemon=True)
-    t[building][room_index].start()
+    threads[building][room_index].start()
     processes[building][room_index] = []
     today = datetime.date.today()
     curr_time = datetime.datetime.now().time()
@@ -80,11 +89,12 @@ def stop(data, room_index, building):
 
 
 def add_sound(video_cam_num, audio_cam_num):
-    subprocess.Popen(
+    proc = subprocess.Popen(
         "ffmpeg -i ../vids/sound-source-" + audio_cam_num + ".mp3 "
         + "-i ../vids/" + video_cam_num + ".mp4" +
         " -shortest -c copy ../vids/result-" + video_cam_num + ".mp4",
         shell=True)
+    proc.wait()
 
 
 def startTimer(data, room_index, building):

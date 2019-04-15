@@ -4,6 +4,7 @@ from httplib2 import Http
 from oauth2client import file, client, tools
 from googleapiclient.http import MediaFileUpload
 import time
+import json
 
 
 # If modifying these scopes, delete the file token.json.
@@ -11,7 +12,7 @@ SCOPES = 'https://www.googleapis.com/auth/drive'
 """
 Setting up drive
 """
-# The file token.json stores the user's access and refresh tokens, and is
+# The file tokenDrive.json stores the user's access and refresh tokens, and is
 # created automatically when the authorization flow completes for the first
 # time.
 store = file.Storage('tokenDrive.json')
@@ -21,17 +22,13 @@ if not creds or creds.invalid:
     creds = tools.run_flow(flow, store)
 service = build('drive', 'v3', http=creds.authorize(Http()))
 
-# Call the Drive v3 API
-# results = service.files().list(
-#     pageSize=10, fields="nextPageToken, files(id, name)").execute()
-# items = results.get('files', [])
 
-# if not items:
-#     print('No files found.')
-# else:
-#     print('Files:')
-#     for item in items:
-#         print(u'{0} ({1})'.format(item['name'], item['id']))
+f = open("app/data.json", 'r')
+data = json.loads(f.read())
+rooms = {}
+for building in data:
+    for room in data[building]:
+        rooms[room['auditorium']] = room['drive'].split('/')[-1]
 
 
 def upload(filename, room):
@@ -39,9 +36,6 @@ def upload(filename, room):
     Upload file "filename" on drive
     """
     time.sleep(0.5)
-    rooms = {"1": "15Ant5hntmfl84Rrkzr9dep2nh13sbXft",
-             "2": "1EbJg0IzJLP788qWVr0u_Y9SmZ8ygzKwr",
-             "3": "1L4icf2QJsv7dBBDygNNXCG9dOnPwxY9r"}
     media = MediaFileUpload(filename, mimetype="video/mp4", resumable=True)
     fileData = {"name": filename.split('/')[2],
                 "parents": [rooms[room]]
