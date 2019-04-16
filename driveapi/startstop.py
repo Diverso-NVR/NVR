@@ -27,9 +27,11 @@ roomsMIEM = {"1": "504"}
 processes = {}
 records = {}
 t = {}
+stopThread = {}
 
 
 def start(data, room_index, sound_type):
+    stopThread[room_index] = False
     t[room_index] = threading.Thread(
         target=startTimer, args=(data, room_index), daemon=True)
     t[room_index].start()
@@ -51,7 +53,7 @@ def start(data, room_index, sound_type):
                                    + records[room_index] + ".mp3", shell=True, preexec_fn=os.setsid)
             processes[room_index].append(cam)
 
-        proc = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168.11." +
+        proc = subprocess.Popen("ffmpeg -i rtsp://192.168.11." +
                                 room_index + "1/main -y -c:v copy -an -f mp4 ../vids/1-" +
                                 records[room_index] + ".mp4", shell=True, preexec_fn=os.setsid)
         processes[room_index].append(proc)
@@ -66,19 +68,19 @@ def start(data, room_index, sound_type):
                                "-f mp4 ../vids/sound-source-" + records[room_index] + ".mp3",
                                shell=True, preexec_fn=os.setsid)
         processes[room_index].append(snd)
-        coderVid = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168.15.56/main -y -c:v copy -an " +
+        coderVid = subprocess.Popen("ffmpeg -i rtsp://192.168.15.56/main -y -c:v copy -an " +
                                     "-f mp4 ../vids/1-" + records[room_index] + ".mp4",
                                     shell=True, preexec_fn=os.setsid)
         processes[room_index].append(coderVid)
         for i in range(2, 4):
-            camVid = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168.15.4" + str(i) + " -y -c:v copy " +
+            camVid = subprocess.Popen("ffmpeg -i rtsp://192.168.15.4" + str(i) + " -y -c:v copy " +
                                       "-an -f mp4 ../vids/" + str(i) + "-" + records[room_index] + ".mp4",
                                       shell=True, preexec_fn=os.setsid)
             processes[room_index].append(camVid)
 
 
 def stop(data, room_index):
-    data[int(room_index) - 1]['timestamp'] = 0
+    stopThread[room_index] = True
     for process in processes[room_index]:
         os.killpg(process.pid, signal.SIGTERM)
     if os.path.isfile("../vids/sound-source-" + records[room_index] + ".mp3"):
@@ -98,22 +100,22 @@ def stop(data, room_index):
         except Exception:
             pass
     data[int(room_index) - 1]['is_stopped'] = 'no'
+    data[int(room_index) - 1]['timestamp'] = 0
     data[int(room_index) - 1]['is_started'] = 'no'
     data[int(room_index) - 1]['status'] = 'free'
+    stopThread[room_index] = False
 
 
 def add_sound(video_cam_num, audio_cam_num):
-    proc = subprocess.Popen(
-        "ffmpeg -i ../vids/sound-source-" + audio_cam_num + ".mp3 "
-        + "-i ../vids/" + video_cam_num + ".mp4" +
-        " -shortest -c copy ../vids/result-" + video_cam_num + ".mp4",
-        shell=True)
+    proc = subprocess.Popen(["ffmpeg", "-i", "../vids/sound-source-" + audio_cam_num + ".mp3", "-i",
+                             "../vids/" + video_cam_num + ".mp4", "-shortest", "-c", "copy",
+                             "../vids/result-" + video_cam_num + ".mp4"], shell=False)
     proc.wait()
 
 
 def startTimer(data, room_index):
     counter = 0
-    while data[int(room_index) - 1]['is_stopped'] == 'no':
+    while (data[int(room_index) - 1]['is_stopped'] == 'no') or (stopThread[room_index] is False):
         time.sleep(1)
         counter += 1
         data[int(room_index) - 1]['timestamp'] = counter
