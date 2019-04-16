@@ -6,8 +6,8 @@ from oauth2client import file, client, tools
 import json
 
 
-f = open("app/data.json", 'r')
-data = json.loads(f.read())
+with open("app/data.json", 'r') as f:
+    data = json.loads(f.read())
 
 rooms = {}
 

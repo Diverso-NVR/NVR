@@ -24,8 +24,8 @@ from driveapi.driveSettings import upload
     45 47  51 52 53 54 55 84-кодер 206  
 """
 
-f = open("app/data.json", 'r')
-data = json.loads(f.read())
+with open("app/data.json", 'r') as f:
+    data = json.loads(f.read())
 
 network = {"ФКМД": "11", "": "13", "МИЭМ": "15"}
 rooms = {}
@@ -62,12 +62,12 @@ def start(data, room_index, sound_type, building):
                                + records[building][room_index] + ".mp3", shell=True, preexec_fn=os.setsid)
         processes[building][room_index].append(cam)
 
-    proc = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168." + network[building] + "." +
+    proc = subprocess.Popen("ffmpeg -i rtsp://192.168." + network[building] + "." +
                             room_index + "1/main -y -c copy -f mp4 ../vids/1-" +  # -c:v copy -an
                             records[building][room_index] + ".mp4", shell=True, preexec_fn=os.setsid)
     processes[building][room_index].append(proc)
     for i in range(2, 7):
-        process = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://admin:Supervisor@192.168." + network[building] + "." +
+        process = subprocess.Popen("ffmpeg -i rtsp://admin:Supervisor@192.168." + network[building] + "." +
                                    room_index +
                                    str(i) + " -y -c:v copy -an -f mp4 ../vids/"
                                    + str(i) + "-" + records[building][room_index] + ".mp4", shell=True, preexec_fn=os.setsid)
@@ -89,11 +89,9 @@ def stop(data, room_index, building):
 
 
 def add_sound(video_cam_num, audio_cam_num):
-    proc = subprocess.Popen(
-        "ffmpeg -i ../vids/sound-source-" + audio_cam_num + ".mp3 "
-        + "-i ../vids/" + video_cam_num + ".mp4" +
-        " -shortest -c copy ../vids/result-" + video_cam_num + ".mp4",
-        shell=True)
+    proc = subprocess.Popen(["ffmpeg", "-i", "../vids/sound-source-" + audio_cam_num + ".mp3", "-i",
+                             "../vids/" + video_cam_num + ".mp4", "-shortest", "-c", "copy",
+                             "../vids/result-" + video_cam_num + ".mp4"], shell=False)
     proc.wait()
 
 

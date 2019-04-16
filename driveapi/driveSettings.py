@@ -3,7 +3,6 @@ from googleapiclient.discovery import build
 from httplib2 import Http
 from oauth2client import file, client, tools
 from googleapiclient.http import MediaFileUpload
-import time
 import json
 
 
@@ -23,8 +22,8 @@ if not creds or creds.invalid:
 service = build('drive', 'v3', http=creds.authorize(Http()))
 
 
-f = open("app/data.json", 'r')
-data = json.loads(f.read())
+with open("app/data.json", 'r') as f:
+    data = json.loads(f.read())
 rooms = {}
 for building in data:
     for room in data[building]:
@@ -35,7 +34,6 @@ def upload(filename, room):
     """
     Upload file "filename" on drive
     """
-    time.sleep(0.5)
     media = MediaFileUpload(filename, mimetype="video/mp4", resumable=True)
     fileData = {"name": filename.split('/')[2],
                 "parents": [rooms[room]]
