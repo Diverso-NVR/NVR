@@ -48,7 +48,6 @@ let app = new Vue({
         )
         .then(res => {
           camera.status = "free";
-          camera.is_stopped = "yes";
           camera.timestamp = 0;
         });
     }
@@ -64,7 +63,6 @@ let app = new Vue({
                 building: "",
                 auditorium: "",
                 status: "",
-                is_stopped: "no",
                 timestamp: 0,
                 sound_source: "enc"
               },
@@ -75,16 +73,14 @@ let app = new Vue({
     });
     let updateStatus = () => {
       axios.get("/status").then(res => {
-        for (building in res.data)
-          res.data[building].forEach(cam => {
-            this.cameras.forEach(camera => {
-              if (camera.id === cam.id && camera.building === cam.building) {
-                camera.status = cam.status;
-                camera.timestamp = cam.timestamp;
-                camera.is_stopped = cam.is_stopped;
-              }
-            });
+        res.data.forEach(cam => {
+          this.cameras.forEach(camera => {
+            if (camera.id === cam.id && camera.building === cam.building) {
+              camera.status = cam.status;
+              camera.timestamp = cam.timestamp;
+            }
           });
+        });
       });
     };
     updateStatus();

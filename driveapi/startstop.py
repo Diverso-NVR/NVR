@@ -4,7 +4,7 @@ import psutil
 import time
 import signal
 import os
-import threading
+from multiprocessing import Process
 import json
 
 
@@ -41,9 +41,9 @@ for building in data:
         rooms[building][str(room['id'])] = room['auditorium']
 
 
-def start(data, room_index, sound_type, building):
-    threads[building][room_index] = threading.Thread(
-        target=startTimer, args=(data, room_index, building), daemon=True)
+def start(room_index, sound_type, building):
+    threads[building][room_index] = Process(
+        target=startTimer, args=(room_index, building), daemon=True)
     threads[building][room_index].start()
     processes[building][room_index] = []
     today = datetime.date.today()
@@ -86,6 +86,7 @@ def stop(room_index, building):
                    records[building][room_index] + ".mp4", rooms[building][room_index])
         except Exception:
             pass
+    threads[building][room_index].terminate()
 
 
 def add_sound(video_cam_num, audio_cam_num):
@@ -95,13 +96,17 @@ def add_sound(video_cam_num, audio_cam_num):
     proc.wait()
 
 
-def startTimer(data, room_index, building):
+def startTimer(room_index, building):
+    with open('app/tempData.json', 'r') as f:
+        data = json.loads(f.read())
+
     camId = 0
     for i in data[building]:
         if i['id'] == int(room_index):
             break
         camId += 1
-    while data[building][camId]['is_stopped'] == 'no':
+
+    while data[building][camId]['status'] == 'busy':
         time.sleep(1)
         data[building][camId]['timestamp'] += 1
         with open('app/tempData.json', 'w') as f:

@@ -7,8 +7,7 @@
       "status": "free",
       "timestamp": 0,
       "drive": "https://drive.google.com/drive/folders/15Ant5hntmfl84Rrkzr9dep2nh13sbXft",
-      "calendar": "33e4j4htl0bvmmuc3t45ehsphk@group.calendar.google.com",
-      "is_stopped": "no"
+      "calendar": "33e4j4htl0bvmmuc3t45ehsphk@group.calendar.google.com"
     },
     {
       "id": 2,
@@ -17,8 +16,7 @@
       "status": "free",
       "timestamp": 0,
       "drive": "https://drive.google.com/drive/folders/1EbJg0IzJLP788qWVr0u_Y9SmZ8ygzKwr",
-      "calendar": "hsenvrproject@gmail.com",
-      "is_stopped": "no"
+      "calendar": "hsenvrproject@gmail.com"
     },
     {
       "id": 3,
@@ -27,8 +25,7 @@
       "status": "free",
       "timestamp": 0,
       "drive": "https://drive.google.com/drive/folders/1L4icf2QJsv7dBBDygNNXCG9dOnPwxY9r",
-      "calendar": "adfevhq6dbe00or14dkhfkq68k@group.calendar.google.com",
-      "is_stopped": "no"
+      "calendar": "adfevhq6dbe00or14dkhfkq68k@group.calendar.google.com"
     }
   ],
   "МИЭМ": [
@@ -39,8 +36,7 @@
       "status": "free",
       "timestamp": 0,
       "drive": "https://drive.google.com/drive/u/2/folders/13zC6Cm2vUsS-sYUPA9dVwN5ZGTwJAm_s",
-      "calendar": "auttp26cq3dnsqpo0t7kpt331g@group.calendar.google.com",
-      "is_stopped": "no"
+      "calendar": "auttp26cq3dnsqpo0t7kpt331g@group.calendar.google.com"
     },
     {
       "id": 4,
@@ -49,8 +45,7 @@
       "status": "free",
       "timestamp": 0,
       "drive": "https://drive.google.com/drive/u/2/folders/1NjJIEr0bOK0MNfFKjzzYF3NRUghjIiZz",
-      "calendar": "",
-      "is_stopped": "no"
+      "calendar": ""
     }
   ]
 }

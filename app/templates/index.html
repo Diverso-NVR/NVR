@@ -72,7 +72,7 @@
                 </button>
                 <button
                   class="ui button"
-                  :class="{active: camera.sound_source==='cam', disabled: camera.status === 'busy'}"
+                  :class="{active: camera.sound_source === 'cam', disabled: camera.status === 'busy'}"
                   @click="camera.sound_source = 'cam'"
                 >
                   Камера
@@ -90,9 +90,8 @@
                 </button>
                 <button
                   class="ui button red"
-                  :class="{disabled: camera.status === 'free' || camera.is_stopped === 'yes'}"
+                  :class="{disabled: camera.status === 'free'}"
                   @click.prevent="stopCamera(camera)"
-                  @click="stopTimer(camera)"
                 >
                   Стоп
                 </button>

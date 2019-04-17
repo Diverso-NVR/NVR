@@ -33,12 +33,11 @@ def startRec(camera, soundType, building):
         camId += 1
 
     data[building][camId]["status"] = "busy"
-    data[building][camId]["is_stoped"] = "no"
 
     with open('app/tempData.json', 'w') as f:
         json.dump(data, f)
 
-    start(data, camera, soundType, building)
+    start(camera, soundType, building)
 
     return jsonify([{'timestamp': time()}])
 
@@ -52,7 +51,6 @@ def stopRec(camera, soundType, building):
         camId += 1
 
     data[building][camId]["status"] = "free"
-    data[building][camId]['is_stopped'] = 'yes'
     data[building][camId]['timestamp'] = 0
 
     with open('app/tempData.json', 'w') as f:
