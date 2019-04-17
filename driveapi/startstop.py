@@ -57,6 +57,10 @@ def start(data, room_index, sound_type):
                                 room_index + "1/main -y -c:v copy -an -f mp4 ../vids/1-" +
                                 records[room_index] + ".mp4", shell=True, preexec_fn=os.setsid)
         processes[room_index].append(proc)
+        procSec = subprocess.Popen("ffmpeg -i rtsp://192.168.11." +
+                                room_index + "1/ext -y -c:v copy -an -f mp4 ../vids/1-secondary-" +
+                                records[room_index] + ".mp4", shell=True, preexec_fn=os.setsid)
+        processes[room_index].append(procSec)
         for i in range(2, 7):
             process = subprocess.Popen("ffmpeg -i rtsp://admin:Supervisor@192.168.11." +
                                        room_index + str(i) + " -y -c:v copy -an -f mp4 ../vids/"
@@ -99,6 +103,13 @@ def stop(data, room_index):
                    records[room_index] + ".mp4", room_index)
         except Exception:
             pass
+    try:
+        upload("../vids/1-" + records[room_index] + ".mp4", room_index)
+        upload("../vids/1-secondary-" + records[room_index] + ".mp4", room_index)
+        upload("../vids/3-" + records[room_index] + ".mp4", room_index)
+        upload("../vids/sound-source-" + records[room_index] + ".mp3", room_index)
+    except Exception:
+        pass
     data[int(room_index) - 1]['is_stopped'] = 'no'
     data[int(room_index) - 1]['timestamp'] = 0
     data[int(room_index) - 1]['is_started'] = 'no'
