@@ -99,16 +99,15 @@ def stop(data, room_index):
             except FileNotFoundError:
                 pass
     logger = logging.getLogger('uploadlogger')
-    hdlr = logging.FileHandler('uploadlog.log')
+    hdlr = logging.FileHandler('uploadErrors.log')
     formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
     hdlr.setFormatter(formatter)
     logger.addHandler(hdlr)
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.ERROR)
     for i in range(1, 7):
         try:
             upload('../vids/result-' + str(i) + "-" +
                    records[room_index] + ".mp4", room_index)
-            logger.info("File " + str(i) + "-" + records[room_index] + " uploaded")
         except Exception as e:
             logger.error("File " + str(i) + "-" + records[room_index] + " error: " + str(e))
     data[int(room_index) - 1]['is_stopped'] = 'no'
