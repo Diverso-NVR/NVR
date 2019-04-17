@@ -4,6 +4,7 @@ import time
 import threading
 import os
 import signal
+import logging
 
 
 from driveapi.driveSettings import upload
@@ -97,18 +98,25 @@ def stop(data, room_index):
                           records[room_index] + ".mp4")
             except FileNotFoundError:
                 pass
+    logger = logging.getLogger('uploadlogger')
+    hdlr = logging.FileHandler('uploadlog.log')
+    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+    hdlr.setFormatter(formatter)
+    logger.addHandler(hdlr)
+    logger.setLevel(logging.INFO)
     for i in range(1, 7):
         try:
             upload('../vids/result-' + str(i) + "-" +
                    records[room_index] + ".mp4", room_index)
-        except Exception:
-            pass
+            logger.info("File " + str(i) + "-" + records[room_index] + " uploaded")
+        except Exception as e:
+            logger.error("File " + str(i) + "-" + records[room_index] + " error: " + str(e))
     try:
         upload("../vids/1-" + records[room_index] + ".mp4", room_index)
         upload("../vids/3-" + records[room_index] + ".mp4", room_index)
         upload("../vids/sound-source-" + records[room_index] + ".mp3", room_index)
-    except Exception:
-        pass
+    except Exception as e:
+        logger.error("Additional files upload error: " + str(e))
     data[int(room_index) - 1]['is_stopped'] = 'no'
     data[int(room_index) - 1]['timestamp'] = 0
     data[int(room_index) - 1]['is_started'] = 'no'
