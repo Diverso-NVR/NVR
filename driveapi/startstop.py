@@ -111,12 +111,6 @@ def stop(data, room_index):
             logger.info("File " + str(i) + "-" + records[room_index] + " uploaded")
         except Exception as e:
             logger.error("File " + str(i) + "-" + records[room_index] + " error: " + str(e))
-    try:
-        upload("../vids/1-" + records[room_index] + ".mp4", room_index)
-        upload("../vids/3-" + records[room_index] + ".mp4", room_index)
-        upload("../vids/sound-source-" + records[room_index] + ".mp3", room_index)
-    except Exception as e:
-        logger.error("Additional files upload error: " + str(e))
     data[int(room_index) - 1]['is_stopped'] = 'no'
     data[int(room_index) - 1]['timestamp'] = 0
     data[int(room_index) - 1]['is_started'] = 'no'
