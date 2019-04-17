@@ -74,7 +74,7 @@ def start(data, room_index, sound_type, building):
         processes[building][room_index].append(process)
 
 
-def stop(data, room_index, building):
+def stop(room_index, building):
     for process in processes[building][room_index]:
         os.killpg(process.pid, signal.SIGTERM)
     for i in range(1, 7):
@@ -83,10 +83,9 @@ def stop(data, room_index, building):
     for i in range(1, 7):
         try:
             upload('../vids/result-' + str(i) + "-" +
-                   records[building][room_index] + ".mp4", room_index)
+                   records[building][room_index] + ".mp4", rooms[building][room_index])
         except Exception:
             pass
-
 
 def add_sound(video_cam_num, audio_cam_num):
     proc = subprocess.Popen(["ffmpeg", "-i", "../vids/sound-source-" + audio_cam_num + ".mp3", "-i",

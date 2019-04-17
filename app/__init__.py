@@ -58,7 +58,7 @@ def stopRec(camera, soundType, building):
     with open('app/tempData.json', 'w') as f:
         json.dump(data, f)
 
-    stop(data, camera, building)
+    stop(camera, building)
 
     return jsonify([{'timestamp': time()}])
 
