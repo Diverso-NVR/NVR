@@ -44,12 +44,12 @@ def start(data, room_index, sound_type):
         today.year, today.month, today.day, formatted_time, rooms[room_index], "HSE")
     if room_index in ["1", "2", "3"]:
         if sound_type == "enc":
-            enc = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168.11." +
+            enc = subprocess.Popen("ffmpeg -i rtsp://192.168.11." +
                                    room_index + "1/main -y -c:a copy -vn -f mp4 ../vids/sound-source-"
                                    + records[room_index] + ".mp3", shell=True, preexec_fn=os.setsid)
             processes[room_index].append(enc)
         else:
-            cam = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://admin:Supervisor@192.168.11." +
+            cam = subprocess.Popen("ffmpeg -i rtsp://admin:Supervisor@192.168.11." +
                                    room_index + "2 -y -c:a copy -vn -f mp4 ../vids/sound-source-"
                                    + records[room_index] + ".mp3", shell=True, preexec_fn=os.setsid)
             processes[room_index].append(cam)
@@ -69,7 +69,7 @@ def start(data, room_index, sound_type):
                                        shell=True, preexec_fn=os.setsid)
             processes[room_index].append(process)
     else:
-        snd = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168.15.56/main -y -c:a copy -vn " +
+        snd = subprocess.Popen("ffmpeg -i rtsp://192.168.15.56/main -y -c:a copy -vn " +
                                "-f mp4 ../vids/sound-source-" + records[room_index] + ".mp3",
                                shell=True, preexec_fn=os.setsid)
         processes[room_index].append(snd)
