@@ -1,19 +1,29 @@
 import time
 from datetime import datetime
 from driveapi import startstop
-from calendarAPI.calendarSettings import getEvents, parseDate, rooms
+from calendarAPI.calendarSettings import getEvents, parseDate
 import threading
+import json
 
+
+with open("app/tempData.json", 'r') as f:
+    data = json.loads(f.read())
+
+rooms = {}
+
+for building in data:
+    rooms[building] = []
+    for room in data[building]:
+        rooms[building].append({"room":room['auditorium'], "event": {} })
 
 def events():
-    dates = []
-    for room in rooms:
-        try:
-            i = getEvents(room)
-            dates.append(i[0])
-        except IndexError:
-            dates.append({})
-    return dates
+    for building in rooms:
+        for room in rooms[building]:
+            try:
+                i = getEvents(room["room"])
+                room["event"] = i[0]
+            except IndexError:
+                room["event"] = {}
 
 
 def duration(date):
@@ -27,29 +37,29 @@ def duration(date):
     return hour + minute
 
 
-def record(num, startt, end):
-    startstop.start(str(num), "cam")
+def record(data, num, building, startt, end):
+    startstop.start(data, str(num), "cam", building)
     time.sleep(duration(end) - duration(startt))
-    startstop.stop(str(num))
+    startstop.stop(str(num), building)
 
 
 def run():
-    dates = events()
     while True:
+        events()
         today = datetime.now()
-        for i in range(len(dates)):
-            if dates[i] == {}:
-                continue
-            startt = parseDate(dates[i]['start'].get(
-                'dateTime', dates[i]['start'].get('date')))
-            end = parseDate(dates[i]['end'].get(
-                'dateTime', dates[i]['end'].get('date')))
-            if startt == datetime.strftime(today, "%Y-%m-%d %H:%M"):
-                t = threading.Thread(target=record, args=(
-                    i+1, startt, end), daemon=True)
-                t.start()
-                dates = events()
-        time.sleep(1)
+        for building in rooms:
+          for i in range(len(rooms[building])):
+              if rooms[building][i]['event'] == {}:
+                  continue
+              startt = parseDate(rooms[building][i]['event']['start'].get(
+                  'dateTime', rooms[building][i]['event']['start'].get('date')))
+              end = parseDate(rooms[building][i]['event']['end'].get(
+                  'dateTime', rooms[building][i]['event']['end'].get('date')))
+              if startt == datetime.strftime(today, "%Y-%m-%d %H:%M"):
+                  t = threading.Thread(target=record, args=(data,
+                      i+1, building, startt, end), daemon=True)
+                  t.start()
+          time.sleep(1)
 
 
 if __name__ == '__main__':

@@ -5,7 +5,6 @@ from httplib2 import Http
 from oauth2client import file, client, tools
 import json
 
-
 with open("app/data.json", 'r') as f:
     data = json.loads(f.read())
 
@@ -14,7 +13,6 @@ rooms = {}
 for building in data:
     for room in data[building]:
         rooms[room['auditorium']] = room['calendar']
-
 
 def parseDate(date):
     """
@@ -31,7 +29,7 @@ def parseDate(date):
 
 def getEvents(room):
     """
-    Prints the start and name of the next 10 events on the "room" calendar.
+    Returns start and summary of the next 10 events on the "room" calendar.
     """
     now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
     events_result = service.events().list(calendarId=rooms[room], timeMin=now,

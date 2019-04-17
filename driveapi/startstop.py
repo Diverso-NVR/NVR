@@ -87,6 +87,7 @@ def stop(room_index, building):
         except Exception:
             pass
 
+
 def add_sound(video_cam_num, audio_cam_num):
     proc = subprocess.Popen(["ffmpeg", "-i", "../vids/sound-source-" + audio_cam_num + ".mp3", "-i",
                              "../vids/" + video_cam_num + ".mp4", "-shortest", "-c", "copy",
