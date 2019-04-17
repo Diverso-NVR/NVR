@@ -105,7 +105,6 @@ def stop(data, room_index):
             pass
     try:
         upload("../vids/1-" + records[room_index] + ".mp4", room_index)
-        upload("../vids/1-secondary-" + records[room_index] + ".mp4", room_index)
         upload("../vids/3-" + records[room_index] + ".mp4", room_index)
         upload("../vids/sound-source-" + records[room_index] + ".mp3", room_index)
     except Exception:
