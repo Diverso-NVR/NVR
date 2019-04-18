@@ -59,6 +59,7 @@ def stopRec(camera, building):
         camId += 1
 
     data[building][camId]["status"] = "free"
+    data[building][camId]['timestamp'] = 0
 
     stop(camera, building)
 
