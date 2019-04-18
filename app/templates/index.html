@@ -25,6 +25,7 @@
       integrity="sha256-mpnrJ5DpEZZkwkE1ZgkEQQJW/46CSEh/STrZKOB/qoM="
       crossorigin="anonymous"
     ></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"
@@ -36,12 +37,14 @@
   <body>
     <!-- 767px > -- жмыкает -->
     <header>
-      <div class="ui stackable inverted menu">
-        <div class="item">
-          <i class="inverted large video icon"></i>
+      <div class="ui borderless inverted menu">
+        <div class="ui inverted menu" style="margin-left: 75px;">
+          <a class="item">ФКМД</a>
+          <a class="item">МИЭМ</a>
         </div>
-        <button class="ui black button">ФКМД</button>
-        <button class="ui black button">МИЭМ</button>
+        <a class="right aligned item" style="margin-right: 75px;" id="login"
+          ><i class="user icon"></i
+        ></a>
       </div>
     </header>
 
