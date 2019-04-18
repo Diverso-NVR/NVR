@@ -51,7 +51,6 @@ def stopRec(camera, soundType, building):
         camId += 1
 
     data[building][camId]["status"] = "free"
-    data[building][camId]['timestamp'] = 0
 
     with open('app/tempData.json', 'w') as f:
         json.dump(data, f)
