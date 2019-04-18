@@ -169,15 +169,7 @@
           },
           stopCamera(camera) {
             axios
-              .post(
-                "/cameras/" +
-                  camera.id +
-                  "/" +
-                  camera.sound_source +
-                  "/" +
-                  camera.building +
-                  "/stop"
-              )
+              .post("/cameras/" + camera.id + "/" + camera.building + "/stop")
               .then(res => {
                 camera.status = "free";
               });
@@ -212,8 +204,9 @@
                       camera.building === cam.building
                     ) {
                       camera.status = cam.status;
-                      if (cam.status == "busy") camera.timestamp += 1;
-                      else camera.timestamp = 0;
+                      camera.timestamp = cam.timestamp;
+                      // camera.timestamp =
+                      //   cam.status === "busy" ? camera.timestamp + 1 : 0;
                     }
                   });
                 });
