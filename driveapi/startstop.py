@@ -43,6 +43,22 @@ def start(room_index, sound_type, building):
     formatted_time = str(curr_time.hour) + ':' + str(curr_time.minute)
     records[building][room_index] = "{0}-{1}-{2}-{3}-{4}-{5}".format(
         today.year, today.month, today.day, formatted_time, rooms[building][room_index], "HSE")
+
+    if rooms[building][room_index] == '513':
+        enc = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168.15.56/main -y -c:a copy -vn " +
+                               "-f mp4 ../vids/sound-source-" +
+                               records[building][room_index] + ".mp3",
+                               shell=True, preexec_fn=os.setsid)
+        processes[building][room_index].append(enc)
+        for i in range(2, 4):
+            process = subprocess.Popen("ffmpeg -i rtsp://192.168.15.4" + str(i) + " -y -c:v copy " +
+                                       "-an -f mp4 ../vids/" +
+                                       str(i) + "-" +
+                                       records[building][room_index] + ".mp4",
+                                       shell=True, preexec_fn=os.setsid)
+            processes[building][room_index].append(process)
+        return
+
     if sound_type == "enc":
         enc = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168." + network[building] + "." +
                                room_index + "1/main -y -c:a copy -vn -f mp4 ../vids/sound-source-"

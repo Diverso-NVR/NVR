@@ -9,6 +9,7 @@ app = Flask(__name__)
 
 with open('app/data.json', 'r') as f:
     data = json.loads(f.read())
+
 threads = {}
 for building in data:
     threads[building] = {}
