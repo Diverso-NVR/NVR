@@ -59,7 +59,10 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="camera in cameras">
+          <tr
+            v-for="camera in cameras"
+            :class="{disabled : camera.auditorium === '504'}"
+          >
             <td>[[ camera.building ]]-[[camera.auditorium]]</td>
             <td>
               <div class="ui buttons">
