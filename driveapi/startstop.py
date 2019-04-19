@@ -3,6 +3,7 @@ import subprocess
 import signal
 import os
 import json
+from threading import Thread
 
 
 from driveapi.driveSettings import upload
@@ -90,8 +91,11 @@ def stop(room_index, building):
                   [room_index], records[building][room_index])
     for i in range(1, 7):
         try:
-            upload('../vids/result-' + str(i) + "-" +
-                   records[building][room_index] + ".mp4", rooms[building][room_index])
+            uploadThread = Thread(
+                target=upload, args=('../vids/result-' + str(i) + "-" +
+                                     records[building][room_index] + ".mp4",
+                                     rooms[building][room_index]), daemon=True)
+            uploadThread.start()
         except Exception:
             pass
 
