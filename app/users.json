@@ -1,0 +1,6 @@
+{
+  "users": [
+    { "login": "fcmd", "password": "hitra", "building": "fcmd" },
+    { "login": "miem", "password": "tal34", "building": "miem" }
+  ]
+}

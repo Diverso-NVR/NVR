@@ -17,7 +17,24 @@ for building in data:
 
 @app.route('/')
 def load_main_page():
-    return render_template('index.html')
+    return render_template('login.html')
+
+
+@app.route('/fcmd', methods=['GET', "POST"])
+def load_fcmd():
+    return render_template('fcmd.html')
+
+
+@app.route('/miem', methods=['GET', "POST"])
+def load_miem():
+    return render_template('miem.html')
+
+
+@app.route('/users', methods=['GET', "POST"])
+def users():
+    with open('app/users.json', 'r') as f:
+        users = json.loads(f.read())
+    return jsonify(users)
 
 
 @app.route('/status', methods=['GET'])
