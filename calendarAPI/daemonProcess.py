@@ -38,8 +38,8 @@ def duration(date):
     return hour + minute
 
 
-def record(data, num, building, startt, end):
-    startstop.start(data, str(num), "cam", building)
+def record(num, building, startt, end):
+    startstop.start(str(num), "cam", building)
     time.sleep(duration(end) - duration(startt))
     startstop.stop(str(num), building)
 
@@ -57,8 +57,7 @@ def run():
                 end = parseDate(rooms[building][i]['event']['end'].get(
                     'dateTime', rooms[building][i]['event']['end'].get('date')))
                 if startt == datetime.strftime(today, "%Y-%m-%d %H:%M"):
-                    t = threading.Thread(target=record, args=(data,
-                                                              i+1, building, startt, end), daemon=True)
+                    t = threading.Thread(target=record, args=(i+1, building, startt, end), daemon=True)
                     t.start()
             time.sleep(1)
 
