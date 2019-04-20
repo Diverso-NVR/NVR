@@ -23,7 +23,7 @@ def events():
             try:
                 i = getEvents(room["room"])
                 room["event"] = i[0]
-            except IndexError:
+            except Exception:
                 room["event"] = {}
 
 
@@ -57,7 +57,8 @@ def run():
                 end = parseDate(rooms[building][i]['event']['end'].get(
                     'dateTime', rooms[building][i]['event']['end'].get('date')))
                 if startt == datetime.strftime(today, "%Y-%m-%d %H:%M"):
-                    t = threading.Thread(target=record, args=(i+1, building, startt, end), daemon=True)
+                    t = threading.Thread(target=record, args=(
+                        i+1, building, startt, end), daemon=True)
                     t.start()
             time.sleep(1)
 
