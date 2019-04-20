@@ -42,8 +42,7 @@
         style="width:90vw; margin: 0 auto;"
       >
         <div class="ui inverted menu">
-          <a class="item">ФКМД</a>
-          <a class="item">МИЭМ</a>
+          <h4 class="item">МИЭМ</h4>
         </div>
         <a class="right aligned item" id="login"><i class="user icon"></i></a>
       </div>
@@ -184,37 +183,35 @@
         },
         created() {
           axios.get("/status").then(res => {
-            for (building in res.data)
-              res.data[building].forEach(camera => {
-                this.cameras.push(
-                  Object.assign(
-                    {
-                      id: 0,
-                      building: "",
-                      auditorium: "",
-                      status: "",
-                      timestamp: 0,
-                      sound_source: "enc"
-                    },
-                    camera
-                  )
-                );
-              });
+            res.data["МИЭМ"].forEach(camera => {
+              this.cameras.push(
+                Object.assign(
+                  {
+                    id: 0,
+                    building: "",
+                    auditorium: "",
+                    status: "",
+                    timestamp: 0,
+                    sound_source: "enc"
+                  },
+                  camera
+                )
+              );
+            });
           });
           let updateStatus = () => {
             axios.get("/status").then(res => {
-              for (building in res.data)
-                res.data[building].forEach(cam => {
-                  this.cameras.forEach(camera => {
-                    if (
-                      camera.id === cam.id &&
-                      camera.building === cam.building
-                    ) {
-                      camera.status = cam.status;
-                      camera.timestamp = cam.timestamp;
-                    }
-                  });
+              res.data["МИЭМ"].forEach(cam => {
+                this.cameras.forEach(camera => {
+                  if (
+                    camera.id === cam.id &&
+                    camera.building === cam.building
+                  ) {
+                    camera.status = cam.status;
+                    camera.timestamp = cam.timestamp;
+                  }
                 });
+              });
             });
           };
           updateStatus();

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <title>NVR</title>
+    <link rel="stylesheet" href="../static/style.css" />
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.22/vue.js"
+      integrity="sha256-GmgFjvxj3EgNe3TECaFoMnNKxVc3zY7Ouiyd+K4tqc8="
+      crossorigin="anonymous"
+    ></script>
+    {# Should use this script for production, flnot the one above: #} {#
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js"
+      #}
+      {#
+      integrity="sha256-chlNFSVx3TdcQ2Xlw7SvnbLAavAQLO0Y/LBiWX04viY="
+      #}
+      {#
+      crossorigin="anonymous"
+    ></script>
+    #}
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"
+      integrity="sha256-mpnrJ5DpEZZkwkE1ZgkEQQJW/46CSEh/STrZKOB/qoM="
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"
+      integrity="sha256-9mbkOfVho3ZPXfM7W8sV2SndrGDuh7wuyLjtsWeTI1Q="
+      crossorigin="anonymous"
+    />
+  </head>
+
+  <body>
+    <!-- 767px > -- жмыкает -->
+    <header>
+      <div
+        class="ui borderless inverted menu"
+        style="width:90vw; margin: 0 auto;"
+      >
+        <div class="ui inverted menu">
+          <h4 class="item">ФКМД</h4>
+        </div>
+        <a class="right aligned item" id="login"><i class="user icon"></i></a>
+      </div>
+    </header>
+
+    <main id="app" class="ui container" style="width: 90vw;">
+      <table class="ui celled striped center table" style="text-align:center;">
+        <thead>
+          <tr>
+            <th>Аудитория</th>
+            <th>Источник звука</th>
+            <th>Запись</th>
+            <th>Статус</th>
+            <th>Время записи</th>
+            <th>Календарь</th>
+            <th>Диск</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="camera in cameras"
+            :class="{disabled : camera.auditorium === '504'}"
+          >
+            <td>[[ camera.building ]]-[[camera.auditorium]]</td>
+            <td>
+              <div class="ui buttons">
+                <button
+                  class="ui button"
+                  :class="{active: camera.sound_source==='enc', disabled: camera.status === 'busy'}"
+                  @click="camera.sound_source = 'enc'"
+                >
+                  Кодер
+                </button>
+                <button
+                  class="ui button"
+                  :class="{active: camera.sound_source === 'cam', disabled: camera.status === 'busy'}"
+                  @click="camera.sound_source = 'cam'"
+                >
+                  Камера
+                </button>
+              </div>
+            </td>
+            <td>
+              <div class="ui buttons">
+                <button
+                  class="ui button green"
+                  :class="{disabled: camera.status === 'busy'}"
+                  @click.prevent="startCamera(camera)"
+                >
+                  Старт
+                </button>
+                <button
+                  class="ui button red"
+                  :class="{disabled: camera.status === 'free'}"
+                  @click.prevent="stopCamera(camera)"
+                >
+                  Стоп
+                </button>
+              </div>
+            </td>
+            <td :class="[camera.status==='free' ? 'positive' : 'negative']">
+              <div class="status" v-if="camera.status==='free'">Готов</div>
+              <div class="status busy" v-if="camera.status==='busy'">Занят</div>
+            </td>
+            <td>
+              <div v-if="camera.status==='busy'">
+                [[getTsSting(camera.timestamp)]]
+              </div>
+            </td>
+            <td>
+              <a
+                href="https://calendar.google.com/calendar/b/1/r?tab=oc"
+                target="_blank"
+                class="ui icon button"
+              >
+                <i class="calendar alternate outline icon"></i>
+              </a>
+            </td>
+            <td>
+              <a
+                v-bind:href="camera.drive"
+                target="_blank"
+                class="ui icon button"
+              >
+                <i class="google drive icon"></i>
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </main>
+
+    <script>
+      let app = new Vue({
+        el: "#app",
+        data: () => ({
+          cameras: []
+        }),
+        delimiters: ["[[", "]]"],
+        computed: {
+          getCamName(camera) {
+            return camera.building + "-" + camera.auditorium;
+          }
+        },
+        methods: {
+          getTsSting(ts) {
+            let h = Math.floor(ts / 60 / 60);
+            ts -= h * 60 * 60;
+            let m = Math.floor(ts / 60);
+            ts -= m * 60;
+            return `${h} ч. ${m} м. ${ts} с.`;
+          },
+          startCamera(camera) {
+            axios
+              .post(
+                "/cameras/" +
+                  camera.id +
+                  "/" +
+                  camera.sound_source +
+                  "/" +
+                  camera.building +
+                  "/start",
+                {
+                  sound_source: camera.sound_source
+                }
+              )
+              .then(res => {
+                camera.status = "busy";
+              });
+          },
+          stopCamera(camera) {
+            axios
+              .post("/cameras/" + camera.id + "/" + camera.building + "/stop")
+              .then(res => {
+                camera.status = "free";
+              });
+          }
+        },
+        created() {
+          axios.get("/status").then(res => {
+            res.data["ФКМД"].forEach(camera => {
+              this.cameras.push(
+                Object.assign(
+                  {
+                    id: 0,
+                    building: "",
+                    auditorium: "",
+                    status: "",
+                    timestamp: 0,
+                    sound_source: "enc"
+                  },
+                  camera
+                )
+              );
+            });
+          });
+          let updateStatus = () => {
+            axios.get("/status").then(res => {
+              res.data["ФКМД"].forEach(cam => {
+                this.cameras.forEach(camera => {
+                  if (
+                    camera.id === cam.id &&
+                    camera.building === cam.building
+                  ) {
+                    camera.status = cam.status;
+                    camera.timestamp = cam.timestamp;
+                  }
+                });
+              });
+            });
+          };
+          updateStatus();
+          setInterval(() => {
+            updateStatus();
+          }, 1000);
+        }
+      });
+    </script>
+  </body>
+</html>
