@@ -13,13 +13,13 @@ from driveapi.driveSettings import upload
     P505: 11 12 13 14
     P500: 21 22 23 24 25 26
     S401: 31 32 33 34
-    
+
     192.168.13.
-    
-    
+
+
     192.168.15.
     Для тестов 42 43 56-кодер
-    45 47  51 52 53 54 55 84-кодер 206  
+    45 47  51 52 53 54 55 84-кодер 206
 """
 
 with open("app/data.json", 'r') as f:
@@ -91,11 +91,8 @@ def stop(room_index, building):
                   [room_index], records[building][room_index])
     for i in range(1, 7):
         try:
-            uploadThread = Thread(
-                target=upload, args=('../vids/result-' + str(i) + "-" +
-                                     records[building][room_index] + ".mp4",
-                                     rooms[building][room_index]), daemon=True)
-            uploadThread.start()
+            upload('../vids/result-' + str(i) + "-" + records[building][room_index] + ".mp4",
+                   rooms[building][room_index])
         except Exception:
             pass
 
