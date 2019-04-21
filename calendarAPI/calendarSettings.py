@@ -14,6 +14,7 @@ for building in data:
     for room in data[building]:
         rooms[room['auditorium']] = room['calendar']
 
+
 def parseDate(date):
     """
     Parses date in YYYY-MM-DD hh-mm format
