@@ -12,7 +12,7 @@ rooms = {}
 
 for building in data:
     for room in data[building]:
-        rooms[room['auditorium']] = room['calendar']
+        rooms[room['auditorium']] = room['calendarAPI']
 
 
 def parseDate(date):
