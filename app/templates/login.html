@@ -87,9 +87,12 @@
               $("#login").val() === data["users"][user]["login"] &&
               $("#password").val() === data["users"][user]["password"]
             )
+            {
               $.ajax("/" + data["users"][user]["building"]).done(res => {
                 $("body").html(res);
               });
+              break;
+            }
             else $("#error").css("display", "block");
         });
       });
