@@ -8,17 +8,19 @@
       "timestamp": 0,
 
       "drive": "https://drive.google.com/drive/folders/15Ant5hntmfl84Rrkzr9dep2nh13sbXft",
-      "calendar": "33e4j4htl0bvmmuc3t45ehsphk@group.calendar.google.com"
+      "calendarAPI": "33e4j4htl0bvmmuc3t45ehsphk@group.calendar.google.com",
+      "calendar": "https://calendar.google.com/calendar/b/2?cid=MzNlNGo0aHRsMGJ2bW11YzN0NDVlaHNwaGtAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ"
     },
     {
       "id": 2,
       "building": "ФКМД",
-      "auditorium": "П500",
+      "auditorium": "П500",s
       "status": "free",
       "timestamp": 0,
 
       "drive": "https://drive.google.com/drive/folders/1EbJg0IzJLP788qWVr0u_Y9SmZ8ygzKwr",
-      "calendar": "hsenvrproject@gmail.com"
+      "calendarAPI": "hsenvrproject@gmail.com",
+      "calendar": "https://calendar.google.com/calendar/b/2?cid=aHNlbnZycHJvamVjdEBnbWFpbC5jb20"
     },
     {
       "id": 3,
@@ -28,7 +30,8 @@
       "timestamp": 0,
 
       "drive": "https://drive.google.com/drive/folders/1L4icf2QJsv7dBBDygNNXCG9dOnPwxY9r",
-      "calendar": "adfevhq6dbe00or14dkhfkq68k@group.calendar.google.com"
+      "calendarAPI": "adfevhq6dbe00or14dkhfkq68k@group.calendar.google.com",
+      "calendar": "https://calendar.google.com/calendar/b/2?cid=YWRmZXZocTZkYmUwMG9yMTRka2hma3E2OGtAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ"
     }
   ],
   "МИЭМ": [
@@ -40,7 +43,8 @@
       "timestamp": 0,
 
       "drive": "https://drive.google.com/drive/u/2/folders/13zC6Cm2vUsS-sYUPA9dVwN5ZGTwJAm_s",
-      "calendar": "auttp26cq3dnsqpo0t7kpt331g@group.calendar.google.com"
+      "calendarAPI": "auttp26cq3dnsqpo0t7kpt331g@group.calendar.google.com",
+      "calendar": "https://calendar.google.com/calendar/b/2?cid=YXV0dHAyNmNxM2Ruc3FwbzB0N2twdDMzMWdAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ"
     },
     {
       "id": 4,
@@ -50,6 +54,7 @@
       "timestamp": 0,
 
       "drive": "https://drive.google.com/drive/u/2/folders/1NjJIEr0bOK0MNfFKjzzYF3NRUghjIiZz",
+      "calendarAPI": "",
       "calendar": ""
     }
   ]
