@@ -9,17 +9,12 @@
       integrity="sha256-GmgFjvxj3EgNe3TECaFoMnNKxVc3zY7Ouiyd+K4tqc8="
       crossorigin="anonymous"
     ></script>
-    <!-- {# Should use this script for production, flnot the one above: #} {#
-    <script
+    <!-- Production 
+      <script
       src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js"
-      #}
-      {#
       integrity="sha256-chlNFSVx3TdcQ2Xlw7SvnbLAavAQLO0Y/LBiWX04viY="
-      #}
-      {#
       crossorigin="anonymous"
-    ></script>
-    #} -->
+    ></script> -->
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"
       integrity="sha256-mpnrJ5DpEZZkwkE1ZgkEQQJW/46CSEh/STrZKOB/qoM="
@@ -86,14 +81,13 @@
             if (
               $("#login").val() === data["users"][user]["login"] &&
               $("#password").val() === data["users"][user]["password"]
-            )
-            {
+            ) {
               $.ajax("/" + data["users"][user]["building"]).done(res => {
                 $("body").html(res);
               });
-              break;
+              return;
             }
-            else $("#error").css("display", "block");
+          $("#error").css("display", "block");
         });
       });
     </script>

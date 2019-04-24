@@ -14,16 +14,17 @@ rooms = {}
 for building in data:
     rooms[building] = []
     for room in data[building]:
-        rooms[building].append({"room": room['auditorium'], "event": {}})
+        rooms[building].append(
+            {"id": room['id'], "room": room['auditorium'], "event": {}})
 
 
 def events():
     for building in rooms:
         for room in rooms[building]:
             try:
-                i = getEvents(room["room"])
-                room["event"] = i[0]
-            except IndexError:
+                e = getEvents(room["room"])
+                room["event"] = e[0]
+            except Exception:
                 room["event"] = {}
 
 
@@ -49,16 +50,18 @@ def run():
         events()
         today = datetime.now()
         for building in rooms:
-            for i in range(len(rooms[building])):
-                if rooms[building][i]['event'] == {}:
+            for room in rooms[building]:
+                if room['event'] == {}:
                     continue
-                startt = parseDate(rooms[building][i]['event']['start'].get(
-                    'dateTime', rooms[building][i]['event']['start'].get('date')))
-                end = parseDate(rooms[building][i]['event']['end'].get(
-                    'dateTime', rooms[building][i]['event']['end'].get('date')))
+                startt = parseDate(room['event']['start'].get(
+                    'dateTime', room['event']['start'].get('date')))
+                end = parseDate(room['event']['end'].get(
+                    'dateTime', room['event']['end'].get('date')))
                 if startt == datetime.strftime(today, "%Y-%m-%d %H:%M"):
-                    t = threading.Thread(target=record, args=(i+1, building, startt, end), daemon=True)
+                    t = threading.Thread(target=record, args=(
+                        room['id'], building, startt, end), daemon=True)
                     t.start()
+                    time.sleep(62)
             time.sleep(1)
 
 

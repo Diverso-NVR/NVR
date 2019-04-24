@@ -12,7 +12,8 @@ rooms = {}
 
 for building in data:
     for room in data[building]:
-        rooms[room['auditorium']] = room['calendar']
+        rooms[room['auditorium']] = room['calendarAPI']
+
 
 def parseDate(date):
     """
@@ -23,7 +24,6 @@ def parseDate(date):
     day = date[8:10]
     hour = date[11:13]
     minute = date[14:16]
-    # second = date[17:19]
     return "{}-{}-{} {}:{}".format(year, month, day, hour, minute)
 
 

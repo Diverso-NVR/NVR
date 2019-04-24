@@ -21,7 +21,6 @@ if not creds or creds.invalid:
     creds = tools.run_flow(flow, store)
 service = build('drive', 'v3', http=creds.authorize(Http()))
 
-
 with open("app/data.json", 'r') as f:
     data = json.loads(f.read())
 rooms = {}

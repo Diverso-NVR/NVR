@@ -25,7 +25,7 @@ from driveapi.driveSettings import upload
 with open("app/data.json", 'r') as f:
     data = json.loads(f.read())
 
-network = {"ФКМД": "11", "": "13", "МИЭМ": "15"}
+network = {"ФКМД": "11", "ФКН": "13", "МИЭМ": "15"}
 rooms = {}
 processes = {}
 records = {}
@@ -72,7 +72,7 @@ def start(room_index, sound_type, building):
         processes[building][room_index].append(cam)
 
     proc = subprocess.Popen("ffmpeg -i rtsp://192.168." + network[building] + "." +
-                            room_index + "1/main -y -c:v copy -an -f mp4 ../vids/1-" +
+                            room_index + "1/main -y -c:v copy -an -f mp4 ../vids/1-" +  
                             records[building][room_index] + ".mp4", shell=True, preexec_fn=os.setsid)
     processes[building][room_index].append(proc)
     for i in range(2, 7):
