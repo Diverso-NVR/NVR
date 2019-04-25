@@ -48,7 +48,7 @@ def record(num, building, startt, end):
 def run():
     while True:
         events()
-        today = datetime.now()
+        current_time = datetime.now()
         for building in rooms:
             for room in rooms[building]:
                 if room['event'] == {}:
@@ -57,11 +57,11 @@ def run():
                     'dateTime', room['event']['start'].get('date')))
                 end = parseDate(room['event']['end'].get(
                     'dateTime', room['event']['end'].get('date')))
-                if startt == datetime.strftime(today, "%Y-%m-%d %H:%M"):
+                if startt == datetime.strftime(current_time, "%Y-%m-%d %H:%M"):
                     t = threading.Thread(target=record, args=(
                         room['id'], building, startt, end), daemon=True)
                     t.start()
-                    time.sleep(60)
+                    time.sleep(62)
             time.sleep(1)
 
 

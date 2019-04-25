@@ -35,15 +35,15 @@
             <div class="ui buttons">
               <button
                 class="ui button"
-                :class="{active: camera.sound_source==='enc', disabled: camera.status === 'busy'}"
-                @click="camera.sound_source = 'enc'"
+                :class="{active: camera.soundType==='enc', disabled: camera.status === 'busy'}"
+                @click.prevent="soundCheck(camera, 'enc')"
               >
                 Кодер
               </button>
               <button
                 class="ui button"
-                :class="{active: camera.sound_source === 'cam', disabled: camera.status === 'busy'}"
-                @click="camera.sound_source = 'cam'"
+                :class="{active: camera.soundType === 'cam', disabled: camera.status === 'busy'}"
+                @click.prevent="soundCheck(camera, 'cam')"
               >
                 Камера
               </button>
@@ -119,20 +119,26 @@
           ts -= m * 60;
           return `${h} ч. ${m} м. ${ts} с.`;
         },
-        startCamera(camera) {
+        soundCheck(camera, soundSource) {
           axios
             .post(
               "/cameras/" +
                 camera.id +
                 "/" +
-                camera.sound_source +
-                "/" +
                 camera.building +
-                "/start",
-              {
-                sound_source: camera.sound_source
-              }
+                "/" +
+                soundSource +
+                "/soundCheck"
             )
+            .then(res => {
+              camera.soundType = soundSource;
+            });
+        },
+        startCamera(camera) {
+          axios
+            .post("/cameras/" + camera.id + "/" + camera.building + "/start", {
+              soundType: camera.soundType
+            })
             .then(res => {
               camera.status = "busy";
             });
@@ -156,7 +162,7 @@
                   auditorium: "",
                   status: "",
                   timestamp: 0,
-                  sound_source: "enc"
+                  soundType: ""
                 },
                 camera
               )
@@ -167,9 +173,10 @@
           axios.get("/status").then(res => {
             res.data["ФКМД"].forEach(cam => {
               this.cameras.forEach(camera => {
-                if (camera.id === cam.id && camera.building === cam.building) {
+                if (camera.id === cam.id) {
                   camera.status = cam.status;
                   camera.timestamp = cam.timestamp;
+                  camera.soundType = cam.soundType;
                 }
               });
             });

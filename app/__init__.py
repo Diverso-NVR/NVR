@@ -42,8 +42,21 @@ def status():
     return jsonify(data)
 
 
-@app.route('/cameras/<camera>/<soundType>/<building>/start', methods=['POST'])
-def startRec(camera, soundType, building):
+@app.route('/cameras/<camera>/<building>/<soundType>/soundCheck', methods=['POST'])
+def soundCheck(camera, building, soundType):
+    camId = 0
+    for i in data[building]:
+        if i['id'] == int(camera):
+            break
+        camId += 1
+
+    data[building][camId]["soundType"] = soundType
+
+    return ""
+
+
+@app.route('/cameras/<camera>/<building>/start', methods=['POST'])
+def startRec(camera, building):
     camId = 0
     for i in data[building]:
         if i['id'] == int(camera):
@@ -56,7 +69,7 @@ def startRec(camera, soundType, building):
         target=startTimer, args=(building, camId), daemon=True)
     threads[building][camera].start()
 
-    start(camera, soundType, building)
+    start(camera, data[building][camId]["soundType"], building)
 
     return ""
 
