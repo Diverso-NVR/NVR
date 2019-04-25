@@ -6,6 +6,12 @@
       "auditorium": "П505",
       "status": "free",
       "timestamp": 0,
+      "soundType": "enc",
+
+      "encSound": [],
+      "camSound": [],
+      "encVid": [],
+      "camVid": [],
 
       "drive": "https://drive.google.com/drive/u/1/folders/1UsoGpzf_Nui6Zs1kOGOdwctHJpVBP-Ru",
       "calendarAPI": "auditory.ru_rtkt64ce54bpi1dv9qid8okhkc@group.calendar.google.com",
@@ -17,6 +23,12 @@
       "auditorium": "П500",
       "status": "free",
       "timestamp": 0,
+      "soundType": "enc",
+
+      "encSound": [],
+      "camSound": [],
+      "encVid": [],
+      "camVid": [],
 
       "drive": "https://drive.google.com/drive/u/1/folders/1o6_Pbsp4ZgFogda--o6Cz3o5u9kP69A_",
       "calendarAPI": "auditory.ru_jba0plcebui5gelt34pq8tp69s@group.calendar.google.com",
@@ -28,6 +40,12 @@
       "auditorium": "С401",
       "status": "free",
       "timestamp": 0,
+      "soundType": "enc",
+
+      "encSound": [],
+      "camSound": [],
+      "encVid": [],
+      "camVid": [],
 
       "drive": "https://drive.google.com/drive/u/1/folders/1OXz4FuseEJaN3Xtm1cH0CP5Fgrg-GOMD",
       "calendarAPI": "auditory.ru_adjp0a1nn3mnnu8fju46vh260g@group.calendar.google.com",
@@ -41,6 +59,12 @@
       "auditorium": "504",
       "status": "free",
       "timestamp": 0,
+      "soundType": "enc",
+
+      "encSound": [],
+      "camSound": [],
+      "encVid": [],
+      "camVid": [],
 
       "drive": "https://drive.google.com/drive/u/1/folders/114O1I51q52wRAsbWuX2jV5MfL29Hq0d0",
       "calendarAPI": "auditory.ru_852uel7ga90vudirasmndcppss@group.calendar.google.com",
@@ -52,6 +76,12 @@
       "auditorium": "513",
       "status": "free",
       "timestamp": 0,
+      "soundType": "enc",
+
+      "encSound": [],
+      "camSound": [],
+      "encVid": [],
+      "camVid": [],
 
       "drive": "https://drive.google.com/drive/u/1/folders/1nYNAy--UhZHhkr0r0nx4Edhn8uoIGM3d",
       "calendarAPI": "auditory.ru_g4h95d1fk3tooennjhtck7fuoc@group.calendar.google.com",
