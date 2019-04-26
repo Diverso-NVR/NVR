@@ -98,7 +98,7 @@ def stop(room_index, building):
     for i in range(1, 7):
         try:
             upload('../vids/result-' + str(i) + "-" + records[building][room_index] + ".mp4",
-                   rooms[building][room_index])
+                   rooms[building][room_index]["auditorium"])
         except Exception:
             pass
 
