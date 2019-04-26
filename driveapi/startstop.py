@@ -77,8 +77,7 @@ def start(room_index, sound_type, building):
             processes[building][room_index].append(cam)
 
         process = subprocess.Popen("ffmpeg -i rtsp://192.168.15.45 -y -c:v copy " +
-                                   "-an -f mp4 ../vids/" +
-                                   str(i) + "-" +
+                                   "-an -f mp4 ../vids/1-" +
                                    records[building][room_index] + ".mp4",
                                    shell=True, preexec_fn=os.setsid)
         processes[building][room_index].append(process)
