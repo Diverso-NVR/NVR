@@ -34,7 +34,11 @@ for building in data:
     processes[building] = {}
     records[building] = {}
     for room in data[building]:
-        rooms[building][str(room['id'])] = room['auditorium']
+        rooms[building][str(room['id'])] = {"auditorium": room['auditorium']}
+        rooms[building][str(room['id'])]['encSound'] = room["encSound"]
+        rooms[building][str(room['id'])]['camSound'] = room["camSound"]
+        rooms[building][str(room['id'])]['encVid'] = room["encVid"]
+        rooms[building][str(room['id'])]['camVid'] = room["camVid"]
 
 
 def start(room_index, sound_type, building):
@@ -43,9 +47,11 @@ def start(room_index, sound_type, building):
     curr_time = datetime.datetime.now().time()
     formatted_time = str(curr_time.hour) + ':' + str(curr_time.minute)
     records[building][room_index] = "{0}-{1}-{2}-{3}-{4}-{5}".format(
-        today.year, today.month, today.day, formatted_time, rooms[building][room_index], "HSE")
+        today.year, today.month, today.day, formatted_time, rooms[building][room_index]["auditorium"], "HSE")
 
-    if rooms[building][room_index] == '513':
+    # TODO add enc, cam vids sounds
+
+    if rooms[building][room_index]["auditorium"] == '513':
         enc = subprocess.Popen("ffmpeg -i rtsp://192.168.15.56/main -y -c:a copy -vn " +
                                "-f mp4 ../vids/sound-source-" +
                                records[building][room_index] + ".mp3",
