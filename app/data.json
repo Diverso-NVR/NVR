@@ -8,10 +8,10 @@
       "timestamp": 0,
       "soundType": "enc",
 
-      "encSound": [],
-      "camSound": [],
-      "encVid": [],
-      "camVid": [],
+      "encSound": ["11/main"],
+      "camSound": ["12"],
+      "encVid": ["11/main"],
+      "camVid": ["12", "13", "14"],
 
       "drive": "https://drive.google.com/drive/u/1/folders/1UsoGpzf_Nui6Zs1kOGOdwctHJpVBP-Ru",
       "calendarAPI": "auditory.ru_rtkt64ce54bpi1dv9qid8okhkc@group.calendar.google.com",
@@ -25,10 +25,10 @@
       "timestamp": 0,
       "soundType": "enc",
 
-      "encSound": [],
-      "camSound": [],
-      "encVid": [],
-      "camVid": [],
+      "encSound": ["21/main"],
+      "camSound": ["22"],
+      "encVid": ["21/main"],
+      "camVid": ["22", "23", "24", "25", "26"],
 
       "drive": "https://drive.google.com/drive/u/1/folders/1o6_Pbsp4ZgFogda--o6Cz3o5u9kP69A_",
       "calendarAPI": "auditory.ru_jba0plcebui5gelt34pq8tp69s@group.calendar.google.com",
@@ -42,10 +42,10 @@
       "timestamp": 0,
       "soundType": "enc",
 
-      "encSound": [],
-      "camSound": [],
-      "encVid": [],
-      "camVid": [],
+      "encSound": ["31/main"],
+      "camSound": ["32"],
+      "encVid": ["31/main"],
+      "camVid": ["32", "33", "34"],
 
       "drive": "https://drive.google.com/drive/u/1/folders/1OXz4FuseEJaN3Xtm1cH0CP5Fgrg-GOMD",
       "calendarAPI": "auditory.ru_adjp0a1nn3mnnu8fju46vh260g@group.calendar.google.com",
@@ -78,10 +78,10 @@
       "timestamp": 0,
       "soundType": "enc",
 
-      "encSound": [],
+      "encSound": ["56"],
       "camSound": [],
       "encVid": [],
-      "camVid": [],
+      "camVid": ["42", "43"],
 
       "drive": "https://drive.google.com/drive/u/1/folders/1nYNAy--UhZHhkr0r0nx4Edhn8uoIGM3d",
       "calendarAPI": "auditory.ru_g4h95d1fk3tooennjhtck7fuoc@group.calendar.google.com",
