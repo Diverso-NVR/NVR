@@ -51,7 +51,7 @@ def start(room_index, sound_type, building):
 
     # TODO add enc, cam vids sounds
 
-    if rooms[building][room_index]["auditorium"] == '513':
+    if rooms[building][room_index]["auditorium"] == '520':
         enc = subprocess.Popen("ffmpeg -rtsp_transport tcp   -i rtsp://192.168.15.56/main -y -c:a copy -vn " +
                                "-f mp4 ../vids/sound-source-" +
                                records[building][room_index] + ".mp3",
