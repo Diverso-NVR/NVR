@@ -116,7 +116,7 @@ def stop(room_index, building):
     for process in processes[building][room_index]:
         os.killpg(process.pid, signal.SIGTERM)
     for i in range(1, 7):
-        add_sound("res" + str(i) + records[building]
+        add_sound(records[building]
                   [room_index] + str(i), records[building][room_index])
     for i in range(1, 7):
         try:
@@ -129,5 +129,5 @@ def stop(room_index, building):
 def add_sound(video_cam_num, audio_cam_num):
     proc = subprocess.Popen(["ffmpeg", "-i", "../vids/sound-source-" + audio_cam_num + ".aac", "-i",
                              "../vids/" + video_cam_num + ".mp4", "-y", "-shortest", "-c", "copy",
-                             "../vids/" + video_cam_num + ".mp4"], shell=False)
+                             "../vids/res" + str(i) + video_cam_num + ".mp4"], shell=False)
     proc.wait()
