@@ -44,9 +44,8 @@ def start(room_index, sound_type, building):
     processes[building][room_index] = []
     today = datetime.date.today()
     curr_time = datetime.datetime.now().time()
-    formatted_time = str(curr_time.hour) + ':' + str(curr_time.minute)
-    records[building][room_index] = "{0}-{1}-{2}-{3}-{4}-{5}".format(
-        today.year, today.month, today.day, formatted_time, rooms[building][room_index]["auditorium"], "HSE")
+    records[building][room_index] = "{0}-{1}-{2} {3}:{4} {5} ".format(
+        today.year, today.month, today.day, str(curr_time.hour), str(curr_time.minute), rooms[building][room_index]["auditorium"])
 
     # TODO add enc, cam vids sounds
 
@@ -59,8 +58,8 @@ def start(room_index, sound_type, building):
         for i in range(2, 4):
             process = subprocess.Popen("ffmpeg -i rtsp://192.168.15.4" + str(i) + " -y -c:v copy " +
                                        "-an -f mp4 ../vids/" +
-                                       str(i) + "-" +
-                                       records[building][room_index] + ".",
+                                       records[building][room_index] +
+                                       str(i) + ".mp4",
                                        shell=True, preexec_fn=os.setsid)
             processes[building][room_index].append(process)
         return
@@ -76,8 +75,9 @@ def start(room_index, sound_type, building):
             processes[building][room_index].append(cam)
 
         process = subprocess.Popen("ffmpeg -rtsp_transport http -i rtsp://192.168.15.45 -y -c:v copy " +
-                                   "-an -f mp4 ../vids/1-" +
-                                   records[building][room_index] + ".mp4",
+                                   "-an -f mp4 ../vids/" +
+                                   records[building][room_index] +
+                                   "1" + ".mp4",
                                    shell=True, preexec_fn=os.setsid)
         processes[building][room_index].append(process)
 
@@ -102,14 +102,13 @@ def start(room_index, sound_type, building):
         processes[building][room_index].append(cam)
 
     proc = subprocess.Popen("ffmpeg -rtsp_transport http -i rtsp://192.168." + network[building] + "." +
-                            room_index + "1/main -y -c:v copy -an -f mp4 ../vids/1-" +
-                            records[building][room_index] + ".mp4", shell=True, preexec_fn=os.setsid)
+                            room_index + "1/main -y -c:v copy -an -f mp4 ../vids/" +
+                            records[building][room_index] + "1" + ".mp4", shell=True, preexec_fn=os.setsid)
     processes[building][room_index].append(proc)
     for i in range(2, 7):
         process = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://admin:Supervisor@192.168." + network[building] + "." +
                                    room_index +
-                                   str(i) + " -y -c:v copy -an -f mp4 ../vids/"
-                                   + str(i) + "-" + records[building][room_index] + ".mp4", shell=True, preexec_fn=os.setsid)
+                                   str(i) + " -y -c:v copy -an -f mp4 ../vids/" + records[building][room_index] + str(i) + ".mp4", shell=True, preexec_fn=os.setsid)
         processes[building][room_index].append(process)
 
 
@@ -117,11 +116,11 @@ def stop(room_index, building):
     for process in processes[building][room_index]:
         os.killpg(process.pid, signal.SIGTERM)
     for i in range(1, 7):
-        add_sound(str(i) + "-" + records[building]
-                  [room_index], records[building][room_index])
+        add_sound(records[building]
+                  [room_index] + str(i), records[building][room_index])
     for i in range(1, 7):
         try:
-            upload('../vids/result-' + str(i) + "-" + records[building][room_index] + ".mp4",
+            upload("../vids/" + records[building][room_index] + str(i) + ".mp4",
                    rooms[building][room_index]["auditorium"])
         except Exception:
             pass
@@ -129,6 +128,6 @@ def stop(room_index, building):
 
 def add_sound(video_cam_num, audio_cam_num):
     proc = subprocess.Popen(["ffmpeg", "-i", "../vids/sound-source-" + audio_cam_num + ".aac", "-i",
-                             "../vids/" + video_cam_num + ".mp4", "-shortest", "-c", "copy",
-                             "../vids/result-" + video_cam_num + ".mp4"], shell=False)
+                             "../vids/" + video_cam_num + ".mp4", "-y", "-shortest", "-c", "copy",
+                             "../vids/" + video_cam_num + ".mp4"], shell=False)
     proc.wait()
