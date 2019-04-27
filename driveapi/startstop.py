@@ -120,7 +120,7 @@ def stop(room_index, building):
                   [room_index] + str(i), records[building][room_index])
     for i in range(1, 7):
         try:
-            upload("../vids/res" + records[building][room_index] + str(i) + ".mp4",
+            upload("../vids/" + records[building][room_index] + str(i) + ".mp4",
                    rooms[building][room_index]["auditorium"])
         except Exception:
             pass
@@ -129,5 +129,5 @@ def stop(room_index, building):
 def add_sound(video_cam_num, audio_cam_num):
     proc = subprocess.Popen(["ffmpeg", "-i", "../vids/sound-source-" + audio_cam_num + ".aac", "-i",
                              "../vids/" + video_cam_num + ".mp4", "-y", "-shortest", "-c", "copy",
-                             "../vids/res" + video_cam_num + ".mp4"], shell=False)
+                             "../vids/" + video_cam_num + ".mp4"], shell=False)
     proc.wait()
