@@ -51,16 +51,16 @@ def start(room_index, sound_type, building):
     # TODO add enc, cam vids sounds
 
     if rooms[building][room_index]["auditorium"] == '520':
-        enc = subprocess.Popen("ffmpeg -rtsp_transport tcp   -i rtsp://192.168.15.56/main -y -c:a copy -vn " +
+        enc = subprocess.Popen("ffmpeg -rtsp_transport http -i rtsp://192.168.15.56/main -y -c:a copy -vn " +
                                "-f mp4 ../vids/sound-source-" +
-                               records[building][room_index] + ".mp3",
+                               records[building][room_index] + ".aac",
                                shell=True, preexec_fn=os.setsid)
         processes[building][room_index].append(enc)
         for i in range(2, 4):
             process = subprocess.Popen("ffmpeg -i rtsp://192.168.15.4" + str(i) + " -y -c:v copy " +
                                        "-an -f mp4 ../vids/" +
                                        str(i) + "-" +
-                                       records[building][room_index] + ".mp4",
+                                       records[building][room_index] + ".",
                                        shell=True, preexec_fn=os.setsid)
             processes[building][room_index].append(process)
         return
@@ -68,11 +68,11 @@ def start(room_index, sound_type, building):
     if rooms[building][room_index]["auditorium"] == 'ПТС':
         if sound_type == "enc":
             enc = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168.15.11/main -y -c:a copy -vn -f mp4 ../vids/sound-source-"
-                                   + records[building][room_index] + ".mp3", shell=True, preexec_fn=os.setsid)
+                                   + records[building][room_index] + ".aac", shell=True, preexec_fn=os.setsid)
             processes[building][room_index].append(enc)
         else:
             cam = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168.15.52/live/av0 -y -c:a copy -vn -f mp4 ../vids/sound-source-"
-                                   + records[building][room_index] + ".mp3", shell=True, preexec_fn=os.setsid)
+                                   + records[building][room_index] + ".aac", shell=True, preexec_fn=os.setsid)
             processes[building][room_index].append(cam)
 
         process = subprocess.Popen("ffmpeg -rtsp_transport http -i rtsp://192.168.15.45 -y -c:v copy " +
@@ -91,14 +91,14 @@ def start(room_index, sound_type, building):
         return
 
     if sound_type == "enc":
-        enc = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168." + network[building] + "." +
+        enc = subprocess.Popen("ffmpeg -rtsp_transport http -i rtsp://192.168." + network[building] + "." +
                                room_index + "1/main -y -c:a copy -vn -f mp4 ../vids/sound-source-"
-                               + records[building][room_index] + ".mp3", shell=True, preexec_fn=os.setsid)
+                               + records[building][room_index] + ".aac", shell=True, preexec_fn=os.setsid)
         processes[building][room_index].append(enc)
     else:
         cam = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://admin:Supervisor@192.168." + network[building] + "." +
                                room_index + "2 -y -c:a copy -vn -f mp4 ../vids/sound-source-"
-                               + records[building][room_index] + ".mp3", shell=True, preexec_fn=os.setsid)
+                               + records[building][room_index] + ".aac", shell=True, preexec_fn=os.setsid)
         processes[building][room_index].append(cam)
 
     proc = subprocess.Popen("ffmpeg -rtsp_transport http -i rtsp://192.168." + network[building] + "." +
@@ -128,7 +128,7 @@ def stop(room_index, building):
 
 
 def add_sound(video_cam_num, audio_cam_num):
-    proc = subprocess.Popen(["ffmpeg", "-i", "../vids/sound-source-" + audio_cam_num + ".mp3", "-i",
+    proc = subprocess.Popen(["ffmpeg", "-i", "../vids/sound-source-" + audio_cam_num + ".aac", "-i",
                              "../vids/" + video_cam_num + ".mp4", "-shortest", "-c", "copy",
                              "../vids/result-" + video_cam_num + ".mp4"], shell=False)
     proc.wait()
