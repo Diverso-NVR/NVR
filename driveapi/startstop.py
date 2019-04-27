@@ -116,11 +116,11 @@ def stop(room_index, building):
     for process in processes[building][room_index]:
         os.killpg(process.pid, signal.SIGTERM)
     for i in range(1, 7):
-        add_sound(records[building]
+        add_sound("res" + str(i) + records[building]
                   [room_index] + str(i), records[building][room_index])
     for i in range(1, 7):
         try:
-            upload("../vids/" + records[building][room_index] + str(i) + ".mp4",
+            upload("../vids/res" + str(i) + records[building][room_index] + str(i) + ".mp4",
                    rooms[building][room_index]["auditorium"])
         except Exception:
             pass
