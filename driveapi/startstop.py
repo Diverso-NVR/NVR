@@ -45,7 +45,7 @@ def start(room_index, sound_type, building):
     processes[building][room_index] = []
     today = datetime.date.today()
     curr_time = datetime.datetime.now().time()
-    records[building][room_index] = "{0}-{1}-{2} {3}:{4} {5} ".format(
+    records[building][room_index] = "{0}-{1}-{2}_{3}:{4}_{5}_".format(
         today.year, today.month, today.day, str(curr_time.hour), str(curr_time.minute), rooms[building][room_index]["auditorium"])
 
     # TODO add enc, cam vids sounds
