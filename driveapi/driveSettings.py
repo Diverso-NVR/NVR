@@ -6,6 +6,16 @@ from googleapiclient.http import MediaFileUpload
 import json
 
 
+# TODO grant reading permissions for all when folder is created
+def createFolder(title):
+    file_metadata = {
+        'name': title,
+        'mimeType': 'application/vnd.google-apps.folder',
+    }
+    file = service.files().create(body=file_metadata,
+                                  fields='id').execute()
+
+
 # If modifying these scopes, delete the file token.json.
 SCOPES = 'https://www.googleapis.com/auth/drive'
 """
@@ -34,7 +44,8 @@ def upload(filename, room):
     Upload file "filename" on drive
     """
     media = MediaFileUpload(filename, mimetype="video/mp4", resumable=True)
-    fileData = {"name": filename.split('/')[2],
-                "parents": [rooms[room]]
-                }
+    fileData = {
+        "name": filename.split('/')[2],
+        "parents": [rooms[room]]
+    }
     file = service.files().create(body=fileData, media_body=media, fields='id').execute()

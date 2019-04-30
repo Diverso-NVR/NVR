@@ -1,10 +1,9 @@
 from __future__ import print_function
-import datetime
 from googleapiclient.discovery import build
 from httplib2 import Http
 from oauth2client import file, client, tools
 import json
-import time
+import datetime
 
 with open("app/data.json", 'r') as f:
     data = json.loads(f.read())
@@ -16,6 +15,7 @@ for building in data:
         rooms[room['auditorium']] = room['calendarAPI']
 
 
+# TODO add permission by building
 def addWriter(mail):
     rule = {
         'scope': {
@@ -29,6 +29,7 @@ def addWriter(mail):
             calendarId=rooms[room], body=rule).execute()
 
 
+# TODO when calendar is created, grant permission for it for users
 def createCalendar(title):
     calendar = {
         'summary': title,
@@ -51,6 +52,7 @@ def parseDate(date):
     return "{}-{}-{} {}:{}".format(year, month, day, hour, minute)
 
 
+# TODO return all events with new data structure, separated by building
 def getEvents(room):
     """
     Returns start and summary of the next 10 events on the "room" calendar.
@@ -78,5 +80,3 @@ if not creds or creds.invalid:
     flow = client.flow_from_clientsecrets('credentials.json', SCOPES)
     creds = tools.run_flow(flow, store)
 service = build('calendar', 'v3', http=creds.authorize(Http()))
-
-addWriter("dakudryavcev@gmail.com")

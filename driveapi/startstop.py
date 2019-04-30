@@ -38,6 +38,7 @@ for building in data:
         rooms[building][str(room['id'])]['vid'] = room["vid"]
 
 
+# TODO do smth with rtsp protocols'
 def start(room_index, sound_type, building):
     processes[building][room_index] = []
     today = datetime.date.today()
