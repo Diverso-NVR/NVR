@@ -55,8 +55,8 @@
       "timestamp": 0,
       "soundType": "enc",
 
-      "sound": { "enc": [], "cam": [] },
-      "vid": [],
+      "sound": { "enc": ["11/main"], "cam": ["12"] },
+      "vid": ["11/main", "12", "13", "14"],
 
       "drive": "https://drive.google.com/drive/u/1/folders/114O1I51q52wRAsbWuX2jV5MfL29Hq0d0",
       "calendarAPI": "auditory.ru_852uel7ga90vudirasmndcppss@group.calendar.google.com",
@@ -70,8 +70,8 @@
       "timestamp": 0,
       "soundType": "enc",
 
-      "sound": { "enc": ["56"], "cam": [] },
-      "vid": ["42", "43"],
+      "sound": { "enc": ["56/main"], "cam": [] },
+      "vid": ["42", "43", "56/main"],
 
       "drive": "https://drive.google.com/drive/u/1/folders/1nYNAy--UhZHhkr0r0nx4Edhn8uoIGM3d",
       "calendarAPI": "auditory.ru_g4h95d1fk3tooennjhtck7fuoc@group.calendar.google.com",
@@ -85,8 +85,8 @@
       "timestamp": 0,
       "soundType": "enc",
 
-      "sound": { "enc": ["56"], "cam": [] },
-      "vid": ["42", "43"],
+      "sound": { "enc": ["11/main"], "cam": ["52/live/av0"] },
+      "vid": ["45", "11/main", "52/live/av0"],
 
       "drive": "https://drive.google.com/drive/u/1/folders/1nYNAy--UhZHhkr0r0nx4Edhn8uoIGM3d",
       "calendarAPI": "auditory.ru_g4h95d1fk3tooennjhtck7fuoc@group.calendar.google.com",
