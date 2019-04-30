@@ -35,10 +35,8 @@ for building in data:
     records[building] = {}
     for room in data[building]:
         rooms[building][str(room['id'])] = {"auditorium": room['auditorium']}
-        rooms[building][str(room['id'])]['encSound'] = room["encSound"]
-        rooms[building][str(room['id'])]['camSound'] = room["camSound"]
-        rooms[building][str(room['id'])]['encVid'] = room["encVid"]
-        rooms[building][str(room['id'])]['camVid'] = room["camVid"]
+        rooms[building][str(room['id'])]['sound'] = room["sound"]
+        rooms[building][str(room['id'])]['vid'] = room["vid"]
 
 
 def start(room_index, sound_type, building):
@@ -56,8 +54,8 @@ def start(room_index, sound_type, building):
                                records[building][room_index] + ".aac",
                                shell=True, preexec_fn=os.setsid)
         processes[building][room_index].append(enc)
-        for cam in rooms[building][room_index]['camVid']:
-            process = subprocess.Popen("ffmpeg -i rtsp://192.168." + network[building] + "." + cam + " - y - c: v copy " +
+        for cam in rooms[building][room_index]['vid']:
+            process = subprocess.Popen("ffmpeg -i rtsp://192.168." + network[building] + "." + cam + " -y -c:v copy " +
                                        "-an -f mp4 ../vids/vid_" +
                                        records[building][room_index] +
                                        cam + ".mp4",
@@ -65,50 +63,39 @@ def start(room_index, sound_type, building):
             processes[building][room_index].append(process)
         return
 
-    if rooms[building][room_index]["auditorium"] == 'ПТС':
-        if sound_type == "enc":
-            enc = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168.15.11/main -y -c:a copy -vn -f mp4 ../vids/sound_"
-                                   + records[building][room_index] + ".aac", shell=True, preexec_fn=os.setsid)
-            processes[building][room_index].append(enc)
-        else:
-            cam = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168.15.52/live/av0 -y -c:a copy -vn -f mp4 ../vids/sound_"
-                                   + records[building][room_index] + ".aac", shell=True, preexec_fn=os.setsid)
-            processes[building][room_index].append(cam)
+    # TODO fix ПТС
+    # if rooms[building][room_index]["auditorium"] == 'ПТС':
+    #     if sound_type == "enc":
+    #         enc = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168.15.11/main -y -c:a copy -vn -f mp4 ../vids/sound_"
+    #                                + records[building][room_index] + ".aac", shell=True, preexec_fn=os.setsid)
+    #         processes[building][room_index].append(enc)
+    #     else:
+    #         cam = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://192.168.15.52/live/av0 -y -c:a copy -vn -f mp4 ../vids/sound_"
+    #                                + records[building][room_index] + ".aac", shell=True, preexec_fn=os.setsid)
+    #         processes[building][room_index].append(cam)
 
-        process = subprocess.Popen("ffmpeg -rtsp_transport http -i rtsp://192.168.15.45 -y -c:v copy " +
-                                   "-an -f mp4 ../vids/vid_" +
-                                   records[building][room_index] +
-                                   "1" + ".mp4",
-                                   shell=True, preexec_fn=os.setsid)
-        processes[building][room_index].append(process)
-
-        # for i in range(1, 4):
-        #     process = subprocess.Popen("ffmpeg -i rtsp://192.168.15.5" + str(i) + "/live/av0 -y -c:v copy " +
-        #                                "-an -f mp4 ../vids/" +
-        #                                str(i) + "-" +
-        #                                records[building][room_index] + ".mp4",
-        #                                shell=True, preexec_fn=os.setsid)
-        #     processes[building][room_index].append(process)
-        return
+    #     process = subprocess.Popen("ffmpeg -rtsp_transport http -i rtsp://192.168.15.45 -y -c:v copy " +
+    #                                "-an -f mp4 ../vids/vid_" +
+    #                                records[building][room_index] +
+    #                                "1" + ".mp4",
+    #                                shell=True, preexec_fn=os.setsid)
+    #     processes[building][room_index].append(process)
+    #     return
 
     if sound_type == "enc":
         enc = subprocess.Popen("ffmpeg -rtsp_transport http -i rtsp://192.168." + network[building] + "." +
-                               rooms[building][room_index]['encSound'] +
+                               rooms[building][room_index]['sound']['enc'][0] +
                                " -y -c:a copy -vn -f mp4 ../vids/sound_"
                                + records[building][room_index] + ".aac", shell=True, preexec_fn=os.setsid)
         processes[building][room_index].append(enc)
     else:
         cam = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://admin:Supervisor@192.168." + network[building] + "." +
-                               rooms[building][room_index]['camSound'] +
-                               "-y -c:a copy -vn -f mp4 ../vids/sound_"
+                               rooms[building][room_index]['sound']['cam'][0] +
+                               " -y -c:a copy -vn -f mp4 ../vids/sound_"
                                + records[building][room_index] + ".aac", shell=True, preexec_fn=os.setsid)
         processes[building][room_index].append(cam)
 
-    proc = subprocess.Popen("ffmpeg -rtsp_transport http -i rtsp://192.168." + network[building] + "." +
-                            rooms[building][room_index]['encVid'] + " -y -c:v copy -an -f mp4 ../vids/vid_" +
-                            records[building][room_index] + "1" + ".mp4", shell=True, preexec_fn=os.setsid)
-    processes[building][room_index].append(proc)
-    for cam in rooms[building][room_index]['camVid']:
+    for cam in rooms[building][room_index]['vid']:
         process = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://admin:Supervisor@192.168." + network[building] + "." +
                                    cam + " -y -c:v copy -an -f mp4 ../vids/vid_" +
                                    records[building][room_index] + cam + ".mp4", shell=True, preexec_fn=os.setsid)
@@ -118,10 +105,10 @@ def start(room_index, sound_type, building):
 def stop(room_index, building):
     for process in processes[building][room_index]:
         os.killpg(process.pid, signal.SIGTERM)
-    for cam in rooms[building][room_index]['camVid']:
+    for cam in rooms[building][room_index]['vid']:
         add_sound(records[building]
                   [room_index] + cam, records[building][room_index])
-    for cam in rooms[building][room_index]['camVid']:
+    for cam in rooms[building][room_index]['vid']:
         try:
             upload("../vids/" + records[building][room_index] + cam + ".mp4",
                    rooms[building][room_index]["auditorium"])
