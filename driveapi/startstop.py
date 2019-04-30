@@ -3,7 +3,6 @@ import subprocess
 import signal
 import os
 import json
-from threading import Thread
 
 
 from driveapi.driveSettings import upload
@@ -43,8 +42,12 @@ def start(room_index, sound_type, building):
     processes[building][room_index] = []
     today = datetime.date.today()
     curr_time = datetime.datetime.now().time()
+    hour = "0" + \
+        str(curr_time.hour) if curr_time.hour < 10 else str(curr_time.hour)
+    minute = "0" + \
+        str(curr_time.minute) if curr_time.minute < 10 else str(curr_time.minute)
     records[building][room_index] = "{0}-{1}-{2}_{3}:{4}_{5}_".format(
-        today.year, today.month, today.day, str(curr_time.hour), str(curr_time.minute), rooms[building][room_index]["auditorium"])
+        today.year, today.month, today.day, hour, minute, rooms[building][room_index]["auditorium"])
 
     if sound_type == "enc":
         enc = subprocess.Popen("ffmpeg -rtsp_transport http -i rtsp://192.168." + network[building] + "." +
