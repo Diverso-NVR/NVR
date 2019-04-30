@@ -4,6 +4,7 @@ from googleapiclient.discovery import build
 from httplib2 import Http
 from oauth2client import file, client, tools
 import json
+import time
 
 with open("app/data.json", 'r') as f:
     data = json.loads(f.read())
@@ -13,6 +14,29 @@ rooms = {}
 for building in data:
     for room in data[building]:
         rooms[room['auditorium']] = room['calendarAPI']
+
+
+def addWriter(mail):
+    rule = {
+        'scope': {
+            'type': 'user',
+            'value': mail,
+        },
+        'role': 'writer'
+    }
+    for room in rooms:
+        created_rule = service.acl().insert(
+            calendarId=rooms[room], body=rule).execute()
+
+
+def createCalendar(title):
+    calendar = {
+        'summary': title,
+        'timeZone': 'Europe/Moscow'
+    }
+
+    created_calendar = service.calendars().insert(body=calendar).execute()
+    return created_calendar["id"]
 
 
 def parseDate(date):
@@ -33,7 +57,7 @@ def getEvents(room):
     """
     now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
     events_result = service.events().list(calendarId=rooms[room], timeMin=now,
-                                          maxResults=10, singleEvents=True,
+                                          maxResults=2, singleEvents=True,
                                           orderBy='startTime').execute()
     events = events_result.get('items', [])
 
@@ -54,3 +78,5 @@ if not creds or creds.invalid:
     flow = client.flow_from_clientsecrets('credentials.json', SCOPES)
     creds = tools.run_flow(flow, store)
 service = build('calendar', 'v3', http=creds.authorize(Http()))
+
+addWriter("dakudryavcev@gmail.com")
