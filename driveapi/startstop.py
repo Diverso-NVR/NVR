@@ -107,10 +107,10 @@ def stop(room_index, building):
         os.killpg(process.pid, signal.SIGTERM)
     for cam in rooms[building][room_index]['vid']:
         add_sound(records[building]
-                  [room_index] + cam, records[building][room_index])
+                  [room_index] + cam.split('/')[0], records[building][room_index])
     for cam in rooms[building][room_index]['vid']:
         try:
-            upload("../vids/" + records[building][room_index] + cam + ".mp4",
+            upload("../vids/" + records[building][room_index] + cam.split('/')[0] + ".mp4",
                    rooms[building][room_index]["auditorium"])
         except Exception:
             pass
