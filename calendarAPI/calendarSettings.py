@@ -42,14 +42,27 @@ def calendarPermission(building, mail):
             calendarId=rooms[building][room], body=rule).execute()
 
 
-# TODO when calendar is created, grant permission for users
-def createCalendar(title):
+def createCalendar(building, title):
     calendar = {
         'summary': title,
         'timeZone': 'Europe/Moscow'
     }
 
     created_calendar = service.calendars().insert(body=calendar).execute()
+
+    calendars = service.calendarList().list(pageToken=None).execute()
+    copyPerm = ""
+    for item in calendars['items']:
+        if item['summary'].split('-')[0] == building:
+            copyPerm = item['id']
+            break
+    calendar = service.acl().list(
+        calendarId=copyPerm).execute()
+    for rule in calendar['items']:
+        if rule['role'] == 'writer':
+            created_rule = service.acl().insert(
+                calendarId=created_calendar["id"], body=rule).execute()
+
     return created_calendar["id"]  # calendarAPI link
 
 
