@@ -6,14 +6,10 @@ from googleapiclient.http import MediaFileUpload
 import json
 
 
-# If modifying these scopes, delete the file token.json.
 SCOPES = 'https://www.googleapis.com/auth/drive'
 """
 Setting up drive
 """
-# The file tokenDrive.json stores the user's access and refresh tokens, and is
-# created automatically when the authorization flow completes for the first
-# time.
 store = file.Storage('tokenDrive.json')
 creds = store.get()
 if not creds or creds.invalid:
@@ -57,6 +53,3 @@ def upload(filename, room):
         "parents": [rooms[room]]
     }
     file = service.files().create(body=fileData, media_body=media, fields='id').execute()
-
-
-createFolder("kek")
