@@ -81,7 +81,7 @@ def stop(room_index, building):
         res = "vid_"
     for cam in rooms[building][room_index]['vid']:
         try:
-            upload("../vids/" + records[building][room_index] + cam.split('/')[0] + ".mp4",
+            upload("../vids/" + res + records[building][room_index] + cam.split('/')[0] + ".mp4",
                    rooms[building][room_index]["auditorium"])
         except Exception:
             pass
