@@ -47,7 +47,7 @@ def start(room_index, sound_type, building):
         str(curr_time.hour) if curr_time.hour < 10 else str(curr_time.hour)
     minute = "0" + \
         str(curr_time.minute) if curr_time.minute < 10 else str(curr_time.minute)
-    records[building][room_index] = "{0}-{1}-{2}_{3}:{4}_{5}_".format(
+    records[building][room_index] = "{}-{}-{}_{}:{}_{}_".format(
         today.year, today.month, today.day, hour, minute, rooms[building][room_index]["auditorium"])
 
     if sound_type == "enc":

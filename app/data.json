@@ -12,8 +12,7 @@
       "vid": ["11/main", "12", "13", "14"],
 
       "drive": "https://drive.google.com/drive/u/1/folders/1UsoGpzf_Nui6Zs1kOGOdwctHJpVBP-Ru",
-      "calendarAPI": "auditory.ru_rtkt64ce54bpi1dv9qid8okhkc@group.calendar.google.com",
-      "calendar": "https://calendar.google.com/calendar/b/1?cid=YXVkaXRvcnkucnVfcnRrdDY0Y2U1NGJwaTFkdjlxaWQ4b2toa2NAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ"
+      "calendar": "auditory.ru_rtkt64ce54bpi1dv9qid8okhkc@group.calendar.google.com"
     },
     {
       "id": 2,
@@ -27,8 +26,7 @@
       "vid": ["21/main", "22", "23", "24", "25", "26"],
 
       "drive": "https://drive.google.com/drive/u/1/folders/1o6_Pbsp4ZgFogda--o6Cz3o5u9kP69A_",
-      "calendarAPI": "auditory.ru_jba0plcebui5gelt34pq8tp69s@group.calendar.google.com",
-      "calendar": "https://calendar.google.com/calendar/b/1?cid=YXVkaXRvcnkucnVfamJhMHBsY2VidWk1Z2VsdDM0cHE4dHA2OXNAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ"
+      "calendar": "auditory.ru_jba0plcebui5gelt34pq8tp69s@group.calendar.google.com"
     },
     {
       "id": 3,
@@ -42,8 +40,7 @@
       "vid": ["31/main", "32", "33", "34", "35", "36"],
 
       "drive": "https://drive.google.com/drive/u/1/folders/1OXz4FuseEJaN3Xtm1cH0CP5Fgrg-GOMD",
-      "calendarAPI": "auditory.ru_adjp0a1nn3mnnu8fju46vh260g@group.calendar.google.com",
-      "calendar": "https://calendar.google.com/calendar/b/1?cid=YXVkaXRvcnkucnVfYWRqcDBhMW5uM21ubnU4Zmp1NDZ2aDI2MGdAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ"
+      "calendar": "auditory.ru_adjp0a1nn3mnnu8fju46vh260g@group.calendar.google.com"
     }
   ],
   "МИЭМ": [
@@ -59,8 +56,7 @@
       "vid": ["11/main", "12", "13", "14"],
 
       "drive": "https://drive.google.com/drive/u/1/folders/114O1I51q52wRAsbWuX2jV5MfL29Hq0d0",
-      "calendarAPI": "auditory.ru_852uel7ga90vudirasmndcppss@group.calendar.google.com",
-      "calendar": "https://calendar.google.com/calendar/b/1?cid=YXVkaXRvcnkucnVfODUydWVsN2dhOTB2dWRpcmFzbW5kY3Bwc3NAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ"
+      "calendar": "auditory.ru_852uel7ga90vudirasmndcppss@group.calendar.google.com"
     },
     {
       "id": 4,
@@ -74,8 +70,7 @@
       "vid": ["42", "43", "56/main"],
 
       "drive": "https://drive.google.com/drive/u/1/folders/1nYNAy--UhZHhkr0r0nx4Edhn8uoIGM3d",
-      "calendarAPI": "auditory.ru_g4h95d1fk3tooennjhtck7fuoc@group.calendar.google.com",
-      "calendar": "https://calendar.google.com/calendar/b/1?cid=YXVkaXRvcnkucnVfZzRoOTVkMWZrM3Rvb2VubmpodGNrN2Z1b2NAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ"
+      "calendar": "auditory.ru_g4h95d1fk3tooennjhtck7fuoc@group.calendar.google.com"
     },
     {
       "id": 2,
@@ -89,8 +84,7 @@
       "vid": ["45", "11/main", "52/live/av0"],
 
       "drive": "https://drive.google.com/drive/u/1/folders/1WzclOL8fJD2VyDRsUjkFL8xTT7uzJzdk",
-      "calendarAPI": "auditory.ru_5br67j87tk9avo0gegc4sap30o@group.calendar.google.com",
-      "calendar": "https://calendar.google.com/calendar/b/1?cid=YXVkaXRvcnkucnVfNWJyNjdqODd0azlhdm8wZ2VnYzRzYXAzMG9AZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ"
+      "calendar": "auditory.ru_5br67j87tk9avo0gegc4sap30o@group.calendar.google.com"
     }
   ]
 }

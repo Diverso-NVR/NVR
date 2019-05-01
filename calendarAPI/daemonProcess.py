@@ -22,7 +22,7 @@ def events():
     for building in rooms:
         for room in rooms[building]:
             try:
-                e = getEvents(room["room"])
+                e = getEvents(building, room["room"])
                 room["event"] = e[0]
             except Exception:
                 room["event"] = {}
