@@ -77,7 +77,7 @@ def stop(room_index, building):
         add_sound(records[building]
                   [room_index] + cam.split('/')[0], records[building][room_index])
     res = ""
-    if not os.path.exists("../vids/sound_" + records[building][room_index]):
+    if not os.path.exists("../vids/sound_" + records[building][room_index] + ".aac"):
         res = "vid_"
     for cam in rooms[building][room_index]['vid']:
         try:
