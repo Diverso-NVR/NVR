@@ -6,28 +6,6 @@ from googleapiclient.http import MediaFileUpload
 import json
 
 
-# TODO grant reading permissions for all when folder is created
-def createFolder(title):
-    file_metadata = {
-        'name': title,
-        'mimeType': 'application/vnd.google-apps.folder',
-    }
-    file = service.files().create(body=file_metadata,
-                                  fields='id').execute()
-
-
-def upload(filename, room):
-    """
-    Upload file "filename" on drive
-    """
-    media = MediaFileUpload(filename, mimetype="video/mp4", resumable=True)
-    fileData = {
-        "name": filename.split('/')[2],
-        "parents": [rooms[room]]
-    }
-    file = service.files().create(body=fileData, media_body=media, fields='id').execute()
-
-
 # If modifying these scopes, delete the file token.json.
 SCOPES = 'https://www.googleapis.com/auth/drive'
 """
@@ -49,3 +27,36 @@ rooms = {}
 for building in data:
     for room in data[building]:
         rooms[room['auditorium']] = room['drive'].split('/')[-1]
+
+
+def createFolder(title):
+    file_metadata = {
+        'name': title,
+        'mimeType': 'application/vnd.google-apps.folder',
+    }
+    file = service.files().create(body=file_metadata,
+                                  fields='id').execute()
+
+    new_perm = {
+        'type': 'anyone',
+        'role': 'reader'
+    }
+
+    service.permissions().create(fileId=file['id'], body=new_perm).execute()
+
+    return "https://drive.google.com/drive/u/1/folders/" + file['id']
+
+
+def upload(filename, room):
+    """
+    Upload file "filename" on drive
+    """
+    media = MediaFileUpload(filename, mimetype="video/mp4", resumable=True)
+    fileData = {
+        "name": filename.split('/')[2],
+        "parents": [rooms[room]]
+    }
+    file = service.files().create(body=fileData, media_body=media, fields='id').execute()
+
+
+createFolder("kek")
