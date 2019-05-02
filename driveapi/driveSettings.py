@@ -25,9 +25,9 @@ for building in data:
         rooms[room['auditorium']] = room['drive'].split('/')[-1]
 
 
-def createFolder(title):
+def createFolder(building, room):
     folder_metadata = {
-        'name': title,
+        'name': building + '-' + room,
         'mimeType': 'application/vnd.google-apps.folder',
     }
     folder = service.files().create(body=folder_metadata,
@@ -39,7 +39,6 @@ def createFolder(title):
     }
 
     service.permissions().create(fileId=folder['id'], body=new_perm).execute()
-    print(folder['id'])
     return "https://drive.google.com/drive/u/1/folders/" + folder['id']
 
 

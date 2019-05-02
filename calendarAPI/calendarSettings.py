@@ -42,13 +42,24 @@ def givePermissions(building, mail):
             calendarId=rooms[building][room], body=rule).execute()
 
 
-def createCalendar(building, title):
+# def deletePermissions(building, mail):
+#     calendars = service.calendarList().list(pageToken=None).execute()
+#     copyPerm = ""
+#     for item in calendars['items']:
+#         if item['summary'].split('-')[0] == building:
+#             copyPerm = item['id']
+#             break
+#     calendar = service.acl().list(
+#         calendarId=copyPerm).execute()
+
+#     # service.acl().delete(calendarId='primary', ruleId='ruleId').execute()
+
+
+def createCalendar(building, room):
     calendar = {
-        'summary': title,
+        'summary': building + "-" + room,
         'timeZone': 'Europe/Moscow'
     }
-
-    created_calendar = service.calendars().insert(body=calendar).execute()
 
     calendars = service.calendarList().list(pageToken=None).execute()
     copyPerm = ""
@@ -58,9 +69,12 @@ def createCalendar(building, title):
             break
     calendar = service.acl().list(
         calendarId=copyPerm).execute()
+
+    created_calendar = service.calendars().insert(body=calendar).execute()
+
     for rule in calendar['items']:
         if rule['role'] == 'writer':
-            created_rule = service.acl().insert(
+            new_rule = service.acl().insert(
                 calendarId=created_calendar["id"], body=rule).execute()
 
     return created_calendar["id"]  # calendarAPI link

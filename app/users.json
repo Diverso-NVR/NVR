@@ -1,6 +1,16 @@
 {
   "users": [
-    { "login": "fcmd", "password": "hitra", "building": "fcmd" },
-    { "login": "miem", "password": "tal34", "building": "miem" }
+    {
+      "login": "fcmd",
+      "password": "hitra",
+      "building": "fcmd",
+      "permission": "admin"
+    },
+    {
+      "login": "miem",
+      "password": "tal34",
+      "building": "miem",
+      "permission": "admin"
+    }
   ]
 }
