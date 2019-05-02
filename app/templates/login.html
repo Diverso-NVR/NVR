@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
   <head>
     <meta charset="UTF-8" />
     <title>NVR</title>
@@ -65,6 +65,9 @@
             <div class="ui fluid large black submit button" id="loginBtn">
               Войти
             </div>
+            <div class="ui fluid large gray submit button" id="signUpBtn">
+              Регистрация
+            </div>
           </div>
 
           <div class="ui negative message" id="error" style="display:none">
@@ -88,6 +91,11 @@
               return;
             }
           $("#error").css("display", "block");
+        });
+      });
+      $("#signUpBtn").click(() => {
+        $.ajax("/signup").done(data => {
+          $("body").html(data);
         });
       });
     </script>

@@ -37,6 +37,27 @@ def users():
     return jsonify(users)
 
 
+@app.route('/signup', methods=["GET"])
+def signup():
+    return render_template('signup.html')
+
+
+@app.route('/newuser/<login>/<password>/<building>/<permissions>', methods=["GET", "POST"])
+def newUser(login, password, building, permissions):
+    new_user = {
+        'login': login,
+        'password': password,
+        'building': building,
+        'permissions': permissions
+    }
+    with open('app/newUsers.json', 'r') as f:
+        users = json.loads(f.read())
+    users['users'].append(new_user)
+    with open('app/newUsers.json', 'w') as f:
+        json.dump(users, f)
+    return ""
+
+
 @app.route('/status', methods=['GET'])
 def status():
     return jsonify(data)

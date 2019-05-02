@@ -28,3 +28,7 @@ main {
 th {
   text-align: center;
 }
+.ui.black.button,
+.ui.black.buttons .button {
+  margin: 10px 0;
+}
