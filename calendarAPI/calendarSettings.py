@@ -28,7 +28,7 @@ for building in data:
         rooms[building][room['auditorium']] = room['calendar']
 
 
-def calendarPermission(building, mail):
+def givePermissions(building, mail):
     rule = {
         'scope': {
             'type': 'user',
@@ -64,6 +64,10 @@ def createCalendar(building, title):
                 calendarId=created_calendar["id"], body=rule).execute()
 
     return created_calendar["id"]  # calendarAPI link
+
+
+def deleteCalendar(calendar_id):
+    service.calendars().delete(calendarId=calendar_id).execute()
 
 
 def parseDate(date):

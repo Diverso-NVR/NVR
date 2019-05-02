@@ -26,21 +26,25 @@ for building in data:
 
 
 def createFolder(title):
-    file_metadata = {
+    folder_metadata = {
         'name': title,
         'mimeType': 'application/vnd.google-apps.folder',
     }
-    file = service.files().create(body=file_metadata,
-                                  fields='id').execute()
+    folder = service.files().create(body=folder_metadata,
+                                    fields='id').execute()
 
     new_perm = {
         'type': 'anyone',
         'role': 'reader'
     }
 
-    service.permissions().create(fileId=file['id'], body=new_perm).execute()
+    service.permissions().create(fileId=folder['id'], body=new_perm).execute()
+    print(folder['id'])
+    return "https://drive.google.com/drive/u/1/folders/" + folder['id']
 
-    return "https://drive.google.com/drive/u/1/folders/" + file['id']
+
+def deleteFolder(folder_id):
+    service.files().delete(fileId=folder_id).execute()
 
 
 def upload(filename, room):
