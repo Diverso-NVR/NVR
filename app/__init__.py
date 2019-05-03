@@ -20,8 +20,10 @@ def load_main_page():
     return render_template('login.html')
 
 
-@app.route('/fcmd', methods=['GET', "POST"])
-def load_fcmd():
+@app.route('/fcmd/<user>', methods=['GET', "POST"])
+def load_fcmd(user):
+    if user == 'admin':
+        return render_template('fcmdAdmin.html')
     return render_template('fcmd.html')
 
 
@@ -30,8 +32,10 @@ def load_reqFcmd():
     return render_template('requestsFcmd.html')
 
 
-@app.route('/miem', methods=['GET', "POST"])
-def load_miem():
+@app.route('/miem/<user>', methods=['GET', "POST"])
+def load_miem(user):
+    if user == 'admin':
+        return render_template('miemAdmin.html')
     return render_template('miem.html')
 
 

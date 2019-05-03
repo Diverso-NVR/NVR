@@ -43,7 +43,7 @@
 
   <script>
     $("#tableBtn").click(() => {
-      $.ajax("/fcmd").done(data => {
+      $.ajax("/fcmd/admin").done(data => {
         $("body").html(data);
       });
     });

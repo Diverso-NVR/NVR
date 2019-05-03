@@ -7,6 +7,7 @@
       <div class="ui inverted menu">
         <h4 class="item">МИЭМ</h4>
       </div>
+      <a class="right aligned item" id="adminBtn"><i class="user icon"></i></a>
     </div>
   </header>
 
@@ -95,6 +96,12 @@
   </main>
 
   <script>
+    $("#adminBtn").click(() => {
+      $.ajax("/requestsMiem").done(data => {
+        $("body").html(data);
+      });
+    });
+
     new Vue({
       el: "#app",
       data: () => ({

@@ -1,0 +1,241 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Add source</title>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"
+      integrity="sha256-mpnrJ5DpEZZkwkE1ZgkEQQJW/46CSEh/STrZKOB/qoM="
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"
+      integrity="sha256-9mbkOfVho3ZPXfM7W8sV2SndrGDuh7wuyLjtsWeTI1Q="
+      crossorigin="anonymous"
+    />
+    <style>
+      .ui.form {
+        font-family: "Lato", "Helvetica Neue", Arial, Helvetica, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="ui center aligned page grid">
+      <div class="eight wide column">
+        <form class="ui form adding" style="padding-top: 10px;">
+          <h3 class="ui dividing header">Введите данные</h3>
+          <div class="two fields">
+            <div class="field">
+              <label>Добавление источника</label>
+              <div class="inline field">
+                <label>Название</label>
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Название источника"
+                />
+              </div>
+              <div class="inline field">
+                <label>URL потока</label>
+                <input type="text" name="streaming" placeholder="URL" />
+              </div>
+              <div class="field" style="padding-top: 10px;">
+                <div class="ui form type_source">
+                  <div class="inline fields">
+                    <label style="padding-right: 30px;">Тип:</label>
+                    <div class="field">
+                      <div class="ui checkbox">
+                        <input type="radio" name="camera" />
+                        <label>Камера</label>
+                      </div>
+                    </div>
+                    <div class="field">
+                      <div class="ui checkbox">
+                        <input type="radio" name="enc" />
+                        <label>Кодер</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="field">
+                <div class="ui form sound">
+                  <div class="inline fields">
+                    <label style="padding-right: 25px;">Звук:</label>
+                    <div class="field">
+                      <div class="ui checkbox">
+                        <input type="radio" name="sound_yes" />
+                        <label>Да</label>
+                      </div>
+                    </div>
+                    <div class="field">
+                      <div class="ui checkbox">
+                        <input type="radio" name="sound_no" />
+                        <label>Нет</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="field">
+                <div class="ui form tracking">
+                  <div class="inline fields">
+                    <label>Трекинг:</label>
+                    <div class="field">
+                      <div class="ui checkbox">
+                        <input type="radio" name="track_yes" />
+                        <label>Да</label>
+                      </div>
+                    </div>
+                    <div class="field">
+                      <div class="ui checkbox">
+                        <input type="radio" name="track_no" />
+                        <label>Нет</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Добавление комнаты</label>
+              <div class="inline field">
+                <label>Название</label>
+                <input
+                  type="text"
+                  name="auditorium"
+                  placeholder="Название комнаты"
+                />
+              </div>
+              <div class="inline field">
+                <label>Корпус</label>
+                <input
+                  type="text"
+                  name="building"
+                  placeholder="Название корпуса"
+                />
+              </div>
+            </div>
+          </div>
+          <button
+            class="ui button"
+            type="button"
+            id="submit"
+            onclick="addSource()"
+          >
+            Добавить источник
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="ui center aligned page grid">
+      <div class="column" style="padding-top: 0;">
+        <div
+          class="ui horizontal divider"
+          style="font-family: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;"
+        >
+          Редактирование источников
+        </div>
+        <div class="ui form">
+          <div class="two fields">
+            <div class="field">
+              <label>Источники</label>
+              <div class="field">
+                <table class="ui celled table">
+                  <thead>
+                    <tr>
+                      <th>Название</th>
+                      <th>IP</th>
+                      <th>Аудио</th>
+                      <th>Звук</th>
+                      <th>Тип</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td data-label="Name">-</td>
+                      <td data-label="ip">-</td>
+                      <td data-label="audio">-</td>
+                      <td data-label="sound">-</td>
+                      <td data-label="type">-</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="field">
+              <label>Комнаты</label>
+              <div class="field">
+                <table class="ui celled table">
+                  <thead>
+                    <tr>
+                      <th>Комната</th>
+                      <th>Источники</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td data-label="Num">-</td>
+                      <td data-label="sources">-</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function addSource() {
+        let $form;
+        $form = $("form.adding");
+        const allFields = $form.form("get values");
+
+        var arr = allFields;
+        let soundType = "";
+        if (arr.enc != false) arr.soundType = "enc";
+        else arr.soundType = "camera";
+
+        delete arr.camera;
+        delete arr.enc;
+
+        let sound = false;
+        if (arr.sound_yes != false) arr.sound = true;
+        else arr.sound = false;
+        delete arr.sound_no;
+        delete arr.sound_yes;
+
+        let tracking = false;
+        if (arr.track_yes != false) arr.tracking = true;
+        else arr.tracking = false;
+        delete arr.track_no;
+        delete arr.track_yes;
+
+        dataToJson(arr);
+      }
+
+      function dataToJson(arr) {
+        // let obj = JSON.stringify(arr);
+        $.ajax({
+          url: "test.json",
+          type: "POST",
+          dataType: "json",
+          data: arr,
+          success: function(response) {
+            result = $.parseJSON(response);
+            $("#result_form").html("ok");
+          },
+          error: function(response) {
+            console.log("Ошибка. Данные не отправлены.");
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

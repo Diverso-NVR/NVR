@@ -43,7 +43,7 @@
 
   <script>
     $("#tableBtn").click(() => {
-      $.ajax("/miem").done(data => {
+      $.ajax("/miem/admin").done(data => {
         $("body").html(data);
       });
     });
