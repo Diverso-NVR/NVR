@@ -1,0 +1,82 @@
+<body>
+  <header>
+    <div
+      class="ui borderless inverted menu"
+      style="width:90vw; margin: 0 auto;"
+    >
+      <div class="ui inverted menu">
+        <h4 class="item">ФКМД</h4>
+      </div>
+      <a class="right aligned item" id="tableBtn"><i class="table icon"></i></a>
+    </div>
+  </header>
+
+  <main id="app" class="ui container" style="width: 75vw;">
+    <table class="ui celled striped center table" style="text-align:center">
+      <thead>
+        <tr>
+          <th>Пользователь</th>
+          <th>Доступ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="user in users">
+          <td>[[ user.login ]] - [[user.building]]</td>
+          <td>
+            <button
+              class="ui positive button"
+              @click.prevent="addUser(user.login)"
+            >
+              <i class="user plus icon"></i>
+            </button>
+            <button
+              class="ui negative button"
+              @click.prevent="deleteUser(user.login)"
+            >
+              <i class="user times icon"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </main>
+
+  <script>
+    $("#tableBtn").click(() => {
+      $.ajax("/fcmd").done(data => {
+        $("body").html(data);
+      });
+    });
+    new Vue({
+      el: "#app",
+      data: () => ({
+        users: []
+      }),
+      delimiters: ["[[", "]]"],
+      methods: {
+        addUser(mail) {
+          axios.post("/addUser/" + mail);
+        },
+        deleteUser(mail) {
+          axios.post("/deleteUser/" + mail);
+        }
+      },
+      created() {
+        axios.get("/reqUsers").then(res => {
+          res.data["users"].forEach(user => {
+            if (user.building === "fcmd")
+              this.users.push(
+                Object.assign(
+                  {
+                    login: "",
+                    building: ""
+                  },
+                  user
+                )
+              );
+          });
+        });
+      }
+    });
+  </script>
+</body>

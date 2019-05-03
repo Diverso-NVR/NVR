@@ -1,5 +1,4 @@
 <body>
-  <!-- 767px > -- жмыкает -->
   <header>
     <div
       class="ui borderless inverted menu"
@@ -8,12 +7,12 @@
       <div class="ui inverted menu">
         <h4 class="item">МИЭМ</h4>
       </div>
-      <a class="right aligned item" id="login"><i class="user icon"></i></a>
+      <a class="right aligned item" id="adminBtn"><i class="user icon"></i></a>
     </div>
   </header>
 
   <main id="app" class="ui container" style="width: 90vw;">
-    <table class="ui celled striped center table" style="text-align:center;">
+    <table class="ui celled striped center table" style="text-align:center">
       <thead>
         <tr>
           <th>Аудитория</th>
@@ -26,10 +25,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr
-          v-for="camera in cameras"
-          :class="{disabled : camera.auditorium === '504'}"
-        >
+        <tr v-for="camera in cameras">
           <td>[[ camera.building ]]-[[camera.auditorium]]</td>
           <td>
             <div class="ui buttons">
@@ -100,7 +96,13 @@
   </main>
 
   <script>
-    let app = new Vue({
+    $("#adminBtn").click(() => {
+      $.ajax("/requestsMiem").done(data => {
+        $("body").html(data);
+      });
+    });
+
+    new Vue({
       el: "#app",
       data: () => ({
         cameras: []

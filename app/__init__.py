@@ -25,14 +25,31 @@ def load_fcmd():
     return render_template('fcmd.html')
 
 
+@app.route('/requestsFcmd', methods=['GET', "POST"])
+def load_reqFcmd():
+    return render_template('requestsFcmd.html')
+
+
 @app.route('/miem', methods=['GET', "POST"])
 def load_miem():
     return render_template('miem.html')
 
 
+@app.route('/requestsMiem', methods=['GET', "POST"])
+def load_reqMiem():
+    return render_template('requestsMiem.html')
+
+
 @app.route('/users', methods=['GET', "POST"])
 def users():
     with open('app/users.json', 'r') as f:
+        users = json.loads(f.read())
+    return jsonify(users)
+
+
+@app.route('/reqUsers', methods=['GET', "POST"])
+def reqUsers():
+    with open('app/newUsers.json', 'r') as f:
         users = json.loads(f.read())
     return jsonify(users)
 
@@ -53,6 +70,35 @@ def newUser(login, password, building, permissions):
     with open('app/newUsers.json', 'r') as f:
         users = json.loads(f.read())
     users['users'].append(new_user)
+    with open('app/newUsers.json', 'w') as f:
+        json.dump(users, f)
+    return ""
+
+
+@app.route('/addUser/<mail>', methods=["POST"])
+def addUser(mail):
+    with open('app/newUsers.json', 'r') as f:
+        newUsers = json.loads(f.read())
+    with open('app/users.json', 'r') as f:
+        users = json.loads(f.read())
+    for user in newUsers['users']:
+        if user['login'] == mail:
+            users['users'].append(user)
+            newUsers['users'].remove(user)
+    with open('app/newUsers.json', 'w') as f:
+        json.dump(newUsers, f)
+    with open('app/users.json', 'w') as f:
+        json.dump(users, f)
+    return ""
+
+
+@app.route('/deleteUser/<mail>', methods=["POST"])
+def deleteUser(mail):
+    with open('app/newUsers.json', 'r') as f:
+        users = json.loads(f.read())
+    for user in users['users']:
+        if user['login'] == mail:
+            users['users'].remove(user)
     with open('app/newUsers.json', 'w') as f:
         json.dump(users, f)
     return ""
