@@ -46,6 +46,7 @@ def record(num, building, startt, end):
 
 
 def run():
+    started = []
     while True:
         events()
         current_time = datetime.now()
@@ -57,11 +58,12 @@ def run():
                     'dateTime', room['event']['start'].get('date')))
                 end = parseDate(room['event']['end'].get(
                     'dateTime', room['event']['end'].get('date')))
-                if startt == datetime.strftime(current_time, "%Y-%m-%d %H:%M"):
+                if startt == datetime.strftime(current_time, "%Y-%m-%d %H:%M") and room['event'] not in started:
                     t = threading.Thread(target=record, args=(
                         room['id'], building, startt, end), daemon=True)
                     t.start()
-        time.sleep(60)
+                    started.append(room['event'])
+        time.sleep(1)
 
 
 if __name__ == '__main__':
