@@ -61,9 +61,7 @@ def run():
                     t = threading.Thread(target=record, args=(
                         room['id'], building, startt, end), daemon=True)
                     t.start()
-                    # TODO fix this time sleep
-                    time.sleep(62)
-            time.sleep(1)
+        time.sleep(60)
 
 
 if __name__ == '__main__':
