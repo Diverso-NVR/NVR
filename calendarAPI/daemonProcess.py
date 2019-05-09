@@ -41,8 +41,11 @@ def duration(date):
 
 def record(num, building, startt, end):
     startstop.start(str(num), "cam", building)
-    time.sleep(duration(end) - duration(startt))
-    startstop.stop(str(num), building)
+    while True:
+        current_time = datetime.now()
+        if end == datetime.strftime(current_time, "%Y-%m-%d %H:%M"):
+            startstop.stop(str(num), building)
+        time.sleep(1)
 
 
 def run():
