@@ -41,11 +41,8 @@ def duration(date):
 
 def record(num, building, startt, end):
     startstop.start(str(num), "cam", building)
-    while True:
-        current_time = datetime.now()
-        if end == datetime.strftime(current_time, "%Y-%m-%d %H:%M"):
-            startstop.stop(str(num), building)
-        time.sleep(1)
+    time.sleep(duration(end) - duration(startt))
+    startstop.stop(str(num), building)
 
 
 def run():
@@ -63,7 +60,7 @@ def run():
                     'dateTime', room['event']['end'].get('date')))
                 if room['event'] not in started and startt == datetime.strftime(current_time, "%Y-%m-%d %H:%M"):
                     t = threading.Thread(target=record, args=(
-                        room['id'], building, startt, end), daemon=False)
+                        room['id'], building, startt, end), daemon=True)
                     t.start()
                     started.append(room['event'])
         time.sleep(1)
