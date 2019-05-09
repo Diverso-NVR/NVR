@@ -1,20 +1,61 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Add source</title>
-
+    <title>Document</title>
+    <script src="form.js"></script>
     <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"
-      integrity="sha256-mpnrJ5DpEZZkwkE1ZgkEQQJW/46CSEh/STrZKOB/qoM="
+      src="https://code.jquery.com/jquery-3.1.1.min.js"
+      integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
       crossorigin="anonymous"
     ></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"
-      integrity="sha256-9mbkOfVho3ZPXfM7W8sV2SndrGDuh7wuyLjtsWeTI1Q="
-      crossorigin="anonymous"
+      type="text/css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/form.css"
     />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/form.js"></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/button.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/grid.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/icon.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/header.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/message.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/checkbox.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/divider.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/table.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/checkbox.js"></script>
+
     <style>
       .ui.form {
         font-family: "Lato", "Helvetica Neue", Arial, Helvetica, sans-serif;
@@ -217,24 +258,8 @@
         delete arr.track_no;
         delete arr.track_yes;
 
-        dataToJson(arr);
-      }
-
-      function dataToJson(arr) {
-        // let obj = JSON.stringify(arr);
-        $.ajax({
-          url: "test.json",
-          type: "POST",
-          dataType: "json",
-          data: arr,
-          success: function(response) {
-            result = $.parseJSON(response);
-            $("#result_form").html("ok");
-          },
-          error: function(response) {
-            console.log("Ошибка. Данные не отправлены.");
-          }
-        });
+        console.log(arr);
+        // dataToJson(arr);
       }
     </script>
   </body>

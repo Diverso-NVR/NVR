@@ -21,7 +21,7 @@
       </thead>
       <tbody>
         <tr v-for="user in users">
-          <td>[[ user.login ]] - [[user.building]]</td>
+          <td>[[ user.login ]]</td>
           <td>
             <button
               class="ui positive button"
@@ -56,9 +56,15 @@
       methods: {
         addUser(mail) {
           axios.post("/addUser/" + mail);
+          $(this)
+            .closest("tr")
+            .remove();
         },
         deleteUser(mail) {
           axios.post("/deleteUser/" + mail);
+          $(this)
+            .closest("tr")
+            .remove();
         }
       },
       created() {
