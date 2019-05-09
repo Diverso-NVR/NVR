@@ -4,6 +4,7 @@ from driveapi import startstop
 from calendarAPI.calendarSettings import getEvents, parseDate
 from multiprocessing import Process
 import json
+import random
 
 
 with open("app/data.json", 'r') as f:
@@ -41,7 +42,7 @@ def duration(date):
 
 def record(num, building, startt, end):
     startstop.start(str(num), "cam", building)
-    time.sleep(duration(end) - duration(startt))
+    time.sleep(duration(end) - duration(startt) + random.randint(1, 10))
     startstop.stop(str(num), building)
 
 
