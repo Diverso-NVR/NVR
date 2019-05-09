@@ -58,9 +58,9 @@ def run():
                     'dateTime', room['event']['start'].get('date')))
                 end = parseDate(room['event']['end'].get(
                     'dateTime', room['event']['end'].get('date')))
-                if startt == datetime.strftime(current_time, "%Y-%m-%d %H:%M") and room['event'] not in started:
+                if room['event'] not in started and startt == datetime.strftime(current_time, "%Y-%m-%d %H:%M"):
                     t = threading.Thread(target=record, args=(
-                        room['id'], building, startt, end), daemon=True)
+                        room['id'], building, startt, end), daemon=False)
                     t.start()
                     started.append(room['event'])
         time.sleep(1)
