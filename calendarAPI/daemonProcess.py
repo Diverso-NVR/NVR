@@ -2,7 +2,7 @@ import time
 from datetime import datetime
 from driveapi import startstop
 from calendarAPI.calendarSettings import getEvents, parseDate
-import threading
+from multiprocessing import Process
 import json
 
 
@@ -59,9 +59,9 @@ def run():
                 end = parseDate(room['event']['end'].get(
                     'dateTime', room['event']['end'].get('date')))
                 if room['event'] not in started and startt == datetime.strftime(current_time, "%Y-%m-%d %H:%M"):
-                    t = threading.Thread(target=record, args=(
-                        room['id'], building, startt, end), daemon=True)
-                    t.start()
+                    proc = Process(target=record, args=(
+                        room['id'], building, startt, end,))
+                    proc.start()
                     started.append(room['event'])
         time.sleep(1)
 
