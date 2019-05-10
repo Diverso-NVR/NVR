@@ -74,15 +74,15 @@ def start(room_index, sound_type, building):
 
 
 def stop(room_index, building):
+    for process in processes[building][room_index]:
+        os.killpg(process.pid, signal.SIGTERM)
+    for cam in rooms[building][room_index]['vid']:
+        add_sound(records[building]
+                  [room_index] + cam.split('/')[0], records[building][room_index])
+    res = ""
+    if not os.path.exists("../vids/sound_" + records[building][room_index] + ".aac"):
+        res = "vid_"
     with lock:
-        for process in processes[building][room_index]:
-            os.killpg(process.pid, signal.SIGTERM)
-        for cam in rooms[building][room_index]['vid']:
-            add_sound(records[building]
-                      [room_index] + cam.split('/')[0], records[building][room_index])
-        res = ""
-        if not os.path.exists("../vids/sound_" + records[building][room_index] + ".aac"):
-            res = "vid_"
         for cam in rooms[building][room_index]['vid']:
             try:
                 upload("../vids/" + res + records[building][room_index] + cam.split('/')[0] + ".mp4",
