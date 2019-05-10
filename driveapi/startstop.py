@@ -3,6 +3,7 @@ import subprocess
 import signal
 import os
 import json
+from threading import Lock
 
 
 from driveapi.driveSettings import upload
@@ -23,6 +24,8 @@ from driveapi.driveSettings import upload
 
 with open("app/data.json", 'r') as f:
     data = json.loads(f.read())
+
+lock = Lock()
 
 network = {"ФКМД": "11", "ФКН": "13", "МИЭМ": "15"}
 rooms = {}
@@ -71,20 +74,21 @@ def start(room_index, sound_type, building):
 
 
 def stop(room_index, building):
-    for process in processes[building][room_index]:
-        os.killpg(process.pid, signal.SIGTERM)
-    for cam in rooms[building][room_index]['vid']:
-        add_sound(records[building]
-                  [room_index] + cam.split('/')[0], records[building][room_index])
-    res = ""
-    if not os.path.exists("../vids/sound_" + records[building][room_index] + ".aac"):
-        res = "vid_"
-    for cam in rooms[building][room_index]['vid']:
-        try:
-            upload("../vids/" + res + records[building][room_index] + cam.split('/')[0] + ".mp4",
-                   rooms[building][room_index]["auditorium"])
-        except Exception:
-            pass
+    with lock:
+        for process in processes[building][room_index]:
+            os.killpg(process.pid, signal.SIGTERM)
+        for cam in rooms[building][room_index]['vid']:
+            add_sound(records[building]
+                      [room_index] + cam.split('/')[0], records[building][room_index])
+        res = ""
+        if not os.path.exists("../vids/sound_" + records[building][room_index] + ".aac"):
+            res = "vid_"
+        for cam in rooms[building][room_index]['vid']:
+            try:
+                upload("../vids/" + res + records[building][room_index] + cam.split('/')[0] + ".mp4",
+                       rooms[building][room_index]["auditorium"])
+            except Exception:
+                pass
 
 
 def add_sound(video_cam_num, audio_cam_num):
