@@ -79,25 +79,15 @@
 
     <script>
       $("#loginBtn").click(() => {
-        $.ajax("/users").done(data => {
-          for (user in data["users"])
-            if (
-              $("#login").val() === data["users"][user]["login"] &&
-              $("#password").val() === data["users"][user]["password"]
-            ) {
-              $.ajax(
-                "/" +
-                  data["users"][user]["building"] +
-                  "/" +
-                  data["users"][user]["permission"]
-              ).done(res => {
-                $("body").html(res);
-              });
-              return;
-            }
-          $("#error").css("display", "block");
-        });
+        $.ajax("/users/" + $("#login").val() + "/" + $("#password").val()).done(
+          data => {
+            console.log(data);
+            if (data == "False") $("#error").css("display", "block");
+            else $("body").html(data);
+          }
+        );
       });
+
       $("#signUpBtn").click(() => {
         $.ajax("/signup").done(data => {
           $("body").html(data);

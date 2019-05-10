@@ -1,8 +1,9 @@
 from driveapi.startstop import start, stop
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, redirect
 import time
 import threading
 import json
+import hashlib
 
 app = Flask(__name__)
 
@@ -44,11 +45,16 @@ def load_reqMiem():
     return render_template('requestsMiem.html')
 
 
-@app.route('/users', methods=['GET', "POST"])
-def users():
+@app.route('/users/<login>/<password>', methods=['GET', "POST"])
+def users(login, password):
     with open('app/users.json', 'r') as f:
         users = json.loads(f.read())
-    return jsonify(users)
+    hash_object = hashlib.sha256(password.encode('utf-8'))
+    password = hash_object.hexdigest()
+    for user in users['users']:
+        if user['login'] == login and user['password'] == password:
+            return redirect('/' + user['building'] + '/' + user['permission'])
+    return "False"
 
 
 @app.route('/reqUsers', methods=['GET', "POST"])
@@ -65,11 +71,13 @@ def signup():
 
 @app.route('/newuser/<login>/<password>/<building>/<permissions>', methods=["GET", "POST"])
 def newUser(login, password, building, permissions):
+    hash_object = hashlib.sha256(password.encode('utf-8'))
+    password = hash_object.hexdigest()
     new_user = {
         'login': login,
         'password': password,
         'building': building,
-        'permissions': permissions
+        'permission': permissions
     }
     with open('app/newUsers.json', 'r') as f:
         users = json.loads(f.read())
