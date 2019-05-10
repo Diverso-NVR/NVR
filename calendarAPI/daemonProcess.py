@@ -2,7 +2,7 @@ import time
 from datetime import datetime
 from driveapi import startstop
 from calendarAPI.calendarSettings import getEvents, parseDate
-from multiprocessing import Process
+from threading import Thread
 import json
 import random
 
@@ -44,7 +44,7 @@ def record(num, building, startt, end):
     startstop.start(str(num), "cam", building)
     time.sleep(duration(end) - duration(startt))
     startstop.stop(str(num), building)
-    time.sleep(random.randint(1, 20))
+    time.sleep(random.randint(0, 10))
 
 
 def run():
@@ -61,8 +61,8 @@ def run():
                 end = parseDate(room['event']['end'].get(
                     'dateTime', room['event']['end'].get('date')))
                 if room['event'] not in started and startt == datetime.strftime(current_time, "%Y-%m-%d %H:%M"):
-                    proc = Process(target=record, args=(
-                        room['id'], building, startt, end,))
+                    proc = Thread(target=record, args=(
+                        room['id'], building, startt, end), daemon=True)
                     proc.start()
                     started.append(room['event'])
         time.sleep(1)
