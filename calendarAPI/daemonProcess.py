@@ -41,8 +41,9 @@ def duration(date):
 
 
 def record(num, building, startt, end):
+    time.sleep(random.randint(0, 10))
     startstop.start(str(num), "cam", building)
-    time.sleep(duration(end) - duration(startt) + random.randint(0, 10))
+    time.sleep(duration(end) - duration(startt))
     startstop.stop(str(num), building)
 
 
