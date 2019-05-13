@@ -66,7 +66,7 @@
       "timestamp": 0,
       "soundType": "enc",
 
-      "sound": { "enc": ["56/main"], "cam": [] },
+      "sound": { "enc": ["56/main"], "cam": [""] },
       "vid": ["42", "43", "56/main"],
 
       "drive": "https://drive.google.com/drive/u/1/folders/1nYNAy--UhZHhkr0r0nx4Edhn8uoIGM3d",
