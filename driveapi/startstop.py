@@ -56,19 +56,19 @@ def start(room_index, sound_type, building):
     if sound_type == "enc":
         enc = subprocess.Popen("ffmpeg -rtsp_transport http -i rtsp://192.168." + network[building] + "." +
                                rooms[building][room_index]['sound']['enc'][0] +
-                               " -y -c:a copy -vn -f mp4 ../vids/sound_"
+                               " -y -b 3072k -c:a copy -vn -f mp4 ../vids/sound_"
                                + records[building][room_index] + ".aac", shell=True, preexec_fn=os.setsid)
         processes[building][room_index].append(enc)
     else:
         camera = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://admin:Supervisor@192.168." + network[building] + "." +
                                   rooms[building][room_index]['sound']['cam'][0] +
-                                  " -y -c:a copy -vn -f mp4 ../vids/sound_"
+                                  " -y -b 3072k -c:a copy -vn -f mp4 ../vids/sound_"
                                   + records[building][room_index] + ".aac", shell=True, preexec_fn=os.setsid)
         processes[building][room_index].append(camera)
 
     for cam in rooms[building][room_index]['vid']:
         process = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://admin:Supervisor@192.168." + network[building] + "." +
-                                   cam + " -y -c:v copy -an -f mp4 ../vids/vid_" +
+                                   cam + " -y -b 3072k -c:v copy -an -f mp4 ../vids/vid_" +
                                    records[building][room_index] + cam.split('/')[0] + ".mp4", shell=True, preexec_fn=os.setsid)
         processes[building][room_index].append(process)
 
