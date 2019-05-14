@@ -1,140 +1,139 @@
 {
-  "ФКМД": [
+  "\u0424\u041a\u041c\u0414": [
     {
       "id": 1,
-      "building": "ФКМД",
-      "auditorium": "П505",
+      "building": "\u0424\u041a\u041c\u0414",
+      "auditorium": "\u041f505",
       "status": "free",
       "timestamp": 0,
       "soundType": "enc",
-
       "mainCam": "",
       "track": [],
       "sound": { "enc": ["11/main"], "cam": ["12"] },
       "vid": ["11/main", "12", "13", "14"],
-      "name": ["кодер", "", "", ""],
-
+      "name": ["\u043a\u043e\u0434\u0435\u0440", "", "", ""],
       "drive": "https://drive.google.com/drive/u/1/folders/1UsoGpzf_Nui6Zs1kOGOdwctHJpVBP-Ru",
       "calendar": "auditory.ru_rtkt64ce54bpi1dv9qid8okhkc@group.calendar.google.com"
     },
     {
       "id": 2,
-      "building": "ФКМД",
-      "auditorium": "П500",
+      "building": "\u0424\u041a\u041c\u0414",
+      "auditorium": "\u041f500",
       "status": "free",
       "timestamp": 0,
       "soundType": "enc",
-
       "mainCam": "",
       "track": [],
       "sound": { "enc": ["21/main"], "cam": ["22"] },
       "vid": ["21/main", "22", "23", "24", "25", "26"],
-      "name": ["кодер", "", "", "", "", ""],
-
+      "name": ["\u043a\u043e\u0434\u0435\u0440", "", "", "", "", ""],
       "drive": "https://drive.google.com/drive/u/1/folders/1o6_Pbsp4ZgFogda--o6Cz3o5u9kP69A_",
       "calendar": "auditory.ru_jba0plcebui5gelt34pq8tp69s@group.calendar.google.com"
     },
     {
       "id": 3,
-      "building": "ФКМД",
-      "auditorium": "С401",
+      "building": "\u0424\u041a\u041c\u0414",
+      "auditorium": "\u0421401",
       "status": "free",
       "timestamp": 0,
       "soundType": "enc",
-
       "mainCam": "",
       "track": [],
       "sound": { "enc": ["31/main"], "cam": ["32"] },
       "vid": ["31/main", "32", "33", "34"],
-      "name": ["кодер", "", "", ""],
-
+      "name": ["\u043a\u043e\u0434\u0435\u0440", "", "", ""],
       "drive": "https://drive.google.com/drive/u/1/folders/1OXz4FuseEJaN3Xtm1cH0CP5Fgrg-GOMD",
       "calendar": "auditory.ru_adjp0a1nn3mnnu8fju46vh260g@group.calendar.google.com"
+    },
+    {
+      "id": 4,
+      "building": "\u0424\u041a\u041c\u0414",
+      "auditorium": "228",
+      "status": "free",
+      "timestamp": 0,
+      "soundType": "enc",
+      "mainCam": "",
+      "track": [],
+      "sound": { "enc": [], "cam": [] },
+      "vid": ["15"],
+      "name": ["kek"],
+      "drive": "",
+      "calendar": ""
     }
   ],
-  "МИЭМ": [
+  "\u041c\u0418\u042d\u041c": [
     {
       "id": 5,
-      "building": "МИЭМ",
+      "building": "\u041c\u0418\u042d\u041c",
       "auditorium": "504",
       "status": "free",
       "timestamp": 0,
       "soundType": "enc",
-
       "mainCam": "",
       "track": [],
       "sound": { "enc": ["11/main"], "cam": ["12"] },
       "vid": ["11/main", "12", "13", "14"],
-      "name": ["кодер", "", "", ""],
-
+      "name": ["\u043a\u043e\u0434\u0435\u0440", "", "", ""],
       "drive": "https://drive.google.com/drive/u/1/folders/114O1I51q52wRAsbWuX2jV5MfL29Hq0d0",
       "calendar": "auditory.ru_852uel7ga90vudirasmndcppss@group.calendar.google.com"
     },
     {
       "id": 4,
-      "building": "МИЭМ",
+      "building": "\u041c\u0418\u042d\u041c",
       "auditorium": "520",
       "status": "free",
       "timestamp": 0,
       "soundType": "enc",
-
       "mainCam": "",
       "track": [],
       "sound": { "enc": ["56/main"], "cam": [""] },
       "vid": ["42", "43", "56/main"],
-      "name": ["", "", "кодер"],
-
+      "name": ["", "", "\u043a\u043e\u0434\u0435\u0440"],
       "drive": "https://drive.google.com/drive/u/1/folders/1nYNAy--UhZHhkr0r0nx4Edhn8uoIGM3d",
       "calendar": "auditory.ru_g4h95d1fk3tooennjhtck7fuoc@group.calendar.google.com"
     },
     {
       "id": 1,
-      "building": "МИЭМ",
+      "building": "\u041c\u0418\u042d\u041c",
       "auditorium": "#1",
       "status": "free",
       "timestamp": 0,
       "soundType": "enc",
-
       "mainCam": "",
       "track": [],
       "sound": { "enc": ["11/main"], "cam": ["45"] },
       "vid": ["45", "11/main"],
-      "name": ["", "кодер"],
-
+      "name": ["", "\u043a\u043e\u0434\u0435\u0440"],
       "drive": "https://drive.google.com/drive/u/1/folders/1WzclOL8fJD2VyDRsUjkFL8xTT7uzJzdk",
       "calendar": "auditory.ru_5br67j87tk9avo0gegc4sap30o@group.calendar.google.com"
     },
     {
       "id": 2,
-      "building": "МИЭМ",
+      "building": "\u041c\u0418\u042d\u041c",
       "auditorium": "#2",
       "status": "free",
       "timestamp": 0,
       "soundType": "enc",
-
       "mainCam": "",
       "track": [],
       "sound": { "enc": ["56"], "cam": ["43"] },
       "vid": ["43", "56"],
-      "name": ["", "кодер"],
-
+      "name": ["", "\u043a\u043e\u0434\u0435\u0440"],
       "drive": "https://drive.google.com/drive/u/1/folders/1WzclOL8fJD2VyDRsUjkFL8xTT7uzJzdk",
       "calendar": "auditory.ru_5br67j87tk9avo0gegc4sap30o@group.calendar.google.com"
     },
     {
       "id": 3,
-      "building": "МИЭМ",
+      "building": "\u041c\u0418\u042d\u041c",
       "auditorium": "#3",
       "status": "free",
       "timestamp": 0,
       "soundType": "enc",
-
       "mainCam": "",
       "track": [],
       "sound": { "enc": [""], "cam": ["51/live/av0"] },
       "vid": ["52/live/av0", "51/live/av0"],
       "name": ["", ""],
-
       "drive": "https://drive.google.com/drive/u/1/folders/1WzclOL8fJD2VyDRsUjkFL8xTT7uzJzdk",
       "calendar": "auditory.ru_5br67j87tk9avo0gegc4sap30o@group.calendar.google.com"
     }

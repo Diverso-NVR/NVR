@@ -2,18 +2,12 @@
   <head>
     <meta charset="UTF-8" />
     <title>Document</title>
-    <script src="form.js"></script>
-    <script
-      src="https://code.jquery.com/jquery-3.1.1.min.js"
-      integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
-      crossorigin="anonymous"
-    ></script>
+
     <link
       rel="stylesheet"
       type="text/css"
       href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/form.css"
     />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/form.js"></script>
     <link
       rel="stylesheet"
       type="text/css"
@@ -54,7 +48,20 @@
       type="text/css"
       href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/table.css"
     />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/dropdown.css"
+    />
+
+    <script
+      src="https://code.jquery.com/jquery-3.1.1.min.js"
+      integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/form.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/checkbox.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/dropdown.js"></script>
 
     <style>
       .ui.form {
@@ -63,13 +70,13 @@
     </style>
   </head>
   <body>
-    <div class="ui center aligned page grid">
+    <div class="ui center aligned page grid" style="margin:auto">
       <div class="eight wide column">
         <form class="ui form adding" style="padding-top: 10px;">
           <h3 class="ui dividing header">Введите данные</h3>
           <div class="two fields">
             <div class="field">
-              <label>Добавление источника</label>
+              <label>Источник</label>
               <div class="inline field">
                 <label>Название</label>
                 <input
@@ -79,100 +86,71 @@
                 />
               </div>
               <div class="inline field">
-                <label>URL потока</label>
-                <input type="text" name="streaming" placeholder="URL" />
+                <label>IP потока</label>
+                <input type="text" name="ip" placeholder="IP" />
               </div>
               <div class="field" style="padding-top: 10px;">
-                <div class="ui form type_source">
-                  <div class="inline fields">
-                    <label style="padding-right: 30px;">Тип:</label>
-                    <div class="field">
-                      <div class="ui checkbox">
-                        <input type="radio" name="camera" />
-                        <label>Камера</label>
-                      </div>
-                    </div>
-                    <div class="field">
-                      <div class="ui checkbox">
-                        <input type="radio" name="enc" />
-                        <label>Кодер</label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="field">
-                <div class="ui form sound">
-                  <div class="inline fields">
-                    <label style="padding-right: 25px;">Звук:</label>
-                    <div class="field">
-                      <div class="ui checkbox">
-                        <input type="radio" name="sound_yes" />
-                        <label>Да</label>
-                      </div>
-                    </div>
-                    <div class="field">
-                      <div class="ui checkbox">
-                        <input type="radio" name="sound_no" />
-                        <label>Нет</label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="field">
-                <div class="ui form tracking">
-                  <div class="inline fields">
-                    <label>Трекинг:</label>
-                    <div class="field">
-                      <div class="ui checkbox">
-                        <input type="radio" name="track_yes" />
-                        <label>Да</label>
-                      </div>
-                    </div>
-                    <div class="field">
-                      <div class="ui checkbox">
-                        <input type="radio" name="track_no" />
-                        <label>Нет</label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <label>Тип источника</label>
+                <select class="ui fluid dropdown" name="soundType">
+                  <option value="enc">Кодер</option>
+                  <option value="cam">Камера</option>
+                  <option value="maincam">Главная камера</option>
+                </select>
               </div>
             </div>
 
             <div class="field">
-              <label>Добавление комнаты</label>
+              <label>Расположение</label>
               <div class="inline field">
-                <label>Название</label>
+                <label>Аудиория</label>
                 <input
                   type="text"
                   name="auditorium"
                   placeholder="Название комнаты"
                 />
               </div>
-              <div class="inline field">
+              <div class="field">
                 <label>Корпус</label>
-                <input
-                  type="text"
-                  name="building"
-                  placeholder="Название корпуса"
-                />
+                <select class="ui fluid dropdown" name="building">
+                  <option value="МИЭМ">МИЭМ</option>
+                  <option value="ФКМД">ФКМД</option>
+                  <option value="ФКН">ФКН</option>
+                </select>
+              </div>
+              <div class="field" style="padding-top: 40px;">
+                <div class="ui form">
+                  <div class="two inline fields">
+                    <div class="field">
+                      <div class="ui checkbox">
+                        <input type="checkbox" name="tracking" />
+                        <label>Трекинг</label>
+                      </div>
+                    </div>
+                    <div class="field">
+                      <div class="ui checkbox">
+                        <input type="checkbox" name="sound" />
+                        <label>Звук</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+
           <button
             class="ui button"
             type="button"
             id="submit"
             onclick="addSource()"
           >
-            Добавить источник
+            Добавить
           </button>
         </form>
       </div>
     </div>
 
+    <!-- Редактирование -->
     <div class="ui center aligned page grid">
       <div class="column" style="padding-top: 0;">
         <div
@@ -233,34 +211,32 @@
     </div>
 
     <script>
-      function addSource() {
+      $("#submit").click(() => {
         let $form;
         $form = $("form.adding");
         const allFields = $form.form("get values");
 
         var arr = allFields;
-        let soundType = "";
-        if (arr.enc != false) arr.soundType = "enc";
-        else arr.soundType = "camera";
-
-        delete arr.camera;
-        delete arr.enc;
-
-        let sound = false;
-        if (arr.sound_yes != false) arr.sound = true;
-        else arr.sound = false;
-        delete arr.sound_no;
-        delete arr.sound_yes;
-
-        let tracking = false;
-        if (arr.track_yes != false) arr.tracking = true;
-        else arr.tracking = false;
-        delete arr.track_no;
-        delete arr.track_yes;
-
+        if (arr.tracking == "on") arr.tracking = true;
+        if (arr.sound == "on") arr.sound = true;
         console.log(arr);
-        // dataToJson(arr);
-      }
+        $.post(
+          "/add-source/" +
+            arr.auditorium +
+            "/" +
+            arr.building +
+            "/" +
+            arr.ip +
+            "/" +
+            arr.name +
+            "/" +
+            arr.sound +
+            "/" +
+            arr.soundType +
+            "/" +
+            arr.tracking
+        );
+      });
     </script>
   </body>
 </html>

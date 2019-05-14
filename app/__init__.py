@@ -18,7 +18,7 @@ for building in data:
 
 @app.route('/')
 def load_main_page():
-    return render_template('login.html')
+    return render_template('addSource.html')
 
 
 @app.route('/fcmd/<user>', methods=['GET', "POST"])
@@ -113,6 +113,64 @@ def deleteUser(mail):
             users['users'].remove(user)
     with open('app/newUsers.json', 'w') as f:
         json.dump(users, f)
+    return ""
+
+
+@app.route('/add-source/<auditorium>/<building>/<ip>/<name>/<sound>/<soundType>/<tracking>', methods=["GET", "POST"])
+def addSource(auditorium, building, ip, name, sound, soundType, tracking):
+    id = 1
+    for room in data[building]:
+        if room['auditorium'] == auditorium:
+            if soundType == 'maincam':
+                room['mainCam'] = ip
+            if sound == 'true':
+                if soundType == 'maincam':
+                    room['sound']['cam'].append(ip)
+                else:
+                    room['sound'][soundType].append(ip)
+            if tracking == 'true':
+                room['track'].append(ip)
+            room['vid'].append(ip)
+            room['name'].append(name)
+
+            with open('app/test.json', 'w') as f:
+                json.dump(data, f)
+            return ""
+        id += 1
+
+    room = {
+        'id': id,
+        'building': building,
+        'auditorium': auditorium,
+        'status': 'free',
+        'timestamp': 0,
+        'soundType': 'enc',
+        'mainCam': "",
+        'track': [],
+        'sound': {'enc': [], 'cam': []},
+        'vid': [],
+        'name': [],
+        'drive': '',
+        'calendar': ''
+    }
+
+    if soundType == 'maincam':
+        room['mainCam'] = ip
+    if sound == 'true':
+        if soundType == 'maincam':
+            room['sound']['cam'].append(ip)
+        else:
+            room['sound'][soundType].append(ip)
+    if tracking == 'true':
+        room['track'].append(ip)
+    room['vid'].append(ip)
+    room['name'].append(name)
+
+    data[building].append(room)
+
+    with open('app/test.json', 'w') as f:
+        json.dump(data, f)
+
     return ""
 
 
