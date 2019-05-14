@@ -138,14 +138,12 @@
             </div>
           </div>
 
-          <button
-            class="ui button"
-            type="button"
-            id="submit"
-            onclick="addSource()"
-          >
+          <button class="ui button" type="button" id="submit">
             Добавить
           </button>
+          <div class="ui negative message" id="error" style="display:none">
+            Поля ввода должны быть заполнены
+          </div>
         </form>
       </div>
     </div>
@@ -217,9 +215,17 @@
         const allFields = $form.form("get values");
 
         var arr = allFields;
-        if (arr.tracking == "on") arr.tracking = true;
-        if (arr.sound == "on") arr.sound = true;
-        console.log(arr);
+        arr.tracking = arr.tracking == "on" ? "true" : "false";
+        arr.sound = arr.sound == "on" ? "true" : "false";
+        arr.ip = arr.ip.split("/").join("-");
+
+        for (el in arr) {
+          if (arr[el] == "") {
+            $("#error").css("display", "block");
+            return;
+          }
+        }
+        $("#error").css("display", "none");
         $.post(
           "/add-source/" +
             arr.auditorium +

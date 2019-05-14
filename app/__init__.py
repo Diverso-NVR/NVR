@@ -18,7 +18,7 @@ for building in data:
 
 @app.route('/')
 def load_main_page():
-    return render_template('addSource.html')
+    return render_template('login.html')
 
 
 @app.route('/fcmd/<user>', methods=['GET', "POST"])
@@ -119,6 +119,8 @@ def deleteUser(mail):
 @app.route('/add-source/<auditorium>/<building>/<ip>/<name>/<sound>/<soundType>/<tracking>', methods=["GET", "POST"])
 def addSource(auditorium, building, ip, name, sound, soundType, tracking):
     id = 1
+    ip = '/'.join(ip.split('-'))
+    print(ip)
     for room in data[building]:
         if room['auditorium'] == auditorium:
             if soundType == 'maincam':
