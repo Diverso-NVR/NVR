@@ -7,7 +7,14 @@
       <div class="ui inverted menu">
         <h4 class="item">ФКМД</h4>
       </div>
-      <a class="right aligned item" id="adminBtn"><i class="user icon"></i></a>
+      <div class="right menu">
+        <a class="right aligned item" id="addSourceBtn"
+          ><i class="plus icon"></i
+        ></a>
+        <a class="right aligned item" id="adminBtn"
+          ><i class="user icon"></i
+        ></a>
+      </div>
     </div>
   </header>
 
@@ -98,6 +105,12 @@
   <script>
     $("#adminBtn").click(() => {
       $.ajax("/requestsFcmd").done(data => {
+        $("body").html(data);
+      });
+    });
+
+    $("#addSourceBtn").click(() => {
+      $.ajax("/add-button").done(data => {
         $("body").html(data);
       });
     });

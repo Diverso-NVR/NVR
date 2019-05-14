@@ -27,6 +27,14 @@
       integrity="sha256-9mbkOfVho3ZPXfM7W8sV2SndrGDuh7wuyLjtsWeTI1Q="
       crossorigin="anonymous"
     />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/form.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/checkbox.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/dropdown.js"></script>
+    <style>
+      .field {
+        padding: 5px;
+      }
+    </style>
   </head>
   <body>
     <div
@@ -81,7 +89,6 @@
       $("#loginBtn").click(() => {
         $.ajax("/users/" + $("#login").val() + "/" + $("#password").val()).done(
           data => {
-            console.log(data);
             if (data == "False") $("#error").css("display", "block");
             else $("body").html(data);
           }

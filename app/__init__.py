@@ -116,6 +116,11 @@ def deleteUser(mail):
     return ""
 
 
+@app.route('/add-button', methods=["GET", "POST"])
+def addButton():
+    return render_template('addSource.html')
+
+
 @app.route('/add-source/<auditorium>/<building>/<ip>/<name>/<sound>/<soundType>/<tracking>', methods=["GET", "POST"])
 def addSource(auditorium, building, ip, name, sound, soundType, tracking):
     id = 1

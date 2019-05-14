@@ -32,3 +32,6 @@ th {
 .ui.black.buttons .button {
   margin: 10px 0;
 }
+.field {
+  padding: 5px;
+}

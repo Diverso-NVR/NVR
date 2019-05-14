@@ -1,248 +1,175 @@
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Document</title>
-
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/form.css"
-    />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/button.css"
-    />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/grid.css"
-    />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/icon.css"
-    />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/header.css"
-    />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/message.css"
-    />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/checkbox.css"
-    />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/divider.css"
-    />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/table.css"
-    />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/dropdown.css"
-    />
-
-    <script
-      src="https://code.jquery.com/jquery-3.1.1.min.js"
-      integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
-      crossorigin="anonymous"
-    ></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/form.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/checkbox.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/dropdown.js"></script>
-
-    <style>
-      .ui.form {
-        font-family: "Lato", "Helvetica Neue", Arial, Helvetica, sans-serif;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="ui center aligned page grid" style="margin:auto">
-      <div class="eight wide column">
-        <form class="ui form adding" style="padding-top: 10px;">
-          <h3 class="ui dividing header">Введите данные</h3>
-          <div class="two fields">
-            <div class="field">
-              <label>Источник</label>
-              <div class="inline field">
-                <label>Название</label>
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="Название источника"
-                />
-              </div>
-              <div class="inline field">
-                <label>IP потока</label>
-                <input type="text" name="ip" placeholder="IP" />
-              </div>
-              <div class="field" style="padding-top: 10px;">
-                <label>Тип источника</label>
-                <select class="ui fluid dropdown" name="soundType">
-                  <option value="enc">Кодер</option>
-                  <option value="cam">Камера</option>
-                  <option value="maincam">Главная камера</option>
-                </select>
-              </div>
+<body>
+  <div
+    class="ui center aligned page grid"
+    style="margin:10vh 0; width:80vw; padding:0"
+  >
+    <div class="eight wide column">
+      <form class="ui form adding" style="padding-top: 10px;">
+        <h3 class="ui dividing header">Введите данные</h3>
+        <div class="two fields">
+          <div class="field">
+            <label>Источник</label>
+            <div class="inline field">
+              <label>Название</label>
+              <input type="text" name="name" placeholder="Название источника" />
             </div>
+            <div class="inline field">
+              <label>IP потока</label>
+              <input type="text" name="ip" placeholder="IP" />
+            </div>
+            <div class="inline field" style="padding-top: 10px; width: auto;">
+              <label>Тип источника</label>
+              <select class="ui fluid dropdown" name="soundType">
+                <option value="enc">Кодер</option>
+                <option value="cam">Камера</option>
+                <option value="maincam">Главная камера</option>
+              </select>
+            </div>
+          </div>
 
+          <div class="field">
+            <label>Расположение</label>
+            <div class="inline field">
+              <label>Аудитория</label>
+              <input
+                type="text"
+                name="auditorium"
+                placeholder="Название комнаты"
+              />
+            </div>
+            <div class="inline field" style="padding-top: 10px; width: auto;">
+              <label>Корпус</label>
+              <select class="ui fluid dropdown" name="building">
+                <option value="МИЭМ">МИЭМ</option>
+                <option value="ФКМД">ФКМД</option>
+                <option value="ФКН">ФКН</option>
+              </select>
+            </div>
             <div class="field">
-              <label>Расположение</label>
-              <div class="inline field">
-                <label>Аудиория</label>
-                <input
-                  type="text"
-                  name="auditorium"
-                  placeholder="Название комнаты"
-                />
-              </div>
-              <div class="field">
-                <label>Корпус</label>
-                <select class="ui fluid dropdown" name="building">
-                  <option value="МИЭМ">МИЭМ</option>
-                  <option value="ФКМД">ФКМД</option>
-                  <option value="ФКН">ФКН</option>
-                </select>
-              </div>
-              <div class="field" style="padding-top: 40px;">
-                <div class="ui form">
-                  <div class="two inline fields">
-                    <div class="field">
-                      <div class="ui checkbox">
-                        <input type="checkbox" name="tracking" />
-                        <label>Трекинг</label>
-                      </div>
+              <div class="ui form">
+                <div class="two inline fields">
+                  <div class="field">
+                    <div class="ui checkbox">
+                      <input type="checkbox" name="tracking" />
+                      <label>Трекинг</label>
                     </div>
-                    <div class="field">
-                      <div class="ui checkbox">
-                        <input type="checkbox" name="sound" />
-                        <label>Звук</label>
-                      </div>
+                  </div>
+                  <div class="field">
+                    <div class="ui checkbox">
+                      <input type="checkbox" name="sound" />
+                      <label>Звук</label>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-
-          <button class="ui button" type="button" id="submit">
-            Добавить
-          </button>
-          <div class="ui negative message" id="error" style="display:none">
-            Поля ввода должны быть заполнены
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Редактирование -->
-    <div class="ui center aligned page grid">
-      <div class="column" style="padding-top: 0;">
-        <div
-          class="ui horizontal divider"
-          style="font-family: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;"
-        >
-          Редактирование источников
         </div>
-        <div class="ui form">
-          <div class="two fields">
+
+        <button class="ui button" type="button" id="submit">
+          Добавить
+        </button>
+        <div class="ui negative message" id="error" style="display:none">
+          Поля ввода должны быть заполнены
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Редактирование -->
+  <div class="ui center aligned page grid">
+    <div class="column" style="width:80vw; padding:0">
+      <div
+        class="ui horizontal divider"
+        style="font-family: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;"
+      >
+        Редактирование источников
+      </div>
+      <div class="ui form">
+        <div class="two fields">
+          <div class="field">
+            <label>Источники</label>
             <div class="field">
-              <label>Источники</label>
-              <div class="field">
-                <table class="ui celled table">
-                  <thead>
-                    <tr>
-                      <th>Название</th>
-                      <th>IP</th>
-                      <th>Аудио</th>
-                      <th>Звук</th>
-                      <th>Тип</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td data-label="Name">-</td>
-                      <td data-label="ip">-</td>
-                      <td data-label="audio">-</td>
-                      <td data-label="sound">-</td>
-                      <td data-label="type">-</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <div class="field">
-              <label>Комнаты</label>
-              <div class="field">
-                <table class="ui celled table">
-                  <thead>
-                    <tr>
-                      <th>Комната</th>
-                      <th>Источники</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td data-label="Num">-</td>
-                      <td data-label="sources">-</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+              <table class="ui celled table">
+                <thead>
+                  <tr>
+                    <th>Название</th>
+                    <th>IP</th>
+                    <th>Аудио</th>
+                    <th>Звук</th>
+                    <th>Тип</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td data-label="Name">-</td>
+                    <td data-label="ip">-</td>
+                    <td data-label="audio">-</td>
+                    <td data-label="sound">-</td>
+                    <td data-label="type">-</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
+          <div class="field">
+            <label>Комнаты</label>
+            <div class="field">
+              <table class="ui celled table">
+                <thead>
+                  <tr>
+                    <th>Комната</th>
+                    <th>Источники</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td data-label="Num">-</td>
+                    <td data-label="sources">-</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <script>
-      $("#submit").click(() => {
-        let $form;
-        $form = $("form.adding");
-        const allFields = $form.form("get values");
+  <script>
+    $("#submit").click(() => {
+      let $form;
+      $form = $("form.adding");
+      const allFields = $form.form("get values");
 
-        var arr = allFields;
-        arr.tracking = arr.tracking == "on" ? "true" : "false";
-        arr.sound = arr.sound == "on" ? "true" : "false";
-        arr.ip = arr.ip.split("/").join("-");
+      var arr = allFields;
+      arr.tracking = arr.tracking == "on" ? "true" : "false";
+      arr.sound = arr.sound == "on" ? "true" : "false";
+      arr.ip = arr.ip.split("/").join("-");
 
-        for (el in arr) {
-          if (arr[el] == "") {
-            $("#error").css("display", "block");
-            return;
-          }
+      for (el in arr) {
+        if (arr[el] == "") {
+          $("#error").css("display", "block");
+          return;
         }
-        $("#error").css("display", "none");
-        $.post(
-          "/add-source/" +
-            arr.auditorium +
-            "/" +
-            arr.building +
-            "/" +
-            arr.ip +
-            "/" +
-            arr.name +
-            "/" +
-            arr.sound +
-            "/" +
-            arr.soundType +
-            "/" +
-            arr.tracking
-        );
-      });
-    </script>
-  </body>
-</html>
+      }
+      $("#error").css("display", "none");
+      $.post(
+        "/add-source/" +
+          arr.auditorium +
+          "/" +
+          arr.building +
+          "/" +
+          arr.ip +
+          "/" +
+          arr.name +
+          "/" +
+          arr.sound +
+          "/" +
+          arr.soundType +
+          "/" +
+          arr.tracking
+      );
+    });
+  </script>
+</body>
