@@ -92,6 +92,7 @@ def stop(room_index, building):
                        rooms[building][room_index]["auditorium"])
             except Exception:
                 pass
+
         t = Thread(target=merge, args=(room_index, building), daemon=True)
         t.start()
 
