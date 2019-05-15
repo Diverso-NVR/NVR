@@ -3,7 +3,7 @@ import subprocess
 import signal
 import os
 import json
-from threading import Lock
+from threading import Lock, Thread
 
 
 from driveapi.driveSettings import upload
@@ -56,13 +56,13 @@ def start(room_index, sound_type, building):
     if sound_type == "enc":
         enc = subprocess.Popen("ffmpeg -rtsp_transport http -i rtsp://192.168." + network[building] + "." +
                                rooms[building][room_index]['sound']['enc'][0] +
-                               " -y -b 3000k -c:a copy -vn -f mp4 ../vids/sound_"
+                               " -y -c:a copy -vn -f mp4 ../vids/sound_"
                                + records[building][room_index] + ".aac", shell=True, preexec_fn=os.setsid)
         processes[building][room_index].append(enc)
     else:
         camera = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://admin:Supervisor@192.168." + network[building] + "." +
                                   rooms[building][room_index]['sound']['cam'][0] +
-                                  " -y -b 3000k -c:a copy -vn -f mp4 ../vids/sound_"
+                                  " -y -c:a copy -vn -f mp4 ../vids/sound_"
                                   + records[building][room_index] + ".aac", shell=True, preexec_fn=os.setsid)
         processes[building][room_index].append(camera)
 
@@ -78,18 +78,12 @@ def stop(room_index, building):
         for process in processes[building][room_index]:
             os.killpg(process.pid, signal.SIGTERM)
 
-        merge_video(records[building][room_index] + rooms[building][room_index]['vid'][0].split('/')[0],
-                    records[building][room_index] + rooms[building][room_index]['vid'][2].split('/')[0],
-                    records[building][room_index])
-
-        for cam in rooms[building][room_index]['vid']:
-            add_sound(records[building]
-                      [room_index] + cam.split('/')[0], records[building][room_index])
-        for i in range(1, 4):
-            add_sound(records[building][room_index] + "merged_" + str(i), records[building][room_index])
-
         res = ""
-        if not os.path.exists("../vids/sound_" + records[building][room_index] + ".aac"):
+        if os.path.exists("../vids/sound_" + records[building][room_index] + ".aac"):
+            for cam in rooms[building][room_index]['vid']:
+                add_sound(records[building]
+                          [room_index] + cam.split('/')[0], records[building][room_index])
+        else:
             res = "vid_"
 
         for cam in rooms[building][room_index]['vid']:
@@ -98,12 +92,30 @@ def stop(room_index, building):
                        rooms[building][room_index]["auditorium"])
             except Exception:
                 pass
+        t = Thread(target=merge, args=(room_index, building), daemon=True)
+        t.start()
+
+
+def merge(room_index, building):
+    merge_video(records[building][room_index] + rooms[building][room_index]['vid'][0].split('/')[0],
+                records[building][room_index] +
+                rooms[building][room_index]['vid'][2].split('/')[0],
+                records[building][room_index])
+
+    res = ""
+    if os.path.exists("../vids/sound_" + records[building][room_index] + ".aac"):
         for i in range(1, 4):
-            try:
-                upload("../vids/" + records[building][room_index] + "merged_" + str(i) + ".mp4",
-                       rooms[building][room_index]["auditorium"])
-            except Exception:
-                pass
+            add_sound(records[building][room_index] +
+                      "merged_" + str(i), records[building][room_index])
+    else:
+        res = "vid_"
+
+    for i in range(1, 4):
+        try:
+            upload("../vids/" + res + records[building][room_index] + "merged_" + str(i) + ".mp4",
+                   rooms[building][room_index]["auditorium"])
+        except Exception:
+            pass
 
 
 def add_sound(video_cam_num, audio_cam_num):
