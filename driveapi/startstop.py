@@ -93,8 +93,8 @@ def stop(room_index, building):
             except Exception:
                 pass
 
-        t = Thread(target=merge, args=(room_index, building), daemon=True)
-        t.start()
+        # t = Thread(target=merge, args=(room_index, building), daemon=True)
+        # t.start()
 
 
 def merge(room_index, building):
