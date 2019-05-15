@@ -77,15 +77,30 @@ def stop(room_index, building):
     with lock:
         for process in processes[building][room_index]:
             os.killpg(process.pid, signal.SIGTERM)
+
+        merge_video(records[building][room_index] + rooms[building][room_index]['vid'][0].split('/')[0],
+                    records[building][room_index] + rooms[building][room_index]['vid'][2].split('/')[0],
+                    records[building][room_index])
+
         for cam in rooms[building][room_index]['vid']:
             add_sound(records[building]
                       [room_index] + cam.split('/')[0], records[building][room_index])
+        for i in range(1, 4):
+            add_sound(records[building][room_index] + "merged_" + str(i), records[building][room_index])
+
         res = ""
         if not os.path.exists("../vids/sound_" + records[building][room_index] + ".aac"):
             res = "vid_"
+
         for cam in rooms[building][room_index]['vid']:
             try:
                 upload("../vids/" + res + records[building][room_index] + cam.split('/')[0] + ".mp4",
+                       rooms[building][room_index]["auditorium"])
+            except Exception:
+                pass
+        for i in range(1, 4):
+            try:
+                upload("../vids/" + records[building][room_index] + "merged_" + str(i) + ".mp4",
                        rooms[building][room_index]["auditorium"])
             except Exception:
                 pass
@@ -96,3 +111,35 @@ def add_sound(video_cam_num, audio_cam_num):
                              "../vids/vid_" + video_cam_num + ".mp4", "-y", "-shortest", "-c", "copy",
                              "../vids/" + video_cam_num + ".mp4"], shell=False)
     proc.wait()
+
+
+def merge_video(screen_num, video_cam_num, record_num):
+    # Option 1
+    first = subprocess.Popen(["ffmpeg", "-i", "../vids/vid_" + screen_num + ".mp4", "-i", "../vids/vid_" +
+                              video_cam_num + ".mp4", "-filter_complex", "hstack=inputs=2", "../vids/vid_" +
+                              record_num + "merged_1.mp4"], shell=False)
+    first.wait()
+
+    # Option 2
+    subprocess.Popen(["ffmpeg", "-i", "../vids/vid_" + screen_num + ".mp4", "-s", "hd720",
+                      "../vids/" + record_num + "mid_1_1.mp4"], shell=False).wait()
+    subprocess.Popen(["ffmpeg", "-i", "../vids/vid_" + video_cam_num + ".mp4", "-s", "hd720",
+                      "../vids/" + record_num + "mid_1_3.mp4"], shell=False).wait()
+    subprocess.Popen(["ffmpeg", "-i", "../vids/" + record_num + "mid_1_3.mp4", "-filter:v", "crop=640:720:40:0",
+                      "../vids/" + record_num + "cropped_1.mp4"], shell=False).wait()
+    second = subprocess.Popen(["ffmpeg", "-i", "../vids/" + record_num + "mid_1_1.mp4", "-i", "../vids/" +
+                               record_num + "cropped_1.mp4", "-filter_complex", "hstack=inputs=2", "../vids/vid_" +
+                               record_num + "merged_2.mp4"], shell=False)
+    second.wait()
+
+    # Option 3
+    subprocess.Popen(["ffmpeg", "-i", "../vids/vid_" + screen_num + ".mp4", "-s", "hd720",
+                      "../vids/" + record_num + "mid_2_1.mp4"], shell=False).wait()
+    subprocess.Popen(["ffmpeg", "-i", "../vids/vid_" + video_cam_num + ".mp4", "-s", "hd720",
+                      "../vids/" + record_num + "mid_2_3.mp4"], shell=False).wait()
+    subprocess.Popen(["ffmpeg", "-i", "../vids/" + record_num + "mid_2_3.mp4", "-filter:v", "crop=640:720",
+                      "../vids/" + record_num + "cropped_2.mp4"], shell=False).wait()
+    third = subprocess.Popen(["ffmpeg", "-i", "../vids/" + record_num + "mid_2_1.mp4", "-i", "../vids/" +
+                              record_num + "cropped_2.mp4", "-filter_complex", "hstack=inputs=2", "../vids/vid_" +
+                              record_num + "merged_3.mp4"], shell=False)
+    third.wait()
