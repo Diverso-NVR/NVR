@@ -95,7 +95,7 @@
       "timestamp": 0,
       "soundType": "enc",
 
-      "mainCam": "",
+      "mainCam": "26",
       "track": [],
       "sound": { "enc": ["140"], "cam": ["26"] },
       "vid": ["140", "26"],
