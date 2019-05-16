@@ -149,11 +149,11 @@ def add_sound(video_cam_num, audio_cam_num):
 
 def merge_video(screen_num, video_cam_num, record_num):
     # Option 1
-    first = subprocess.Popen(["ffmpeg", "-i", "../vids/vid_" + video_cam_num + ".mp4", "-i", "../vids/vid_" +
-                              screen_num + ".mp4", "-filter_complex", "hstack=inputs=2", "../vids/vid_" +
-                              record_num + "merged_1.mp4"], shell=False)
-    os.system("renice -n 20 %s" % (first.pid, ))
-    first.wait()
+    # first = subprocess.Popen(["ffmpeg", "-i", "../vids/vid_" + video_cam_num + ".mp4", "-i", "../vids/vid_" +
+    #                           screen_num + ".mp4", "-filter_complex", "hstack=inputs=2", "../vids/vid_" +
+    #                           record_num + "merged_1.mp4"], shell=False)
+    # os.system("renice -n 20 %s" % (first.pid, ))
+    # first.wait()
 
     # Option 2
     mid1 = subprocess.Popen(["ffmpeg", "-i", "../vids/vid_" + screen_num + ".mp4", "-s", "hd720",
@@ -175,20 +175,20 @@ def merge_video(screen_num, video_cam_num, record_num):
     second.wait()
 
     # Option 3
-    mid3 = subprocess.Popen(["ffmpeg", "-i", "../vids/vid_" + screen_num + ".mp4", "-s", "hd720",
-                             "../vids/" + record_num + "mid_2_1.mp4"], shell=False)
-    os.system("renice -n 20 %s" % (mid3.pid, ))
-    mid3.wait()
-    mid4 = subprocess.Popen(["ffmpeg", "-i", "../vids/vid_" + video_cam_num + ".mp4", "-s", "hd720",
-                             "../vids/" + record_num + "mid_2_3.mp4"], shell=False)
-    os.system("renice -n 20 %s" % (mid4.pid, ))
-    mid4.wait()
-    crop2 = subprocess.Popen(["ffmpeg", "-i", "../vids/" + record_num + "mid_2_3.mp4", "-filter:v", "crop=640:720",
-                              "../vids/" + record_num + "cropped_2.mp4"], shell=False)
-    os.system("renice -n 20 %s" % (crop2.pid, ))
-    crop2.wait()
-    third = subprocess.Popen(["ffmpeg", "-i", "../vids/" + record_num + "cropped_2.mp4", "-i", "../vids/" +
-                              record_num + "mid_2_1.mp4", "-filter_complex", "hstack=inputs=2", "../vids/vid_" +
-                              record_num + "merged_3.mp4"], shell=False)
-    os.system("renice -n 20 %s" % (third.pid, ))
-    third.wait()
+    # mid3 = subprocess.Popen(["ffmpeg", "-i", "../vids/vid_" + screen_num + ".mp4", "-s", "hd720",
+    #                          "../vids/" + record_num + "mid_2_1.mp4"], shell=False)
+    # os.system("renice -n 20 %s" % (mid3.pid, ))
+    # mid3.wait()
+    # mid4 = subprocess.Popen(["ffmpeg", "-i", "../vids/vid_" + video_cam_num + ".mp4", "-s", "hd720",
+    #                          "../vids/" + record_num + "mid_2_3.mp4"], shell=False)
+    # os.system("renice -n 20 %s" % (mid4.pid, ))
+    # mid4.wait()
+    # crop2 = subprocess.Popen(["ffmpeg", "-i", "../vids/" + record_num + "mid_2_3.mp4", "-filter:v", "crop=640:720",
+    #                           "../vids/" + record_num + "cropped_2.mp4"], shell=False)
+    # os.system("renice -n 20 %s" % (crop2.pid, ))
+    # crop2.wait()
+    # third = subprocess.Popen(["ffmpeg", "-i", "../vids/" + record_num + "cropped_2.mp4", "-i", "../vids/" +
+    #                           record_num + "mid_2_1.mp4", "-filter_complex", "hstack=inputs=2", "../vids/vid_" +
+    #                           record_num + "merged_3.mp4"], shell=False)
+    # os.system("renice -n 20 %s" % (third.pid, ))
+    # third.wait()
