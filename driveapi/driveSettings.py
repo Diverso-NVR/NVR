@@ -6,14 +6,10 @@ from googleapiclient.http import MediaFileUpload
 import json
 
 
-# If modifying these scopes, delete the file token.json.
 SCOPES = 'https://www.googleapis.com/auth/drive'
 """
 Setting up drive
 """
-# The file tokenDrive.json stores the user's access and refresh tokens, and is
-# created automatically when the authorization flow completes for the first
-# time.
 store = file.Storage('tokenDrive.json')
 creds = store.get()
 if not creds or creds.invalid:
@@ -29,12 +25,34 @@ for building in data:
         rooms[room['auditorium']] = room['drive'].split('/')[-1]
 
 
+def createFolder(building, room):
+    folder_metadata = {
+        'name': building + '-' + room,
+        'mimeType': 'application/vnd.google-apps.folder',
+    }
+    folder = service.files().create(body=folder_metadata,
+                                    fields='id').execute()
+
+    new_perm = {
+        'type': 'anyone',
+        'role': 'reader'
+    }
+
+    service.permissions().create(fileId=folder['id'], body=new_perm).execute()
+    return "https://drive.google.com/drive/u/1/folders/" + folder['id']
+
+
+def deleteFolder(folder_id):
+    service.files().delete(fileId=folder_id).execute()
+
+
 def upload(filename, room):
     """
     Upload file "filename" on drive
     """
     media = MediaFileUpload(filename, mimetype="video/mp4", resumable=True)
-    fileData = {"name": filename.split('/')[2],
-                "parents": [rooms[room]]
-                }
+    fileData = {
+        "name": filename.split('/')[2],
+        "parents": [rooms[room]]
+    }
     file = service.files().create(body=fileData, media_body=media, fields='id').execute()

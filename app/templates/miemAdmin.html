@@ -7,6 +7,14 @@
       <div class="ui inverted menu">
         <h4 class="item">МИЭМ</h4>
       </div>
+      <div class="right menu">
+        <a class="right aligned item" id="addSourceBtn"
+          ><i class="plus icon"></i
+        ></a>
+        <a class="right aligned item" id="adminBtn"
+          ><i class="user icon"></i
+        ></a>
+      </div>
     </div>
   </header>
 
@@ -95,6 +103,18 @@
   </main>
 
   <script>
+    $("#adminBtn").click(() => {
+      $.ajax("/requestsMiem").done(data => {
+        $("body").html(data);
+      });
+    });
+
+    $("#addSourceBtn").click(() => {
+      $.ajax("/add-button").done(data => {
+        $("body").html(data);
+      });
+    });
+
     new Vue({
       el: "#app",
       data: () => ({

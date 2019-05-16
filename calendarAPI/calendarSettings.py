@@ -1,9 +1,21 @@
 from __future__ import print_function
-import datetime
 from googleapiclient.discovery import build
 from httplib2 import Http
 from oauth2client import file, client, tools
 import json
+import datetime
+
+
+SCOPES = 'https://www.googleapis.com/auth/calendar'
+"""
+Setting up calendar
+"""
+store = file.Storage('tokenCalendar.json')
+creds = store.get()
+if not creds or creds.invalid:
+    flow = client.flow_from_clientsecrets('credentials.json', SCOPES)
+    creds = tools.run_flow(flow, store)
+service = build('calendar', 'v3', http=creds.authorize(Http()))
 
 with open("app/data.json", 'r') as f:
     data = json.loads(f.read())
@@ -11,8 +23,65 @@ with open("app/data.json", 'r') as f:
 rooms = {}
 
 for building in data:
+    rooms[building] = {}
     for room in data[building]:
-        rooms[room['auditorium']] = room['calendarAPI']
+        rooms[building][room['auditorium']] = room['calendar']
+
+
+def givePermissions(building, mail):
+    rule = {
+        'scope': {
+            'type': 'user',
+            'value': mail,
+        },
+        'role': 'writer'
+    }
+
+    for room in rooms[building]:
+        created_rule = service.acl().insert(
+            calendarId=rooms[building][room], body=rule).execute()
+
+
+# def deletePermissions(building, mail):
+#     calendars = service.calendarList().list(pageToken=None).execute()
+#     copyPerm = ""
+#     for item in calendars['items']:
+#         if item['summary'].split('-')[0] == building:
+#             copyPerm = item['id']
+#             break
+#     calendar = service.acl().list(
+#         calendarId=copyPerm).execute()
+
+#     # service.acl().delete(calendarId='primary', ruleId='ruleId').execute()
+
+
+def createCalendar(building, room):
+    calendar = {
+        'summary': building + "-" + room,
+        'timeZone': 'Europe/Moscow'
+    }
+
+    calendars = service.calendarList().list(pageToken=None).execute()
+    copyPerm = ""
+    for item in calendars['items']:
+        if item['summary'].split('-')[0] == building:
+            copyPerm = item['id']
+            break
+    calendar = service.acl().list(
+        calendarId=copyPerm).execute()
+
+    created_calendar = service.calendars().insert(body=calendar).execute()
+
+    for rule in calendar['items']:
+        if rule['role'] == 'writer':
+            new_rule = service.acl().insert(
+                calendarId=created_calendar["id"], body=rule).execute()
+
+    return created_calendar["id"]  # calendarAPI link
+
+
+def deleteCalendar(calendar_id):
+    service.calendars().delete(calendarId=calendar_id).execute()
 
 
 def parseDate(date):
@@ -27,30 +96,14 @@ def parseDate(date):
     return "{}-{}-{} {}:{}".format(year, month, day, hour, minute)
 
 
-def getEvents(room):
+def getEvents(building, room):
     """
-    Returns start and summary of the next 10 events on the "room" calendar.
+    Returns start and summary of the next 3 events on the "room" calendar.
     """
     now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
-    events_result = service.events().list(calendarId=rooms[room], timeMin=now,
-                                          maxResults=10, singleEvents=True,
+    events_result = service.events().list(calendarId=rooms[building][room], timeMin=now,
+                                          maxResults=3, singleEvents=True,
                                           orderBy='startTime').execute()
     events = events_result.get('items', [])
 
     return events
-
-
-# If modifying these scopes, delete the file token.json.
-SCOPES = 'https://www.googleapis.com/auth/calendar'
-"""
-Setting up calendar
-"""
-# The file tokenCalendar.json stores the user's access and refresh tokens, and is
-# created automatically when the authorization flow completes for the first
-# time.
-store = file.Storage('tokenCalendar.json')
-creds = store.get()
-if not creds or creds.invalid:
-    flow = client.flow_from_clientsecrets('credentials.json', SCOPES)
-    creds = tools.run_flow(flow, store)
-service = build('calendar', 'v3', http=creds.authorize(Http()))

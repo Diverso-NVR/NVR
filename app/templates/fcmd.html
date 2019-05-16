@@ -1,5 +1,4 @@
 <body>
-  <!-- 767px > -- жмыкает -->
   <header>
     <div
       class="ui borderless inverted menu"
@@ -8,7 +7,6 @@
       <div class="ui inverted menu">
         <h4 class="item">ФКМД</h4>
       </div>
-      <a class="right aligned item" id="login"><i class="user icon"></i></a>
     </div>
   </header>
 
@@ -26,10 +24,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr
-          v-for="camera in cameras"
-          :class="{disabled : camera.auditorium === '504'}"
-        >
+        <tr v-for="camera in cameras">
           <td>[[ camera.building ]]-[[camera.auditorium]]</td>
           <td>
             <div class="ui buttons">
@@ -78,9 +73,9 @@
           </td>
           <td>
             <a
-              v-bind:href="camera.calendar"
               target="_blank"
               class="ui icon button"
+              href="https://calendar.google.com/calendar/r"
             >
               <i class="calendar alternate outline icon"></i>
             </a>
@@ -100,7 +95,7 @@
   </main>
 
   <script>
-    let app = new Vue({
+    new Vue({
       el: "#app",
       data: () => ({
         cameras: []

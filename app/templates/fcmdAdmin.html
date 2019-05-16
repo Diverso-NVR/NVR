@@ -5,13 +5,21 @@
       style="width:90vw; margin: 0 auto;"
     >
       <div class="ui inverted menu">
-        <h4 class="item">МИЭМ</h4>
+        <h4 class="item">ФКМД</h4>
+      </div>
+      <div class="right menu">
+        <a class="right aligned item" id="addSourceBtn"
+          ><i class="plus icon"></i
+        ></a>
+        <a class="right aligned item" id="adminBtn"
+          ><i class="user icon"></i
+        ></a>
       </div>
     </div>
   </header>
 
   <main id="app" class="ui container" style="width: 90vw;">
-    <table class="ui celled striped center table" style="text-align:center">
+    <table class="ui celled striped center table" style="text-align:center;">
       <thead>
         <tr>
           <th>Аудитория</th>
@@ -95,6 +103,18 @@
   </main>
 
   <script>
+    $("#adminBtn").click(() => {
+      $.ajax("/requestsFcmd").done(data => {
+        $("body").html(data);
+      });
+    });
+
+    $("#addSourceBtn").click(() => {
+      $.ajax("/add-button").done(data => {
+        $("body").html(data);
+      });
+    });
+
     new Vue({
       el: "#app",
       data: () => ({
@@ -148,7 +168,7 @@
       },
       created() {
         axios.get("/status").then(res => {
-          res.data["МИЭМ"].forEach(camera => {
+          res.data["ФКМД"].forEach(camera => {
             this.cameras.push(
               Object.assign(
                 {
@@ -166,7 +186,7 @@
         });
         let updateStatus = () => {
           axios.get("/status").then(res => {
-            res.data["МИЭМ"].forEach(cam => {
+            res.data["ФКМД"].forEach(cam => {
               this.cameras.forEach(camera => {
                 if (camera.id === cam.id) {
                   camera.status = cam.status;

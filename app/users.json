@@ -1,6 +1,16 @@
 {
   "users": [
-    { "login": "fcmd", "password": "hitra", "building": "fcmd" },
-    { "login": "miem", "password": "tal34", "building": "miem" }
+    {
+      "login": "miem",
+      "password": "ec3d449ae8d3830faced0e0bd449fa40310ecd66b75d03f7b640545ef4a56603",
+      "building": "miem",
+      "permission": "admin"
+    },
+    {
+      "login": "fcmd",
+      "password": "b71c20682cba815eba2837bc15846f47588fd38f6dd421cf818f58e1d5a4f201",
+      "building": "fcmd",
+      "permission": "admin"
+    }
   ]
 }

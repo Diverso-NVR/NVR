@@ -2,8 +2,9 @@ import time
 from datetime import datetime
 from driveapi import startstop
 from calendarAPI.calendarSettings import getEvents, parseDate
-import threading
+from threading import Thread
 import json
+import random
 
 
 with open("app/data.json", 'r') as f:
@@ -22,7 +23,7 @@ def events():
     for building in rooms:
         for room in rooms[building]:
             try:
-                e = getEvents(room["room"])
+                e = getEvents(building, room["room"])
                 room["event"] = e[0]
             except Exception:
                 room["event"] = {}
@@ -40,12 +41,13 @@ def duration(date):
 
 
 def record(num, building, startt, end):
-    startstop.start(str(num), "cam", building)
+    startstop.start(str(num), "enc", building)
     time.sleep(duration(end) - duration(startt))
     startstop.stop(str(num), building)
 
 
 def run():
+    started = []
     while True:
         events()
         current_time = datetime.now()
@@ -57,12 +59,12 @@ def run():
                     'dateTime', room['event']['start'].get('date')))
                 end = parseDate(room['event']['end'].get(
                     'dateTime', room['event']['end'].get('date')))
-                if startt == datetime.strftime(current_time, "%Y-%m-%d %H:%M"):
-                    t = threading.Thread(target=record, args=(
+                if room['event'] not in started and startt == datetime.strftime(current_time, "%Y-%m-%d %H:%M"):
+                    proc = Thread(target=record, args=(
                         room['id'], building, startt, end), daemon=True)
-                    t.start()
-                    time.sleep(62)
-            time.sleep(1)
+                    proc.start()
+                    started.append(room['event'])
+        time.sleep(1)
 
 
 if __name__ == '__main__':
