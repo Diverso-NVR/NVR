@@ -55,18 +55,11 @@ def start(room_index, sound_type, building):
         today.year, today.month, today.day, hour, minute, rooms[building][room_index]["auditorium"])
 
     if rooms[building][room_index]["auditorium"] == '406':
-        if sound_type == "enc":
-            enc = subprocess.Popen("ffmpeg -rtsp_transport http -i rtsp://admin:admin@172.18.185." +
-                                   rooms[building][room_index]['sound']['enc'][0] +
-                                   " -y -c:a copy -vn -f mp4 ../vids/sound_"
-                                   + records[building][room_index] + ".aac", shell=True, preexec_fn=os.setsid)
-            processes[building][room_index].append(enc)
-        else:
-            camera = subprocess.Popen("ffmpeg - rtsp_transport tcp - i rtsp://admin:Supervisor@172.18.185." +
-                                      rooms[building][room_index]['sound']['cam'][0] +
-                                      " -y -c:a copy -vn -f mp4 ../vids/sound_"
-                                      + records[building][room_index] + ".aac", shell=True, preexec_fn=os.setsid)
-            processes[building][room_index].append(camera)
+        enc = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://admin:admin@172.18.185." +
+                               rooms[building][room_index]['sound']['enc'][0] +
+                               " -y -c:a copy -vn -f mp4 ../vids/sound_"
+                               + records[building][room_index] + ".aac", shell=True, preexec_fn=os.setsid)
+        processes[building][room_index].append(enc)
 
         process1 = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://admin:admin@172.18.185." +
                                     rooms[building][room_index]['vid'][0] + " -y -c:v copy -an -f mp4 ../vids/vid_" +
