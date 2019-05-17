@@ -135,6 +135,14 @@ def stop(room_index, building):
     t.start()
 
 
+def add_sound(video_cam_num, audio_cam_num):
+    with lock:
+        proc = subprocess.Popen(["ffmpeg", "-i", "../vids/sound_" + audio_cam_num + ".aac", "-i",
+                                 "../vids/vid_" + video_cam_num + ".mp4", "-y", "-shortest", "-c", "copy",
+                                 "../vids/" + video_cam_num + ".mp4"], shell=False)
+        proc.wait()
+
+
 def merge(room_index, building):
     merge_video(records[building][room_index] + rooms[building][room_index]['sound']['enc'][0].split('/')[0],
                 records[building][room_index] +
@@ -143,26 +151,16 @@ def merge(room_index, building):
 
     res = ""
     if os.path.exists("../vids/sound_" + records[building][room_index] + ".aac"):
-        for i in range(1, 4):
-            add_sound(records[building][room_index] +
-                      "merged_" + str(i), records[building][room_index])
+        add_sound(records[building][room_index] +
+                  "merged_2", records[building][room_index])
     else:
         res = "vid_"
 
-    for i in range(1, 4):
-        try:
-            upload("../vids/" + res + records[building][room_index] + "merged_" + str(i) + ".mp4",
-                   rooms[building][room_index]["auditorium"])
-        except Exception:
-            pass
-
-
-def add_sound(video_cam_num, audio_cam_num):
-    with lock:
-        proc = subprocess.Popen(["ffmpeg", "-i", "../vids/sound_" + audio_cam_num + ".aac", "-i",
-                                 "../vids/vid_" + video_cam_num + ".mp4", "-y", "-shortest", "-c", "copy",
-                                 "../vids/" + video_cam_num + ".mp4"], shell=False)
-        proc.wait()
+    try:
+        upload("../vids/" + res + records[building][room_index] + "merged_2.mp4",
+               rooms[building][room_index]["auditorium"])
+    except Exception:
+        pass
 
 
 def merge_video(screen_num, video_cam_num, record_num):
