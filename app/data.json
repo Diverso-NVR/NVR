@@ -103,6 +103,23 @@
 
       "drive": "https://drive.google.com/drive/u/1/folders/1q030y6MKjWwudoA5KY7d6znrp9CZIKz2",
       "calendar": "auditory.ru_dvctk87if21ht58v9ab4j2lmdc@group.calendar.google.com"
+    },
+    {
+      "id": 4,
+      "building": "МИЭМ",
+      "auditorium": "403",
+      "status": "free",
+      "timestamp": 0,
+      "soundType": "enc",
+
+      "mainCam": "28",
+      "track": [],
+      "sound": { "enc": ["144"], "cam": ["28/live/av0"] },
+      "vid": ["144", "28"],
+      "name": ["кодер", ""],
+
+      "drive": "https://drive.google.com/drive/u/1/folders/1q030y6MKjWwudoA5KY7d6znrp9CZIKz2",
+      "calendar": "auditory.ru_2f9n8qln52nba7u2if6g73pnb4@group.calendar.google.com"
     }
   ],
   "ФКН": []
