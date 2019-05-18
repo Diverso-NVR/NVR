@@ -109,12 +109,11 @@ def start(room_index, sound_type, building):
 
 
 def stop(room_index, building):
-    with lock:
-        for process in processes[building][room_index]:
-            try:
-                os.killpg(process.pid, signal.SIGTERM)
-            except OSError:
-                os.system("sudo kill %s" % (process.pid, ))
+    for process in processes[building][room_index]:
+        try:
+            os.killpg(process.pid, signal.SIGTERM)
+        except OSError:
+            os.system("sudo kill %s" % (process.pid, ))
 
     t = Thread(target=merge, args=(room_index, building), daemon=True)
     t.start()
@@ -136,11 +135,10 @@ def stop(room_index, building):
 
 
 def add_sound(video_cam_num, audio_cam_num):
-    with lock:
-        proc = subprocess.Popen(["ffmpeg", "-i", "../vids/sound_" + audio_cam_num + ".aac", "-i",
-                                 "../vids/vid_" + video_cam_num + ".mp4", "-y", "-shortest", "-c", "copy",
-                                 "../vids/" + video_cam_num + ".mp4"], shell=False)
-        proc.wait()
+    proc = subprocess.Popen(["ffmpeg", "-i", "../vids/sound_" + audio_cam_num + ".aac", "-i",
+                             "../vids/vid_" + video_cam_num + ".mp4", "-y", "-shortest", "-c", "copy",
+                             "../vids/" + video_cam_num + ".mp4"], shell=False)
+    proc.wait()
 
 
 def merge(room_index, building):
@@ -171,28 +169,24 @@ def merge_video(screen_num, video_cam_num, record_num):
     # os.system("renice -n 20 %s" % (first.pid, ))
     # first.wait()
 
-    with lock:
-        # Option 2
-        mid1 = subprocess.Popen(["ffmpeg", "-i", "../vids/vid_" + screen_num + ".mp4", "-s", "hd720",
-                                 "../vids/" + record_num + "mid_1_1.mp4"], shell=False)
-        os.system("renice -n 20 %s" % (mid1.pid, ))
-        mid1.wait()
-    with lock:
-        mid2 = subprocess.Popen(["ffmpeg", "-i", "../vids/vid_" + video_cam_num + ".mp4", "-s", "hd720",
-                                 "../vids/" + record_num + "mid_1_3.mp4"], shell=False)
-        os.system("renice -n 20 %s" % (mid2.pid, ))
-        mid2.wait()
-    with lock:
-        crop1 = subprocess.Popen(["ffmpeg", "-i", "../vids/" + record_num + "mid_1_3.mp4", "-filter:v", "crop=640:720:40:0",
-                                  "../vids/" + record_num + "cropped_1.mp4"], shell=False)
-        os.system("renice -n 20 %s" % (crop1.pid, ))
-        crop1.wait()
-    with lock:
-        second = subprocess.Popen(["ffmpeg", "-i", "../vids/" + record_num + "cropped_1.mp4", "-i", "../vids/" +
-                                   record_num + "mid_1_1.mp4", "-filter_complex", "hstack=inputs=2", "../vids/vid_" +
-                                   record_num + "merged_2.mp4"], shell=False)
-        os.system("renice -n 20 %s" % (second.pid, ))
-        second.wait()
+    # Option 2
+    mid1 = subprocess.Popen(["ffmpeg", "-i", "../vids/vid_" + screen_num + ".mp4", "-s", "hd720",
+                             "../vids/" + record_num + "mid_1_1.mp4"], shell=False)
+    os.system("renice -n 20 %s" % (mid1.pid, ))
+    mid1.wait()
+    mid2 = subprocess.Popen(["ffmpeg", "-i", "../vids/vid_" + video_cam_num + ".mp4", "-s", "hd720",
+                             "../vids/" + record_num + "mid_1_3.mp4"], shell=False)
+    os.system("renice -n 20 %s" % (mid2.pid, ))
+    mid2.wait()
+    crop1 = subprocess.Popen(["ffmpeg", "-i", "../vids/" + record_num + "mid_1_3.mp4", "-filter:v", "crop=640:720:40:0",
+                              "../vids/" + record_num + "cropped_1.mp4"], shell=False)
+    os.system("renice -n 20 %s" % (crop1.pid, ))
+    crop1.wait()
+    second = subprocess.Popen(["ffmpeg", "-i", "../vids/" + record_num + "cropped_1.mp4", "-i", "../vids/" +
+                               record_num + "mid_1_1.mp4", "-filter_complex", "hstack=inputs=2", "../vids/vid_" +
+                               record_num + "merged_2.mp4"], shell=False)
+    os.system("renice -n 20 %s" % (second.pid, ))
+    second.wait()
 
     # Option 3
     # mid3 = subprocess.Popen(["ffmpeg", "-i", "../vids/vid_" + screen_num + ".mp4", "-s", "hd720",
