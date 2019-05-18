@@ -116,6 +116,9 @@ def stop(room_index, building):
             except OSError:
                 os.system("sudo kill %s" % (process.pid, ))
 
+    t = Thread(target=merge, args=(room_index, building), daemon=True)
+    t.start()
+
     res = ""
     if os.path.exists("../vids/sound_" + records[building][room_index] + ".aac"):
         for cam in rooms[building][room_index]['vid']:
@@ -130,9 +133,6 @@ def stop(room_index, building):
                    rooms[building][room_index]["auditorium"])
         except Exception:
             pass
-
-    t = Thread(target=merge, args=(room_index, building), daemon=True)
-    t.start()
 
 
 def add_sound(video_cam_num, audio_cam_num):
