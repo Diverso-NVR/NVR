@@ -131,8 +131,8 @@
 
       "mainCam": "28",
       "track": [],
-      "sound": { "enc": ["27/onvif"], "cam": ["30"] },
-      "vid": ["27/onvif", "30"],
+      "sound": { "enc": ["27/onvif0"], "cam": ["30"] },
+      "vid": ["27/onvif0", "30"],
       "name": ["кодер", ""],
 
       "drive": "https://drive.google.com/drive/u/1/folders/1q030y6MKjWwudoA5KY7d6znrp9CZIKz2",
