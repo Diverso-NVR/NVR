@@ -56,7 +56,7 @@ def start(room_index, sound_type, building):
 
     if rooms[building][room_index]["auditorium"] == '304' or rooms[building][room_index]["auditorium"] == '307':
         enc = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://admin:admin@172.18.183." +
-                               rooms[building][room_index]['sound']['enc'][0].split('/')[0] +
+                               rooms[building][room_index]['sound']['enc'][0] +
                                " -y -c:a copy -vn -f mp4 ../vids/sound_"
                                + records[building][room_index] + ".aac", shell=True, preexec_fn=os.setsid)
         processes[building][room_index].append(enc)

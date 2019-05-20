@@ -129,7 +129,7 @@
       "timestamp": 0,
       "soundType": "enc",
 
-      "mainCam": "28",
+      "mainCam": "30",
       "track": [],
       "sound": { "enc": ["27/onvif0"], "cam": ["30"] },
       "vid": ["27/onvif0", "30"],
