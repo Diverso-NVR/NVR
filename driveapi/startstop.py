@@ -3,9 +3,7 @@ import subprocess
 import signal
 import os
 import json
-from threading import RLock, Thread
-
-
+from threading import Thread
 from driveapi.driveSettings import upload
 
 """
@@ -24,8 +22,6 @@ from driveapi.driveSettings import upload
 
 with open("app/data.json", 'r') as f:
     data = json.loads(f.read())
-
-lock = RLock()
 
 network = {"ФКМД": "11", "ФКН": "13", "МИЭМ": "15"}
 rooms = {}
@@ -47,6 +43,7 @@ def start(room_index, sound_type, building):
     processes[building][room_index] = []
     today = datetime.date.today()
     curr_time = datetime.datetime.now().time()
+    
     hour = "0" + \
         str(curr_time.hour) if curr_time.hour < 10 else str(curr_time.hour)
     minute = "0" + \
@@ -135,7 +132,7 @@ def stop(room_index, building):
 
 
 def add_sound(video_cam_num, audio_cam_num):
-    proc = subprocess.Popen(["ffmpeg", "-i", "../vids/sound_" + audio_cam_num + ".aac", "-i",
+    proc = subprocess.Popen(["ffmpeg", "-i", "../vids/sound_" + audio_cam_num + ".m4a", "-i",
                              "../vids/vid_" + video_cam_num + ".mp4", "-y", "-shortest", "-c", "copy",
                              "../vids/" + video_cam_num + ".mp4"], shell=False)
     proc.wait()
