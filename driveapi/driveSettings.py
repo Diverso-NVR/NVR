@@ -4,6 +4,9 @@ from httplib2 import Http
 from oauth2client import file, client, tools
 from googleapiclient.http import MediaFileUpload
 import json
+from threading import RLock
+
+lock = RLock()
 
 
 SCOPES = 'https://www.googleapis.com/auth/drive'
@@ -50,9 +53,10 @@ def upload(filename, room):
     """
     Upload file "filename" on drive
     """
-    media = MediaFileUpload(filename, mimetype="video/mp4", resumable=True)
-    fileData = {
-        "name": filename.split('/')[2],
-        "parents": [rooms[room]]
-    }
-    file = service.files().create(body=fileData, media_body=media, fields='id').execute()
+    with lock:
+        media = MediaFileUpload(filename, mimetype="video/mp4", resumable=True)
+        fileData = {
+            "name": filename.split('/')[2],
+            "parents": [rooms[room]]
+        }
+        file = service.files().create(body=fileData, media_body=media, fields='id').execute()

@@ -90,53 +90,53 @@
     {
       "id": 3,
       "building": "МИЭМ",
-      "auditorium": "#1",
+      "auditorium": "304",
       "status": "free",
       "timestamp": 0,
       "soundType": "enc",
 
-      "mainCam": "",
+      "mainCam": "141",
       "track": [],
-      "sound": { "enc": ["11/main"], "cam": ["45"] },
-      "vid": ["45", "11/main"],
-      "name": ["", "кодер"],
+      "sound": { "enc": ["143"], "cam": ["141"] },
+      "vid": ["143", "141"],
+      "name": ["кодер", ""],
 
-      "drive": "https://drive.google.com/drive/u/1/folders/1WzclOL8fJD2VyDRsUjkFL8xTT7uzJzdk",
-      "calendar": "auditory.ru_5br67j87tk9avo0gegc4sap30o@group.calendar.google.com"
+      "drive": "https://drive.google.com/drive/u/1/folders/1q030y6MKjWwudoA5KY7d6znrp9CZIKz2",
+      "calendar": ""
     },
     {
       "id": 4,
       "building": "МИЭМ",
-      "auditorium": "#2",
+      "auditorium": "306",
       "status": "free",
       "timestamp": 0,
       "soundType": "enc",
 
-      "mainCam": "",
+      "mainCam": "29",
       "track": [],
-      "sound": { "enc": ["56"], "cam": ["43"] },
-      "vid": ["43", "56"],
-      "name": ["", "кодер"],
+      "sound": { "enc": ["144"], "cam": ["29/live/av0"] },
+      "vid": ["144", "29/live/av0"],
+      "name": ["кодер", ""],
 
-      "drive": "https://drive.google.com/drive/u/1/folders/1WzclOL8fJD2VyDRsUjkFL8xTT7uzJzdk",
-      "calendar": "auditory.ru_5br67j87tk9avo0gegc4sap30o@group.calendar.google.com"
+      "drive": "https://drive.google.com/drive/u/1/folders/1q030y6MKjWwudoA5KY7d6znrp9CZIKz2",
+      "calendar": ""
     },
     {
       "id": 5,
       "building": "МИЭМ",
-      "auditorium": "#3",
+      "auditorium": "307",
       "status": "free",
       "timestamp": 0,
       "soundType": "enc",
 
-      "mainCam": "",
+      "mainCam": "30",
       "track": [],
-      "sound": { "enc": [""], "cam": ["51/live/av0"] },
-      "vid": ["52/live/av0", "51/live/av0"],
-      "name": ["", ""],
+      "sound": { "enc": ["27/onvif0"], "cam": ["30"] },
+      "vid": ["27/onvif0", "30"],
+      "name": ["кодер", ""],
 
-      "drive": "https://drive.google.com/drive/u/1/folders/1WzclOL8fJD2VyDRsUjkFL8xTT7uzJzdk",
-      "calendar": "auditory.ru_5br67j87tk9avo0gegc4sap30o@group.calendar.google.com"
+      "drive": "https://drive.google.com/drive/u/1/folders/1q030y6MKjWwudoA5KY7d6znrp9CZIKz2",
+      "calendar": ""
     }
   ],
   "ФКН": []
