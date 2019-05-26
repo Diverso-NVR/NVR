@@ -1,4 +1,6 @@
 from driveapi.startstop import start, stop
+from driveapi.driveSettings import createFolder
+from calendarAPI.calendarSettings import createCalendar
 from flask import Flask, render_template, jsonify, redirect
 import time
 import threading
@@ -145,6 +147,9 @@ def addSource(auditorium, building, ip, name, sound, soundType, tracking):
             return ""
         id += 1
 
+    drive = createFolder(building, auditorium)
+    calendar = createCalendar(building, auditorium)
+
     room = {
         'id': id,
         'building': building,
@@ -157,8 +162,8 @@ def addSource(auditorium, building, ip, name, sound, soundType, tracking):
         'sound': {'enc': [], 'cam': []},
         'vid': [],
         'name': [],
-        'drive': '',
-        'calendar': ''
+        'drive': drive,
+        'calendar': calendar
     }
 
     if soundType == 'maincam':
