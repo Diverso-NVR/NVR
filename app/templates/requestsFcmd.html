@@ -11,7 +11,7 @@
     </div>
   </header>
 
-  <main id="app" class="ui container" style="width: 75vw;">
+  <main id="app" class="ui container">
     <table class="ui celled striped center table" style="text-align:center">
       <thead>
         <tr>
@@ -55,16 +55,18 @@
       delimiters: ["[[", "]]"],
       methods: {
         addUser(mail) {
+          let i = this.users.findIndex(user => {
+            return user["login"] === mail;
+          });
+          this.users.splice(i, 1);
           axios.post("/addUser/" + mail);
-          $(this)
-            .closest("tr")
-            .remove();
         },
         deleteUser(mail) {
+          let i = this.users.findIndex(user => {
+            return user["login"] === mail;
+          });
+          this.users.splice(i, 1);
           axios.post("/deleteUser/" + mail);
-          $(this)
-            .closest("tr")
-            .remove();
         }
       },
       created() {

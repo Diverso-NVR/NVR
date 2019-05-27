@@ -56,9 +56,17 @@
       delimiters: ["[[", "]]"],
       methods: {
         addUser(mail) {
+          let i = this.users.findIndex(user => {
+            return user["login"] === mail;
+          });
+          this.users.splice(i, 1);
           axios.post("/addUser/" + mail);
         },
         deleteUser(mail) {
+          let i = this.users.findIndex(user => {
+            return user["login"] === mail;
+          });
+          this.users.splice(i, 1);
           axios.post("/deleteUser/" + mail);
         }
       },
