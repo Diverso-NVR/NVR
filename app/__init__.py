@@ -142,7 +142,7 @@ def addSource(auditorium, building, ip, name, sound, soundType, tracking):
             room['vid'].append(ip)
             room['name'].append(name)
 
-            with open('app/test.json', 'w') as f:
+            with open('app/data.json', 'w') as f:
                 json.dump(data, f)
             return ""
         id += 1
@@ -180,7 +180,7 @@ def addSource(auditorium, building, ip, name, sound, soundType, tracking):
 
     data[building].append(room)
 
-    with open('app/test.json', 'w') as f:
+    with open('app/data.json', 'w') as f:
         json.dump(data, f)
 
     return ""
