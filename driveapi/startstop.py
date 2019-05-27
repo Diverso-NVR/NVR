@@ -81,8 +81,8 @@ def stop(room_index, building):
         except OSError:
             os.system("sudo kill %s" % (process.pid))
 
-    t = Thread(target=merge, args=(room_index, building), daemon=True)
-    t.start()
+    # t = Thread(target=merge, args=(room_index, building), daemon=True)
+    # t.start()
 
     res = ""
     if os.path.exists("../vids/sound_" + records[building][room_index] + ".aac"):
