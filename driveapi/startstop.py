@@ -51,40 +51,6 @@ def start(room_index, sound_type, building):
     records[building][room_index] = "{}-{}-{}_{}:{}_{}_".format(
         today.year, today.month, today.day, hour, minute, rooms[building][room_index]["auditorium"])
 
-    if rooms[building][room_index]["auditorium"] == '304' or rooms[building][room_index]["auditorium"] == '307':
-        enc = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://admin:admin@172.18.183." +
-                               rooms[building][room_index]['sound']['enc'][0] +
-                               " -y -c:a copy -vn -f mp4 ../vids/sound_"
-                               + records[building][room_index] + ".aac", shell=True, preexec_fn=os.setsid)
-        processes[building][room_index].append(enc)
-
-        process1 = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://admin:admin@172.18.183." +
-                                    rooms[building][room_index]['vid'][0] + " -y -c:v copy -an -f mp4 ../vids/vid_" +
-                                    records[building][room_index] + rooms[building][room_index]['vid'][0].split('/')[0] + ".mp4", shell=True, preexec_fn=os.setsid)
-        processes[building][room_index].append(process1)
-        process2 = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://admin:Supervisor@172.18.183." +
-                                    rooms[building][room_index]['vid'][1] + " -y -c:v copy -an -f mp4 ../vids/vid_" +
-                                    records[building][room_index] + rooms[building][room_index]['vid'][1].split('/')[0] + ".mp4", shell=True, preexec_fn=os.setsid)
-        processes[building][room_index].append(process2)
-        return
-
-    if rooms[building][room_index]["auditorium"] == '306':
-        enc = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://admin:Supervisor@172.18.183." +
-                               rooms[building][room_index]['sound']['enc'][0].split('/')[0] +
-                               " -y -c:a copy -vn -f mp4 ../vids/sound_"
-                               + records[building][room_index] + ".aac", shell=True, preexec_fn=os.setsid)
-        processes[building][room_index].append(enc)
-
-        process1 = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://admin:Supervisor@172.18.183." +
-                                    rooms[building][room_index]['vid'][0] + " -y -c:v copy -an -f mp4 ../vids/vid_" +
-                                    records[building][room_index] + rooms[building][room_index]['vid'][0].split('/')[0] + ".mp4", shell=True, preexec_fn=os.setsid)
-        processes[building][room_index].append(process1)
-        process2 = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://admin:Supervisor@172.18.183." +
-                                    rooms[building][room_index]['vid'][1] + " -y -c:v copy -an -f mp4 ../vids/vid_" +
-                                    records[building][room_index] + rooms[building][room_index]['vid'][1].split('/')[0] + ".mp4", shell=True, preexec_fn=os.setsid)
-        processes[building][room_index].append(process2)
-        return
-
     if sound_type == "enc":
         enc = subprocess.Popen("ffmpeg -rtsp_transport http -i rtsp://192.168." + network[building] + "." +
                                rooms[building][room_index]['sound']['enc'][0] +
@@ -110,10 +76,10 @@ def stop(room_index, building):
         try:
             os.killpg(process.pid, signal.SIGTERM)
         except OSError:
-            os.system("sudo kill %s" % (process.pid, ))
+            os.system("sudo kill %s" % (process.pid))
 
-    t = Thread(target=merge, args=(room_index, building), daemon=True)
-    t.start()
+    # t = Thread(target=merge, args=(room_index, building), daemon=True)
+    # t.start()
 
     res = ""
     if os.path.exists("../vids/sound_" + records[building][room_index] + ".aac"):
