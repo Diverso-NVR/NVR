@@ -75,12 +75,11 @@ def start(room_index, sound_type, building):
 
 
 def stop(room_index, building):
-    with lock:
-        for process in processes[building][room_index]:
-            try:
-                os.killpg(process.pid, signal.SIGTERM)
-            except OSError:
-                os.system("sudo kill %s" % (process.pid))
+    for process in processes[building][room_index]:
+        try:
+            os.killpg(process.pid, signal.SIGTERM)
+        except OSError:
+            os.system("sudo kill %s" % (process.pid))
 
     t = Thread(target=merge, args=(room_index, building), daemon=True)
     t.start()
