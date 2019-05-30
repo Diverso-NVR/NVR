@@ -163,7 +163,7 @@ def addSource(auditorium, building, ip, name, sound, soundType, tracking):
         'timestamp': 0,
         'soundType': 'enc',
         'mainCam': "",
-        'track': [],
+        'tracking': [],
         'sound': {'enc': [], 'cam': []},
         'vid': [],
         'name': [],
