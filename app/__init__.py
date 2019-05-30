@@ -127,9 +127,7 @@ def addButton():
 def addSource(auditorium, building, ip, name, sound, soundType, tracking):
     id = 1
     ip = '/'.join(ip.split('-'))
-    with open('app/data.json', 'r') as f:
-        tempData = json.loads(f.read())
-    for room in tempData[building]:
+    for room in data[building]:
         if room['auditorium'] == auditorium:
             if soundType == 'maincam':
                 room['mainCam'] = ip
@@ -142,6 +140,12 @@ def addSource(auditorium, building, ip, name, sound, soundType, tracking):
                 room['track'].append(ip)
             room['vid'].append(ip)
             room['name'].append(name)
+
+            tempData = data
+            for build in tempData:
+                for room in tempData[build]:
+                    room['timestamp'] = 0
+                    room['status'] = 'free'
 
             with open('app/data.json', 'w') as f:
                 json.dump(tempData, f)
@@ -179,7 +183,13 @@ def addSource(auditorium, building, ip, name, sound, soundType, tracking):
     room['vid'].append(ip)
     room['name'].append(name)
 
-    tempData[building].append(room)
+    data[building].append(room)
+
+    tempData = data
+    for build in tempData:
+        for room in tempData[build]:
+            room['timestamp'] = 0
+            room['status'] = 'free'
 
     with open('app/data.json', 'w') as f:
         json.dump(tempData, f)
