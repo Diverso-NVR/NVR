@@ -8,12 +8,11 @@
         <h4 class="item">ФКМД</h4>
       </div>
       <div class="right menu">
-        <a class="right aligned item" id="addSourceBtn"
-          ><i class="plus icon"></i
-        ></a>
-        <a class="right aligned item" id="adminBtn"
-          ><i class="user icon"></i
-        ></a>
+        <div class="ui buttons">
+          <button class="ui icon black button" id="adminBtn">
+            <i class="user icon"></i>
+          </button>
+        </div>
       </div>
     </div>
   </header>
@@ -29,6 +28,8 @@
           <th>Время записи</th>
           <th>Календарь</th>
           <th>Диск</th>
+          <th>Изменить</th>
+          <th>Удалить</th>
         </tr>
       </thead>
       <tbody>
@@ -97,9 +98,81 @@
               <i class="google drive icon"></i>
             </a>
           </td>
+          <td>
+            <button class="ui icon button" @click.prevent="edit(camera)">
+              <i class="edit icon"></i>
+            </button>
+          </td>
+          <td>
+            <button class="ui icon button" @click.prevent="del(camera)">
+              <i class="window close icon"></i>
+            </button>
+          </td>
         </tr>
       </tbody>
     </table>
+
+    <button
+      class="ui fluid basic button"
+      @click.prevent="clear()"
+      v-if="!addForm"
+    >
+      <i class="plus square large icon"></i>
+    </button>
+
+    <div v-if="addForm" class="addCam">
+      <label for="name">Название</label>
+      <input type="text" name="name" v-model="newSource.name" />
+
+      <label for="name">IP</label>
+      <input type="text" name="ip" v-model="newSource.ip" />
+
+      <label>Тип источника</label>
+      <select
+        class="ui fluid dropdown"
+        name="soundType"
+        v-model="newSource.soundType"
+      >
+        <option value="enc">Кодер</option>
+        <option value="cam">Камера</option>
+        <option value="maincam">Главная камера</option>
+      </select>
+
+      <label>Аудитория</label>
+      <input
+        type="text"
+        name="auditorium"
+        placeholder="Название комнаты"
+        v-model="newSource.auditorium"
+      />
+
+      <label>Корпус</label>
+      <select
+        class="ui fluid dropdown"
+        name="building"
+        v-model="newSource.building"
+      >
+        <option value="МИЭМ">МИЭМ</option>
+        <option value="ФКМД">ФКМД</option>
+        <option value="ФКН">ФКН</option>
+      </select>
+
+      <input type="checkbox" name="tracking" v-model="newSource.tracking" />
+      <label>Трекинг</label>
+
+      <input type="checkbox" name="sound" v-model="newSource.sound" />
+      <label>Звук</label>
+
+      <button class="ui button" @click.prevent="save(newSource)">
+        Сохранить
+      </button>
+      <button class="ui button" @click.prevent="clear()">
+        Отмена
+      </button>
+      <div class="ui negative message" v-if="!correctData">
+        Поля ввода должны быть заполнены
+      </div>
+    </div>
   </main>
 
   <script>
@@ -109,16 +182,13 @@
       });
     });
 
-    $("#addSourceBtn").click(() => {
-      $.ajax("/add-button").done(data => {
-        $("body").html(data);
-      });
-    });
-
     new Vue({
       el: "#app",
       data: () => ({
-        cameras: []
+        cameras: [],
+        addForm: false,
+        newSource: {},
+        correctData: true
       }),
       delimiters: ["[[", "]]"],
       computed: {
@@ -134,6 +204,17 @@
           ts -= m * 60;
           return `${h} ч. ${m} м. ${ts} с.`;
         },
+        del(camera) {
+          let i = this.cameras.indexOf(camera);
+          this.cameras.splice(i, 1);
+          axios.post("delete-camera/" + camera.id + "/" + camera.building);
+        },
+        clear(camera) {
+          this.addForm = !this.addForm;
+          this.newSource = {};
+        },
+        edit(camera) {},
+        save(newSource) {},
         soundCheck(camera, soundSource) {
           axios
             .post(
