@@ -41,7 +41,7 @@ def duration(date):
 
 
 def record(num, building, startt, end):
-    startstop.start(str(num), "enc", building)
+    startstop.start(str(num), "cam", building)
     time.sleep(duration(end) - duration(startt))
     startstop.stop(str(num), building)
 
