@@ -1,126 +1,114 @@
 {
-  "ФКМД": [
+  "\u0424\u041a\u041c\u0414": [
     {
       "id": 1,
-      "building": "ФКМД",
-      "auditorium": "П505",
+      "building": "\u0424\u041a\u041c\u0414",
+      "auditorium": "\u041f505",
       "status": "free",
       "timestamp": 0,
       "soundType": "enc",
-
       "mainCam": "192.168.11.13",
       "tracking": ["192.168.11.13"],
       "sound": {
         "enc": ["192.168.11.11/main"],
-        "cam": ["192.168.11.12/admin/Supervisor"]
+        "cam": ["admin:Supervisor@192.168.11.12"]
       },
       "vid": [
         "192.168.11.11/main",
-        "192.168.11.12/admin/Supervisor",
+        "admin:Supervisor@192.168.11.12",
         "192.168.11.13",
         "192.168.11.14"
       ],
-      "name": ["кодер", "", "", ""],
-
+      "name": ["\u043a\u043e\u0434\u0435\u0440", "", "", ""],
       "drive": "https://drive.google.com/drive/u/1/folders/1UsoGpzf_Nui6Zs1kOGOdwctHJpVBP-Ru",
       "calendar": "auditory.ru_rtkt64ce54bpi1dv9qid8okhkc@group.calendar.google.com"
     },
     {
       "id": 2,
-      "building": "ФКМД",
-      "auditorium": "П500",
+      "building": "\u0424\u041a\u041c\u0414",
+      "auditorium": "\u041f500",
       "status": "free",
       "timestamp": 0,
       "soundType": "enc",
-
       "mainCam": "192.168.11.23",
       "tracking": ["192.168.11.23"],
       "sound": {
         "enc": ["192.168.11.21/main"],
-        "cam": ["192.168.11.22/admin/Supervisor"]
+        "cam": ["admin:Supervisor@192.168.11.22"]
       },
       "vid": [
         "192.168.11.21/main",
-        "192.168.11.22/admin/Supervisor",
+        "admin:Supervisor@192.168.11.22",
         "192.168.11.23",
         "192.168.11.24",
         "192.168.11.25",
         "192.168.11.26"
       ],
-      "name": ["кодер", "", "", "", "", ""],
-
+      "name": ["\u043a\u043e\u0434\u0435\u0440", "", "", "", "", ""],
       "drive": "https://drive.google.com/drive/u/1/folders/1o6_Pbsp4ZgFogda--o6Cz3o5u9kP69A_",
       "calendar": "auditory.ru_jba0plcebui5gelt34pq8tp69s@group.calendar.google.com"
     },
     {
       "id": 3,
-      "building": "ФКМД",
-      "auditorium": "С401",
+      "building": "\u0424\u041a\u041c\u0414",
+      "auditorium": "\u0421401",
       "status": "free",
       "timestamp": 0,
       "soundType": "enc",
-
       "mainCam": "192.168.11.33",
       "tracking": ["192.168.11.33"],
       "sound": {
         "enc": ["192.168.11.31/main"],
-        "cam": ["192.168.11.32/admin/Supervisor"]
+        "cam": ["admin:Supervisor@192.168.11.32"]
       },
       "vid": [
         "192.168.11.31/main",
-        "192.168.11.32/admin/Supervisor",
+        "admin:Supervisor@192.168.11.32",
         "192.168.11.33",
         "192.168.11.34"
       ],
-      "name": ["кодер", "", "", ""],
-
+      "name": ["\u043a\u043e\u0434\u0435\u0440", "", "", ""],
       "drive": "https://drive.google.com/drive/u/1/folders/1OXz4FuseEJaN3Xtm1cH0CP5Fgrg-GOMD",
       "calendar": "auditory.ru_adjp0a1nn3mnnu8fju46vh260g@group.calendar.google.com"
     }
   ],
-  "МИЭМ": [
+  "\u041c\u0418\u042d\u041c": [
     {
       "id": 1,
-      "building": "МИЭМ",
+      "building": "\u041c\u0418\u042d\u041c",
       "auditorium": "504",
       "status": "free",
       "timestamp": 0,
       "soundType": "enc",
-
-      "mainCam": "192.168.15.13",
-      "tracking": ["192.168.15.13"],
+      "mainCam": "192.168.15.29",
+      "tracking": ["192.168.15.29"],
       "sound": {
-        "enc": ["192.168.15.11/main"],
-        "cam": ["192.168.15.12/admin/Supervisor"]
+        "enc": [""],
+        "cam": [""]
       },
       "vid": [
-        "192.168.15.11/main",
-        "192.168.15.12/admin/Supervisor",
-        "192.168.15.13",
-        "192.168.15.14"
+        "admin:Supervisor@192.168.15.247",
+        "admin:Supervisor@192.168.15.29"
       ],
-      "name": ["кодер", "", "", ""],
-
+      "name": ["", ""],
       "drive": "https://drive.google.com/drive/u/1/folders/114O1I51q52wRAsbWuX2jV5MfL29Hq0d0",
       "calendar": "auditory.ru_852uel7ga90vudirasmndcppss@group.calendar.google.com"
     },
     {
       "id": 2,
-      "building": "МИЭМ",
+      "building": "\u041c\u0418\u042d\u041c",
       "auditorium": "520",
       "status": "free",
       "timestamp": 0,
       "soundType": "enc",
-
-      "mainCam": "192.168.15.45",
-      "tracking": ["192.168.15.45"],
-      "sound": { "enc": ["192.168.15.56/main"], "cam": [""] },
-      "vid": ["192.168.15.42", "192.168.15.45", "192.168.15.56/main"],
-      "name": ["", "", "кодер"],
-
+      "mainCam": "192.168.15.42",
+      "tracking": ["192.168.15.42"],
+      "sound": { "enc": [""], "cam": [""] },
+      "vid": ["192.168.15.42", "192.168.15.47"],
+      "name": ["", ""],
       "drive": "https://drive.google.com/drive/u/1/folders/1nYNAy--UhZHhkr0r0nx4Edhn8uoIGM3d",
       "calendar": "auditory.ru_g4h95d1fk3tooennjhtck7fuoc@group.calendar.google.com"
     }
   ],
-  "ФКН": []
+  "\u0424\u041a\u041d": []
 }
