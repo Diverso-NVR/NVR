@@ -56,7 +56,7 @@ def givePermissions(building, mail):
 
 
 def createCalendar(building, room):
-    calendar = {
+    calendar_metadata = {
         'summary': building + "-" + room,
         'timeZone': 'Europe/Moscow'
     }
@@ -70,7 +70,7 @@ def createCalendar(building, room):
     calendar = service.acl().list(
         calendarId=copyPerm).execute()
 
-    created_calendar = service.calendars().insert(body=calendar).execute()
+    created_calendar = service.calendars().insert(body=calendar_metadata).execute()
 
     for rule in calendar['items']:
         if rule['role'] == 'writer':

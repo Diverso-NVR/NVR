@@ -127,7 +127,6 @@ def addButton():
 def addSource(auditorium, building, ip, name, sound, soundType, tracking):
     id = 1
     ip = '/'.join(ip.split('-'))
-    print(ip)
     for room in data[building]:
         if room['auditorium'] == auditorium:
             if soundType == 'maincam':
@@ -142,8 +141,14 @@ def addSource(auditorium, building, ip, name, sound, soundType, tracking):
             room['vid'].append(ip)
             room['name'].append(name)
 
-            with open('app/test.json', 'w') as f:
-                json.dump(data, f)
+            tempData = data
+            for build in tempData:
+                for room in tempData[build]:
+                    room['timestamp'] = 0
+                    room['status'] = 'free'
+
+            with open('app/data.json', 'w') as f:
+                json.dump(tempData, f)
             return ""
         id += 1
 
@@ -158,7 +163,7 @@ def addSource(auditorium, building, ip, name, sound, soundType, tracking):
         'timestamp': 0,
         'soundType': 'enc',
         'mainCam': "",
-        'track': [],
+        'tracking': [],
         'sound': {'enc': [], 'cam': []},
         'vid': [],
         'name': [],
@@ -180,8 +185,14 @@ def addSource(auditorium, building, ip, name, sound, soundType, tracking):
 
     data[building].append(room)
 
-    with open('app/test.json', 'w') as f:
-        json.dump(data, f)
+    tempData = data
+    for build in tempData:
+        for room in tempData[build]:
+            room['timestamp'] = 0
+            room['status'] = 'free'
+
+    with open('app/data.json', 'w') as f:
+        json.dump(tempData, f)
 
     return ""
 

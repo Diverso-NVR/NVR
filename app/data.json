@@ -8,10 +8,18 @@
       "timestamp": 0,
       "soundType": "enc",
 
-      "mainCam": "13",
-      "track": [],
-      "sound": { "enc": ["11/main"], "cam": ["12"] },
-      "vid": ["11/main", "12", "13", "14"],
+      "mainCam": "192.168.11.13",
+      "tracking": ["192.168.11.13"],
+      "sound": {
+        "enc": ["192.168.11.11/main"],
+        "cam": ["192.168.11.12/admin/Supervisor"]
+      },
+      "vid": [
+        "192.168.11.11/main",
+        "192.168.11.12/admin/Supervisor",
+        "192.168.11.13",
+        "192.168.11.14"
+      ],
       "name": ["кодер", "", "", ""],
 
       "drive": "https://drive.google.com/drive/u/1/folders/1UsoGpzf_Nui6Zs1kOGOdwctHJpVBP-Ru",
@@ -25,10 +33,20 @@
       "timestamp": 0,
       "soundType": "enc",
 
-      "mainCam": "23",
-      "track": [],
-      "sound": { "enc": ["21/main"], "cam": ["22"] },
-      "vid": ["21/main", "22", "23", "24", "25", "26"],
+      "mainCam": "192.168.11.23",
+      "tracking": ["192.168.11.23"],
+      "sound": {
+        "enc": ["192.168.11.21/main"],
+        "cam": ["192.168.11.22/admin/Supervisor"]
+      },
+      "vid": [
+        "192.168.11.21/main",
+        "192.168.11.22/admin/Supervisor",
+        "192.168.11.23",
+        "192.168.11.24",
+        "192.168.11.25",
+        "192.168.11.26"
+      ],
       "name": ["кодер", "", "", "", "", ""],
 
       "drive": "https://drive.google.com/drive/u/1/folders/1o6_Pbsp4ZgFogda--o6Cz3o5u9kP69A_",
@@ -42,10 +60,18 @@
       "timestamp": 0,
       "soundType": "enc",
 
-      "mainCam": "33",
-      "track": [],
-      "sound": { "enc": ["31/main"], "cam": ["32"] },
-      "vid": ["31/main", "32", "33", "34"],
+      "mainCam": "192.168.11.33",
+      "tracking": ["192.168.11.33"],
+      "sound": {
+        "enc": ["192.168.11.31/main"],
+        "cam": ["192.168.11.32/admin/Supervisor"]
+      },
+      "vid": [
+        "192.168.11.31/main",
+        "192.168.11.32/admin/Supervisor",
+        "192.168.11.33",
+        "192.168.11.34"
+      ],
       "name": ["кодер", "", "", ""],
 
       "drive": "https://drive.google.com/drive/u/1/folders/1OXz4FuseEJaN3Xtm1cH0CP5Fgrg-GOMD",
@@ -61,10 +87,18 @@
       "timestamp": 0,
       "soundType": "enc",
 
-      "mainCam": "13",
-      "track": [],
-      "sound": { "enc": ["11/main"], "cam": ["12"] },
-      "vid": ["11/main", "12", "13", "14"],
+      "mainCam": "192.168.15.13",
+      "tracking": ["192.168.15.13"],
+      "sound": {
+        "enc": ["192.168.15.11/main"],
+        "cam": ["192.168.15.12/admin/Supervisor"]
+      },
+      "vid": [
+        "192.168.15.11/main",
+        "192.168.15.12/admin/Supervisor",
+        "192.168.15.13",
+        "192.168.15.14"
+      ],
       "name": ["кодер", "", "", ""],
 
       "drive": "https://drive.google.com/drive/u/1/folders/114O1I51q52wRAsbWuX2jV5MfL29Hq0d0",
@@ -78,10 +112,10 @@
       "timestamp": 0,
       "soundType": "enc",
 
-      "mainCam": "",
-      "track": [],
-      "sound": { "enc": ["56/main"], "cam": [""] },
-      "vid": ["42", "43", "56/main"],
+      "mainCam": "192.168.15.45",
+      "tracking": ["192.168.15.45"],
+      "sound": { "enc": ["192.168.15.56/main"], "cam": [""] },
+      "vid": ["192.168.15.42", "192.168.15.45", "192.168.15.56/main"],
       "name": ["", "", "кодер"],
 
       "drive": "https://drive.google.com/drive/u/1/folders/1nYNAy--UhZHhkr0r0nx4Edhn8uoIGM3d",

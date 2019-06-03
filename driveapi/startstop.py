@@ -4,26 +4,15 @@ import signal
 import os
 import json
 from threading import Thread
+import requests
+
 from driveapi.driveSettings import upload
-
-"""
-    192.168.11.
-    P505: 11 12 13 14
-    P500: 21 22 23 24 25 26
-    S401: 31 32 33 34
-
-    192.168.13.
-
-
-    192.168.15.
-    Для тестов 42 43 56-кодер
-    45 47  51 52 53 54 55 84-кодер 206
-"""
 
 with open("app/data.json", 'r') as f:
     data = json.loads(f.read())
 
-network = {"ФКМД": "11", "ФКН": "13", "МИЭМ": "15"}
+tracking_url = '172.18.198.31:5000/tracking'
+
 rooms = {}
 processes = {}
 records = {}
@@ -36,10 +25,21 @@ for building in data:
         rooms[building][str(room['id'])]['sound'] = room["sound"]
         rooms[building][str(room['id'])]['vid'] = room["vid"]
         rooms[building][str(room['id'])]['mainCam'] = room["mainCam"]
+        rooms[building][str(room['id'])]['tracking'] = room["tracking"]
 
 
 # TODO do smth with rtsp protocols'
 def start(room_index, sound_type, building):
+    try:
+        req = {
+            'command': 'start',
+            'ip': rooms[building][room_index]['tracking'][0],
+            'port': '80'
+        }
+        response = requests.post(tracking_url, json=req)
+    except Exception:
+        pass
+
     processes[building][room_index] = []
     today = datetime.date.today()
     curr_time = datetime.datetime.now().time()
@@ -52,26 +52,36 @@ def start(room_index, sound_type, building):
         today.year, today.month, today.day, hour, minute, rooms[building][room_index]["auditorium"])
 
     if sound_type == "enc":
-        enc = subprocess.Popen("ffmpeg -rtsp_transport http -i rtsp://192.168." + network[building] + "." +
+        enc = subprocess.Popen("ffmpeg -rtsp_transport http -i rtsp://" +
                                rooms[building][room_index]['sound']['enc'][0] +
                                " -y -c:a copy -vn -f mp4 ../vids/sound_"
                                + records[building][room_index] + ".aac", shell=True, preexec_fn=os.setsid)
         processes[building][room_index].append(enc)
     else:
-        camera = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://admin:Supervisor@192.168." + network[building] + "." +
+        camera = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://" +
                                   rooms[building][room_index]['sound']['cam'][0] +
                                   " -y -c:a copy -vn -f mp4 ../vids/sound_"
                                   + records[building][room_index] + ".aac", shell=True, preexec_fn=os.setsid)
         processes[building][room_index].append(camera)
 
     for cam in rooms[building][room_index]['vid']:
-        process = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://admin:Supervisor@192.168." + network[building] + "." +
+        process = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://" +
                                    cam + " -y -c:v copy -an -f mp4 ../vids/vid_" +
-                                   records[building][room_index] + cam.split('/')[0] + ".mp4", shell=True, preexec_fn=os.setsid)
+                                   records[building][room_index] + cam.split('/')[0].split('.')[-1] + ".mp4", shell=True, preexec_fn=os.setsid)
         processes[building][room_index].append(process)
 
 
 def stop(room_index, building):
+    try:
+        req = {
+            'command': 'stop',
+            'ip': rooms[building][room_index]['tracking'][0],
+            'port': '80'
+        }
+        response = requests.post(tracking_url, json=req)
+    except Exception:
+        pass
+
     for process in processes[building][room_index]:
         try:
             os.killpg(process.pid, signal.SIGTERM)
@@ -85,13 +95,14 @@ def stop(room_index, building):
     if os.path.exists("../vids/sound_" + records[building][room_index] + ".aac"):
         for cam in rooms[building][room_index]['vid']:
             add_sound(records[building][room_index] +
-                      cam.split('/')[0], records[building][room_index])
+                      cam.split('/')[0].split('.')[-1], records[building][room_index])
     else:
         res = "vid_"
 
     for cam in rooms[building][room_index]['vid']:
         try:
-            upload("../vids/" + res + records[building][room_index] + cam.split('/')[0] + ".mp4",
+            upload("../vids/" + res + records[building][room_index]
+                   + cam.split('/')[0].split('.')[-1] + ".mp4",
                    rooms[building][room_index]["auditorium"])
         except Exception:
             pass
@@ -105,9 +116,11 @@ def add_sound(video_cam_num, audio_cam_num):
 
 
 def merge(room_index, building):
-    merge_video(records[building][room_index] + rooms[building][room_index]['sound']['enc'][0].split('/')[0],
+    merge_video(records[building][room_index]
+                + rooms[building][room_index]['sound']['enc'][0].split('/')[0].split('.')[-1],
                 records[building][room_index] +
-                rooms[building][room_index]['mainCam'].split('/')[0],
+                rooms[building][room_index]['mainCam'].split(
+                    '/')[0].split('.')[-1],
                 records[building][room_index])
 
     res = ""
