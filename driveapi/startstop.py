@@ -3,7 +3,7 @@ import subprocess
 import signal
 import os
 import json
-from threading import Thread
+from threading import Thread, RLock
 import requests
 
 from driveapi.driveSettings import upload
@@ -12,6 +12,7 @@ with open("app/data.json", 'r') as f:
     data = json.loads(f.read())
 
 tracking_url = '172.18.198.31:5000/tracking'
+lock = RLock()
 
 rooms = {}
 processes = {}
@@ -30,15 +31,15 @@ for building in data:
 
 # TODO do smth with rtsp protocols'
 def start(room_index, sound_type, building):
-    try:
-        req = {
-            'command': 'start',
-            'ip': rooms[building][room_index]['tracking'][0],
-            'port': '80'
-        }
-        response = requests.post(tracking_url, json=req)
-    except Exception:
-        pass
+    # try:
+    #     req = {
+    #         'command': 'start',
+    #         'ip': rooms[building][room_index]['tracking'][0],
+    #         'port': '80'
+    #     }
+    #     response = requests.post(tracking_url, json=req)
+    # except Exception:
+    #     pass
 
     processes[building][room_index] = []
     today = datetime.date.today()
@@ -72,15 +73,16 @@ def start(room_index, sound_type, building):
 
 
 def stop(room_index, building):
-    try:
-        req = {
-            'command': 'stop',
-            'ip': rooms[building][room_index]['tracking'][0],
-            'port': '80'
-        }
-        response = requests.post(tracking_url, json=req)
-    except Exception:
-        pass
+    # with lock:
+    #     try:
+    #         req = {
+    #             'command': 'stop',
+    #             'ip': rooms[building][room_index]['tracking'][0],
+    #             'port': '80'
+    #         }
+    #         response = requests.post(tracking_url, json=req)
+    #     except Exception:
+    #         pass
 
     for process in processes[building][room_index]:
         try:
