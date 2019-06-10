@@ -118,6 +118,29 @@
       "soundType": "enc",
       "mainCam": "",
       "tracking": [""],
+      "sound": { "enc": ["172.18.200.61"], "cam": ["172.18.200.61"] },
+      "vid": [
+        "172.18.200.51",
+        "172.18.200.52",
+        "172.18.200.53",
+        "172.18.200.54",
+        "172.18.200.55",
+        "172.18.200.56",
+        "172.18.200.61"
+      ],
+      "name": ["", ""],
+      "drive": "https://drive.google.com/drive/u/1/folders/1Rja-cbUhfLEs4Lud8do_bSKzg9DzR17g",
+      "calendar": ""
+    },
+    {
+      "id": 4,
+      "building": "\u041c\u0418\u042d\u041c",
+      "auditorium": "Техношоу залы",
+      "status": "free",
+      "timestamp": 0,
+      "soundType": "enc",
+      "mainCam": "",
+      "tracking": [""],
       "sound": { "enc": [""], "cam": [""] },
       "vid": [
         "172.18.200.51",
@@ -125,7 +148,8 @@
         "172.18.200.53",
         "172.18.200.54",
         "172.18.200.55",
-        "172.18.200.56"
+        "172.18.200.56",
+        "172.18.200.61"
       ],
       "name": ["", ""],
       "drive": "https://drive.google.com/drive/u/1/folders/1Rja-cbUhfLEs4Lud8do_bSKzg9DzR17g",
