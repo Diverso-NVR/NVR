@@ -53,7 +53,7 @@ def start(room_index, sound_type, building):
         today.year, today.month, today.day, hour, minute, rooms[building][room_index]["auditorium"])
 
     if sound_type == "enc":
-        enc = subprocess.Popen("ffmpeg -rtsp_transport http -i rtsp://" +
+        enc = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://" +
                                rooms[building][room_index]['sound']['enc'][0] +
                                " -y -c:a copy -vn -f mp4 ../vids/sound_"
                                + records[building][room_index] + ".aac", shell=True, preexec_fn=os.setsid)

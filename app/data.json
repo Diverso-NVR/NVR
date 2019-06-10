@@ -141,8 +141,11 @@
       "soundType": "enc",
       "mainCam": "",
       "tracking": [""],
-      "sound": { "enc": ["172.18.200.50"], "cam": ["172.18.200.50"] },
-      "vid": ["172.18.200.50"],
+      "sound": {
+        "enc": ["172.18.200.50/live/av0"],
+        "cam": ["172.18.200.50/live/av0"]
+      },
+      "vid": ["172.18.200.50/live/av0"],
       "name": ["", ""],
       "drive": "https://drive.google.com/drive/u/1/folders/1Rja-cbUhfLEs4Lud8do_bSKzg9DzR17g",
       "calendar": ""
@@ -157,7 +160,7 @@
       "mainCam": "",
       "tracking": [""],
       "sound": { "enc": ["172.18.200.59"], "cam": ["172.18.200.59"] },
-      "vid": ["172.18.200.58", "172.18.200.59"],
+      "vid": ["172.18.200.58/live/av0", "172.18.200.59"],
       "name": ["", ""],
       "drive": "https://drive.google.com/drive/u/1/folders/1Rja-cbUhfLEs4Lud8do_bSKzg9DzR17g",
       "calendar": ""
