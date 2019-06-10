@@ -28,8 +28,8 @@
           <th>Время записи</th>
           <th>Календарь</th>
           <th>Диск</th>
-          <th>Изменить</th>
-          <th>Удалить</th>
+          <!-- <th>Изменить</th>
+          <th>Удалить</th> -->
         </tr>
       </thead>
       <tbody>
@@ -98,7 +98,7 @@
               <i class="google drive icon"></i>
             </a>
           </td>
-          <td>
+          <!-- <td>
             <button class="ui icon button" @click.prevent="edit(camera)">
               <i class="edit icon"></i>
             </button>
@@ -107,18 +107,18 @@
             <button class="ui icon button" @click.prevent="del(camera)">
               <i class="window close icon"></i>
             </button>
-          </td>
+          </td> -->
         </tr>
       </tbody>
     </table>
 
-    <button
+    <!-- <button
       class="ui fluid basic button"
       @click.prevent="clear()"
       v-if="!addForm"
     >
       <i class="plus square large icon"></i>
-    </button>
+    </button> -->
 
     <div v-if="addForm" class="addCam">
       <label for="name">Название</label>
