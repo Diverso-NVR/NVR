@@ -112,7 +112,7 @@
     {
       "id": 3,
       "building": "\u041c\u0418\u042d\u041c",
-      "auditorium": "Техношоу-Зал",
+      "auditorium": "ТехношоуЗал",
       "status": "free",
       "timestamp": 0,
       "soundType": "enc",
@@ -135,7 +135,7 @@
     {
       "id": 4,
       "building": "\u041c\u0418\u042d\u041c",
-      "auditorium": "Техношоу-пресс-комната",
+      "auditorium": "ТехношоуПрессКомната",
       "status": "free",
       "timestamp": 0,
       "soundType": "enc",
@@ -153,7 +153,7 @@
     {
       "id": 5,
       "building": "\u041c\u0418\u042d\u041c",
-      "auditorium": "Техношоу-шоурум",
+      "auditorium": "ТехношоуШоурум",
       "status": "free",
       "timestamp": 0,
       "soundType": "enc",
