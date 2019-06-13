@@ -52,14 +52,8 @@ def start(room_index, sound_type, building):
     records[building][room_index] = "{}-{}-{}_{}:{}_{}_".format(
         today.year, today.month, today.day, hour, minute, rooms[building][room_index]["auditorium"])
 
-    # if rooms[building][room_index]['auditorium'] == 'Техношоу-пресс-комната':
-    #     proc = subprocess.Popen(
-    #         "ffmpeg -rtsp_transport tcp -i rtsp://172.18.200.50/live/av0 -y -c copy ../vids/" +
-    #         records[building][room_index] + ".mp4",
-    #         shell=True, preexec_fn=os.setsid)
-
     if sound_type == "enc":
-        enc = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://" +
+        enc = subprocess.Popen("ffmpeg -rtsp_transport http -i rtsp://" +
                                rooms[building][room_index]['sound']['enc'][0] +
                                " -y -c:a copy -vn -f mp4 ../vids/sound_"
                                + records[building][room_index] + ".aac", shell=True, preexec_fn=os.setsid)
@@ -190,9 +184,3 @@ def merge_video(screen_num, video_cam_num, record_num):
     #                           record_num + "merged_3.mp4"], shell=False)
     # os.system("renice -n 20 %s" % (third.pid, ))
     # third.wait()
-
-
-data = ['vid_2019-6-10_14:37_ТехношоуЗал_51.mp4', 'vid_2019-6-10_14:37_ТехношоуЗал_52.mp4', 'vid_2019-6-10_14:37_ТехношоуЗал_53.mp4', 'vid_2019-6-10_14:37_ТехношоуЗал_54.mp4', 'vid_2019-6-10_14:37_ТехношоуЗал_55.mp4', 'vid_2019-6-10_14:37_ТехношоуЗал_56.mp4', 'vid_2019-6-10_14:37_ТехношоуЗал_61.mp4', 'vid_2019-6-10_15:04_ТехношоуПрессКомната_50.mp4', 'vid_2019-6-10_15:04_ТехношоуШоурум_58.mp4', 'vid_2019-6-10_15:58_ТехношоуШоурум_58.mp4', 'vid_2019-6-10_16:06_ТехношоуШоурум_58.mp4', 'vid_2019-6-10_16:18_ТехношоуЗал_51.mp4',
-        'vid_2019-6-10_16:18_ТехношоуЗал_52.mp4', 'vid_2019-6-10_16:18_ТехношоуЗал_53.mp4', 'vid_2019-6-10_16:18_ТехношоуЗал_54.mp4', 'vid_2019-6-10_16:18_ТехношоуЗал_55.mp4', 'vid_2019-6-10_16:18_ТехношоуЗал_56.mp4', 'vid_2019-6-10_16:18_ТехношоуЗал_61.mp4', 'vid_2019-6-10_17:15_ТехношоуЗал_51.mp4', 'vid_2019-6-10_17:15_ТехношоуЗал_52.mp4', 'vid_2019-6-10_17:15_ТехношоуЗал_53.mp4', 'vid_2019-6-10_17:15_ТехношоуЗал_54.mp4', 'vid_2019-6-10_17:15_ТехношоуЗал_55.mp4', 'vid_2019-6-10_17:15_ТехношоуЗал_56.mp4', 'vid_2019-6-10_17:15_ТехношоуЗал_61.mp4']
-for i in data:
-    upload("../vids/" + i, 'ТехношоуЗал')
