@@ -108,6 +108,29 @@
       "name": ["", ""],
       "drive": "https://drive.google.com/drive/u/1/folders/1nYNAy--UhZHhkr0r0nx4Edhn8uoIGM3d",
       "calendar": "auditory.ru_g4h95d1fk3tooennjhtck7fuoc@group.calendar.google.com"
+    },
+    {
+      "id": 3,
+      "building": "\u041c\u0418\u042d\u041c",
+      "auditorium": "ТехношоуЗал",
+      "status": "free",
+      "timestamp": 0,
+      "soundType": "enc",
+      "mainCam": "",
+      "tracking": [""],
+      "sound": { "enc": ["172.18.200.61/main"], "cam": ["172.18.200.61/main"] },
+      "vid": [
+        "172.18.200.51",
+        "172.18.200.52",
+        "172.18.200.53",
+        "172.18.200.54",
+        "172.18.200.55",
+        "172.18.200.56",
+        "172.18.200.61/main"
+      ],
+      "name": ["", ""],
+      "drive": "https://drive.google.com/drive/u/1/folders/1Rja-cbUhfLEs4Lud8do_bSKzg9DzR17g",
+      "calendar": ""
     }
   ],
   "\u0424\u041a\u041d": []
