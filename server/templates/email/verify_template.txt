@@ -1,9 +1,0 @@
-Здравствуйте {{ user.email }},
-
-Чтобы подтвердить почту, нажмите на следующую ссылку:
-
-{{ url_for('api.verify_email', token=token, _external=True) }}
-
-С уважением,
-
-Команда NVR
