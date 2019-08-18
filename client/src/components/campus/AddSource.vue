@@ -1,0 +1,67 @@
+<template>
+  <v-dialog v-model="modal" max-width="600px">
+    <v-btn block color="black" class="white--text" slot="activator">Добавить</v-btn>
+
+    <v-card>
+      <v-card-text>
+        <v-container grid-list-md>
+          <v-layout wrap>
+            <v-flex xs12 sm6 md8>
+              <v-text-field label="Название" required v-model="newSource.name"></v-text-field>
+            </v-flex>
+            <v-flex xs12 sm6 md8>
+              <v-text-field label="IP" v-model="newSource.ip"></v-text-field>
+            </v-flex>
+
+            <v-flex xs12 sm6 md8>
+              <v-select
+                :items="['enc', 'cam']"
+                label="Источник звука"
+                required
+                v-model="newSource.sound"
+              ></v-select>
+            </v-flex>
+            <v-flex xs12 sm6 md8>
+              <v-checkbox v-model="newSource.tracking" :label="`Трекинг`"></v-checkbox>
+            </v-flex>
+            <v-flex xs12 sm6 md8>
+              <v-checkbox v-model="newSource.mainCam" :label="`Главная камера`"></v-checkbox>
+            </v-flex>
+          </v-layout>
+        </v-container>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="black" flat @click="modal = false">Закрыть</v-btn>
+        <v-btn color="black" flat @click="addSource">Сохранить</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+</template>
+
+<script>
+export default {
+  props: ["room"],
+  data() {
+    return {
+      modal: false,
+      newSource: {
+        tracking: false,
+        mainCam: false,
+        sound: false
+      }
+    };
+  },
+  methods: {
+    addSource() {
+      this.modal = false;
+      this.room.sources.push(this.newSource);
+      this.newSource = {
+        tracking: false,
+        mainCam: false,
+        sound: false
+      };
+    }
+  }
+};
+</script>
