@@ -18,5 +18,5 @@ if __name__ == "__main__":
             configCalendar(r.to_dict())
             configDrive(r.to_dict())
             configDaemon(r.to_dict())
-    # Thread(target=runDaemon, name='calendar_daemon').start()
+    Thread(target=runDaemon, name='calendar_daemon').start()
     app.run()

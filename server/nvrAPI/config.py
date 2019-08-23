@@ -6,7 +6,7 @@ import os
 
 
 class BaseConfig(object):
-    DEBUG = True
+    DEBUG = False
     SQLALCHEMY_DATABASE_URI = 'sqlite:///nvr.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = 'nvr2019'  # for encryption and session managment
