@@ -19,4 +19,4 @@ if __name__ == "__main__":
             configDrive(r.to_dict())
             configDaemon(r.to_dict())
     Thread(target=runDaemon, name='calendar_daemon').start()
-    app.run()
+    app.run(host='0.0.0.0')
