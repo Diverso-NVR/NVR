@@ -75,7 +75,7 @@ def verify_email(token):
     return "", 201
 
 
-@api.route('/login', methods=['POST'])
+@api.route('/login/', methods=['POST'])
 def login():
     data = request.get_json()
     user = User.authenticate(**data)
