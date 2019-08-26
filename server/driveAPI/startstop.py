@@ -85,7 +85,7 @@ def killrecords(id):
         try:
             os.killpg(process.pid, signal.SIGTERM)
         except OSError:
-            os.system("sudo kill %s" % (process.pid)) # sudo for server
+            os.system("sudo kill %s" % (process.pid))  # sudo for server
 
 
 def stop(id: int, calendarId: str = None, eventId: str = None) -> None:
@@ -115,7 +115,7 @@ def stop(id: int, calendarId: str = None, eventId: str = None) -> None:
             res = "vid_"
 
         files = []
-              for cam in rooms[id]['vid']:
+        for cam in rooms[id]['vid']:
             try:
                 fileId = upload("/home/nvr/vids/" + res + records[id]
                                 + cam.split('/')[0].split('.')[-1] + ".mp4",
@@ -125,7 +125,7 @@ def stop(id: int, calendarId: str = None, eventId: str = None) -> None:
                 print(e)
 
         # TODO fix [SSL: WRONG_VERSION_NUMBER]
-        #if calendarId:
+        # if calendarId:
         #    for fileId in files:
         #        try:
         #            add_attachment(calendarId, eventId, fileId)
@@ -164,14 +164,7 @@ def merge(id: int) -> None:
 
 
 def merge_video(screen_num: str, video_cam_num: str, record_num: str) -> None:
-    # Option 1
-    # first = subprocess.Popen(["ffmpeg", "-i", "/Users/kuder/vids/vid_" + video_cam_num + ".mp4", "-i", "/Users/kuder/vids/vid_" +
-    #                           screen_num + ".mp4", "-filter_complex", "hstack=inputs=2", "/Users/kuder/vids/vid_" +
-    #                           record_num + "merged_1.mp4"], shell=False)
-    # os.system("renice -n 20 %s" % (first.pid, ))
-    # first.wait()
 
-    # Option 2
     mid1 = subprocess.Popen(["ffmpeg", "-i", "/home/nvr/vids/vid_" + screen_num + ".mp4", "-s", "hd720",
                              "/home/nvr/vids/" + record_num + "mid_1_1.mp4"], shell=False)
     os.system("renice -n 20 %s" % (mid1.pid, ))
@@ -189,20 +182,3 @@ def merge_video(screen_num: str, video_cam_num: str, record_num: str) -> None:
                                record_num + "merged_2.mp4"], shell=False)
     os.system("renice -n 20 %s" % (second.pid, ))
     second.wait()
-
-    # Option 3
-    # mid3 = subprocess.Popen(["ffmpeg", "-i", "/Users/kuder/vids/vid_" + screen_num + ".mp4", "-s", "hd720",
-    #                          "/Users/kuder/vids/" + record_num + "mid_2_1.mp4"], shell=False)
-    # os.system("renice -n 20 %s" % (mid3.pid, ))
-    # mid3.wait()
-    # mid4 = subprocess.Popen(["ffmpeg", "-i", "/Users/kuder/vids/vid_" + video_cam_num + ".mp4", "-s", "hd720",
-   #                          "/Users/kuder/vids/" + record_num + "mid_2_3.mp4"], shell=False)
-x    # os.system("renice -n 20 %s" % (mid4.pid, ))
-    # mid4.wait()
-    # crop2 = subprocess.Popen(["ffmpeg", "-i", "/Users/kuder/vids/" + record_num + "mid_2_3.mp4", "-filter:v", "crop=640:720",
-    #                           "/Users/kuder/vids/" + record_num + "cropped_2.mp4"], shell=False)
-    # os.system("renice -n 20 %s" % (crop2.pid, ))
-    # crop2.wait()
-    # third = subprocess.Popen(["ffmpeg", "-i", "/Users/kuder/vids/" + record_num + "cropped_2.mp4", "-i", "/Users/kuder/vids/" +
-    #                           record_num + "mid_2_1.mp4", "-filter_complex", "hstack=inputs=2", "/Users/kuder/vids/vid_" +
-
