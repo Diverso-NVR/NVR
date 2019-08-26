@@ -48,8 +48,10 @@ def token_required(f):
             return f(user, *args, **kwargs)
         except jwt.ExpiredSignatureError:
             return jsonify(expired_msg), 401
-        except (jwt.InvalidTokenError, Exception) as e:
+        except (jwt.InvalidTokenError):
             return jsonify(invalid_msg), 401
+        except Exception as e:
+            return jsonify({'error':str(e)}), 401
 
     return _verify
 
@@ -75,7 +77,7 @@ def verify_email(token):
     return "", 201
 
 
-@api.route('/login/', methods=['POST'])
+@api.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
     user = User.authenticate(**data)
@@ -263,7 +265,7 @@ def soundChange(current_user):
     soundType = post_data['sound']
 
     room = Room.query.get(id)
-
+    print(current_app.config['MAIL_USERNAME'])
     room.chosenSound = soundType
     changedSound(room.to_dict())
     db.session.commit()

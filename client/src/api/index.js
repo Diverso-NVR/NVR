@@ -4,7 +4,7 @@ const API_URL = process.env.API_URL;
 
 //users
 export function authenticate(userData) {
-  return axios.post(`${API_URL}/login/`, userData);
+  return axios.post(`${API_URL}/login`, userData);
 }
 
 export function register(userData) {

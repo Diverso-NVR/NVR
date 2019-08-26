@@ -23,7 +23,6 @@ def updateDaemon(room: dict) -> None:
 def changedSound(room: dict) -> None:
     rooms[room['id']]['chosenSound'] = room['chosenSound']
 
-
 def events() -> None:
     for room in rooms:
         try:
