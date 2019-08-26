@@ -164,7 +164,7 @@ def createRoom(current_user):
     return jsonify(room.to_dict())
 
 
-@api.route('/rooms', methods=['GET'])
+@api.route('/rooms/', methods=['GET'])
 def getRooms():
     rooms = Room.query.all()
     for room in rooms:
