@@ -249,11 +249,11 @@ def stopRec(current_user):
     id = post_data['id']
 
     room = Room.query.get(id)
+    copies[id] = [0, True]
 
     if room.free == False:
         Thread(target=stop, args=(id,)).start()
 
-    copies[id] = [0, True]
     room.free = True
     room.timestamp = 0
     db.session.commit()
