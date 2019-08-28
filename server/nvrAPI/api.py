@@ -51,7 +51,7 @@ def token_required(f):
         except (jwt.InvalidTokenError):
             return jsonify(invalid_msg), 401
         except Exception as e:
-            return jsonify({'error':str(e)}), 401
+            return jsonify({'error': str(e)}), 401
 
     return _verify
 
@@ -160,7 +160,6 @@ def createRoom(current_user):
     configCalendar(room.to_dict())
     configDrive(room.to_dict())
     configDaemon(room.to_dict())
-    (room.to_dict())
     return jsonify(room.to_dict())
 
 
@@ -197,7 +196,11 @@ def editRoom(current_user, room_id):
     room = Room.query.get(room_id)
     updateDaemon(room.to_dict())
     for s in post_data['sources']:
-        source = Source.query.get(s['id'])
+        if s.get('id'):
+            source = Source.query.get(s['id'])
+        else:
+            source = Source()
+            room.sources.append(source)
         source.ip = s['ip']
         source.name = s['name']
         source.sound = s['sound']
@@ -265,7 +268,6 @@ def soundChange(current_user):
     soundType = post_data['sound']
 
     room = Room.query.get(id)
-    print(current_app.config['MAIL_USERNAME'])
     room.chosenSound = soundType
     changedSound(room.to_dict())
     db.session.commit()
