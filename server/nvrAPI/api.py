@@ -218,6 +218,7 @@ def startRec(current_user):
     post_data = request.get_json()
     id = post_data['id']
     room = Room.query.get(id)
+    copies[id] = [0, False]
 
     if room.free == True:
         threads[id] = Thread(
@@ -230,7 +231,6 @@ def startRec(current_user):
                ).start()
 
     room.free = False
-    copies[id] = [0, False]
     db.session.commit()
 
     return ""
