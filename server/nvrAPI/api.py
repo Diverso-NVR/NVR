@@ -218,20 +218,20 @@ def startRec(current_user):
     post_data = request.get_json()
     id = post_data['id']
     room = Room.query.get(id)
-    if room.free == False:
-        return "", 401
+
+    if room.free == True:
+        threads[id] = Thread(
+            target=startTimer, args=(id,), daemon=True)
+        threads[id].start()
+
+        Thread(target=start,
+               args=(id, room.name, room.chosenSound,
+                     [s.to_dict() for s in room.sources])
+               ).start()
+
     room.free = False
     copies[id] = [0, False]
     db.session.commit()
-
-    threads[id] = Thread(
-        target=startTimer, args=(id,), daemon=True)
-    threads[id].start()
-
-    Thread(target=start,
-           args=(id, room.name, room.chosenSound,
-                 [s.to_dict() for s in room.sources])
-           ).start()
 
     return ""
 
