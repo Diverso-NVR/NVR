@@ -195,12 +195,13 @@ def editRoom(current_user, room_id):
     post_data = request.get_json()
     room = Room.query.get(room_id)
     updateDaemon(room.to_dict())
+    room.sources = []
     for s in post_data['sources']:
         if s.get('id'):
             source = Source.query.get(s['id'])
         else:
             source = Source()
-            room.sources.append(source)
+        room.sources.append(source)
         source.ip = s['ip']
         source.name = s['name']
         source.sound = s['sound']
