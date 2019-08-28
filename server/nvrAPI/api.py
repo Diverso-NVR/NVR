@@ -202,9 +202,10 @@ def editRoom(current_user, room_id):
         else:
             source = Source()
         room.sources.append(source)
+        source.room_id = s['room_id']
         source.ip = s['ip']
         source.name = s['name']
-        source.sound = s['sound']
+        source.sound = s['sound'] if s['sound'] != False else None
         source.tracking = s['tracking']
         source.mainCam = s['mainCam']
     db.session.commit()
@@ -248,15 +249,14 @@ def stopRec(current_user):
     id = post_data['id']
 
     room = Room.query.get(id)
-    if room.free == True:
-        return "", 401
+
+    if room.free == False:
+        Thread(target=stop, args=(id,)).start()
 
     copies[id] = [0, True]
     room.free = True
     room.timestamp = 0
     db.session.commit()
-
-    Thread(target=stop, args=(id,)).start()
 
     return ""
 
