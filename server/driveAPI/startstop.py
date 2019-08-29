@@ -61,7 +61,6 @@ def start(id: int, name: str, sound_type: str, sources: list) -> None:
 
     config(id, name, sources)
 
-    print(records[id], processes[id])
     if sound_type == "enc":
         enc = subprocess.Popen("ffmpeg -rtsp_transport http -i rtsp://" +
                                rooms[id]['sound']['enc'][0] +
