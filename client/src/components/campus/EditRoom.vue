@@ -19,7 +19,7 @@
         <v-toolbar-title>{{room.name}}</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-toolbar-items>
-          <v-btn dark flat @click="saveChanges(room)">Сохранить</v-btn>
+          <v-btn dark flat @click="saveChanges(roomCopy)">Сохранить</v-btn>
         </v-toolbar-items>
       </v-toolbar>
       <v-card-text>
@@ -28,7 +28,7 @@
       </v-card-text>
       <v-data-table
         :headers="headers"
-        :items="room.sources"
+        :items="roomCopy.sources"
         :search="search"
         hide-actions
         class="elevation-4"
@@ -55,7 +55,7 @@
           >Ничего не найдено по запросу "{{ search }}".</v-alert>
         </template>
       </v-data-table>
-      <app-add-source :room="room"></app-add-source>
+      <app-add-source :room="roomCopy"></app-add-source>
     </v-card>
   </v-dialog>
 </template>
@@ -106,14 +106,15 @@ export default {
           sortable: false,
           align: "center"
         }
-      ]
+      ],
+      roomCopy: Object.assign({}, this.room)
     };
   },
   methods: {
     del(camera) {
-      let i = this.room.sources.indexOf(camera);
+      let i = this.roomCopy.sources.indexOf(camera);
       confirm("Вы уверены, что хотите удалить этот источник записи?") &&
-        this.room.sources.splice(i, 1);
+        this.roomCopy.sources.splice(i, 1);
     },
     saveChanges(room) {
       this.$store

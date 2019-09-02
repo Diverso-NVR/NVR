@@ -51,7 +51,7 @@ def token_required(f):
         except (jwt.InvalidTokenError):
             return jsonify(invalid_msg), 401
         except Exception as e:
-            return jsonify({'error':str(e)}), 401
+            return jsonify({'error': str(e)}), 401
 
     return _verify
 
@@ -160,7 +160,7 @@ def create_room(current_user):
     configCalendar(room.to_dict())
     configDrive(room.to_dict())
     configDaemon(room.to_dict())
-    (room.to_dict())
+   
     return jsonify(room.to_dict()), 201
 
 
@@ -196,11 +196,17 @@ def edit_room(current_user, room_id):
     post_data = request.get_json()
     room = Room.query.get(room_id)
     updateDaemon(room.to_dict())
+    room.sources = []
     for s in post_data['sources']:
-        source = Source.query.get(s['id'])
+        if s.get('id'):
+            source = Source.query.get(s['id'])
+        else:
+            source = Source()
+        room.sources.append(source)
+        source.room_id = s['room_id']
         source.ip = s['ip']
         source.name = s['name']
-        source.sound = s['sound']
+        source.sound = s['sound'] if s['sound'] != False else None
         source.tracking = s['tracking']
         source.mainCam = s['mainCam']
     db.session.commit()
@@ -213,20 +219,20 @@ def start_rec(current_user):
     post_data = request.get_json()
     id = post_data['id']
     room = Room.query.get(id)
-    if not room.free:
-        return "", 401
-    room.free = False
     copies[id] = [0, False]
+
+    if room.free == True:
+        threads[id] = Thread(
+            target=startTimer, args=(id,), daemon=True)
+        threads[id].start()
+
+        Thread(target=start,
+               args=(id, room.name, room.chosenSound,
+                     [s.to_dict() for s in room.sources])
+               ).start()
+
+    room.free = False
     db.session.commit()
-
-    threads[id] = Thread(
-        target=start_timer, args=(id,), daemon=True)
-    threads[id].start()
-
-    Thread(target=start,
-           args=(id, room.name, room.chosenSound,
-                 [s.to_dict() for s in room.sources])
-           ).start()
 
     return "", 200
 
@@ -244,10 +250,11 @@ def stop_rec(current_user):
     id = post_data['id']
 
     room = Room.query.get(id)
-    if room.free:
-        return "", 401
-
     copies[id] = [0, True]
+
+    if room.free == False:
+        Thread(target=stop, args=(id,)).start()
+
     room.free = True
     room.timestamp = 0
     db.session.commit()
@@ -265,7 +272,6 @@ def sound_change(current_user):
     soundType = post_data['sound']
 
     room = Room.query.get(id)
-    print(current_app.config['MAIL_USERNAME'])
     room.chosenSound = soundType
     changedSound(room.to_dict())
     db.session.commit()

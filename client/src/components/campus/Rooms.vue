@@ -183,9 +183,12 @@ export default {
         align: "center"
       });
     this.$store.dispatch("loadRooms");
-    setInterval(() => {
-      this.$store.dispatch("loadRooms");
-    }, 5000);
+    if (!this.$store.getters.timer) {
+      let roomsUpdateTimer = setInterval(() => {
+        this.$store.dispatch("loadRooms");
+      }, 3000);
+      this.$store.dispatch("setTimer", roomsUpdateTimer);
+    }
   }
 };
 </script>

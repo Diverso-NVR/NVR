@@ -43,7 +43,7 @@ export function grantUser(id, jwt) {
 
 //rooms
 export function getRooms() {
-  return axios.get(`${API_URL}/rooms`);
+  return axios.get(`${API_URL}/rooms/`);
 }
 
 export function soundSwitch(id, sound, jwt) {

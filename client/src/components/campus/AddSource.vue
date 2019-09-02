@@ -15,7 +15,7 @@
 
             <v-flex xs12 sm6 md8>
               <v-select
-                :items="['enc', 'cam']"
+                :items="['enc', 'cam', false]"
                 label="Источник звука"
                 required
                 v-model="newSource.sound"

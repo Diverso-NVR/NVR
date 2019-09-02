@@ -21,6 +21,18 @@ records = {}
 def config(id: int, name: str, sources: list) -> None:
     rooms[id] = {
         "name": name}
+
+    processes[id] = []
+
+    today = datetime.date.today()
+    curr_time = datetime.datetime.now().time()
+
+    hour = "0" + \
+        str(curr_time.hour) if curr_time.hour < 10 else str(curr_time.hour)
+    minute = "0" + \
+        str(curr_time.minute) if curr_time.minute < 10 else str(curr_time.minute)
+    records[id] = f"{today.year}-{today.month}-{today.day}_{hour}:{minute}_{rooms[id]['name']}_"
+
     rooms[id]['sound'] = {'cam': [], 'enc': []}
     rooms[id]['vid'] = []
     for cam in sources:
@@ -49,15 +61,6 @@ def start(id: int, name: str, sound_type: str, sources: list) -> None:
     #     pass
 
     config(id, name, sources)
-
-    processes[id] = []
-    today = datetime.date.today()
-    curr_time = datetime.datetime.now().time()
-
-    hour = "0" + str(curr_time.hour) if curr_time.hour < 10 else str(curr_time.hour)
-    minute = "0" + str(curr_time.minute) if curr_time.minute < 10 else str(curr_time.minute)
-    records[id] = "{}-{}-{}_{}:{}_{}_".format(
-        today.year, today.month, today.day, hour, minute, rooms[id]["name"])
 
     if sound_type == "enc":
         enc = subprocess.Popen("ffmpeg -rtsp_transport http -i rtsp://" +
