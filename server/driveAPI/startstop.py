@@ -93,7 +93,8 @@ def stop(id: int, url: str, calendarId: str = None, eventId: str = None) -> None
         rooms[id]['mainCam'].split('/')[0].split('.')[-1],
         "record_num": records[id],
         "room_name": rooms[id]['name']
-    })
+    },
+        headers={'content-type': 'application/json'})
 
     with lock:
         res = ""
