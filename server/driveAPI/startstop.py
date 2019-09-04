@@ -7,6 +7,7 @@ from threading import RLock, Lock
 
 import requests
 from driveAPI.driveSettings import upload
+from calendarAPI.calendarSettings import add_attachment
 
 tracking_url = 'http://172.18.198.31:5000/tracking'
 home = str(Path.home())
