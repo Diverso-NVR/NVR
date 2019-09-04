@@ -90,21 +90,7 @@ def killrecords(id):
 
 
 def stop(id: int, calendarId: str = None, eventId: str = None) -> None:
-    # with lock:
-    #     try:
-    #         req = {
-    #             'command': 'stop',
-    #             'ip': rooms[id]['tracking'][0],
-    #             'port': '80'
-    #         }
-    #         response = requests.post(tracking_url, json=req)
-    #     except:
-    #         pass
-
     killrecords(id)
-
-    # t = Thread(target=merge, args=(id), daemon=True)
-    # t.start()
 
     with lock:
         res = ""
@@ -140,46 +126,3 @@ def add_sound(video_cam_num: str, audio_cam_num: str) -> None:
                              ".mp4", "-y", "-shortest", "-c", "copy",
                              "/home/nvr/vids/" + video_cam_num + ".mp4"], shell=False)
     proc.wait()
-
-
-def merge(id: int) -> None:
-    merge_video(records[id]
-                + rooms[id]['sound']['enc'][0].split('/')[0].split('.')[-1],
-                records[id] +
-                rooms[id]['mainCam'].split(
-                    '/')[0].split('.')[-1],
-                records[id])
-
-    res = ""
-    if os.path.exists("/home/nvr/vids/sound_" + records[id] + ".aac"):
-        add_sound(records[id] +
-                  "merged_2", records[id])
-    else:
-        res = "vid_"
-
-    try:
-        upload("/home/nvr/vids/" + res + records[id] + "merged_2.mp4",
-               rooms[id]["name"])
-    except Exception:
-        pass
-
-
-def merge_video(screen_num: str, video_cam_num: str, record_num: str) -> None:
-
-    mid1 = subprocess.Popen(["ffmpeg", "-i", "/home/nvr/vids/vid_" + screen_num + ".mp4", "-s", "hd720",
-                             "/home/nvr/vids/" + record_num + "mid_1_1.mp4"], shell=False)
-    os.system("renice -n 20 %s" % (mid1.pid, ))
-    mid1.wait()
-    mid2 = subprocess.Popen(["ffmpeg", "-i", "/home/nvr/vids/vid_" + video_cam_num + ".mp4", "-s", "hd720",
-                             "/home/nvr/vids/" + record_num + "mid_1_3.mp4"], shell=False)
-    os.system("renice -n 20 %s" % (mid2.pid, ))
-    mid2.wait()
-    crop1 = subprocess.Popen(["ffmpeg", "-i", "/home/nvr/vids/" + record_num + "mid_1_3.mp4", "-filter:v", "crop=640:720:40:0",
-                              "/home/nvr/vids/" + record_num + "cropped_1.mp4"], shell=False)
-    os.system("renice -n 20 %s" % (crop1.pid, ))
-    crop1.wait()
-    second = subprocess.Popen(["ffmpeg", "-i", "/home/nvr/vids/" + record_num + "cropped_1.mp4", "-i", "/home/nvr/vids/" +
-                               record_num + "mid_1_1.mp4", "-filter_complex", "hstack=inputs=2", "/home/nvr/vids/vid_" +
-                               record_num + "merged_2.mp4"], shell=False)
-    os.system("renice -n 20 %s" % (second.pid, ))
-    second.wait()

@@ -60,8 +60,11 @@ def token_required(f):
 def register():
     data = request.get_json()
     user = User(**data)
-    db.session.add(user)
-    db.session.commit()
+    try:
+        db.session.add(user)
+        db.session.commit()
+    except:
+        return jsonify('Пользователь с данной почтой существует'), 400
     send_verify_email(user)
     return jsonify(user.to_dict()), 201
 
@@ -70,11 +73,11 @@ def register():
 def verify_email(token):
     user = User.verify_email_token(token)
     if not user:
-        return "", 401
+        return "Ошибка", 401
 
     user.email_verified = True
     db.session.commit()
-    return "", 201
+    return "Подтверждение успешно", 201
 
 
 @api.route('/login', methods=['POST'])

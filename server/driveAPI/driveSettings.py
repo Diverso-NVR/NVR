@@ -4,10 +4,6 @@ from httplib2 import Http
 from oauth2client import file, client, tools
 from googleapiclient.http import MediaFileUpload
 import json
-from threading import RLock
-
-
-lock = RLock()
 
 
 SCOPES = 'https://www.googleapis.com/auth/drive'
