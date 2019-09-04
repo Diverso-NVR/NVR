@@ -86,14 +86,14 @@ def stop(id: int, url: str, calendarId: str = None, eventId: str = None) -> None
 
     kill_records(id)
 
-    requests.post(url, json=jsonify(
-        screen_num=records[id] +
+    requests.post(url, json={
+        "screen_num": records[id] +
         rooms[id]['sound']['enc'][0].split('/')[0].split('.')[-1],
-        video_cam_num=records[id] +
+        "video_cam_num": records[id] +
         rooms[id]['mainCam'].split('/')[0].split('.')[-1],
-        record_num=records[id],
-        room_name=rooms[id]['name']
-    ))
+        "record_num": records[id],
+        "room_name": rooms[id]['name']
+    })
 
     with lock:
         res = ""
