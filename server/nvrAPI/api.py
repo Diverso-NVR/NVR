@@ -256,14 +256,13 @@ def stop_rec(current_user):
     copies[id] = [0, True]
 
     if room.free == False:
-        Thread(target=stop, args=(id,)).start()
+        Thread(target=stop, args=(id, current_app.config['MERGE_SERVER_URL'])).start()
 
     room.free = True
     room.timestamp = 0
     db.session.commit()
 
-    Thread(target=stop, args=(
-        id, current_app.config['MERGE_SERVER_URL'],)).start()
+    Thread(target=stop, args=(id, current_app.config['MERGE_SERVER_URL'])).start()
 
     return "", 200
 
