@@ -10,6 +10,7 @@ from driveAPI.driveSettings import upload
 
 tracking_url = '172.18.198.31:5000/tracking'
 home = str(Path.home())
+merge_url = os.environ.get('MERGE_SERVER_URL')
 lock = RLock()
 rooms = {}
 processes = {}
@@ -80,11 +81,11 @@ def kill_records(id):
             os.system("sudo kill %s" % (process.pid))  # sudo for server
 
 
-def stop(id: int, url: str, calendarId: str = None, eventId: str = None) -> None:
+def stop(id: int, calendarId: str = None, eventId: str = None) -> None:
 
     kill_records(id)
 
-    requests.post(url, json={
+    requests.post(merge_url, json={
         "screen_num": records[id] +
         rooms[id]['sound']['enc'][0].split('/')[0].split('.')[-1],
         "video_cam_num": records[id] +

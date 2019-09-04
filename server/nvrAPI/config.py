@@ -16,5 +16,3 @@ class BaseConfig(object):
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     ADMINS = ['nvr.autoreply@gmail.com']
-    # TODO: поменять, когда появится DNS-имя
-    MERGE_SERVER_URL = 'http://172.18.130.40/merge'
