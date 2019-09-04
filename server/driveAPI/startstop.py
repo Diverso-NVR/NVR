@@ -11,7 +11,6 @@ from driveAPI.driveSettings import upload
 tracking_url = '172.18.198.31:5000/tracking'
 home = str(Path.home())
 lock = RLock()
-lock_merge = Lock()
 rooms = {}
 processes = {}
 records = {}
