@@ -8,7 +8,7 @@ from threading import RLock, Lock
 import requests
 from driveAPI.driveSettings import upload
 
-tracking_url = '172.18.198.31:5000/tracking'
+tracking_url = 'http://172.18.198.31:5000/tracking'
 home = str(Path.home())
 merge_url = os.environ.get('MERGE_SERVER_URL')
 lock = RLock()
@@ -107,24 +107,20 @@ def stop(id: int, calendarId: str = None, eventId: str = None) -> None:
         files = []
         for cam in rooms[id]['vid']:
             try:
-                print(home + "/vids/" + res + records[id]
-                      + cam.split('/')[0].split('.')[-1] + ".mp4", 'upload started')
                 fileId = upload(home + "/vids/" + res + records[id]
                                 + cam.split('/')[0].split('.')[-1] + ".mp4",
                                 rooms[id]["name"])
-                print(home + "/vids/" + res + records[id]
-                      + cam.split('/')[0].split('.')[-1] + ".mp4", 'upload ended')
                 files.append(fileId)
             except Exception as e:
                 print(e)
 
         # TODO fix [SSL: WRONG_VERSION_NUMBER]
-        # if calendarId:
-        #    for fileId in files:
-        #        try:
-        #            add_attachment(calendarId, eventId, fileId)
-        #        except Exception as e:
-        #            print(e)
+        if calendarId:
+            for fileId in files:
+                try:
+                    add_attachment(calendarId, eventId, fileId)
+                except Exception as e:
+                    print(e)
 
 
 def add_sound(video_cam_num: str, audio_cam_num: str) -> None:
