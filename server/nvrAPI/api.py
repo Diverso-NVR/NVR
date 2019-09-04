@@ -1,22 +1,22 @@
+import time
+from datetime import datetime, timedelta
+from functools import wraps
+from threading import Thread
+
+import jwt
 from calendarAPI.calendarSettings import createCalendar, deleteCalendar, configCalendar
 from calendarAPI.calendar_daemon import configDaemon, updateDaemon, changedSound
 from driveAPI.driveSettings import createFolder, configDrive
 from driveAPI.startstop import start, stop
-from threading import Thread
-from multiprocessing import Process
-import time
-from datetime import datetime, timedelta
-from functools import wraps
 from flask import Blueprint, jsonify, request, current_app
+
 from .email import send_verify_email
 from .models import db, Room, Source, User
-import jwt
 
 api = Blueprint('api', __name__)
 
 threads = {}
 copies = {}
-
 
 building = "ФКМД"
 
@@ -102,14 +102,14 @@ def login():
 
 
 @api.route('/users', methods=['GET'])
-def getUsers():
+def get_users():
     users = [u.to_dict() for u in User.query.all() if u.email_verified]
     return jsonify(users)
 
 
 @api.route('/users/<user_id>', methods=['PUT'])
 @token_required
-def grantAccess(current_user, user_id):
+def grant_access(current_user, user_id):
     if current_user.role != 'admin':
         return "", 401
     user = User.query.get(user_id)
@@ -120,7 +120,7 @@ def grantAccess(current_user, user_id):
 
 @api.route('/users/roles/<user_id>', methods=['PUT'])
 @token_required
-def userRole(current_user, user_id):
+def user_role(current_user, user_id):
     if current_user.role != 'admin':
         return "", 401
     user = User.query.get(user_id)
@@ -132,7 +132,7 @@ def userRole(current_user, user_id):
 
 @api.route('/users/<user_id>', methods=['DELETE'])
 @token_required
-def deleteUser(current_user, user_id):
+def delete_user(current_user, user_id):
     if current_user.role != 'admin':
         return "", 401
     user = User.query.get(user_id)
@@ -144,7 +144,7 @@ def deleteUser(current_user, user_id):
 # RECORD AND GOOGLE API
 @api.route('/rooms', methods=['POST'])
 @token_required
-def createRoom(current_user):
+def create_room(current_user):
     if current_user.role != 'admin':
         return "", 401
     post_data = request.get_json()
@@ -163,11 +163,12 @@ def createRoom(current_user):
     configCalendar(room.to_dict())
     configDrive(room.to_dict())
     configDaemon(room.to_dict())
-    return jsonify(room.to_dict())
+
+    return jsonify(room.to_dict()), 201
 
 
 @api.route('/rooms/', methods=['GET'])
-def getRooms():
+def get_rooms():
     rooms = Room.query.all()
     for room in rooms:
         try:
@@ -175,12 +176,12 @@ def getRooms():
             room.free = copies[room.id][1]
         except:
             pass
-    return jsonify([r.to_dict() for r in rooms])
+    return jsonify([r.to_dict() for r in rooms]), 200
 
 
 @api.route('/rooms/<room_id>', methods=['DELETE'])
 @token_required
-def deleteRoom(current_user, room_id):
+def delete_room(current_user, room_id):
     if current_user.role != 'admin':
         return "", 401
     room = Room.query.get(room_id)
@@ -192,7 +193,7 @@ def deleteRoom(current_user, room_id):
 
 @api.route("/rooms/<room_id>", methods=['PUT'])
 @token_required
-def editRoom(current_user, room_id):
+def edit_room(current_user, room_id):
     if current_user.role != 'admin':
         return "", 401
     post_data = request.get_json()
@@ -212,12 +213,12 @@ def editRoom(current_user, room_id):
         source.tracking = s['tracking']
         source.mainCam = s['mainCam']
     db.session.commit()
-    return ""
+    return "", 200
 
 
 @api.route('/startRec', methods=['POST'])
 @token_required
-def startRec(current_user):
+def start_rec(current_user):
     post_data = request.get_json()
     id = post_data['id']
     room = Room.query.get(id)
@@ -225,7 +226,7 @@ def startRec(current_user):
 
     if room.free == True:
         threads[id] = Thread(
-            target=startTimer, args=(id,), daemon=True)
+            target=start_timer, args=(id,), daemon=True)
         threads[id].start()
 
         Thread(target=start,
@@ -236,18 +237,18 @@ def startRec(current_user):
     room.free = False
     db.session.commit()
 
-    return ""
+    return "", 200
 
 
-def startTimer(id):
-    while copies[id][1] == False:
+def start_timer(id):
+    while not copies[id][1]:
         copies[id][0] += 1
         time.sleep(1)
 
 
 @api.route('/stopRec', methods=["POST"])
 @token_required
-def stopRec(current_user):
+def stop_rec(current_user):
     post_data = request.get_json()
     id = post_data['id']
 
@@ -261,12 +262,15 @@ def stopRec(current_user):
     room.timestamp = 0
     db.session.commit()
 
-    return ""
+    Thread(target=stop, args=(
+        id, current_app.config['MERGE_SERVER_URL'],)).start()
+
+    return "", 200
 
 
 @api.route('/sound', methods=['POST'])
 @token_required
-def soundChange(current_user):
+def sound_change(current_user):
     post_data = request.get_json()
     id = post_data['id']
     soundType = post_data['sound']
@@ -276,4 +280,4 @@ def soundChange(current_user):
     changedSound(room.to_dict())
     db.session.commit()
 
-    return ""
+    return "", 200

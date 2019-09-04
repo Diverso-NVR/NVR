@@ -1,17 +1,18 @@
 import datetime
-import subprocess
-import signal
 import os
-import json
-from threading import Thread, RLock
-import requests
-import asyncio
+import signal
+import subprocess
+from pathlib import Path
+from threading import RLock, Lock
 
+import requests
 from driveAPI.driveSettings import upload
-from calendarAPI.calendarSettings import add_attachment
+from flask import jsonify
 
 tracking_url = '172.18.198.31:5000/tracking'
+home = str(Path.home())
 lock = RLock()
+lock_merge = Lock()
 rooms = {}
 processes = {}
 records = {}
@@ -49,39 +50,31 @@ def config(id: int, name: str, sources: list) -> None:
 
 # TODO do smth with rtsp protocols'
 def start(id: int, name: str, sound_type: str, sources: list) -> None:
-    # try:
-    #     req = {
-    #         'command': 'start',
-    #         'ip': rooms[id]['tracking'][0],
-    #         'port': '80'
-    #     }
-    #     response = requests.post(tracking_url, json=req)
-    # except:
-    #     pass
 
     config(id, name, sources)
 
     if sound_type == "enc":
         enc = subprocess.Popen("ffmpeg -rtsp_transport http -i rtsp://" +
                                rooms[id]['sound']['enc'][0] +
-                               " -y -c:a copy -vn -f mp4 /home/nvr/vids/sound_"
+                               " -y -c:a copy -vn -f mp4 " + home + "/vids/sound_"
                                + records[id] + ".aac", shell=True, preexec_fn=os.setsid)
         processes[id].append(enc)
     else:
         camera = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://" +
                                   rooms[id]['sound']['cam'][0] +
-                                  " -y -c:a copy -vn -f mp4 /home/nvr/vids/sound_"
+                                  " -y -c:a copy -vn -f mp4 " + home + "/vids/sound_"
                                   + records[id] + ".aac", shell=True, preexec_fn=os.setsid)
         processes[id].append(camera)
 
     for cam in rooms[id]['vid']:
         process = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://" +
-                                   cam + " -y -c:v copy -an -f mp4 /home/nvr/vids/vid_" +
-                                   records[id] + cam.split('/')[0].split('.')[-1] + ".mp4", shell=True, preexec_fn=os.setsid)
+                                   cam + " -y -c:v copy -an -f mp4 " + home + "/vids/vid_" +
+                                   records[id] + cam.split('/')[0].split('.')[-1] + ".mp4", shell=True,
+                                   preexec_fn=os.setsid)
         processes[id].append(process)
 
 
-def killrecords(id):
+def kill_records(id):
     for process in processes[id]:
         try:
             os.killpg(process.pid, signal.SIGTERM)
@@ -89,12 +82,22 @@ def killrecords(id):
             os.system("sudo kill %s" % (process.pid))  # sudo for server
 
 
-def stop(id: int, calendarId: str = None, eventId: str = None) -> None:
-    killrecords(id)
+def stop(id: int, url: str, calendarId: str = None, eventId: str = None) -> None:
+
+    kill_records(id)
+
+    requests.post(url, json=jsonify(
+        screen_num=records[id] +
+        rooms[id]['sound']['enc'][0].split('/')[0].split('.')[-1],
+        video_cam_num=records[id] +
+        rooms[id]['mainCam'].split('/')[0].split('.')[-1],
+        record_num=records[id],
+        room_name=rooms[id]['name']
+    ))
 
     with lock:
         res = ""
-        if os.path.exists("/home/nvr/vids/sound_" + records[id] + ".aac"):
+        if os.path.exists(home + "/vids/sound_" + records[id] + ".aac"):
             for cam in rooms[id]['vid']:
                 add_sound(records[id] +
                           cam.split('/')[0].split('.')[-1], records[id])
@@ -104,9 +107,13 @@ def stop(id: int, calendarId: str = None, eventId: str = None) -> None:
         files = []
         for cam in rooms[id]['vid']:
             try:
-                fileId = upload("/home/nvr/vids/" + res + records[id]
+                print(home + "/vids/" + res + records[id]
+                      + cam.split('/')[0].split('.')[-1] + ".mp4", 'upload started')
+                fileId = upload(home + "/vids/" + res + records[id]
                                 + cam.split('/')[0].split('.')[-1] + ".mp4",
                                 rooms[id]["name"])
+                print(home + "/vids/" + res + records[id]
+                      + cam.split('/')[0].split('.')[-1] + ".mp4", 'upload ended')
                 files.append(fileId)
             except Exception as e:
                 print(e)
@@ -121,8 +128,8 @@ def stop(id: int, calendarId: str = None, eventId: str = None) -> None:
 
 
 def add_sound(video_cam_num: str, audio_cam_num: str) -> None:
-    proc = subprocess.Popen(["ffmpeg", "-i", "/home/nvr/vids/sound_" + audio_cam_num + ".aac", "-i",
-                             "/home/nvr/vids/vid_" + video_cam_num +
+    proc = subprocess.Popen(["ffmpeg", "-i", home + "/vids/sound_" + audio_cam_num + ".aac", "-i",
+                             home + "/vids/vid_" + video_cam_num +
                              ".mp4", "-y", "-shortest", "-c", "copy",
-                             "/home/nvr/vids/" + video_cam_num + ".mp4"], shell=False)
+                             home + "/vids/" + video_cam_num + ".mp4"], shell=False)
     proc.wait()
