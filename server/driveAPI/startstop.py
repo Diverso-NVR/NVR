@@ -86,7 +86,7 @@ def stop(id: int, url: str, calendarId: str = None, eventId: str = None) -> None
 
     kill_records(id)
 
-    requests.post("http://" + url, json={
+    requests.post(url, json={
         "screen_num": records[id] +
         rooms[id]['sound']['enc'][0].split('/')[0].split('.')[-1],
         "video_cam_num": records[id] +
