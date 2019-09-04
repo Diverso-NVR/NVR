@@ -7,7 +7,6 @@ from threading import RLock, Lock
 
 import requests
 from driveAPI.driveSettings import upload
-from flask import jsonify
 
 tracking_url = '172.18.198.31:5000/tracking'
 home = str(Path.home())
