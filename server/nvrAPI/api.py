@@ -262,8 +262,6 @@ def stop_rec(current_user):
     room.timestamp = 0
     db.session.commit()
 
-    Thread(target=stop, args=(id, current_app.config['MERGE_SERVER_URL'])).start()
-
     return "", 200
 
 
