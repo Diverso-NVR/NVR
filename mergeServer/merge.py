@@ -46,7 +46,7 @@ def merge_video(screen_num: str, video_cam_num: str, record_num: str, room_name:
     requests.post(client_url + "/upload_merged", json={
         "file_name": res + record_num + "merged_2.mp4",
         "room_name": room_name
-    })
+    }, headers={'content-type': 'application/json'})
 
     lock.release()
 
