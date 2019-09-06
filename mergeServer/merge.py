@@ -1,15 +1,14 @@
 import os
 import subprocess
+import requests
 from pathlib import Path
 from threading import Lock
-
-from driveAPI.driveSettings import upload
 
 lock = Lock()
 home = str(Path.home())
 
 
-def merge_video(screen_num: str, video_cam_num: str, record_num: str, room_name: str) -> None:
+def merge_video(screen_num: str, video_cam_num: str, record_num: str, room_name: str, client_url: str) -> None:
     lock.acquire()
 
     mid1 = subprocess.Popen(
@@ -44,11 +43,10 @@ def merge_video(screen_num: str, video_cam_num: str, record_num: str, room_name:
     else:
         res = "vid_"
 
-    try:
-        upload(home + "/vids/" + res + record_num + "merged_2.mp4",
-               room_name)
-    except Exception:
-        pass
+    requests.post(client_url + "/upload_merged", json={
+        "file_name": res + record_num + "merged_2.mp4",
+        "room_name": room_name
+    })
 
     lock.release()
 

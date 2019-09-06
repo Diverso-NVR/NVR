@@ -3,7 +3,7 @@ import os
 import signal
 import subprocess
 from pathlib import Path
-from threading import RLock, Lock
+from threading import RLock
 
 import requests
 from driveAPI.driveSettings import upload
@@ -119,12 +119,9 @@ def stop(id: int, calendarId: str = None, eventId: str = None) -> None:
         if calendarId:
             for fileId in files:
                 try:
-                    print(fileId + ' started')
                     add_attachment(calendarId, eventId, fileId)
-                    print(fileId + ' ended')
                 except Exception as e:
                     print(e)
-        print('DONE')
 
 
 def add_sound(video_cam_num: str, audio_cam_num: str) -> None:
@@ -133,3 +130,11 @@ def add_sound(video_cam_num: str, audio_cam_num: str) -> None:
                              ".mp4", "-y", "-shortest", "-c", "copy",
                              home + "/vids/" + video_cam_num + ".mp4"], shell=False)
     proc.wait()
+
+
+def upload_file(file_name: str, room_name: str):
+    try:
+        upload(str(Path.home()) + "/vids/" + file_name,
+               room_name)
+    except Exception as e:
+        print(e)
