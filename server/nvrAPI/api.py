@@ -4,9 +4,9 @@ from functools import wraps
 from threading import Thread
 
 import jwt
-from calendarAPI.calendarSettings import createCalendar, deleteCalendar, configCalendar
-from calendarAPI.calendar_daemon import configDaemon, updateDaemon, changedSound
-from driveAPI.driveSettings import createFolder, configDrive
+from calendarAPI.calendarSettings import create_calendar, delete_calendar, config_calendar
+from calendarAPI.calendar_daemon import config_daemon, update_daemon, changed_sound
+from driveAPI.driveSettings import create_folder, config_drive
 from driveAPI.startstop import start, stop
 from flask import Blueprint, jsonify, request, current_app
 
@@ -149,20 +149,20 @@ def create_room(current_user):
         return "", 401
     post_data = request.get_json()
     room = Room(name=post_data['name'])
-    room.drive = createFolder(
+    room.drive = create_folder(
         building,
         post_data.get('name')
     )
-    room.calendar = createCalendar(
+    room.calendar = create_calendar(
         building,
         post_data.get('name')
     )
     room.sources = []
     db.session.add(room)
     db.session.commit()
-    configCalendar(room.to_dict())
-    configDrive(room.to_dict())
-    configDaemon(room.to_dict())
+    config_calendar(room.to_dict())
+    config_drive(room.to_dict())
+    config_daemon(room.to_dict())
 
     return jsonify(room.to_dict()), 201
 
@@ -185,7 +185,7 @@ def delete_room(current_user, room_id):
     if current_user.role != 'admin':
         return "", 401
     room = Room.query.get(room_id)
-    deleteCalendar(room.calendar)
+    delete_calendar(room.calendar)
     db.session.delete(room)
     db.session.commit()
     return "", 201
@@ -198,7 +198,7 @@ def edit_room(current_user, room_id):
         return "", 401
     post_data = request.get_json()
     room = Room.query.get(room_id)
-    updateDaemon(room.to_dict())
+    update_daemon(room.to_dict())
     room.sources = []
     for s in post_data['sources']:
         if s.get('id'):
@@ -274,7 +274,7 @@ def sound_change(current_user):
 
     room = Room.query.get(id)
     room.chosenSound = soundType
-    changedSound(room.to_dict())
+    changed_sound(room.to_dict())
     db.session.commit()
 
     return "", 200

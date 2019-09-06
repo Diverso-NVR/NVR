@@ -1,13 +1,13 @@
 import time
 from datetime import datetime
 from driveAPI import startstop
-from calendarAPI.calendarSettings import getEvents
+from calendarAPI.calendarSettings import get_events
 from threading import Thread, local
 
 rooms = {}
 
 
-def configDaemon(room: dict) -> None:
+def config_daemon(room: dict) -> None:
     id = room['id']
     rooms[id] = {}
     rooms[id]['event'] = {}
@@ -16,17 +16,18 @@ def configDaemon(room: dict) -> None:
     rooms[id]['sources'] = room['sources']
 
 
-def updateDaemon(room: dict) -> None:
+def update_daemon(room: dict) -> None:
     rooms[room['id']]['sources'] = room['sources']
 
 
-def changedSound(room: dict) -> None:
+def changed_sound(room: dict) -> None:
     rooms[room['id']]['chosenSound'] = room['chosenSound']
+
 
 def events() -> None:
     for room in rooms:
         try:
-            e = getEvents(rooms[room]["name"])
+            e = get_events(rooms[room]["name"])
             rooms[room]["event"] = e
         except Exception:
             rooms[room]["event"] = {}
@@ -43,7 +44,7 @@ def duration(date: str) -> int:
     return hour + minute
 
 
-def parseDate(date: str) -> str:
+def parse_date(date: str) -> str:
     """
     Parses date in YYYY-MM-DD hh-mm format
     """
@@ -56,15 +57,15 @@ def parseDate(date: str) -> str:
 
 
 def record(id: int, room: dict, dur: int) -> None:
-    calendarId = room['event']['organizer'].get(
+    calendar_id = room['event']['organizer'].get(
         'email')
-    eventId = room['event']['id']
+    event_id = room['event']['id']
     startstop.start(id, room['name'], room['chosenSound'], room['sources'])
     time.sleep(dur)
-    startstop.stop(id, calendarId, eventId)
+    startstop.stop(id, calendar_id, event_id)
 
 
-def runDaemon() -> None:
+def run_daemon() -> None:
     started = []
     while True:
         events()
@@ -72,8 +73,8 @@ def runDaemon() -> None:
         for room in rooms:
             if rooms[room]['event'] == {}:
                 continue
-            start = parseDate(rooms[room]['event']['start'].get('dateTime'))
-            end = parseDate(rooms[room]['event']['end'].get('dateTime'))
+            start = parse_date(rooms[room]['event']['start'].get('dateTime'))
+            end = parse_date(rooms[room]['event']['end'].get('dateTime'))
             if rooms[room]['event']['id'] not in started and start == datetime.strftime(current_time, "%Y-%m-%d %H:%M"):
                 Thread(target=record, args=(
                     room, rooms[room], duration(end) - duration(start)), daemon=True).start()
