@@ -2,11 +2,12 @@ import time
 from datetime import datetime, timedelta
 from functools import wraps
 from threading import Thread
+from pathlib import Path
 
 import jwt
 from calendarAPI.calendarSettings import create_calendar, delete_calendar, config_calendar
 from calendarAPI.calendar_daemon import config_daemon, update_daemon, changed_sound
-from driveAPI.driveSettings import create_folder, config_drive
+from driveAPI.driveSettings import create_folder, config_drive, upload
 from driveAPI.startstop import start, stop
 from flask import Blueprint, jsonify, request, current_app
 
@@ -276,5 +277,18 @@ def sound_change(current_user):
     room.chosenSound = soundType
     changed_sound(room.to_dict())
     db.session.commit()
+
+    return "", 200
+
+
+@api.route('/upload_merged', methods=["POST"])
+def upload_merged():
+    post_data = request.get_json()
+
+    try:
+        upload(str(Path.home()) + "/vids/" + post_data["file_name"],
+               post_data["room_name"])
+    except Exception:
+        pass
 
     return "", 200
