@@ -19,7 +19,3 @@ def start_merge():
            args=(json["screen_num"], json["video_cam_num"], json["record_num"],
                  json["room_name"], url)).start()
     return "Merge started", 200
-
-
-if __name__ == '__main__':
-    app.run()
