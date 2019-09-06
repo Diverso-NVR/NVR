@@ -294,7 +294,7 @@ def sound_change(current_user):
 
 @api.route('/upload_merged', methods=["POST"])
 def upload_merged():
-    post_data = request.get_json()
+    post_data = request.get_json(force=True)
 
     Thread(target=upload_file, args=(
         post_data["file_name"], post_data["room_name"])).start()
