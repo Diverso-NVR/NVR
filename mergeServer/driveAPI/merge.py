@@ -48,7 +48,7 @@ def merge_video(screen_num: str, video_cam_num: str, record_num: str, room_name:
     try:
         upload(home + "/vids/" + res + record_num + "merged_2.mp4",
                room_name)
-    except Exception, exc:
+    except Exception as exc:
         traceback.print_exc()
 
     lock.release()
