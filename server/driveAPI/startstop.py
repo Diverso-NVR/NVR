@@ -134,7 +134,7 @@ def add_sound(video_cam_num: str, audio_cam_num: str) -> None:
 
 def upload_file(file_name: str, room_name: str):
     try:
-        upload(str(Path.home()) + "/vids/" + file_name,
+        upload(home + "/vids/" + file_name,
                room_name)
     except Exception as e:
         print(e)
