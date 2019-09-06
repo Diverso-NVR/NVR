@@ -2,13 +2,12 @@ import time
 from datetime import datetime, timedelta
 from functools import wraps
 from threading import Thread
-from pathlib import Path
 
 import jwt
 from calendarAPI.calendarSettings import create_calendar, delete_calendar, config_calendar
 from calendarAPI.calendar_daemon import config_daemon, update_daemon, changed_sound
 from driveAPI.driveSettings import create_folder, config_drive, upload
-from driveAPI.startstop import start, stop
+from driveAPI.startstop import start, stop, upload_file
 from flask import Blueprint, jsonify, request, current_app
 
 from .email import send_verify_email
@@ -285,10 +284,6 @@ def sound_change(current_user):
 def upload_merged():
     post_data = request.get_json()
 
-    try:
-        upload(str(Path.home()) + "/vids/" + post_data["file_name"],
-               post_data["room_name"])
-    except Exception:
-        pass
+    Thread(target=upload_file, args=(post_data["file_name"], post_data["room_name"])).start()
 
     return "", 200

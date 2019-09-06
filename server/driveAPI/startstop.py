@@ -3,7 +3,7 @@ import os
 import signal
 import subprocess
 from pathlib import Path
-from threading import RLock, Lock
+from threading import RLock
 
 import requests
 from driveAPI.driveSettings import upload
@@ -130,3 +130,12 @@ def add_sound(video_cam_num: str, audio_cam_num: str) -> None:
                              ".mp4", "-y", "-shortest", "-c", "copy",
                              home + "/vids/" + video_cam_num + ".mp4"], shell=False)
     proc.wait()
+
+
+def upload_file(file_name: str, room_name: str):
+    try:
+        upload(str(Path.home()) + "/vids/" + file_name,
+               room_name)
+    except Exception as e:
+        print(e)
+
