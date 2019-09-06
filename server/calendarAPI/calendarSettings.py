@@ -6,9 +6,9 @@ from oauth2client import file, client, tools
 import json
 import datetime
 
-from threading import RLock
+from threading import Lock
 
-lock = RLock()
+lock = Lock()
 
 SCOPES = 'https://www.googleapis.com/auth/calendar'
 """
@@ -30,24 +30,25 @@ def config_calendar(room: dict) -> None:
 
 
 def add_attachment(calendarId: str, eventId: str, fileId: str) -> None:
-    file = drive_service.files().get(fileId=fileId).execute()
-    event = calendar_service.events().get(calendarId=calendarId,
-                                          eventId=eventId).execute()
+    with lock:
+        file = drive_service.files().get(fileId=fileId).execute()
+        event = calendar_service.events().get(calendarId=calendarId,
+                                              eventId=eventId).execute()
 
-    attachments = event.get('attachments', [])
-    file_url = 'https://drive.google.com/a/auditory.ru/file/d/' + \
-        file['id'] + '/view?usp=drive_web'
-    attachments.append({
-        'fileUrl': file_url,
-        'mimeType': file['mimeType'],
-        'title': file['name']
-    })
-    changes = {
-        'attachments': attachments
-    }
-    calendar_service.events().patch(calendarId=calendarId, eventId=eventId,
-                                    body=changes,
-                                    supportsAttachments=True).execute()
+        attachments = event.get('attachments', [])
+        file_url = 'https://drive.google.com/a/auditory.ru/file/d/' + \
+            file['id'] + '/view?usp=drive_web'
+        attachments.append({
+            'fileUrl': file_url,
+            'mimeType': file['mimeType'],
+            'title': file['name']
+        })
+        changes = {
+            'attachments': attachments
+        }
+        calendar_service.events().patch(calendarId=calendarId, eventId=eventId,
+                                        body=changes,
+                                        supportsAttachments=True).execute()
 
 
 def give_permissions(building: str, mail: str) -> None:

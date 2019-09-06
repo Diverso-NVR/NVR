@@ -116,12 +116,12 @@ def stop(id: int, calendarId: str = None, eventId: str = None) -> None:
                 print(e)
 
         # TODO fix [SSL: WRONG_VERSION_NUMBER]
-#        if calendarId:
-#            for fileId in files:
-#                try:
-#                    add_attachment(calendarId, eventId, fileId)
-#                except Exception as e:
-#                    print(e)
+        if calendarId:
+            for fileId in files:
+                try:
+                    add_attachment(calendarId, eventId, fileId)
+                except Exception as e:
+                    print(e)
 
 
 def add_sound(video_cam_num: str, audio_cam_num: str) -> None:
@@ -138,4 +138,3 @@ def upload_file(file_name: str, room_name: str):
                room_name)
     except Exception as e:
         print(e)
-

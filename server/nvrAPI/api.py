@@ -1,3 +1,10 @@
+from .models import db, Room, Source, User
+from .email import send_verify_email
+from flask import Blueprint, jsonify, request, current_app
+from driveAPI.startstop import start, stop, upload_file
+from driveAPI.driveSettings import create_folder, config_drive, upload
+from driveAPI.startstop import start, stop
+from driveAPI.driveSettings import create_folder, config_drive, move_file
 import time
 from datetime import datetime, timedelta
 from functools import wraps
@@ -6,12 +13,7 @@ from threading import Thread
 import jwt
 from calendarAPI.calendarSettings import create_calendar, delete_calendar, config_calendar
 from calendarAPI.calendar_daemon import config_daemon, update_daemon, changed_sound
-from driveAPI.driveSettings import create_folder, config_drive, upload
-from driveAPI.startstop import start, stop, upload_file
-from flask import Blueprint, jsonify, request, current_app
 
-from .email import send_verify_email
-from .models import db, Room, Source, User
 
 api = Blueprint('api', __name__)
 
@@ -140,6 +142,16 @@ def delete_user(current_user, user_id):
     db.session.commit()
     return "", 201
 
+# GOOGLE API
+@api.route('/move-file', methods=['POST'])
+def move_file():
+    data = request.get_json()
+
+    file_id = data['file_id']
+    room_name = data['room_name']
+
+    move_file(file_id, room_name)
+    return "Success", 201
 
 # RECORD AND GOOGLE API
 @api.route('/rooms', methods=['POST'])
@@ -284,6 +296,7 @@ def sound_change(current_user):
 def upload_merged():
     post_data = request.get_json()
 
-    Thread(target=upload_file, args=(post_data["file_name"], post_data["room_name"])).start()
+    Thread(target=upload_file, args=(
+        post_data["file_name"], post_data["room_name"])).start()
 
     return "", 200
