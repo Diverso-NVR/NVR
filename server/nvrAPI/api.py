@@ -6,7 +6,7 @@ from threading import Thread
 import jwt
 from calendarAPI.calendarSettings import create_calendar, delete_calendar, config_calendar
 from calendarAPI.calendar_daemon import config_daemon, update_daemon, changed_sound
-from driveAPI.driveSettings import create_folder, config_drive
+from driveAPI.driveSettings import create_folder, config_drive, move_file
 from driveAPI.startstop import start, stop
 from flask import Blueprint, jsonify, request, current_app
 
@@ -140,6 +140,16 @@ def delete_user(current_user, user_id):
     db.session.commit()
     return "", 201
 
+# GOOGLE API
+@api.route('/move-file', methods=['POST'])
+def move_file():
+    data = request.get_json()
+
+    file_id = data['file_id']
+    room_name = data['room_name']
+
+    move_file(file_id, room_name)
+    return "Success", 201
 
 # RECORD AND GOOGLE API
 @api.route('/rooms', methods=['POST'])

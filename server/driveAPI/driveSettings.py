@@ -46,7 +46,7 @@ def delete_folder(folder_id: str) -> None:
     drive_service.files().delete(fileId=folder_id).execute()
 
 
-def moveFile(file_id: str, room: str):
+def move_file(file_id: str, room: str):
     folder_id = [rooms[room]]
     file = drive_service.files().get(fileId=file_id,
                                      fields='parents').execute()
@@ -57,14 +57,15 @@ def moveFile(file_id: str, room: str):
                                         fields='id, parents').execute()
 
 
-def upload(filename: str, room: str) -> str:
+def upload(filename: str, room: str, names: list = []) -> str:
     """
     Upload file "filename" on drive
     """
     media = MediaFileUpload(filename, mimetype="video/mp4", resumable=True)
     file_data = {
         "name": filename.split('/')[4],
-        "parents": [rooms[room]]
+        "parents": [rooms[room]],
+        'description': 'На занятии присутсвовали: ' + ','.join(names)
     }
     file = drive_service.files().create(
         body=file_data, media_body=media).execute()

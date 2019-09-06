@@ -46,7 +46,7 @@ def delete_folder(folder_id: str) -> None:
     drive_service.files().delete(fileId=folder_id).execute()
 
 
-def moveFile(file_id: str, room: str):
+def move_file(file_id: str, room: str):
     folder_id = [rooms[room]]
     file = drive_service.files().get(fileId=file_id,
                                      fields='parents').execute()
