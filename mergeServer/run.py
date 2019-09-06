@@ -1,6 +1,6 @@
 from threading import Thread
 
-from driveAPI.merge import merge_video
+from merge import merge_video
 from flask import Flask, request
 
 app = Flask("NVR_VIDEO_MERGE")
