@@ -82,19 +82,19 @@ def kill_records(id):
             os.system("sudo kill %s" % (process.pid))  # sudo for server
 
 
-def stop(id: int, calendarId: str = None, eventId: str = None) -> None:
+def stop(id: int, calendar_id: str = None, event_id: str = None) -> None:
 
     kill_records(id)
 
-    requests.post(merge_url, json={
-        "screen_num": records[id] +
-        rooms[id]['sound']['enc'][0].split('/')[0].split('.')[-1],
-        "video_cam_num": records[id] +
-        rooms[id]['mainCam'].split('/')[0].split('.')[-1],
-        "record_num": records[id],
-        "room_name": rooms[id]['name']
-    },
-        headers={'content-type': 'application/json'})
+    # requests.post(merge_url, json={
+    #     "screen_num": records[id] +
+    #     rooms[id]['sound']['enc'][0].split('/')[0].split('.')[-1],
+    #     "video_cam_num": records[id] +
+    #     rooms[id]['mainCam'].split('/')[0].split('.')[-1],
+    #     "record_num": records[id],
+    #     "room_name": rooms[id]['name']
+    # },
+    #     headers={'content-type': 'application/json'})
 
     with lock:
         res = ""
@@ -105,23 +105,19 @@ def stop(id: int, calendarId: str = None, eventId: str = None) -> None:
         else:
             res = "vid_"
 
-        files = []
         for cam in rooms[id]['vid']:
             try:
-                fileId = upload(home + "/vids/" + res + records[id]
-                                + cam.split('/')[0].split('.')[-1] + ".mp4",
-                                rooms[id]["name"])
-                files.append(fileId)
+                file_id = upload(home + "/vids/" + res + records[id]
+                                 + cam.split('/')[0].split('.')[-1] + ".mp4",
+                                 rooms[id]["name"])
             except Exception as e:
                 print(e)
 
-        # TODO fix [SSL: WRONG_VERSION_NUMBER]
-        # if calendarId:
-        #     for fileId in files:
-        #         try:
-        #             add_attachment(calendarId, eventId, fileId)
-        #         except Exception as e:
-        #             print(e)
+        if calendar_id:
+            try:
+                add_attachment(calendar_id, event_id, file_id)
+            except Exception as e:
+                print(e)
 
 
 def add_sound(video_cam_num: str, audio_cam_num: str) -> None:

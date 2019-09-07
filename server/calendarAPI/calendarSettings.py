@@ -1,14 +1,10 @@
 from __future__ import print_function
 from googleapiclient.discovery import build
 from httplib2 import Http
-from driveAPI.driveSettings import drive_service
 from oauth2client import file, client, tools
 import json
 import datetime
 
-from threading import Lock
-
-lock = Lock()
 
 SCOPES = 'https://www.googleapis.com/auth/calendar'
 """
@@ -29,26 +25,14 @@ def config_calendar(room: dict) -> None:
     rooms[room['name']] = room['calendar']
 
 
-def add_attachment(calendarId: str, eventId: str, fileId: str) -> None:
-    with lock:
-        file = drive_service.files().get(fileId=fileId).execute()
-        event = calendar_service.events().get(calendarId=calendarId,
-                                              eventId=eventId).execute()
-
-        attachments = event.get('attachments', [])
-        file_url = 'https://drive.google.com/a/auditory.ru/file/d/' + \
-            file['id'] + '/view?usp=drive_web'
-        attachments.append({
-            'fileUrl': file_url,
-            'mimeType': file['mimeType'],
-            'title': file['name']
-        })
-        changes = {
-            'attachments': attachments
-        }
-        calendar_service.events().patch(calendarId=calendarId, eventId=eventId,
-                                        body=changes,
-                                        supportsAttachments=True).execute()
+def add_attachment(calendar_id: str, event_id: str, file_id: str) -> None:
+    description = f"https://drive.google.com/a/auditory.ru/file/d/{file_id}/view?usp=drive_web"
+    changes = {
+        'description': description
+    }
+    calendar_service.events().patch(calendarId=calendar_id, eventId=event_id,
+                                    body=changes,
+                                    supportsAttachments=True).execute()
 
 
 def give_permissions(building: str, mail: str) -> None:
@@ -104,8 +88,8 @@ def create_calendar(building: str, room: str) -> None:
     return created_calendar["id"]  # calendarAPI link
 
 
-def delete_calendar(calendarId: str) -> None:
-    calendar_service.calendars().delete(calendarId=calendarId).execute()
+def delete_calendar(calendar_id: str) -> None:
+    calendar_service.calendars().delete(calendarId=calendar_id).execute()
 
 
 def get_events(room: str) -> dict:
