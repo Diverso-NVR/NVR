@@ -51,6 +51,10 @@
           :class="[props.item.free ? 'green lighten-4' : 'red lighten-4']"
         >
           <span class="green--text text--darken-4" v-if="props.item.free">Свободна</span>
+          <span
+            class="red--text text--darken-4"
+            v-else-if="props.item.daemon"
+          >Идёт запись по календарю</span>
           <span class="red--text text--darken-4" v-else>Идёт запись</span>
         </td>
 

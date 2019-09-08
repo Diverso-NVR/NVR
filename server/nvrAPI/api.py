@@ -123,7 +123,6 @@ def user_role(current_user, user_id):
     if current_user.role != 'admin':
         return "", 401
     user = User.query.get(user_id)
-    print(request.get_json()['role'])
     user.role = request.get_json()['role']
     db.session.commit()
     return "", 201
@@ -183,8 +182,8 @@ def get_rooms():
     rooms = Room.query.all()
     for room in rooms:
         try:
-            room.timestamp = copies[room.id][0]
-            room.free = copies[room.id][1]
+            room.timestamp = copies[room.id]['duration']
+            room.free = copies[room.id]['free']
         except:
             pass
     return jsonify([r.to_dict() for r in rooms]), 200
@@ -233,27 +232,29 @@ def start_rec(current_user):
     post_data = request.get_json()
     id = post_data['id']
     room = Room.query.get(id)
-    copies[id] = [0, False]
 
-    if room.free == True:
-        threads[id] = Thread(
-            target=start_timer, args=(id,), daemon=True)
-        threads[id].start()
+    if not room.free:
+        return "Already recording", 401
 
-        Thread(target=start,
-               args=(id, room.name, room.chosenSound,
-                     [s.to_dict() for s in room.sources])
-               ).start()
+    copies[id] = {'duration': 0, 'free': False, 'daemon': False}
+
+    threads[id] = Thread(target=start_timer, args=(id,), daemon=True)
+    threads[id].start()
+
+    Thread(target=start,
+           args=(id, room.name, room.chosenSound,
+                 [s.to_dict() for s in room.sources])
+           ).start()
 
     room.free = False
     db.session.commit()
 
-    return "", 200
+    return "Started", 200
 
 
 def start_timer(id):
-    while not copies[id][1]:
-        copies[id][0] += 1
+    while not copies[id]['free']:
+        copies[id]['duration'] += 1
         time.sleep(1)
 
 
@@ -264,16 +265,18 @@ def stop_rec(current_user):
     id = post_data['id']
 
     room = Room.query.get(id)
-    copies[id] = [0, True]
 
-    if room.free == False:
-        Thread(target=stop, args=(id,)).start()
+    if room.free:
+        return "Already stoped", 401
+
+    copies[id] = {'duration': 0, 'free': True, 'daemon': False}
+    Thread(target=stop, args=(id,)).start()
 
     room.free = True
     room.timestamp = 0
     db.session.commit()
 
-    return "", 200
+    return "Stoped", 200
 
 
 @api.route('/sound', methods=['POST'])
@@ -288,7 +291,7 @@ def sound_change(current_user):
     changed_sound(room.to_dict())
     db.session.commit()
 
-    return "", 200
+    return "Sound source changed", 200
 
 
 @api.route('/upload_merged', methods=["POST"])
@@ -298,4 +301,43 @@ def upload_merged():
     Thread(target=upload_file, args=(
         post_data["file_name"], post_data["room_name"])).start()
 
-    return "", 200
+    return "Video uploaded", 200
+
+# CALENDAR DAEMON
+@api.route('/daemonStartRec', methods=['POST'])
+def daemon_start_rec():
+    post_data = request.get_json()
+    id = post_data['id']
+    room = Room.query.get(id)
+
+    if not room.free:
+        return "Already recording", 401
+
+    copies[id] = {'duration': 0, 'free': False, 'daemon': True}
+    threads[id] = Thread(target=start_timer, args=(id,), daemon=True)
+    threads[id].start()
+
+    room.free = False
+    db.session.commit()
+
+    return "Started", 200
+
+
+@api.route('/daemonStopRec', methods=["POST"])
+def daemon_stop_rec():
+    post_data = request.get_json()
+    id = post_data['id']
+
+    room = Room.query.get(id)
+    if room.free:
+        return "Already stoped", 401
+    if not copies[id]['daemon']:
+        return "Daemon recording is already done", 401
+
+    copies[id] = {'duration': 0, 'free': True, 'daemon': True}
+
+    room.free = True
+    room.timestamp = 0
+    db.session.commit()
+
+    return "Stoped", 200
