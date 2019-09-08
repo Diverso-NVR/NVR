@@ -3,8 +3,10 @@ from datetime import datetime
 from driveAPI import startstop
 from calendarAPI.calendarSettings import get_events
 from threading import Thread, local
+import threading
 
 rooms = {}
+started = []
 
 
 def config_daemon(room: dict) -> None:
@@ -56,17 +58,18 @@ def parse_date(date: str) -> str:
     return "{}-{}-{} {}:{}".format(year, month, day, hour, minute)
 
 
-def record(id: int, room: dict, dur: int) -> None:
+def record(room_id: int, room: dict, dur: int) -> None:
     calendar_id = room['event']['organizer'].get(
         'email')
     event_id = room['event']['id']
-    startstop.start(id, room['name'], room['chosenSound'], room['sources'])
+    startstop.start(room_id, room['name'],
+                    room['chosenSound'], room['sources'])
     time.sleep(dur)
-    startstop.stop(id, calendar_id, event_id)
+    started.remove(event_id)
+    startstop.stop(room_id, calendar_id, event_id)
 
 
 def run_daemon() -> None:
-    started = []
     while True:
         events()
         current_time = datetime.now()
@@ -77,6 +80,6 @@ def run_daemon() -> None:
             end = parse_date(rooms[room]['event']['end'].get('dateTime'))
             if rooms[room]['event']['id'] not in started and start == datetime.strftime(current_time, "%Y-%m-%d %H:%M"):
                 Thread(target=record, args=(
-                    room, rooms[room], duration(end) - duration(start)), daemon=True).start()
+                    room, rooms[room], duration(end) - duration(start))).start()
                 started.append(rooms[room]['event']['id'])
         time.sleep(1)
