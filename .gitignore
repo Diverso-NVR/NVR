@@ -8,5 +8,3 @@ venv/
 logs/
 *.iml
 .idea
-*.db
-token*.json
