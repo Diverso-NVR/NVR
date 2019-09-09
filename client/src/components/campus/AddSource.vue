@@ -4,13 +4,13 @@
 
     <v-card>
       <v-card-text>
-        <v-container grid-list-md>
+        <v-form ref="form" validation v-model="valid">
           <v-layout wrap>
             <v-flex xs12 sm6 md8>
-              <v-text-field label="Название" required v-model="newSource.name"></v-text-field>
+              <v-text-field label="Название" :rules="fieldsRules" v-model="newSource.name"></v-text-field>
             </v-flex>
             <v-flex xs12 sm6 md8>
-              <v-text-field label="IP" v-model="newSource.ip"></v-text-field>
+              <v-text-field label="IP" :rules="fieldsRules" v-model="newSource.ip"></v-text-field>
             </v-flex>
 
             <v-flex xs12 sm6 md8>
@@ -28,12 +28,12 @@
               <v-checkbox v-model="newSource.mainCam" :label="`Главная камера`"></v-checkbox>
             </v-flex>
           </v-layout>
-        </v-container>
+        </v-form>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="black" flat @click="modal = false">Закрыть</v-btn>
-        <v-btn color="black" flat @click="addSource">Сохранить</v-btn>
+        <v-btn color="black" flat :disabled="!valid" @click="addSource">Сохранить</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -45,11 +45,13 @@ export default {
   data() {
     return {
       modal: false,
+      valid: false,
       newSource: {
         tracking: false,
         mainCam: false,
         sound: false
-      }
+      },
+      fieldsRules: [v => !!v || "Обязательное поле"]
     };
   },
   methods: {

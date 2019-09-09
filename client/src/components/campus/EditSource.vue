@@ -5,13 +5,13 @@
     </v-btn>
     <v-card>
       <v-card-text>
-        <v-container grid-list-md>
+        <v-form ref="form" validation v-model="valid">
           <v-layout wrap>
             <v-flex xs12 sm6 md8>
-              <v-text-field label="Название" required v-model="source.name"></v-text-field>
+              <v-text-field label="Название" :rules="fieldsRules" v-model="source.name"></v-text-field>
             </v-flex>
             <v-flex xs12 sm6 md8>
-              <v-text-field label="IP" v-model="source.ip"></v-text-field>
+              <v-text-field label="IP" :rules="fieldsRules" v-model="source.ip"></v-text-field>
             </v-flex>
 
             <v-flex xs12 sm6 md8>
@@ -29,11 +29,11 @@
               <v-checkbox v-model="source.mainCam" :label="`Главная камера`"></v-checkbox>
             </v-flex>
           </v-layout>
-        </v-container>
+        </v-form>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="black" flat @click="modal = false">Закрыть</v-btn>
+        <v-btn color="black" flat :disabled="!valid" @click="modal = false">Закрыть</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -44,7 +44,9 @@ export default {
   props: ["source"],
   data() {
     return {
-      modal: false
+      modal: false,
+      valid: false,
+      fieldsRules: [v => !!v || "Обязательное поле"]
     };
   }
 };
