@@ -216,7 +216,7 @@ def edit_room(current_user, room_id):
         else:
             source = Source()
         room.sources.append(source)
-        source.room_id = s['room_id']
+        source.id = s['id']
         source.ip = s['ip']
         source.name = s['name']
         source.sound = s['sound'] if s['sound'] != False else None
