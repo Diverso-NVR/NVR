@@ -111,15 +111,9 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
 
         for cam in rooms[room_id]['vid']:
             try:
-                file_id = upload(home + "/vids/" + res + records[room_id]
-                                 + cam.split('/')[0].split('.')[-1] + ".mp4",
-                                 rooms[room_id]["name"])
-            except Exception as e:
-                print(e)
-
-        if calendar_id:
-            try:
-                add_attachment(calendar_id, event_id, file_id)
+                upload(home + "/vids/" + res + records[room_id]
+                       + cam.split('/')[0].split('.')[-1] + ".mp4",
+                       rooms[room_id]["name"])
             except Exception as e:
                 print(e)
 
