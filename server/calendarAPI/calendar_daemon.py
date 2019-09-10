@@ -60,17 +60,18 @@ def parse_date(date: str) -> str:
     return "{}-{}-{} {}:{}".format(year, month, day, hour, minute)
 
 
+# TODO fix requests on server
 def record(room_id: int, room: dict, dur: int) -> None:
     calendar_id = room['event']['organizer'].get(
         'email')
     event_id = room['event']['id']
     startstop.start(room_id, room['name'],
                     room['chosenSound'], room['sources'])
-    requests.post(url=f'{API_URL}/daemonStartRec', json={'id': room_id})
+    # requests.post(url=f'{API_URL}/daemonStartRec', json={'id': room_id})
     time.sleep(dur)
     started.remove(event_id)
     startstop.stop(room_id, calendar_id, event_id)
-    requests.post(url=f'{API_URL}/daemonStopRec', json={'id': room_id})
+    # requests.post(url=f'{API_URL}/daemonStopRec', json={'id': room_id})
 
 
 def run_daemon() -> None:
