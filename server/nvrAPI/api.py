@@ -223,7 +223,6 @@ def edit_room(current_user, room_id):
         source.tracking = s['tracking']
         source.mainCam = s['mainCam']
     db.session.commit()
-    print(room.to_dict())
     return "", 200
 
 
@@ -243,7 +242,9 @@ def start_rec(current_user):
     threads[id].start()
 
     Thread(target=start,
-           args=(id, room.name, room.chosenSound,
+           args=(id,
+                 room.name,
+                 room.chosenSound,
                  [s.to_dict() for s in room.sources])
            ).start()
 
@@ -299,8 +300,14 @@ def sound_change(current_user):
 def upload_merged():
     post_data = request.get_json(force=True)
 
-    Thread(target=upload_file, args=(
-        post_data["file_name"], post_data["room_name"])).start()
+    Thread(target=upload_file,
+           args=(
+               post_data["file_name"],
+               post_data["room_name"],
+               post_data['calendar_id'],
+               post_data['event_id']
+           )
+           ).start()
 
     return "Video uploaded", 200
 

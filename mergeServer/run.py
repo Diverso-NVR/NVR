@@ -16,8 +16,9 @@ def start_merge():
     json = request.get_json(force=True)
     url = "http://172.16.87.10/api"
     Thread(target=merge_video,
-           args=(json["screen_num"], json["video_cam_num"], json["record_num"],
-                 json["room_name"], url)).start()
+           args=(url, json["screen_num"], json["video_cam_num"], json["record_num"],
+                 json["room_name"], json['calendar_id'], json['event_id'])
+           ).start()
     return "Merge started", 200
 
 

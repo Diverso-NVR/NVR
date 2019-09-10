@@ -8,7 +8,7 @@ lock = Lock()
 home = str(Path.home())
 
 
-def merge_video(screen_num: str, video_cam_num: str, record_num: str, room_name: str, client_url: str) -> None:
+def merge_video(client_url: str, screen_num: str, video_cam_num: str, record_num: str, room_name: str, calendar_id: str, event_id: str) -> None:
     lock.acquire()
 
     mid1 = subprocess.Popen(
@@ -43,10 +43,14 @@ def merge_video(screen_num: str, video_cam_num: str, record_num: str, room_name:
     else:
         res = "vid_"
 
-    requests.post(client_url + "/upload_merged", json={
-        "file_name": res + record_num + "merged_2.mp4",
-        "room_name": room_name
-    }, headers={'content-type': 'application/json'})
+    requests.post(client_url + "/upload_merged",
+                  json={
+                      "file_name": res + record_num + "merged_2.mp4",
+                      "room_name": room_name,
+                      "calenear_id": calendar_id,
+                      "event_id": event_id
+                  },
+                  headers={'content-type': 'application/json'})
 
     lock.release()
 

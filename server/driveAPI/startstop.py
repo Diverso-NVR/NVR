@@ -86,15 +86,19 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
 
     kill_records(room_id)
 
-    requests.post(merge_url, json={
-        "screen_num": records[room_id] +
-        rooms[room_id]['sound']['enc'][0].split('/')[0].split('.')[-1],
-        "video_cam_num": records[room_id] +
-        rooms[room_id]['mainCam'].split('/')[0].split('.')[-1],
-        "record_num": records[room_id],
-        "room_name": rooms[room_id]['name']
-    },
-        headers={'content-type': 'application/json'})
+    requests.post(merge_url,
+                  json={
+                      "screen_num": records[room_id] +
+                      rooms[room_id]['sound']['enc'][0].split(
+                          '/')[0].split('.')[-1],
+                      "video_cam_num": records[room_id] +
+                      rooms[room_id]['mainCam'].split('/')[0].split('.')[-1],
+                      "record_num": records[room_id],
+                      "room_name": rooms[room_id]['name'],
+                      "calendar_id": calendar_id,
+                      "event_id": event_id
+                  },
+                  headers={'content-type': 'application/json'})
 
     with lock:
         res = ""
@@ -128,9 +132,11 @@ def add_sound(video_cam_num: str, audio_cam_num: str) -> None:
     proc.wait()
 
 
-def upload_file(file_name: str, room_name: str):
+def upload_file(file_name: str, room_name: str, calendar_id: str, event_id: str):
     try:
-        upload(home + "/vids/" + file_name,
-               room_name)
+        file_id = upload(home + "/vids/" + file_name,
+                         room_name)
+        if calendar_id:
+            add_attachment(calendar_id, event_id, file_id)
     except Exception as e:
         print(e)
