@@ -304,8 +304,8 @@ def upload_merged():
            args=(
                post_data["file_name"],
                post_data["room_name"],
-               post_data['calendar_id'],
-               post_data['event_id']
+               post_data.get('calendar_id'),
+               post_data.get('event_id')
            )
            ).start()
 
