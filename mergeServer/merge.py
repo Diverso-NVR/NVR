@@ -47,7 +47,7 @@ def merge_video(client_url: str, screen_num: str, video_cam_num: str, record_num
                   json={
                       "file_name": res + record_num + "merged_2.mp4",
                       "room_name": room_name,
-                      "calenear_id": calendar_id,
+                      "calendar_id": calendar_id,
                       "event_id": event_id
                   },
                   headers={'content-type': 'application/json'})
