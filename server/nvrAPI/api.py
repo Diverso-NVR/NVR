@@ -306,7 +306,8 @@ def upload_merged():
                post_data["room_name"],
                post_data.get('calendar_id'),
                post_data.get('event_id')
-           )
+           ),
+           daemon=True
            ).start()
 
     return "Video uploaded", 200

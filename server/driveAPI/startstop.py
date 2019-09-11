@@ -130,7 +130,11 @@ def upload_file(file_name: str, room_name: str, calendar_id: str, event_id: str)
     try:
         file_id = upload(home + "/vids/" + file_name,
                          room_name)
-        if calendar_id:
-            add_attachment(calendar_id, event_id, file_id)
     except Exception as e:
         print(e)
+
+    if calendar_id:
+        try:
+            add_attachment(calendar_id, event_id, file_id)
+        except:
+            print(e)
