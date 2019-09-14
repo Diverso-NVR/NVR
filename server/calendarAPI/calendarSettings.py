@@ -1,22 +1,35 @@
 from __future__ import print_function
-from googleapiclient.discovery import build
-from httplib2 import Http
-from oauth2client import file, client, tools
-import json
 import datetime
+import pickle
+import os.path
+from googleapiclient.discovery import build
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
+import json
 
 
 SCOPES = 'https://www.googleapis.com/auth/calendar'
 """
 Setting up calendar
 """
-store = file.Storage('.creds/tokenCalendar.json')
-creds = store.get()
-if not creds or creds.invalid:
-    flow = client.flow_from_clientsecrets('.creds/credentials.json', SCOPES)
-    creds = tools.run_flow(flow, store)
-calendar_service = build('calendar', 'v3', http=creds.authorize(Http()))
+creds = None
 
+token_path = '.creds/tokenCalendar.pickle'
+
+if os.path.exists(token_path):
+    with open(token_path, 'rb') as token:
+        creds = pickle.load(token)
+if not creds or not creds.valid:
+    if creds and creds.expired and creds.refresh_token:
+        creds.refresh(Request())
+    else:
+        flow = InstalledAppFlow.from_client_secrets_file(
+            '.creds/credentials.json', SCOPES)
+        creds = flow.run_local_server(port=0)
+    with open(token_path, 'wb') as token:
+        pickle.dump(creds, token)
+
+calendar_service = build('calendar', 'v3', credentials=creds)
 
 rooms = {}
 
@@ -51,13 +64,13 @@ def give_permissions(building: str, mail: str) -> None:
 
 # def delete_permissions(building, mail):
 #     calendars = calendar_service.calendarList().list(pageToken=None).execute()
-#     copyPerm = ""
+#     copy_perm = ""
 #     for item in calendars['items']:
 #         if item['summary'].split('-')[0] == building:
-#             copyPerm = item['id']
+#             copy_perm = item['id']
 #             break
 #     calendar = calendar_service.acl().list(
-#         calendarId=copyPerm).execute()
+#         calendarId=copy_perm).execute()
 
 #     # calendar_service.acl().delete(calendarId='primary', ruleId='ruleId').execute()
 
@@ -69,13 +82,13 @@ def create_calendar(building: str, room: str) -> None:
     }
 
     calendars = calendar_service.calendarList().list(pageToken=None).execute()
-    copyPerm = ""
+    copy_perm = ""
     for item in calendars['items']:
         if item['summary'].split('-')[0] == building:
-            copyPerm = item['id']
+            copy_perm = item['id']
             break
     calendar = calendar_service.acl().list(
-        calendarId=copyPerm).execute()
+        calendarId=copy_perm).execute()
 
     created_calendar = calendar_service.calendars().insert(
         body=calendar_metadata).execute()
@@ -84,7 +97,6 @@ def create_calendar(building: str, room: str) -> None:
         if rule['role'] == 'writer':
             new_rule = calendar_service.acl().insert(
                 calendarId=created_calendar["id"], body=rule).execute()
-
     return created_calendar["id"]  # calendarAPI link
 
 
