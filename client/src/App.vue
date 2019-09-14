@@ -53,9 +53,28 @@
     </v-content>
 
     <template v-if="error">
-      <v-snackbar :multi-line="true" :timeout="5000" @input="closeError" :value="true">
+      <v-snackbar
+        :multi-line="true"
+        :timeout="3000"
+        @input="closeError"
+        :value="true"
+        color="error"
+      >
         {{error}}
         <v-btn dark flat @click="closeError">Закрыть</v-btn>
+      </v-snackbar>
+    </template>
+
+    <template v-if="message">
+      <v-snackbar
+        :multi-line="true"
+        :timeout="3000"
+        @input="closeMessage"
+        :value="true"
+        color="primary"
+      >
+        {{message}}
+        <v-btn dark flat @click="closeMessage">Закрыть</v-btn>
       </v-snackbar>
     </template>
   </v-app>
@@ -71,6 +90,9 @@ export default {
   computed: {
     error() {
       return this.$store.getters.error;
+    },
+    message() {
+      return this.$store.getters.message;
     },
     isUserLoggedIn() {
       return this.$store.getters.isAutheticated;
@@ -111,12 +133,22 @@ export default {
     closeError() {
       this.$store.dispatch("clearError");
     },
+    closeMessage() {
+      this.$store.dispatch("clearMessage");
+    },
     onLogout() {
       this.$store.dispatch("logout").then(() => {
         this.$store.dispatch("clearTimer");
         this.$router.push("/");
       });
     }
+  },
+  beforeMount() {
+    this.$store.dispatch("loadRooms");
+    let roomsUpdateTimer = setInterval(() => {
+      this.$store.dispatch("loadRooms");
+    }, 3000);
+    this.$store.dispatch("setTimer", roomsUpdateTimer);
   }
 };
 </script>
