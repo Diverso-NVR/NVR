@@ -63,7 +63,7 @@ def register():
         db.session.add(user)
         db.session.commit()
     except:
-        return jsonify('Пользователь с данной почтой существует'), 400
+        return jsonify({"message": 'Пользователь с данной почтой существует'}), 400
     send_verify_email(user)
     return jsonify(user.to_dict()), 201
 
@@ -72,7 +72,7 @@ def register():
 def verify_email(token):
     user = User.verify_email_token(token)
     if not user:
-        return "Ошибка", 401
+        return "Время на подтверждение вышло", 401
 
     user.email_verified = True
     db.session.commit()
@@ -86,6 +86,9 @@ def login():
 
     if not user:
         return jsonify({'message': "Неверные данные", 'authenticated': False}), 401
+
+    if not user.email_verified:
+        return jsonify({'message': 'Почта не подтверждена', 'authenticated': False}), 401
 
     if not user.access:
         return jsonify({'message': 'Ошибка доступа. Администратор ещё не открыл доступ для этого аккаунта',
@@ -110,7 +113,7 @@ def get_users():
 @token_required
 def grant_access(current_user, user_id):
     if current_user.role != 'admin':
-        return "", 401
+        return jsonify({'message': "Ошибка доступа"}), 401
     user = User.query.get(user_id)
     user.access = True
     db.session.commit()
@@ -121,7 +124,7 @@ def grant_access(current_user, user_id):
 @token_required
 def user_role(current_user, user_id):
     if current_user.role != 'admin':
-        return "", 401
+        return jsonify({'message': "Ошибка доступа"}), 401
     user = User.query.get(user_id)
     user.role = request.get_json()['role']
     db.session.commit()
@@ -132,7 +135,7 @@ def user_role(current_user, user_id):
 @token_required
 def delete_user(current_user, user_id):
     if current_user.role != 'admin':
-        return "", 401
+        return jsonify({'message': "Ошибка доступа"}), 401
     user = User.query.get(user_id)
     db.session.delete(user)
     db.session.commit()
@@ -156,7 +159,7 @@ def move_file():
 @token_required
 def create_room(current_user):
     if current_user.role != 'admin':
-        return "", 401
+        return jsonify({'message': "Ошибка доступа"}), 401
     post_data = request.get_json()
     room = Room(name=post_data['name'])
     room.drive = create_folder(
@@ -193,7 +196,7 @@ def get_rooms():
 @token_required
 def delete_room(current_user, room_id):
     if current_user.role != 'admin':
-        return "", 401
+        return jsonify({'message': "Ошибка доступа"}), 401
     room = Room.query.get(room_id)
     delete_calendar(room.calendar)
     db.session.delete(room)
@@ -205,7 +208,7 @@ def delete_room(current_user, room_id):
 @token_required
 def edit_room(current_user, room_id):
     if current_user.role != 'admin':
-        return "", 401
+        return jsonify({'message': "Ошибка доступа"}), 401
     post_data = request.get_json()
     room = Room.query.get(room_id)
     update_daemon(room.to_dict())

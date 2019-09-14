@@ -1,4 +1,4 @@
-<p>Здравствуйте {{ user.email }},</p>
+<p>Здравствуйте, {{ user.email }}</p>
 <p>
   Чтобы подтвердить почту
   <a href="{{ url_for('api.verify_email', token=token, _external=True) }}">

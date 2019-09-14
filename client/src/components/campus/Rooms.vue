@@ -14,12 +14,14 @@
           <v-btn-toggle mandatory v-model="props.item.chosenSound">
             <v-btn
               flat
+              :loading="loader"
               value="enc"
               :disabled="!props.item.free"
               @click="soundSwitch(props.item, 'enc')"
             >Кодер</v-btn>
             <v-btn
               flat
+              :loading="loader"
               value="cam"
               :disabled="!props.item.free"
               @click="soundSwitch(props.item, 'cam')"
@@ -31,6 +33,7 @@
           <v-btn-toggle mandatory v-model="props.item.status">
             <v-btn
               flat
+              :loading="loader"
               color="green"
               value="free"
               @click="startRec(props.item)"
@@ -38,6 +41,7 @@
             >Старт</v-btn>
             <v-btn
               flat
+              :loading="loader"
               color="error"
               value="busy"
               @click="stopRec(props.item)"
@@ -83,14 +87,14 @@
 
     <v-layout row wrap class="addRoom" v-if="user.role === 'admin'">
       <v-flex xs6 sm4 md2>
-        <v-text-field v-model.trim="newRoom" label="Новая аудитория" :disabled="newRoomDownload"></v-text-field>
+        <v-text-field v-model.trim="newRoom" label="Новая аудитория" :disabled="newRoomLoader"></v-text-field>
       </v-flex>
       <v-btn
         color="black"
         class="white--text"
         @click="addRoom"
-        :loading="newRoomDownload"
-        :disabled="newRoomDownload"
+        :loading="newRoomLoader"
+        :disabled="newRoomLoader"
       >Добавить</v-btn>
     </v-layout>
   </v-app>
@@ -134,7 +138,7 @@ export default {
         { text: "Диск", value: "drive", sortable: false, align: "center" }
       ],
       newRoom: "",
-      newRoomDownload: false,
+      newRoomLoader: false,
       campus: "ФКМД"
     };
   },
@@ -143,7 +147,10 @@ export default {
   },
   computed: mapState({
     rooms: state => state.rooms,
-    user: state => state.user
+    user: state => state.user,
+    loader() {
+      return this.$store.getters.loading;
+    }
   }),
   methods: {
     getTsString(seconds) {
@@ -170,11 +177,10 @@ export default {
       if (this.newRoom === "") {
         return;
       }
-
-      this.newRoomDownload = true;
+      this.newRoomLoader = true;
       this.$store.dispatch("addRoom", { name: this.newRoom }).then(() => {
-        this.newRoomDownload = false;
         this.newRoom = "";
+        this.newRoomLoader = false;
       });
     }
   },
@@ -186,13 +192,6 @@ export default {
         sortable: false,
         align: "center"
       });
-    this.$store.dispatch("loadRooms");
-    if (!this.$store.getters.timer) {
-      let roomsUpdateTimer = setInterval(() => {
-        this.$store.dispatch("loadRooms");
-      }, 3000);
-      this.$store.dispatch("setTimer", roomsUpdateTimer);
-    }
   }
 };
 </script>

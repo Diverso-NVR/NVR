@@ -35,8 +35,9 @@ export default {
       this.$store.dispatch("changeRole", { user });
     },
     deleteUser(user) {
-      confirm("Вы уверены, что хотите удалить этого пользователя?") &&
+      if (confirm("Вы уверены, что хотите удалить этого пользователя?")) {
         this.$store.dispatch("deleteUser", { user });
+      }
     }
   },
   beforeMount() {

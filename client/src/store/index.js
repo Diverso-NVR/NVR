@@ -72,7 +72,7 @@ const mutations = {
 const actions = {
   login({ commit, state }, userData) {
     commit("setUserData", { userData });
-    commit("clearError");
+    commit("switchLoading");
     return authenticate(userData)
       .then(res => {
         commit("setJwtToken", { jwt: res.data });
@@ -80,8 +80,12 @@ const actions = {
         const body = JSON.parse(atob(tokenParts[1]));
         state.user.email = body.sub.email;
         state.user.role = body.sub.role;
+        commit("switchLoading");
       })
-      .catch(error => {});
+      .catch(error => {
+        commit("setError", error);
+        commit("switchLoading");
+      });
   },
   getUsers({ commit }) {
     return getUsers().then(res => {
@@ -89,14 +93,16 @@ const actions = {
     });
   },
   register({ commit }, userData) {
+    commit("switchLoading");
     commit("setUserData", { userData });
-    commit("clearError");
     return register(userData)
       .then(res => {
-        commit("setError", "Письмо с подтверждением выслано на почту");
+        commit("setMessage", "Письмо с подтверждением выслано на почту");
+        commit("switchLoading");
       })
       .catch(error => {
         commit("setError", error);
+        commit("switchLoading");
       });
   },
   logout({ commit }) {
@@ -106,16 +112,18 @@ const actions = {
     return delUser(user.id, state.jwt.token)
       .then(() => {
         commit("deleteUser", user);
-        commit("setError", `Пользователь ${user.email} удалён`);
+        commit("setMessage", `Пользователь ${user.email} удалён`);
       })
       .catch(error => {
         commit("setError", error);
       });
   },
-  changeRole({ state }, { user }) {
-    return changeUserRole(user.id, user.role, state.jwt.token).catch(error => {
-      commit("setError", error);
-    });
+  changeRole({ commit, state }, { user }) {
+    return changeUserRole(user.id, user.role, state.jwt.token)
+      .then(() => {})
+      .catch(error => {
+        commit("setError", error);
+      });
   },
   grantAccess({ commit, state }, { user }) {
     return grantUser(user.id, state.jwt.token)
@@ -135,7 +143,7 @@ const actions = {
         commit("setError", error);
       });
   },
-  switchSound({ state }, { room, sound }) {
+  switchSound({ commit, state }, { room, sound }) {
     return soundSwitch(room.id, sound, state.jwt.token)
       .then(() => {
         room.chosenSound = sound;
@@ -144,30 +152,34 @@ const actions = {
         commit("setError", error);
       });
   },
-  startRec({ state }, { room }) {
+  startRec({ commit, state }, { room }) {
     room.timer = setInterval(() => {
       room.timestamp++;
     }, 1000);
     room.free = false;
     room.status = "busy";
-    return start(room.id, state.jwt.token).catch(error => {
-      commit("setError", error);
-    });
+    return start(room.id, state.jwt.token)
+      .then(() => {})
+      .catch(error => {
+        commit("setError", error);
+      });
   },
-  stopRec({ state }, { room }) {
+  stopRec({ commit, state }, { room }) {
     room.timestamp = 0;
     clearInterval(room.timer);
     room.free = true;
     room.status = "free";
-    return stop(room.id, state.jwt.token).catch(error => {
-      commit("setError", error);
-    });
+    return stop(room.id, state.jwt.token)
+      .then(() => {})
+      .catch(error => {
+        commit("setError", error);
+      });
   },
   deleteRoom({ commit, state }, { room }) {
     return del(room.id, state.jwt.token)
       .then(res => {
         commit("deleteRoom", room);
-        commit("setError", `Комната ${room.name} удалена`);
+        commit("setMessage", `Комната ${room.name} удалена`);
       })
       .catch(error => {
         commit("setError", error);
@@ -177,16 +189,16 @@ const actions = {
     return add(name, state.jwt.token)
       .then(res => {
         commit("pushRoom", res.data);
-        commit("setError", `Комната ${res.data.name} успешно создана`);
+        commit("setMessage", `Комната ${res.data.name} успешно создана`);
       })
       .catch(error => {
         commit("setError", error);
       });
   },
-  editRoom({ state }, { id, sources }) {
+  editRoom({ commit, state }, { id, sources }) {
     return edit(id, sources, state.jwt.token)
       .then(() => {
-        commit("setError", "Изменения сохранены");
+        commit("setMessage", "Изменения сохранены");
       })
       .catch(error => {
         commit("setError", error);
