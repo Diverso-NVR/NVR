@@ -186,7 +186,6 @@ def get_rooms():
     for room in rooms:
         try:
             room.timestamp = copies[room.id]['duration']
-            room.free = copies[room.id]['free']
         except:
             pass
     return jsonify([r.to_dict() for r in rooms]), 200
@@ -275,8 +274,13 @@ def stop_rec(current_user):
         return "Already stoped", 401
 
     copies[id] = {'duration': 0, 'free': True, 'daemon': False}
-    Thread(target=stop, args=(id,)).start()
 
+    room.processing = True
+    db.session.commit()
+
+    stop(id)
+
+    room.processing = False
     room.free = True
     room.timestamp = 0
     db.session.commit()

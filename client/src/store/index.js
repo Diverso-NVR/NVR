@@ -42,7 +42,8 @@ const mutations = {
   setRooms(state, payload) {
     state.rooms = payload;
     for (let room of state.rooms) {
-      room.status = room.free ? "free" : "busy";
+      if (room.processing) room.status = "processing";
+      else room.status = room.free ? "free" : "busy";
       room.timer = room.free
         ? null
         : setInterval(() => {
@@ -166,12 +167,16 @@ const actions = {
   },
   stopRec({ commit, state }, { room }) {
     room.timestamp = 0;
+    room.status = "processing";
     clearInterval(room.timer);
-    room.free = true;
-    room.status = "free";
     return stop(room.id, state.jwt.token)
-      .then(() => {})
+      .then(() => {
+        room.free = true;
+        room.status = "free";
+      })
       .catch(error => {
+        room.free = true;
+        room.status = "free";
         commit("setError", error);
       });
   },

@@ -37,7 +37,7 @@
               color="green"
               value="free"
               @click="startRec(props.item)"
-              :disabled="!props.item.free"
+              :disabled="!props.item.free || props.item.status === 'processing'"
             >Старт</v-btn>
             <v-btn
               flat
@@ -45,25 +45,23 @@
               color="error"
               value="busy"
               @click="stopRec(props.item)"
-              :disabled="props.item.free"
+              :disabled="props.item.free || props.item.status === 'processing'"
             >Стоп</v-btn>
           </v-btn-toggle>
         </td>
 
         <td
           class="text-xs-center body-2"
-          :class="[props.item.free ? 'green lighten-4' : 'red lighten-4']"
+          :class="background[props.item.status]"
+          v-switch="props.item.status"
         >
-          <span class="green--text text--darken-4" v-if="props.item.free">Свободна</span>
-          <span
-            class="red--text text--darken-4"
-            v-else-if="props.item.daemon"
-          >Идёт запись по календарю</span>
-          <span class="red--text text--darken-4" v-else>Идёт запись</span>
+          <span class="green--text text--darken-4" v-case="'free'">Свободна</span>
+          <span class="yellow--text text--darken-4" v-case="'processing'">Обработка</span>
+          <span class="red--text text--darken-4" v-case="'busy'">Идёт запись</span>
         </td>
 
         <td class="text-xs-center">
-          <div v-if="!props.item.free">{{getTsString(props.item.timestamp)}}</div>
+          <div v-if="props.item.status === 'busy'">{{getTsString(props.item.timestamp)}}</div>
         </td>
 
         <td class="text-xs-center">
@@ -72,7 +70,7 @@
           </v-btn>
         </td>
         <td class="text-xs-center">
-          <v-btn icon v-bind:href="props.item.drive" target="_blank">
+          <v-btn icon :href="props.item.drive" target="_blank">
             <v-icon>folder</v-icon>
           </v-btn>
         </td>
@@ -138,6 +136,11 @@ export default {
         { text: "Диск", value: "drive", sortable: false, align: "center" }
       ],
       newRoom: "",
+      background: {
+        free: "green lighten-4",
+        processing: "yellow lighten-3",
+        busy: "red lighten-4"
+      },
       newRoomLoader: false,
       campus: "ФКМД"
     };

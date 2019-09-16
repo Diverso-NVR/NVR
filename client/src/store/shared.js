@@ -10,7 +10,9 @@ export default {
       state.loading = !state.loading;
     },
     setError(state, payload) {
-      state.error = payload["response"].data.message;
+      try {
+        state.error = payload["response"].data.message;
+      } catch (error) {}
     },
     clearError(state) {
       state.error = null;
