@@ -289,10 +289,10 @@ def stop_rec(current_user):
 def sound_change(current_user):
     post_data = request.get_json()
     id = post_data['id']
-    soundType = post_data['sound']
+    sound_type = post_data['sound']
 
     room = Room.query.get(id)
-    room.chosenSound = soundType
+    room.chosenSound = sound_type
     changed_sound(room.to_dict())
     db.session.commit()
 
@@ -352,4 +352,4 @@ def daemon_stop_rec():
     room.timestamp = 0
     db.session.commit()
 
-    return "Stoped", 200
+    return "Stopped", 200
