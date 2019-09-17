@@ -71,143 +71,138 @@ const mutations = {
   }
 };
 const actions = {
-  login({ commit, state }, userData) {
-    commit("setUserData", { userData });
-    commit("switchLoading");
-    return authenticate(userData)
-      .then(res => {
-        commit("setJwtToken", { jwt: res.data });
-        const tokenParts = res.data.token.split(".");
-        const body = JSON.parse(atob(tokenParts[1]));
-        state.user.email = body.sub.email;
-        state.user.role = body.sub.role;
-        commit("switchLoading");
-      })
-      .catch(error => {
-        commit("setError", error);
-        commit("switchLoading");
-      });
+  async login({ commit, state }, userData) {
+    try {
+      commit("setUserData", { userData });
+      commit("switchLoading");
+      let res = await authenticate(userData);
+      commit("setJwtToken", { jwt: res.data });
+      const tokenParts = res.data.token.split(".");
+      const body = JSON.parse(atob(tokenParts[1]));
+      state.user.email = body.sub.email;
+      state.user.role = body.sub.role;
+      commit("switchLoading");
+    } catch (error) {
+      commit("setError", error);
+      commit("switchLoading");
+    }
   },
-  getUsers({ commit }) {
-    return getUsers().then(res => {
+  async getUsers({ commit, state }) {
+    try {
+      let res = await getUsers(state.jwt.token);
       commit("setUsers", res.data);
-    });
+    } catch (error) {
+      commit("setError", error);
+    }
   },
-  register({ commit }, userData) {
-    commit("switchLoading");
-    commit("setUserData", { userData });
-    return register(userData)
-      .then(res => {
-        commit("setMessage", "Письмо с подтверждением выслано на почту");
-        commit("switchLoading");
-      })
-      .catch(error => {
-        commit("setError", error);
-        commit("switchLoading");
-      });
+  async register({ commit }, userData) {
+    try {
+      commit("switchLoading");
+      commit("setUserData", { userData });
+      await register(userData);
+      commit("setMessage", "Письмо с подтверждением выслано на почту");
+      commit("switchLoading");
+    } catch (error) {
+      commit("setError", error);
+      commit("switchLoading");
+    }
   },
   logout({ commit }) {
     commit("cleaUserData");
   },
-  deleteUser({ commit, state }, { user }) {
-    return delUser(user.id, state.jwt.token)
-      .then(() => {
-        commit("deleteUser", user);
-        commit("setMessage", `Пользователь ${user.email} удалён`);
-      })
-      .catch(error => {
-        commit("setError", error);
-      });
+  async deleteUser({ commit, state }, { user }) {
+    try {
+      await delUser(user.id, state.jwt.token);
+      commit("deleteUser", user);
+      commit("setMessage", `Пользователь ${user.email} удалён`);
+    } catch (error) {
+      commit("setError", error);
+    }
   },
-  changeRole({ commit, state }, { user }) {
-    return changeUserRole(user.id, user.role, state.jwt.token)
-      .then(() => {})
-      .catch(error => {
-        commit("setError", error);
-      });
+  async changeRole({ commit, state }, { user }) {
+    try {
+      await changeUserRole(user.id, user.role, state.jwt.token);
+    } catch (error) {
+      commit("setError", error);
+    }
   },
-  grantAccess({ commit, state }, { user }) {
-    return grantUser(user.id, state.jwt.token)
-      .then(() => {
-        commit("grantAccess", user);
-      })
-      .catch(error => {
-        commit("setError", error);
-      });
+  async grantAccess({ commit, state }, { user }) {
+    try {
+      await grantUser(user.id, state.jwt.token);
+      commit("grantAccess", user);
+    } catch (error) {
+      commit("setError", error);
+    }
   },
-  loadRooms({ commit }) {
-    return getRooms()
-      .then(res => {
-        commit("setRooms", res.data);
-      })
-      .catch(error => {
-        commit("setError", error);
-      });
+  async loadRooms({ commit }) {
+    try {
+      let res = await getRooms();
+      commit("setRooms", res.data);
+    } catch (error) {
+      commit("setError", error);
+    }
   },
-  switchSound({ commit, state }, { room, sound }) {
-    return soundSwitch(room.id, sound, state.jwt.token)
-      .then(() => {
-        room.chosenSound = sound;
-      })
-      .catch(error => {
-        commit("setError", error);
-      });
+  async switchSound({ commit, state }, { room, sound }) {
+    try {
+      await soundSwitch(room.id, sound, state.jwt.token);
+      room.chosenSound = sound;
+    } catch (error) {
+      commit("setError", error);
+    }
   },
-  startRec({ commit, state }, { room }) {
-    room.timer = setInterval(() => {
-      room.timestamp++;
-    }, 1000);
-    room.free = false;
-    room.status = "busy";
-    return start(room.id, state.jwt.token)
-      .then(() => {})
-      .catch(error => {
-        commit("setError", error);
-      });
+  async startRec({ commit, state }, { room }) {
+    try {
+      room.timer = setInterval(() => {
+        room.timestamp++;
+      }, 1000);
+      room.free = false;
+      room.status = "busy";
+      await start(room.id, state.jwt.token);
+    } catch (error) {
+      commit("setError", error);
+    }
   },
-  stopRec({ commit, state }, { room }) {
-    room.timestamp = 0;
-    room.status = "processing";
-    clearInterval(room.timer);
-    return stop(room.id, state.jwt.token)
-      .then(() => {
-        room.free = true;
-        room.status = "free";
-      })
-      .catch(error => {
-        room.free = true;
-        room.status = "free";
-        commit("setError", error);
-      });
+  async stopRec({ commit, state }, { room }) {
+    try {
+      room.timestamp = 0;
+      room.status = "processing";
+      clearInterval(room.timer);
+
+      await stop(room.id, state.jwt.token);
+
+      room.free = true;
+      room.status = "free";
+    } catch (error) {
+      room.free = true;
+      room.status = "free";
+      commit("setError", error);
+    }
   },
-  deleteRoom({ commit, state }, { room }) {
-    return del(room.id, state.jwt.token)
-      .then(res => {
-        commit("deleteRoom", room);
-        commit("setMessage", `Комната ${room.name} удалена`);
-      })
-      .catch(error => {
-        commit("setError", error);
-      });
+  async deleteRoom({ commit, state }, { room }) {
+    try {
+      await del(room.id, state.jwt.token);
+      commit("deleteRoom", room);
+      commit("setMessage", `Комната ${room.name} удалена`);
+    } catch (error) {
+      commit("setError", error);
+    }
   },
-  addRoom({ commit, state }, { name }) {
-    return add(name, state.jwt.token)
-      .then(res => {
-        commit("pushRoom", res.data);
-        commit("setMessage", `Комната ${res.data.name} успешно создана`);
-      })
-      .catch(error => {
-        commit("setError", error);
-      });
+  async addRoom({ commit, state }, { name }) {
+    try {
+      let res = await add(name, state.jwt.token);
+      commit("pushRoom", res.data);
+      commit("setMessage", `Комната ${res.data.name} успешно создана`);
+    } catch (error) {
+      commit("setError", error);
+    }
   },
-  editRoom({ commit, state }, { id, sources }) {
-    return edit(id, sources, state.jwt.token)
-      .then(() => {
-        commit("setMessage", "Изменения сохранены");
-      })
-      .catch(error => {
-        commit("setError", error);
-      });
+  async editRoom({ commit, state }, { id, sources }) {
+    try {
+      await edit(id, sources, state.jwt.token);
+      commit("setMessage", "Изменения сохранены");
+    } catch (error) {
+      commit("setError", error);
+    }
   }
 };
 const getters = {

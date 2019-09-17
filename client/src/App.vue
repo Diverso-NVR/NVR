@@ -142,13 +142,6 @@ export default {
         this.$router.push("/");
       });
     }
-  },
-  beforeMount() {
-    this.$store.dispatch("loadRooms");
-    let roomsUpdateTimer = setInterval(() => {
-      this.$store.dispatch("loadRooms");
-    }, 3000);
-    this.$store.dispatch("setTimer", roomsUpdateTimer);
   }
 };
 </script>

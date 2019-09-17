@@ -104,7 +104,8 @@ def login():
 
 
 @api.route('/users', methods=['GET'])
-def get_users():
+@token_required
+def get_users(current_user):
     users = [u.to_dict() for u in User.query.all() if u.email_verified]
     return jsonify(users)
 

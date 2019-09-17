@@ -76,6 +76,11 @@ export default {
         this.$store
           .dispatch("login", { email: this.email, password: this.password })
           .then(() => {
+            this.$store.dispatch("loadRooms");
+            let roomsUpdateTimer = setInterval(() => {
+              this.$store.dispatch("loadRooms");
+            }, 3000);
+            this.$store.dispatch("setTimer", roomsUpdateTimer);
             this.$router.push("/rooms");
           });
       }
