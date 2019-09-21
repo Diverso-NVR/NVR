@@ -3,7 +3,7 @@ import store from "@/store";
 export function adminOnly(to, from, next) {
   if (store.getters.user.role === "admin") {
     next();
-  } else next("/error");
+  } else next("/login");
 }
 
 export function authRequired(to, from, next) {

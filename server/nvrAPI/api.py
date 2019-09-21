@@ -239,6 +239,9 @@ def start_rec(current_user):
     if not room.free:
         return "Already recording", 401
 
+    room.free = False
+    db.session.commit()
+
     copies[id] = {'duration': 0, 'free': False, 'daemon': False}
 
     threads[id] = Thread(target=start_timer, args=(id,), daemon=True)
@@ -250,9 +253,6 @@ def start_rec(current_user):
                  room.chosenSound,
                  [s.to_dict() for s in room.sources])
            ).start()
-
-    room.free = False
-    db.session.commit()
 
     return "Started", 200
 
