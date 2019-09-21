@@ -1,101 +1,182 @@
 <template>
   <v-app>
-    <v-data-table
-      :headers="headers"
-      :items="rooms"
-      class="elevation-4"
-      hide-actions
-      disable-initial-sort
-    >
-      <template v-slot:items="props">
-        <td class="text-xs-center subheading">{{ props.item.name }}</td>
+    <v-layout v-resize="onResize" column>
+      <v-data-table
+        :headers="headers"
+        :items="rooms"
+        class="elevation-4"
+        :hide-headers="isMobile"
+        :class="{mobile: isMobile}"
+        hide-actions
+        disable-initial-sort
+      >
+        <template v-slot:items="props">
+          <tr v-if="!isMobile">
+            <td class="text-xs-center subheading">{{ props.item.name }}</td>
 
-        <td class="text-xs-center">
-          <v-btn-toggle mandatory v-model="props.item.chosenSound">
-            <v-btn
-              flat
-              :loading="loader"
-              value="enc"
-              :disabled="!props.item.free"
-              @click="soundSwitch(props.item, 'enc')"
-            >Кодер</v-btn>
-            <v-btn
-              flat
-              :loading="loader"
-              value="cam"
-              :disabled="!props.item.free"
-              @click="soundSwitch(props.item, 'cam')"
-            >Камера</v-btn>
-          </v-btn-toggle>
-        </td>
+            <td class="text-xs-center">
+              <v-btn-toggle mandatory v-model="props.item.chosenSound">
+                <v-btn
+                  flat
+                  :loading="loader"
+                  value="enc"
+                  :disabled="!props.item.free"
+                  @click="soundSwitch(props.item, 'enc')"
+                >Кодер</v-btn>
+                <v-btn
+                  flat
+                  :loading="loader"
+                  value="cam"
+                  :disabled="!props.item.free"
+                  @click="soundSwitch(props.item, 'cam')"
+                >Камера</v-btn>
+              </v-btn-toggle>
+            </td>
 
-        <td class="text-xs-center">
-          <v-btn-toggle mandatory v-model="props.item.status">
-            <v-btn
-              flat
-              :loading="loader"
-              color="green"
-              value="free"
-              @click="startRec(props.item)"
-              :disabled="!props.item.free"
-            >Старт</v-btn>
-            <v-btn
-              flat
-              :loading="loader"
-              color="error"
-              value="busy"
-              @click="stopRec(props.item)"
-              :disabled="props.item.free"
-            >Стоп</v-btn>
-          </v-btn-toggle>
-        </td>
+            <td class="text-xs-center">
+              <v-btn-toggle mandatory v-model="props.item.status">
+                <v-btn
+                  flat
+                  :loading="loader"
+                  color="green"
+                  value="free"
+                  @click="startRec(props.item)"
+                  :disabled="!props.item.free || props.item.status === 'processing'"
+                >Старт</v-btn>
+                <v-btn
+                  flat
+                  :loading="loader"
+                  color="error"
+                  value="busy"
+                  @click="stopRec(props.item)"
+                  :disabled="props.item.free || props.item.status === 'processing'"
+                >Стоп</v-btn>
+              </v-btn-toggle>
+            </td>
 
-        <td
-          class="text-xs-center body-2"
-          :class="[props.item.free ? 'green lighten-4' : 'red lighten-4']"
-        >
-          <span class="green--text text--darken-4" v-if="props.item.free">Свободна</span>
-          <span
-            class="red--text text--darken-4"
-            v-else-if="props.item.daemon"
-          >Идёт запись по календарю</span>
-          <span class="red--text text--darken-4" v-else>Идёт запись</span>
-        </td>
+            <td
+              class="text-xs-center body-2"
+              :class="background[props.item.status]"
+              v-switch="props.item.status"
+            >
+              <span class="green--text text--darken-4" v-case="'free'">Свободна</span>
+              <span class="yellow--text text--darken-4" v-case="'processing'">Обработка</span>
+              <span class="red--text text--darken-4" v-case="'busy'">Идёт запись</span>
+            </td>
 
-        <td class="text-xs-center">
-          <div v-if="!props.item.free">{{getTsString(props.item.timestamp)}}</div>
-        </td>
+            <td class="text-xs-center">
+              <div v-if="props.item.status === 'busy'">{{getTsString(props.item.timestamp)}}</div>
+            </td>
 
-        <td class="text-xs-center">
-          <v-btn icon target="_blank" href="https://calendar.google.com/calendar/r">
-            <v-icon>calendar_today</v-icon>
-          </v-btn>
-        </td>
-        <td class="text-xs-center">
-          <v-btn icon v-bind:href="props.item.drive" target="_blank">
-            <v-icon>folder</v-icon>
-          </v-btn>
-        </td>
-        <td class="text-xs-center" v-if="user.role === 'admin'">
-          <app-edit-room :room="props.item"></app-edit-room>
-          <v-btn icon @click="del(props.item)" :disabled="!props.item.free">
-            <v-icon>delete</v-icon>
-          </v-btn>
-        </td>
-      </template>
-    </v-data-table>
+            <td class="text-xs-center">
+              <v-btn icon target="_blank" href="https://calendar.google.com/calendar/r">
+                <v-icon>calendar_today</v-icon>
+              </v-btn>
+            </td>
+            <td class="text-xs-center">
+              <v-btn icon :href="props.item.drive" target="_blank">
+                <v-icon>folder</v-icon>
+              </v-btn>
+            </td>
+            <td class="text-xs-center" v-if="user.role === 'admin'">
+              <app-edit-room :room="props.item"></app-edit-room>
+              <v-btn icon @click="del(props.item)" :disabled="!props.item.free">
+                <v-icon>delete</v-icon>
+              </v-btn>
+            </td>
+          </tr>
+          <tr v-else>
+            <td>
+              <ul class="flex-content">
+                <li
+                  class="flex-item subheading key-elems"
+                  data-label="Аудитория"
+                >{{ props.item.name }}</li>
+                <li class="flex-item subheading" data-label="Запись">
+                  <v-btn-toggle mandatory v-model="props.item.status">
+                    <v-btn
+                      flat
+                      :loading="loader"
+                      color="green"
+                      value="free"
+                      @click="startRec(props.item)"
+                      :disabled="!props.item.free || props.item.status === 'processing'"
+                    >Старт</v-btn>
+                    <v-btn
+                      flat
+                      :loading="loader"
+                      color="error"
+                      value="busy"
+                      @click="stopRec(props.item)"
+                      :disabled="props.item.free || props.item.status === 'processing'"
+                    >Стоп</v-btn>
+                  </v-btn-toggle>
+                </li>
+                <li class="flex-item subheading" data-label="Источник звука">
+                  <v-btn-toggle mandatory v-model="props.item.chosenSound">
+                    <v-btn
+                      flat
+                      :loading="loader"
+                      value="enc"
+                      :disabled="!props.item.free"
+                      @click="soundSwitch(props.item, 'enc')"
+                    >Кодер</v-btn>
+                    <v-btn
+                      flat
+                      :loading="loader"
+                      value="cam"
+                      :disabled="!props.item.free"
+                      @click="soundSwitch(props.item, 'cam')"
+                    >Камера</v-btn>
+                  </v-btn-toggle>
+                </li>
 
-    <v-layout row wrap class="addRoom" v-if="user.role === 'admin'">
-      <v-flex xs6 sm4 md2>
-        <v-text-field v-model.trim="newRoom" label="Новая аудитория" :disabled="newRoomLoader"></v-text-field>
-      </v-flex>
-      <v-btn
-        color="black"
-        class="white--text"
-        @click="addRoom"
-        :loading="newRoomLoader"
-        :disabled="newRoomLoader"
-      >Добавить</v-btn>
+                <li class="flex-item subheading" data-label="Статус" v-switch="props.item.status">
+                  <span class="green--text text--darken-4" v-case="'free'">Свободна</span>
+                  <span class="yellow--text text--darken-4" v-case="'processing'">Обработка</span>
+                  <span class="red--text text--darken-4" v-case="'busy'">Идёт запись</span>
+                </li>
+                <li class="flex-item subheading" data-label="Время записи">
+                  <div v-if="props.item.status === 'busy'">{{getTsString(props.item.timestamp)}}</div>
+                </li>
+                <li class="flex-item subheading" data-label="Календарь">
+                  <v-btn icon target="_blank" href="https://calendar.google.com/calendar/r">
+                    <v-icon medium>calendar_today</v-icon>
+                  </v-btn>
+                </li>
+                <li class="flex-item subheading" data-label="Диск">
+                  <v-btn icon :href="props.item.drive" target="_blank">
+                    <v-icon medium>folder</v-icon>
+                  </v-btn>
+                </li>
+
+                <li
+                  class="flex-item subheading key-elems"
+                  v-if="user.role === 'admin'"
+                  data-label="Изменить"
+                >
+                  <app-edit-room :room="props.item"></app-edit-room>
+                  <v-btn icon @click="del(props.item)" :disabled="!props.item.free">
+                    <v-icon medium>delete</v-icon>
+                  </v-btn>
+                </li>
+              </ul>
+            </td>
+          </tr>
+        </template>
+      </v-data-table>
+      <v-layout row wrap class="addRoom" v-if="user.role === 'admin'">
+        <v-flex xs6 sm4 md2>
+          <v-text-field v-model.trim="newRoom" label="Новая аудитория" :disabled="newRoomLoader"></v-text-field>
+        </v-flex>
+        <v-btn
+          color="black"
+          class="white--text"
+          @click="addRoom"
+          :loading="newRoomLoader"
+          :disabled="newRoomLoader"
+        >Добавить</v-btn>
+      </v-layout>
     </v-layout>
   </v-app>
 </template>
@@ -138,7 +219,13 @@ export default {
         { text: "Диск", value: "drive", sortable: false, align: "center" }
       ],
       newRoom: "",
+      background: {
+        free: "green lighten-4",
+        processing: "yellow lighten-3",
+        busy: "red lighten-4"
+      },
       newRoomLoader: false,
+      isMobile: false,
       campus: "ФКМД"
     };
   },
@@ -153,6 +240,9 @@ export default {
     }
   }),
   methods: {
+    onResize() {
+      this.isMobile = window.innerWidth < 769;
+    },
     getTsString(seconds) {
       let h = Math.floor(seconds / 60 / 60);
       seconds -= h * 60 * 60;
@@ -173,15 +263,14 @@ export default {
       confirm("Вы уверены, что хотите удалить эту аудиторию?") &&
         this.$store.dispatch("deleteRoom", { room });
     },
-    addRoom() {
+    async addRoom() {
       if (this.newRoom === "") {
         return;
       }
       this.newRoomLoader = true;
-      this.$store.dispatch("addRoom", { name: this.newRoom }).then(() => {
-        this.newRoom = "";
-        this.newRoomLoader = false;
-      });
+      await this.$store.dispatch("addRoom", { name: this.newRoom });
+      this.newRoom = "";
+      this.newRoomLoader = false;
     }
   },
   beforeMount() {
@@ -196,8 +285,70 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 .addRoom {
   margin-top: 15px;
+}
+.mobile {
+  color: #333;
+}
+
+@media screen and (max-width: 768px) {
+  .mobile table.v-table tr {
+    max-width: 100%;
+    position: relative;
+    display: block;
+  }
+
+  .mobile table.v-table tr:nth-child(odd) {
+    border-left: 6px solid;
+  }
+
+  .mobile table.v-table tr:nth-child(even) {
+    border-left: 6px solid;
+  }
+
+  .mobile table.v-table tr td {
+    display: flex;
+    width: 100%;
+    border-bottom: 1px solid black;
+    height: auto;
+    padding: 10px;
+  }
+
+  .mobile table.v-table tr td ul li:before {
+    content: attr(data-label);
+    padding-right: 0.5em;
+    text-align: center;
+    display: block;
+    color: #999;
+  }
+  .v-datatable__actions__select {
+    width: 50%;
+    margin: 0px;
+    justify-content: flex-start;
+  }
+  .mobile .theme--light.v-table tbody tr:hover:not(.v-datatable__expand-row) {
+    background: transparent;
+  }
+}
+.flex-content {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.flex-item {
+  padding: auto;
+  text-align: center;
+  width: 50%;
+  height: 75px;
+  font-weight: bold;
+}
+.key-elems {
+  width: 100%;
 }
 </style>

@@ -104,7 +104,8 @@ def login():
 
 
 @api.route('/users', methods=['GET'])
-def get_users():
+@token_required
+def get_users(current_user):
     users = [u.to_dict() for u in User.query.all() if u.email_verified]
     return jsonify(users)
 
@@ -186,7 +187,6 @@ def get_rooms():
     for room in rooms:
         try:
             room.timestamp = copies[room.id]['duration']
-            room.free = copies[room.id]['free']
         except:
             pass
     return jsonify([r.to_dict() for r in rooms]), 200
@@ -239,6 +239,9 @@ def start_rec(current_user):
     if not room.free:
         return "Already recording", 401
 
+    room.free = False
+    db.session.commit()
+
     copies[id] = {'duration': 0, 'free': False, 'daemon': False}
 
     threads[id] = Thread(target=start_timer, args=(id,), daemon=True)
@@ -250,9 +253,6 @@ def start_rec(current_user):
                  room.chosenSound,
                  [s.to_dict() for s in room.sources])
            ).start()
-
-    room.free = False
-    db.session.commit()
 
     return "Started", 200
 
@@ -275,8 +275,13 @@ def stop_rec(current_user):
         return "Already stoped", 401
 
     copies[id] = {'duration': 0, 'free': True, 'daemon': False}
-    Thread(target=stop, args=(id,)).start()
 
+    room.processing = True
+    db.session.commit()
+
+    stop(id)
+
+    room.processing = False
     room.free = True
     room.timestamp = 0
     db.session.commit()

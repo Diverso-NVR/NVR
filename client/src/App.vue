@@ -23,7 +23,7 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-toolbar dark color="black">
+    <v-toolbar dark color="black" fixed>
       <v-toolbar-side-icon @click.prevent="drawer = !drawer" class="hidden-md-and-up"></v-toolbar-side-icon>
       <v-toolbar-title>
         <v-btn
@@ -46,7 +46,7 @@
       </v-toolbar-items>
     </v-toolbar>
 
-    <v-content>
+    <v-content style="margin-top:60px">
       <v-container fluid>
         <router-view></router-view>
       </v-container>
@@ -142,13 +142,6 @@ export default {
         this.$router.push("/");
       });
     }
-  },
-  beforeMount() {
-    this.$store.dispatch("loadRooms");
-    let roomsUpdateTimer = setInterval(() => {
-      this.$store.dispatch("loadRooms");
-    }, 3000);
-    this.$store.dispatch("setTimer", roomsUpdateTimer);
   }
 };
 </script>

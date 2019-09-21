@@ -1,7 +1,7 @@
 <template>
   <v-dialog v-model="modal" max-width="600px">
     <v-btn icon slot="activator">
-      <v-icon>edit</v-icon>
+      <v-icon medium>edit</v-icon>
     </v-btn>
     <v-card>
       <v-card-text>

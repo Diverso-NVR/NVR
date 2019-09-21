@@ -67,9 +67,10 @@ class Room(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
-    free = db.Column(db.Boolean, default=True)
-    timestamp = db.Column(db.Integer, default=0)
-    chosenSound = db.Column(db.String(100), default='enc')
+    free = db.Column(db.Boolean, nullable=False, default=True)
+    processing = db.Column(db.Boolean, nullable=False, default=False)
+    timestamp = db.Column(db.Integer, nullable=False, default=0)
+    chosenSound = db.Column(db.String(100), nullable=False, default='enc')
     sources = db.relationship('Source', backref='room', lazy=False)
     drive = db.Column(db.String(200), nullable=False)
     calendar = db.Column(db.String(200), nullable=False)
@@ -78,6 +79,7 @@ class Room(db.Model):
         return dict(id=self.id,
                     name=self.name,
                     free=self.free,
+                    processing=self.processing,
                     timestamp=self.timestamp,
                     chosenSound=self.chosenSound,
                     sources=[source.to_dict() for source in self.sources],

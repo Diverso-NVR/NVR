@@ -11,32 +11,34 @@ export function register(userData) {
   return axios.post(`${API_URL}/register`, userData);
 }
 
-export function getUsers() {
-  return axios.get(`${API_URL}/users`);
-}
-
-export function delUser(id, jwt) {
-  return axios.delete(`${API_URL}/users/${id}`, {
-    headers: { Authorization: `Bearer: ${jwt}` }
+export function getUsers(token) {
+  return axios.get(`${API_URL}/users`, {
+    headers: { Authorization: `Bearer: ${token}` }
   });
 }
 
-export function changeUserRole(id, role, jwt) {
+export function delUser(id, token) {
+  return axios.delete(`${API_URL}/users/${id}`, {
+    headers: { Authorization: `Bearer: ${token}` }
+  });
+}
+
+export function changeUserRole(id, role, token) {
   return axios.put(
     `${API_URL}/users/roles/${id}`,
     { role },
     {
-      headers: { Authorization: `Bearer: ${jwt}` }
+      headers: { Authorization: `Bearer: ${token}` }
     }
   );
 }
 
-export function grantUser(id, jwt) {
+export function grantUser(id, token) {
   return axios.put(
     `${API_URL}/users/${id}`,
     {},
     {
-      headers: { Authorization: `Bearer: ${jwt}` }
+      headers: { Authorization: `Bearer: ${token}` }
     }
   );
 }
@@ -46,48 +48,48 @@ export function getRooms() {
   return axios.get(`${API_URL}/rooms/`);
 }
 
-export function soundSwitch(id, sound, jwt) {
+export function soundSwitch(id, sound, token) {
   return axios.post(
     `${API_URL}/sound`,
     { id, sound },
-    { headers: { Authorization: `Bearer: ${jwt}` } }
+    { headers: { Authorization: `Bearer: ${token}` } }
   );
 }
 
-export function start(id, jwt) {
+export function start(id, token) {
   return axios.post(
     `${API_URL}/startRec`,
     { id },
-    { headers: { Authorization: `Bearer: ${jwt}` } }
+    { headers: { Authorization: `Bearer: ${token}` } }
   );
 }
 
-export function stop(id, jwt) {
+export function stop(id, token) {
   return axios.post(
     `${API_URL}/stopRec`,
     { id },
-    { headers: { Authorization: `Bearer: ${jwt}` } }
+    { headers: { Authorization: `Bearer: ${token}` } }
   );
 }
 
-export function del(id, jwt) {
+export function del(id, token) {
   return axios.delete(`${API_URL}/rooms/${id}`, {
-    headers: { Authorization: `Bearer: ${jwt}` }
+    headers: { Authorization: `Bearer: ${token}` }
   });
 }
 
-export function add(name, jwt) {
+export function add(name, token) {
   return axios.post(
     `${API_URL}/rooms`,
     { name },
-    { headers: { Authorization: `Bearer: ${jwt}` } }
+    { headers: { Authorization: `Bearer: ${token}` } }
   );
 }
 
-export function edit(id, sources, jwt) {
+export function edit(id, sources, token) {
   return axios.put(
     `${API_URL}/rooms/${id}`,
     { sources },
-    { headers: { Authorization: `Bearer: ${jwt}` } }
+    { headers: { Authorization: `Bearer: ${token}` } }
   );
 }
