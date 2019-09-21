@@ -84,13 +84,14 @@ export default {
     }
   },
   methods: {
-    onSubmit() {
+    async onSubmit() {
       if (this.$refs.form.validate()) {
-        this.$store
-          .dispatch("register", { email: this.email, password: this.password })
-          .then(() => {
-            this.$router.push("/");
-          });
+        await this.$store.dispatch("register", {
+          email: this.email,
+          password: this.password
+        });
+
+        this.$router.push("/");
       }
     }
   }

@@ -263,15 +263,14 @@ export default {
       confirm("Вы уверены, что хотите удалить эту аудиторию?") &&
         this.$store.dispatch("deleteRoom", { room });
     },
-    addRoom() {
+    async addRoom() {
       if (this.newRoom === "") {
         return;
       }
       this.newRoomLoader = true;
-      this.$store.dispatch("addRoom", { name: this.newRoom }).then(() => {
-        this.newRoom = "";
-        this.newRoomLoader = false;
-      });
+      await this.$store.dispatch("addRoom", { name: this.newRoom });
+      this.newRoom = "";
+      this.newRoomLoader = false;
     }
   },
   beforeMount() {
