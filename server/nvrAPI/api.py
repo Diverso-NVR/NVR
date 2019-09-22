@@ -219,8 +219,8 @@ def edit_room(current_user, room_id):
         source.ip = s['ip']
         source.name = s['name']
         source.sound = s['sound'] if s['sound'] != False else None
-        source.tracking = s['tracking']
-        source.main_cam = s['main_cam']
+        source.tracking = s.get('tracking')
+        source.main_cam = s.get('main_cam')
         source.room_id = room_id
 
     db.session.commit()
