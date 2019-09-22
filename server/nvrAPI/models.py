@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 from flask import current_app
-from time import time
+from time import time, sleep
 
 
 db = SQLAlchemy()
@@ -18,7 +18,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
-    role = db.Column(db.String(50), nullable=False, default='user')
+    role = db.Column(db.String(50), default='user')
     email_verified = db.Column(db.Boolean, default=False)
     access = db.Column(db.Boolean, default=False)
 
@@ -40,10 +40,17 @@ class User(db.Model):
 
         return user
 
-    def get_verify_token(self, expires_in=600):
+    def get_verify_token(self, token_expiration):
         return jwt.encode(
             {'verify_user': self.id, 'exp': time() + expires_in},
             current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+
+    def delete_user_after_token_expiration(self, app, token_expiration):
+        sleep(token_expiration)
+        with app.app_context():
+            user = User.query.get(self.id)
+            db.session.delete(user)
+            db.session.commit()
 
     @staticmethod
     def verify_email_token(token):
@@ -66,14 +73,14 @@ class Room(db.Model):
     __tablename__ = 'rooms'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
-    free = db.Column(db.Boolean, nullable=False, default=True)
-    processing = db.Column(db.Boolean, nullable=False, default=False)
-    timestamp = db.Column(db.Integer, nullable=False, default=0)
-    chosenSound = db.Column(db.String(100), nullable=False, default='enc')
+    name = db.Column(db.String(100), nullable=False)
+    free = db.Column(db.Boolean,  default=True)
+    processing = db.Column(db.Boolean,  default=False)
+    timestamp = db.Column(db.Integer,  default=0)
+    chosen_sound = db.Column(db.String(100), default='enc')
     sources = db.relationship('Source', backref='room', lazy=False)
-    drive = db.Column(db.String(200), nullable=False)
-    calendar = db.Column(db.String(200), nullable=False)
+    drive = db.Column(db.String(200))
+    calendar = db.Column(db.String(200))
 
     def to_dict(self):
         return dict(id=self.id,
@@ -81,7 +88,7 @@ class Room(db.Model):
                     free=self.free,
                     processing=self.processing,
                     timestamp=self.timestamp,
-                    chosenSound=self.chosenSound,
+                    chosen_sound=self.chosen_sound,
                     sources=[source.to_dict() for source in self.sources],
                     drive=self.drive,
                     calendar=self.calendar)
@@ -94,8 +101,8 @@ class Source(db.Model):
     ip = db.Column(db.String(200))
     name = db.Column(db.String(100))
     sound = db.Column(db.String(100))
-    tracking = db.Column(db.Boolean, default=False,  nullable=False)
-    mainCam = db.Column(db.Boolean, default=False,  nullable=False)
+    tracking = db.Column(db.Boolean, default=False)
+    main_cam = db.Column(db.Boolean, default=False)
     room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
 
     def to_dict(self):
@@ -104,5 +111,5 @@ class Source(db.Model):
                     name=self.name,
                     sound=self.sound,
                     tracking=self.tracking,
-                    mainCam=self.mainCam,
+                    main_cam=self.main_cam,
                     room_id=self.room_id)

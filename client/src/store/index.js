@@ -82,9 +82,11 @@ const actions = {
       state.user.email = body.sub.email;
       state.user.role = body.sub.role;
       commit("switchLoading");
+      return true;
     } catch (error) {
       commit("setError", error);
       commit("switchLoading");
+      return false;
     }
   },
   async getUsers({ commit, state }) {

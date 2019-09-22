@@ -86,19 +86,19 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
 
     kill_records(room_id)
 
-    requests.post(merge_url,
-                  json={
-                      "screen_num": records[room_id] +
-                      rooms[room_id]['sound']['enc'][0].split(
-                          '/')[0].split('.')[-1],
-                      "video_cam_num": records[room_id] +
-                      rooms[room_id]['mainCam'].split('/')[0].split('.')[-1],
-                      "record_num": records[room_id],
-                      "room_name": rooms[room_id]['name'],
-                      "calendar_id": calendar_id,
-                      "event_id": event_id
-                  },
-                  headers={'content-type': 'application/json'})
+    # requests.post(merge_url,
+    #               json={
+    #                   "screen_num": records[room_id] +
+    #                   rooms[room_id]['sound']['enc'][0].split(
+    #                       '/')[0].split('.')[-1],
+    #                   "video_cam_num": records[room_id] +
+    #                   rooms[room_id]['mainCam'].split('/')[0].split('.')[-1],
+    #                   "record_num": records[room_id],
+    #                   "room_name": rooms[room_id]['name'],
+    #                   "calendar_id": calendar_id,
+    #                   "event_id": event_id
+    #               },
+    #               headers={'content-type': 'application/json'})
 
     with lock:
         res = ""

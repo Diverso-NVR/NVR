@@ -73,18 +73,19 @@ export default {
   methods: {
     async onSubmit() {
       if (this.$refs.form.validate()) {
-        await this.$store.dispatch("loadRooms");
-        let roomsUpdateTimer = setInterval(() => {
-          this.$store.dispatch("loadRooms");
-        }, 3000);
-        this.$store.dispatch("setTimer", roomsUpdateTimer);
-
-        await this.$store.dispatch("login", {
+        let res = await this.$store.dispatch("login", {
           email: this.email,
           password: this.password
         });
+        if (res) {
+          await this.$store.dispatch("loadRooms");
+          let roomsUpdateTimer = setInterval(() => {
+            this.$store.dispatch("loadRooms");
+          }, 1000);
+          this.$store.dispatch("setTimer", roomsUpdateTimer);
 
-        this.$router.push("/rooms");
+          this.$router.push("/rooms");
+        }
       }
     }
   }
