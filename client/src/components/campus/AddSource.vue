@@ -25,7 +25,7 @@
               <v-checkbox v-model="newSource.tracking" :label="`Трекинг`"></v-checkbox>
             </v-flex>
             <v-flex xs12 sm6 md8>
-              <v-checkbox v-model="newSource.mainCam" :label="`Главная камера`"></v-checkbox>
+              <v-checkbox v-model="newSource.main_сam" :label="`Главная камера`"></v-checkbox>
             </v-flex>
           </v-layout>
         </v-form>
@@ -48,7 +48,7 @@ export default {
       valid: false,
       newSource: {
         tracking: false,
-        mainCam: false,
+        main_сam: false,
         sound: false
       },
       fieldsRules: [v => !!v || "Обязательное поле"]
@@ -60,7 +60,7 @@ export default {
       this.room.sources.push(this.newSource);
       this.newSource = {
         tracking: false,
-        mainCam: false,
+        main_сam: false,
         sound: false
       };
     }
