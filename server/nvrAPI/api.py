@@ -62,7 +62,7 @@ def register():
     except:
         return jsonify({"message": 'Пользователь с данной почтой существует'}), 400
 
-    token_expiration = 60
+    token_expiration = 600
     send_verify_email(user, token_expiration)
     Thread(target=user.delete_user_after_token_expiration,
            args=(current_app._get_current_object(), token_expiration)).start()
@@ -221,7 +221,7 @@ def edit_room(current_user, room_id):
         source.name = s['name']
         source.sound = s['sound'] if s['sound'] != False else None
         source.tracking = s['tracking']
-        source.main_cam = s['mainCam']
+        source.main_cam = s['main_cam']
     db.session.commit()
     return "", 200
 

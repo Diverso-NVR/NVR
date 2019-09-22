@@ -42,7 +42,7 @@ class User(db.Model):
 
     def get_verify_token(self, token_expiration):
         return jwt.encode(
-            {'verify_user': self.id, 'exp': time() + expires_in},
+            {'verify_user': self.id, 'exp': time() + token_expiration},
             current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
     def delete_user_after_token_expiration(self, app, token_expiration):

@@ -147,7 +147,7 @@ const actions = {
   async switchSound({ commit, state }, { room, sound }) {
     try {
       await soundSwitch(room.id, sound, state.jwt.token);
-      room.chosenSound = sound;
+      room.chosen_sound = sound;
     } catch (error) {
       commit("setError", error);
     }
