@@ -3,13 +3,14 @@
 """
 
 import os
+import uuid
 
 
 class BaseConfig(object):
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///nvr.db'
+    SECRET_KEY = uuid.uuid4().hex  # for encryption and session managment
+    SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SECRET_KEY = 'nvr2019'  # for encryption and session managment
     MAIL_SERVER = os.environ.get('MAIL_SERVER')
     MAIL_PORT = int(os.environ.get('MAIL_PORT') or 25)
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS') is not None

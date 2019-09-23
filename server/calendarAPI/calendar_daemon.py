@@ -6,7 +6,6 @@ from threading import Thread, local
 import requests
 import os
 
-API_URL = os.environ.get('NVR_API_URL')
 rooms = {}
 started = []
 
