@@ -82,9 +82,11 @@ const actions = {
       state.user.email = body.sub.email;
       state.user.role = body.sub.role;
       commit("switchLoading");
+      return true;
     } catch (error) {
       commit("setError", error);
       commit("switchLoading");
+      return false;
     }
   },
   async getUsers({ commit, state }) {
@@ -145,7 +147,7 @@ const actions = {
   async switchSound({ commit, state }, { room, sound }) {
     try {
       await soundSwitch(room.id, sound, state.jwt.token);
-      room.chosenSound = sound;
+      room.chosen_sound = sound;
     } catch (error) {
       commit("setError", error);
     }

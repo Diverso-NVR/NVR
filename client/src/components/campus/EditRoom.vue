@@ -43,7 +43,7 @@
               <td class="text-xs-center">{{props.item.ip}}</td>
               <td class="text-xs-center">{{props.item.sound}}</td>
               <td class="text-xs-center">{{props.item.tracking}}</td>
-              <td class="text-xs-center">{{props.item.mainCam}}</td>
+              <td class="text-xs-center">{{props.item.main_cam}}</td>
               <td class="text-xs-center">
                 <app-edit-source :source="props.item"></app-edit-source>
                 <v-btn icon @click="del(props.item)">
@@ -64,7 +64,7 @@
                   <li
                     class="flex-item subheading"
                     data-label="Главная камера"
-                  >{{props.item.mainCam}}</li>
+                  >{{props.item.main_cam}}</li>
                   <li class="flex-item subheading" data-label="Изменить">
                     <app-edit-source :source="props.item"></app-edit-source>
                     <v-btn icon @click="del(props.item)">

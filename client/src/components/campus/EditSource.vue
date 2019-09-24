@@ -26,7 +26,7 @@
               <v-checkbox v-model="source.tracking" :label="`Трекинг`"></v-checkbox>
             </v-flex>
             <v-flex xs12 sm6 md8>
-              <v-checkbox v-model="source.mainCam" :label="`Главная камера`"></v-checkbox>
+              <v-checkbox v-model="source.main_cam" :label="`Главная камера`"></v-checkbox>
             </v-flex>
           </v-layout>
         </v-form>

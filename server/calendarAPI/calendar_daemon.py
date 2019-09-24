@@ -6,7 +6,6 @@ from threading import Thread, local
 import requests
 import os
 
-API_URL = os.environ.get('NVR_API_URL')
 rooms = {}
 started = []
 
@@ -16,7 +15,7 @@ def config_daemon(room: dict) -> None:
     rooms[id] = {}
     rooms[id]['event'] = {}
     rooms[id]['name'] = room['name']
-    rooms[id]['chosenSound'] = room['chosenSound']
+    rooms[id]['chosen_sound'] = room['chosen_sound']
     rooms[id]['sources'] = room['sources']
 
 
@@ -25,7 +24,7 @@ def update_daemon(room: dict) -> None:
 
 
 def changed_sound(room: dict) -> None:
-    rooms[room['id']]['chosenSound'] = room['chosenSound']
+    rooms[room['id']]['chosen_sound'] = room['chosen_sound']
 
 
 def events() -> None:
@@ -66,7 +65,7 @@ def record(room_id: int, room: dict, dur: int) -> None:
         'email')
     event_id = room['event']['id']
     startstop.start(room_id, room['name'],
-                    room['chosenSound'], room['sources'])
+                    room['chosen_sound'], room['sources'])
     # requests.post(url=f'{API_URL}/daemonStartRec', json={'id': room_id})
     time.sleep(dur)
     started.remove(event_id)

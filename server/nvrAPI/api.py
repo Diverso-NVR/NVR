@@ -14,9 +14,6 @@ from calendarAPI.calendar_daemon import config_daemon, update_daemon, changed_so
 
 api = Blueprint('api', __name__)
 
-threads = {}
-copies = {}
-
 building = "ФКМД"
 
 
@@ -64,7 +61,12 @@ def register():
         db.session.commit()
     except:
         return jsonify({"message": 'Пользователь с данной почтой существует'}), 400
-    send_verify_email(user)
+
+    token_expiration = 600
+    send_verify_email(user, token_expiration)
+    Thread(target=user.delete_user_after_token_expiration,
+           args=(current_app._get_current_object(), token_expiration)).start()
+
     return jsonify(user.to_dict()), 201
 
 
@@ -184,11 +186,6 @@ def create_room(current_user):
 @api.route('/rooms/', methods=['GET'])
 def get_rooms():
     rooms = Room.query.all()
-    for room in rooms:
-        try:
-            room.timestamp = copies[room.id]['duration']
-        except:
-            pass
     return jsonify([r.to_dict() for r in rooms]), 200
 
 
@@ -219,12 +216,13 @@ def edit_room(current_user, room_id):
         else:
             source = Source()
         room.sources.append(source)
-        source.room_id = room_id
         source.ip = s['ip']
         source.name = s['name']
         source.sound = s['sound'] if s['sound'] != False else None
-        source.tracking = s['tracking']
-        source.mainCam = s['mainCam']
+        source.tracking = s.get('tracking')
+        source.main_cam = s.get('main_cam')
+        source.room_id = room_id
+
     db.session.commit()
     return "", 200
 
@@ -242,25 +240,25 @@ def start_rec(current_user):
     room.free = False
     db.session.commit()
 
-    copies[id] = {'duration': 0, 'free': False, 'daemon': False}
-
-    threads[id] = Thread(target=start_timer, args=(id,), daemon=True)
-    threads[id].start()
+    Thread(target=start_timer, args=(
+        current_app._get_current_object(), id), daemon=True).start()
 
     Thread(target=start,
            args=(id,
                  room.name,
-                 room.chosenSound,
+                 room.chosen_sound,
                  [s.to_dict() for s in room.sources])
            ).start()
 
     return "Started", 200
 
 
-def start_timer(id):
-    while not copies[id]['free']:
-        copies[id]['duration'] += 1
-        time.sleep(1)
+def start_timer(app, id):
+    with app.app_context():
+        while not Room.query.get(id).free:
+            Room.query.get(id).timestamp += 1
+            db.session.commit()
+            time.sleep(1)
 
 
 @api.route('/stopRec', methods=["POST"])
@@ -273,8 +271,6 @@ def stop_rec(current_user):
 
     if room.free:
         return "Already stoped", 401
-
-    copies[id] = {'duration': 0, 'free': True, 'daemon': False}
 
     room.processing = True
     db.session.commit()
@@ -297,7 +293,7 @@ def sound_change(current_user):
     sound_type = post_data['sound']
 
     room = Room.query.get(id)
-    room.chosenSound = sound_type
+    room.chosen_sound = sound_type
     changed_sound(room.to_dict())
     db.session.commit()
 
@@ -319,42 +315,3 @@ def upload_merged():
            ).start()
 
     return "Video uploaded", 200
-
-# CALENDAR DAEMON
-@api.route('/daemonStartRec', methods=['POST'])
-def daemon_start_rec():
-    post_data = request.get_json()
-    id = post_data['id']
-    room = Room.query.get(id)
-
-    if not room.free:
-        return "Already recording", 401
-
-    copies[id] = {'duration': 0, 'free': False, 'daemon': True}
-    threads[id] = Thread(target=start_timer, args=(id,), daemon=True)
-    threads[id].start()
-
-    room.free = False
-    db.session.commit()
-
-    return "Started", 200
-
-
-@api.route('/daemonStopRec', methods=["POST"])
-def daemon_stop_rec():
-    post_data = request.get_json()
-    id = post_data['id']
-
-    room = Room.query.get(id)
-    if room.free:
-        return "Already stoped", 401
-    if not copies[id]['daemon']:
-        return "Daemon recording is already done", 401
-
-    copies[id] = {'duration': 0, 'free': True, 'daemon': True}
-
-    room.free = True
-    room.timestamp = 0
-    db.session.commit()
-
-    return "Stopped", 200

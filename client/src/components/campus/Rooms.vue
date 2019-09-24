@@ -15,7 +15,7 @@
             <td class="text-xs-center subheading">{{ props.item.name }}</td>
 
             <td class="text-xs-center">
-              <v-btn-toggle mandatory v-model="props.item.chosenSound">
+              <v-btn-toggle mandatory v-model="props.item.chosen_sound">
                 <v-btn
                   flat
                   :loading="loader"
@@ -113,7 +113,7 @@
                   </v-btn-toggle>
                 </li>
                 <li class="flex-item subheading" data-label="Источник звука">
-                  <v-btn-toggle mandatory v-model="props.item.chosenSound">
+                  <v-btn-toggle mandatory v-model="props.item.chosen_sound">
                     <v-btn
                       flat
                       :loading="loader"
@@ -198,7 +198,7 @@ export default {
         },
         {
           text: "Источник звука",
-          value: "chosenSound",
+          value: "chosen_sound",
           sortable: false,
           align: "center"
         },

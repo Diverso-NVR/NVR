@@ -40,9 +40,9 @@ def config(room_id: int, name: str, sources: list) -> None:
         if cam['sound']:
             rooms[room_id
                   ]['sound'][cam['sound']].append(cam['ip'])
-        if cam['mainCam']:
+        if cam['main_cam']:
             rooms[room_id
-                  ]['mainCam'] = cam['ip']
+                  ]['main_cam'] = cam['ip']
         if cam['tracking']:
             rooms[room_id
                   ]['tracking'] = cam['ip']
@@ -92,7 +92,7 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
                       rooms[room_id]['sound']['enc'][0].split(
                           '/')[0].split('.')[-1],
                       "video_cam_num": records[room_id] +
-                      rooms[room_id]['mainCam'].split('/')[0].split('.')[-1],
+                      rooms[room_id]['main_cam'].split('/')[0].split('.')[-1],
                       "record_num": records[room_id],
                       "room_name": rooms[room_id]['name'],
                       "calendar_id": calendar_id,
