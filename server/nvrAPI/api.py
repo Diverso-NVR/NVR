@@ -7,6 +7,7 @@ import time
 from datetime import datetime, timedelta
 from functools import wraps
 from threading import Thread
+import os
 
 import jwt
 from calendarAPI.calendarSettings import create_calendar, delete_calendar, config_calendar
@@ -14,7 +15,7 @@ from calendarAPI.calendar_daemon import config_daemon, update_daemon, changed_so
 
 api = Blueprint('api', __name__)
 
-building = "ФКМД"
+CAMPUS = os.environ.get('CAMPUS')
 
 
 # AUTHENTICATE
@@ -166,11 +167,11 @@ def create_room(current_user):
     post_data = request.get_json()
     room = Room(name=post_data['name'])
     room.drive = create_folder(
-        building,
+        CAMPUS,
         post_data.get('name')
     )
     room.calendar = create_calendar(
-        building,
+        CAMPUS,
         post_data.get('name')
     )
     room.sources = []
@@ -275,7 +276,10 @@ def stop_rec(current_user):
     room.processing = True
     db.session.commit()
 
-    stop(id)
+    try:
+        stop(id)
+    except Exception as e:
+        print(e)
 
     room.processing = False
     room.free = True

@@ -49,8 +49,9 @@ class User(db.Model):
         sleep(token_expiration)
         with app.app_context():
             user = User.query.get(self.id)
-            db.session.delete(user)
-            db.session.commit()
+            if not user.email_verified:
+                db.session.delete(user)
+                db.session.commit()
 
     @staticmethod
     def verify_email_token(token):
