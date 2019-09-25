@@ -1,8 +1,7 @@
 from .models import db, Room, Source, User
 from .email import send_verify_email
 from flask import Blueprint, jsonify, request, current_app
-from driveAPI.startstop import start, stop, upload_file
-from driveAPI.driveSettings import create_folder, config_drive, move_file
+
 import time
 from datetime import datetime, timedelta
 from functools import wraps
@@ -10,12 +9,14 @@ from threading import Thread
 import os
 
 import jwt
-from calendarAPI.calendarSettings import create_calendar, delete_calendar, config_calendar
-from calendarAPI.calendar_daemon import config_daemon, update_daemon, changed_sound
+from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions
+from driveAPI.startstop import start, stop, upload_file
+from driveAPI.driveSettings import create_folder
 
 api = Blueprint('api', __name__)
 
-CAMPUS = os.environ.get('CAMPUS')
+# CAMPUS = os.environ.get('CAMPUS')
+CAMPUS = 'dev'
 
 
 # AUTHENTICATE
@@ -78,6 +79,8 @@ def verify_email(token):
         return "Время на подтверждение вышло", 401
 
     user.email_verified = True
+    Thread(target=give_permissions, args=(
+        current_app._get_current_object(), CAMPUS, user.email)).start()
     db.session.commit()
     return "Подтверждение успешно", 201
 
@@ -177,9 +180,6 @@ def create_room(current_user):
     room.sources = []
     db.session.add(room)
     db.session.commit()
-    config_calendar(room.to_dict())
-    config_drive(room.to_dict())
-    config_daemon(room.to_dict())
 
     return jsonify(room.to_dict()), 201
 
@@ -195,10 +195,12 @@ def get_rooms():
 def delete_room(current_user, room_id):
     if current_user.role != 'admin':
         return jsonify({'message': "Ошибка доступа"}), 401
+
     room = Room.query.get(room_id)
     delete_calendar(room.calendar)
     db.session.delete(room)
     db.session.commit()
+
     return "", 201
 
 
@@ -207,9 +209,9 @@ def delete_room(current_user, room_id):
 def edit_room(current_user, room_id):
     if current_user.role != 'admin':
         return jsonify({'message': "Ошибка доступа"}), 401
+
     post_data = request.get_json()
     room = Room.query.get(room_id)
-    update_daemon(room.to_dict())
     room.sources = []
     for s in post_data['sources']:
         if s.get('id'):
@@ -241,15 +243,16 @@ def start_rec(current_user):
     room.free = False
     db.session.commit()
 
-    Thread(target=start_timer, args=(
-        current_app._get_current_object(), id), daemon=True).start()
+    Thread(
+        target=start_timer,
+        args=(current_app._get_current_object(), id),
+        daemon=True
+    ).start()
 
-    Thread(target=start,
-           args=(id,
-                 room.name,
-                 room.chosen_sound,
-                 [s.to_dict() for s in room.sources])
-           ).start()
+    Thread(
+        target=start,
+        args=(current_app._get_current_object(), id)
+    ).start()
 
     return "Started", 200
 
@@ -277,16 +280,17 @@ def stop_rec(current_user):
     db.session.commit()
 
     try:
-        stop(id)
+        stop(current_app._get_current_object(), id)
     except Exception as e:
-        print(e)
+        pass
+    finally:
+        room = Room.query.get(id)
+        room.processing = False
+        room.free = True
+        room.timestamp = 0
+        db.session.commit()
 
-    room.processing = False
-    room.free = True
-    room.timestamp = 0
-    db.session.commit()
-
-    return "Stoped", 200
+    return 'Stopped', 200
 
 
 @api.route('/sound', methods=['POST'])
@@ -298,7 +302,6 @@ def sound_change(current_user):
 
     room = Room.query.get(id)
     room.chosen_sound = sound_type
-    changed_sound(room.to_dict())
     db.session.commit()
 
     return "Sound source changed", 200

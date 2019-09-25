@@ -12,6 +12,16 @@ from time import time, sleep
 db = SQLAlchemy()
 
 
+def nvr_db_context(func):
+    """
+    decorator to provide functions access to db
+    """
+    def wrapper(app, *args):
+        with app.app_context():
+            return func(*args)
+    return wrapper
+
+
 class User(db.Model):
     __tablename__ = 'users'
 

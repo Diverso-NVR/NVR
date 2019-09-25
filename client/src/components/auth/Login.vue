@@ -12,7 +12,7 @@
                 color="black"
                 prepend-icon="person"
                 name="email"
-                label="Логин"
+                label="Почта"
                 type="email"
                 v-model.trim="email"
                 :rules="emailRules"

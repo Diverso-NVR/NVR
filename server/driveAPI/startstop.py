@@ -4,7 +4,7 @@ import signal
 import subprocess
 from pathlib import Path
 from threading import RLock
-
+from nvrAPI.models import nvr_db_context, Room
 import requests
 from driveAPI.driveSettings import upload
 from calendarAPI.calendarSettings import add_attachment
@@ -49,27 +49,30 @@ def config(room_id: int, name: str, sources: list) -> None:
 
 
 # TODO do smth with rtsp protocols'
-def start(room_id: int, name: str, sound_type: str, sources: list) -> None:
+@nvr_db_context
+def start(room_id: int) -> None:
 
-    config(room_id, name, sources)
+    room = Room.query.get(room_id)
+    config(room.id, room.name, [source.to_dict()
+                                for source in room.sources])
 
-    if sound_type == "enc":
+    if room.chosen_sound == "enc":
         enc = subprocess.Popen("ffmpeg -rtsp_transport http -i rtsp://" +
                                rooms[room_id]['sound']['enc'][0] +
                                " -y -c:a copy -vn -f mp4 " + home + "/vids/sound_"
-                               + records[room_id] + ".aac", shell=True, preexec_fn=os.setsid)
+                               + records[room_id] + ".aac 1>/dev/null", shell=True, preexec_fn=os.setsid)
         processes[room_id].append(enc)
     else:
         camera = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://" +
                                   rooms[room_id]['sound']['cam'][0] +
                                   " -y -c:a copy -vn -f mp4 " + home + "/vids/sound_"
-                                  + records[room_id] + ".aac", shell=True, preexec_fn=os.setsid)
+                                  + records[room_id] + ".aac 1>/dev/null", shell=True, preexec_fn=os.setsid)
         processes[room_id].append(camera)
 
     for cam in rooms[room_id]['vid']:
         process = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://" +
                                    cam + " -y -c:v copy -an -f mp4 " + home + "/vids/vid_" +
-                                   records[room_id] + cam.split('/')[0].split('.')[-1] + ".mp4", shell=True,
+                                   records[room_id] + cam.split('/')[0].split('.')[-1] + ".mp4 1>/dev/null", shell=True,
                                    preexec_fn=os.setsid)
         processes[room_id].append(process)
 
@@ -79,26 +82,27 @@ def kill_records(room_id):
         try:
             os.killpg(process.pid, signal.SIGTERM)
         except OSError:
-            os.system("sudo kill %s" % (process.pid))  # sudo for server
+            os.system("kill %s" % (process.pid))  # sudo for server
 
 
+@nvr_db_context
 def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
 
     kill_records(room_id)
 
-    requests.post(merge_url,
-                  json={
-                      "screen_num": records[room_id] +
-                      rooms[room_id]['sound']['enc'][0].split(
-                          '/')[0].split('.')[-1],
-                      "video_cam_num": records[room_id] +
-                      rooms[room_id]['main_cam'].split('/')[0].split('.')[-1],
-                      "record_num": records[room_id],
-                      "room_name": rooms[room_id]['name'],
-                      "calendar_id": calendar_id,
-                      "event_id": event_id
-                  },
-                  headers={'content-type': 'application/json'})
+    # requests.post(merge_url,
+    #               json={
+    #                   "screen_num": records[room_id] +
+    #                   rooms[room_id]['sound']['enc'][0].split(
+    #                       '/')[0].split('.')[-1],
+    #                   "video_cam_num": records[room_id] +
+    #                   rooms[room_id]['main_cam'].split('/')[0].split('.')[-1],
+    #                   "record_num": records[room_id],
+    #                   "room_name": rooms[room_id]['name'],
+    #                   "calendar_id": calendar_id,
+    #                   "event_id": event_id
+    #               },
+    #               headers={'content-type': 'application/json'})
 
     with lock:
         res = ""
@@ -109,11 +113,19 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
         else:
             res = "vid_"
 
+        room = Room.query.get(room_id)
+
         for cam in rooms[room_id]['vid']:
             try:
-                upload(home + "/vids/" + res + records[room_id]
-                       + cam.split('/')[0].split('.')[-1] + ".mp4",
-                       rooms[room_id]["name"])
+                file_id = upload(home + "/vids/" + res + records[room_id]
+                                 + cam.split('/')[0].split('.')[-1] + ".mp4",
+                                 room.drive.split('/')[-1])
+
+                if calendar_id:
+                    try:
+                        add_attachment(calendar_id, event_id, file_id)
+                    except Exception as e:
+                        print(e)
             except Exception as e:
                 print(e)
 
