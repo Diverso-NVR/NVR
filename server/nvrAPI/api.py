@@ -15,8 +15,7 @@ from driveAPI.driveSettings import create_folder
 
 api = Blueprint('api', __name__)
 
-# CAMPUS = os.environ.get('CAMPUS')
-CAMPUS = 'dev'
+CAMPUS = os.environ.get('CAMPUS')
 
 
 # AUTHENTICATE
