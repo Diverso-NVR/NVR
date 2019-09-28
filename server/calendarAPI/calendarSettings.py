@@ -6,6 +6,9 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 import json
+from pprint import pprint
+
+from nvrAPI.models import nvr_db_context, Room
 
 
 SCOPES = 'https://www.googleapis.com/auth/calendar'
@@ -31,14 +34,11 @@ if not creds or not creds.valid:
 
 calendar_service = build('calendar', 'v3', credentials=creds)
 
-rooms = {}
-
-
-def config_calendar(room: dict) -> None:
-    rooms[room['name']] = room['calendar']
-
 
 def add_attachment(calendar_id: str, event_id: str, file_id: str) -> None:
+    """
+    Adds url of drive file 'file_id' to calendar event 'event_id'
+    """
     description = f"https://drive.google.com/a/auditory.ru/file/d/{file_id}/view?usp=drive_web"
     changes = {
         'description': description
@@ -48,7 +48,11 @@ def add_attachment(calendar_id: str, event_id: str, file_id: str) -> None:
                                     supportsAttachments=True).execute()
 
 
+@nvr_db_context
 def give_permissions(building: str, mail: str) -> None:
+    """
+    Give write permissions to user 'mail', according his 'building'
+    """
     rule = {
         'scope': {
             'type': 'user',
@@ -57,9 +61,9 @@ def give_permissions(building: str, mail: str) -> None:
         'role': 'writer'
     }
 
-    for room in rooms:
+    for room in Room.query.all():
         created_rule = calendar_service.acl().insert(
-            calendarId=rooms[room], body=rule).execute()
+            calendarId=room.calendar, body=rule).execute()
 
 
 # def delete_permissions(building, mail):
@@ -76,6 +80,10 @@ def give_permissions(building: str, mail: str) -> None:
 
 
 def create_calendar(building: str, room: str) -> None:
+    """
+    Creates calendar with name: 'building'-'room'
+    and grant access to all users from same campus
+    """
     calendar_metadata = {
         'summary': building + "-" + room,
         'timeZone': 'Europe/Moscow'
@@ -87,29 +95,40 @@ def create_calendar(building: str, room: str) -> None:
         if item['summary'].split('-')[0] == building:
             copy_perm = item['id']
             break
-    calendar = calendar_service.acl().list(
-        calendarId=copy_perm).execute()
 
     created_calendar = calendar_service.calendars().insert(
         body=calendar_metadata).execute()
 
-    for rule in calendar['items']:
-        if rule['role'] == 'writer':
-            new_rule = calendar_service.acl().insert(
-                calendarId=created_calendar["id"], body=rule).execute()
+    if copy_perm:
+        calendar = calendar_service.acl().list(
+            calendarId=copy_perm).execute()
+
+        for rule in calendar['items']:
+            if rule['role'] == 'writer':
+                new_rule = calendar_service.acl().insert(
+                    calendarId=created_calendar["id"], body=rule).execute()
+
     return created_calendar["id"]  # calendarAPI link
 
 
 def delete_calendar(calendar_id: str) -> None:
-    calendar_service.calendars().delete(calendarId=calendar_id).execute()
+    """
+    Delete calendar with 'calendar_id' id
+    """
+    try:
+        calendar_service.calendars().delete(calendarId=calendar_id).execute()
+    except Exception as e:
+        pass
 
 
-def get_events(room: str) -> dict:
+@nvr_db_context
+def get_events(room_id: int) -> dict:
     """
-    Returns start and summary of the next 3 events on the "room" calendar.
+    Returns start/end time and summary of the next event of the "room" calendar.
     """
+    room = Room.query.get(room_id)
     now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
-    events_result = calendar_service.events().list(calendarId=rooms[room], timeMin=now,
+    events_result = calendar_service.events().list(calendarId=room.calendar, timeMin=now,
                                                    maxResults=1, singleEvents=True,
                                                    orderBy='startTime').execute()
     event = events_result['items'][0]

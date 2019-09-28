@@ -4,36 +4,20 @@ from driveAPI import startstop
 from calendarAPI.calendarSettings import get_events
 from threading import Thread, local
 import requests
+from nvrAPI.models import nvr_db_context, Room
 import os
+from pprint import pprint
 
-rooms = {}
 started = []
 
 
-def config_daemon(room: dict) -> None:
-    id = room['id']
-    rooms[id] = {}
-    rooms[id]['event'] = {}
-    rooms[id]['name'] = room['name']
-    rooms[id]['chosen_sound'] = room['chosen_sound']
-    rooms[id]['sources'] = room['sources']
-
-
-def update_daemon(room: dict) -> None:
-    rooms[room['id']]['sources'] = room['sources']
-
-
-def changed_sound(room: dict) -> None:
-    rooms[room['id']]['chosen_sound'] = room['chosen_sound']
-
-
-def events() -> None:
+def events(app) -> None:
     for room in rooms:
         try:
-            e = get_events(rooms[room]["name"])
-            rooms[room]["event"] = e
-        except Exception:
-            rooms[room]["event"] = {}
+            e = get_events(app, room['id'])
+            room["event"] = e
+        except Exception as e:
+            room["event"] = {}
 
 
 def duration(date: str) -> int:
@@ -60,30 +44,35 @@ def parse_date(date: str) -> str:
 
 
 # TODO fix requests on server
-def record(room_id: int, room: dict, dur: int) -> None:
-    calendar_id = room['event']['organizer'].get(
-        'email')
+@nvr_db_context
+def record(app, room: dict, dur: int) -> None:
     event_id = room['event']['id']
-    startstop.start(room_id, room['name'],
-                    room['chosen_sound'], room['sources'])
-    # requests.post(url=f'{API_URL}/daemonStartRec', json={'id': room_id})
+
+    room = Room.query.get(room['id'])
+    calendar_id = room.calendar
+    startstop.start(app, room.id)
     time.sleep(dur)
     started.remove(event_id)
-    startstop.stop(room_id, calendar_id, event_id)
-    # requests.post(url=f'{API_URL}/daemonStopRec', json={'id': room_id})
+    startstop.stop(app, room.id, calendar_id, event_id)
 
 
-def run_daemon() -> None:
+def run_daemon(app) -> None:
+    with app.app_context():
+        global rooms
+        rooms = [
+            {'id': room.id} for room in Room.query.all()
+        ]
+
     while True:
-        events()
+        events(app)
         current_time = datetime.now()
         for room in rooms:
-            if rooms[room]['event'] == {}:
+            if room['event'] == {}:
                 continue
-            start = parse_date(rooms[room]['event']['start'].get('dateTime'))
-            end = parse_date(rooms[room]['event']['end'].get('dateTime'))
-            if rooms[room]['event']['id'] not in started and start == datetime.strftime(current_time, "%Y-%m-%d %H:%M"):
-                Thread(target=record, args=(
-                    room, rooms[room], duration(end) - duration(start))).start()
-                started.append(rooms[room]['event']['id'])
-        time.sleep(1)
+            start = parse_date(room['event']['start'].get('dateTime'))
+            end = parse_date(room['event']['end'].get('dateTime'))
+            if room['event']['id'] not in started and start == datetime.strftime(current_time, "%Y-%m-%d %H:%M"):
+                Thread(target=record,
+                       args=(app, app, room, duration(end) - duration(start))).start()
+                started.append(room['event']['id'])
+        time.sleep(10)

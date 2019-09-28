@@ -5,8 +5,6 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.http import MediaFileUpload
-import json
-
 
 SCOPES = 'https://www.googleapis.com/auth/drive'
 """
@@ -30,14 +28,11 @@ if not creds or not creds.valid:
 
 drive_service = build('drive', 'v3', credentials=creds)
 
-rooms = {}
-
-
-def config_drive(room: dict) -> None:
-    rooms[room['name']] = room['drive'].split('/')[-1]
-
 
 def create_folder(building: str, room: str) -> str:
+    """
+    Creates folder in format: 'building'-'room'
+    """
     folder_metadata = {
         'name': building + '-' + room,
         'mimeType': 'application/vnd.google-apps.folder',
@@ -56,28 +51,31 @@ def create_folder(building: str, room: str) -> str:
 
 
 def delete_folder(folder_id: str) -> None:
+    """
+    Deletes folder with 'folder_id' id
+    """
     drive_service.files().delete(fileId=folder_id).execute()
 
 
-def move_file(file_id: str, room: str):
-    folder_id = [rooms[room]]
-    file = drive_service.files().get(fileId=file_id,
-                                     fields='parents').execute()
-    previous_parents = ",".join(file.get('parents'))
-    file = drive_service.files().update(fileId=file_id,
-                                        addParents=folder_id,
-                                        removeParents=previous_parents,
-                                        fields='id, parents').execute()
+# def move_file(file_id: str, room: str):
+#     folder_id = [rooms[room]]
+#     file = drive_service.files().get(fileId=file_id,
+#                                      fields='parents').execute()
+#     previous_parents = ",".join(file.get('parents'))
+#     file = drive_service.files().update(fileId=file_id,
+#                                         addParents=folder_id,
+#                                         removeParents=previous_parents,
+#                                         fields='id, parents').execute()
 
 
-def upload(filename: str, room: str, names: list = []) -> str:
+def upload(filename: str, drive_url: int, names: list = []) -> str:
     """
-    Upload file "filename" on drive
+    Upload file "filename" on drive folder 'drive_url'
     """
     media = MediaFileUpload(filename, mimetype="video/mp4", resumable=True)
     file_data = {
         "name": filename.split('/')[4],
-        "parents": [rooms[room]],
+        "parents": [drive_url],
         'description': 'На занятии присутсвовали: ' + ','.join(names)
     }
     file = drive_service.files().create(
