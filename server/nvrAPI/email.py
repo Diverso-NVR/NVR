@@ -6,12 +6,18 @@ import os
 mail = Mail()
 
 
-def send_async_email(app, msg):
+def send_async_email(app, msg: Message) -> None:
+    """
+    Sends message asynchronously
+    """
     with app.app_context():
         mail.send(msg)
 
 
-def send_email(subject, sender, recipients, text_body, html_body):
+def send_email(subject: str, sender: str, recipients: list, text_body, html_body) -> None:
+    """
+    Creates message
+    """
     msg = Message(subject, sender=sender, recipients=recipients)
     msg.body = text_body
     msg.html = html_body
@@ -19,7 +25,10 @@ def send_email(subject, sender, recipients, text_body, html_body):
            args=(current_app._get_current_object(), msg)).start()
 
 
-def send_verify_email(user, token_expiration):
+def send_verify_email(user, token_expiration: int) -> None:
+    """
+    Creates token, and email body
+    """
     token = user.get_verify_token(token_expiration)
     send_email('[NVR] Подтверждение аккаунта',
                sender=current_app.config['ADMINS'][0],

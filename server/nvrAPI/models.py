@@ -14,7 +14,7 @@ db = SQLAlchemy()
 
 def nvr_db_context(func):
     """
-    decorator to provide functions access to db
+    Decorator to provide functions access to db
     """
     def wrapper(app, *args):
         with app.app_context():
@@ -50,12 +50,18 @@ class User(db.Model):
 
         return user
 
-    def get_verify_token(self, token_expiration):
+    def get_verify_token(self, token_expiration: int):
+        """
+        Creates verification token
+        """
         return jwt.encode(
             {'verify_user': self.id, 'exp': time() + token_expiration},
             current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
-    def delete_user_after_token_expiration(self, app, token_expiration):
+    def delete_user_after_token_expiration(self, app, token_expiration: int) -> None:
+        """
+        Deletes user if token is expired
+        """
         sleep(token_expiration)
         with app.app_context():
             user = User.query.get(self.id)
@@ -64,7 +70,10 @@ class User(db.Model):
                 db.session.commit()
 
     @staticmethod
-    def verify_email_token(token):
+    def verify_email_token(token: str):
+        """
+        Check if token is valid
+        """
         try:
             id = jwt.decode(token, current_app.config['SECRET_KEY'],
                             algorithms=['HS256'])['verify_user']

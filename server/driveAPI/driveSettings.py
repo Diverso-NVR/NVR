@@ -30,6 +30,9 @@ drive_service = build('drive', 'v3', credentials=creds)
 
 
 def create_folder(building: str, room: str) -> str:
+    """
+    Creates folder in format: 'building'-'room'
+    """
     folder_metadata = {
         'name': building + '-' + room,
         'mimeType': 'application/vnd.google-apps.folder',
@@ -48,6 +51,9 @@ def create_folder(building: str, room: str) -> str:
 
 
 def delete_folder(folder_id: str) -> None:
+    """
+    Deletes folder with 'folder_id' id
+    """
     drive_service.files().delete(fileId=folder_id).execute()
 
 
@@ -64,7 +70,7 @@ def delete_folder(folder_id: str) -> None:
 
 def upload(filename: str, drive_url: int, names: list = []) -> str:
     """
-    Upload file "filename" on drive
+    Upload file "filename" on drive folder 'drive_url'
     """
     media = MediaFileUpload(filename, mimetype="video/mp4", resumable=True)
     file_data = {

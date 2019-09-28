@@ -90,19 +90,19 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
 
     kill_records(room_id)
 
-    # requests.post(merge_url,
-    #               json={
-    #                   "screen_num": records[room_id] +
-    #                   rooms[room_id]['sound']['enc'][0].split(
-    #                       '/')[0].split('.')[-1],
-    #                   "video_cam_num": records[room_id] +
-    #                   rooms[room_id]['main_cam'].split('/')[0].split('.')[-1],
-    #                   "record_num": records[room_id],
-    #                   "room_name": rooms[room_id]['name'],
-    #                   "calendar_id": calendar_id,
-    #                   "event_id": event_id
-    #               },
-    #               headers={'content-type': 'application/json'})
+    requests.post(merge_url,
+                  json={
+                      "screen_num": records[room_id] +
+                      rooms[room_id]['sound']['enc'][0].split(
+                          '/')[0].split('.')[-1],
+                      "video_cam_num": records[room_id] +
+                      rooms[room_id]['main_cam'].split('/')[0].split('.')[-1],
+                      "record_num": records[room_id],
+                      "room_name": rooms[room_id]['name'],
+                      "calendar_id": calendar_id,
+                      "event_id": event_id
+                  },
+                  headers={'content-type': 'application/json'})
 
     with lock:
         res = ""
@@ -117,15 +117,9 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
 
         for cam in rooms[room_id]['vid']:
             try:
-                file_id = upload(home + "/vids/" + res + records[room_id]
-                                 + cam.split('/')[0].split('.')[-1] + ".mp4",
-                                 room.drive.split('/')[-1])
-
-                if calendar_id:
-                    try:
-                        add_attachment(calendar_id, event_id, file_id)
-                    except Exception as e:
-                        print(e)
+                upload(home + "/vids/" + res + records[room_id]
+                       + cam.split('/')[0].split('.')[-1] + ".mp4",
+                       room.drive.split('/')[-1])
             except Exception as e:
                 print(e)
 

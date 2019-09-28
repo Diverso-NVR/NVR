@@ -21,6 +21,9 @@ CAMPUS = 'dev'
 
 # AUTHENTICATE
 def token_required(f):
+    """
+    Verification wrapper to make sure that user is logged in
+    """
     @wraps(f)
     def _verify(*args, **kwargs):
         auth_headers = request.headers.get('Authorization', '').split()
@@ -76,13 +79,11 @@ def register():
 def verify_email(token):
     user = User.verify_email_token(token)
     if not user:
-        return "Время на подтверждение вышло", 401
+        return "Ошибка. Время на подтверждение вышло", 401
 
     user.email_verified = True
-    Thread(target=give_permissions, args=(
-        current_app._get_current_object(), CAMPUS, user.email)).start()
     db.session.commit()
-    return "Подтверждение успешно", 201
+    return "Подтверждение успешно, ожидайте одобрения администратора", 201
 
 
 @api.route('/login', methods=['POST'])
@@ -123,6 +124,8 @@ def grant_access(current_user, user_id):
         return jsonify({'message': "Ошибка доступа"}), 401
     user = User.query.get(user_id)
     user.access = True
+    Thread(target=give_permissions, args=(
+        current_app._get_current_object(), CAMPUS, user.email)).start()
     db.session.commit()
     return "", 201
 
@@ -167,21 +170,29 @@ def move_file():
 def create_room(current_user):
     if current_user.role != 'admin':
         return jsonify({'message': "Ошибка доступа"}), 401
-    post_data = request.get_json()
-    room = Room(name=post_data['name'])
-    room.drive = create_folder(
-        CAMPUS,
-        post_data.get('name')
-    )
-    room.calendar = create_calendar(
-        CAMPUS,
-        post_data.get('name')
-    )
-    room.sources = []
-    db.session.add(room)
-    db.session.commit()
 
-    return jsonify(room.to_dict()), 201
+    name = request.get_json()['name']
+
+    Thread(target=config_room, args=(
+        current_app._get_current_object(), name)).start()
+
+    return jsonify({'name': name}), 201
+
+
+def config_room(app, name):
+    with app.app_context():
+        room = Room(name=name)
+        room.drive = create_folder(
+            CAMPUS,
+            name
+        )
+        room.calendar = create_calendar(
+            CAMPUS,
+            name
+        )
+        room.sources = []
+        db.session.add(room)
+        db.session.commit()
 
 
 @api.route('/rooms/', methods=['GET'])
@@ -197,7 +208,9 @@ def delete_room(current_user, room_id):
         return jsonify({'message': "Ошибка доступа"}), 401
 
     room = Room.query.get(room_id)
-    delete_calendar(room.calendar)
+
+    Thread(target=delete_calendar, args=(room.calendar,)).start()
+
     db.session.delete(room)
     db.session.commit()
 

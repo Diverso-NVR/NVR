@@ -36,6 +36,9 @@ calendar_service = build('calendar', 'v3', credentials=creds)
 
 
 def add_attachment(calendar_id: str, event_id: str, file_id: str) -> None:
+    """
+    Adds url of drive file 'file_id' to calendar event 'event_id'
+    """
     description = f"https://drive.google.com/a/auditory.ru/file/d/{file_id}/view?usp=drive_web"
     changes = {
         'description': description
@@ -47,6 +50,9 @@ def add_attachment(calendar_id: str, event_id: str, file_id: str) -> None:
 
 @nvr_db_context
 def give_permissions(building: str, mail: str) -> None:
+    """
+    Give write permissions to user 'mail', according his 'building'
+    """
     rule = {
         'scope': {
             'type': 'user',
@@ -74,13 +80,14 @@ def give_permissions(building: str, mail: str) -> None:
 
 
 def create_calendar(building: str, room: str) -> None:
+    """
+    Creates calendar with name: 'building'-'room'
+    and grant access to all users from same campus
+    """
     calendar_metadata = {
         'summary': building + "-" + room,
         'timeZone': 'Europe/Moscow'
     }
-
-    created_calendar = calendar_service.calendars().insert(
-        body=calendar_metadata).execute()
 
     calendars = calendar_service.calendarList().list(pageToken=None).execute()
     copy_perm = ""
@@ -88,6 +95,9 @@ def create_calendar(building: str, room: str) -> None:
         if item['summary'].split('-')[0] == building:
             copy_perm = item['id']
             break
+
+    created_calendar = calendar_service.calendars().insert(
+        body=calendar_metadata).execute()
 
     if copy_perm:
         calendar = calendar_service.acl().list(
@@ -102,13 +112,19 @@ def create_calendar(building: str, room: str) -> None:
 
 
 def delete_calendar(calendar_id: str) -> None:
-    calendar_service.calendars().delete(calendarId=calendar_id).execute()
+    """
+    Delete calendar with 'calendar_id' id
+    """
+    try:
+        calendar_service.calendars().delete(calendarId=calendar_id).execute()
+    except Exception as e:
+        pass
 
 
 @nvr_db_context
 def get_events(room_id: int) -> dict:
     """
-    Returns start and summary of the next 3 events on the "room" calendar.
+    Returns start/end time and summary of the next event of the "room" calendar.
     """
     room = Room.query.get(room_id)
     now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time

@@ -62,9 +62,6 @@ const mutations = {
     let i = state.users.indexOf(payload);
     state.users[i].access = true;
   },
-  pushRoom(state, payload) {
-    state.rooms.push(payload);
-  },
   deleteRoom(state, payload) {
     let i = state.rooms.indexOf(payload);
     state.rooms.splice(i, 1);
@@ -192,8 +189,7 @@ const actions = {
   async addRoom({ commit, state }, { name }) {
     try {
       let res = await add(name, state.jwt.token);
-      commit("pushRoom", res.data);
-      commit("setMessage", `Комната ${res.data.name} успешно создана`);
+      commit("setMessage", `Процесс создания комнаты ${res.data.name} запущен`);
     } catch (error) {
       commit("setError", error);
     }
