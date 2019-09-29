@@ -119,17 +119,3 @@ def delete_calendar(calendar_id: str) -> None:
         calendar_service.calendars().delete(calendarId=calendar_id).execute()
     except Exception as e:
         pass
-
-
-@nvr_db_context
-def get_events(room_id: int) -> dict:
-    """
-    Returns start/end time and summary of the next event of the "room" calendar.
-    """
-    room = Room.query.get(room_id)
-    now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
-    events_result = calendar_service.events().list(calendarId=room.calendar, timeMin=now,
-                                                   maxResults=1, singleEvents=True,
-                                                   orderBy='startTime').execute()
-    event = events_result['items'][0]
-    return event

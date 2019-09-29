@@ -41,6 +41,8 @@ def token_required(f):
 
         try:
             token = auth_headers[1]
+            if token == 'daemon':
+                return f('daemon', *args, **kwargs)
             data = jwt.decode(token, current_app.config['SECRET_KEY'])
             user = User.query.filter_by(email=data['sub']['email']).first()
             if not user:
@@ -123,10 +125,12 @@ def grant_access(current_user, user_id):
         return jsonify({'message': "Ошибка доступа"}), 401
     user = User.query.get(user_id)
     user.access = True
+    db.session.commit()
+
     Thread(target=give_permissions, args=(
         current_app._get_current_object(), CAMPUS, user.email)).start()
-    db.session.commit()
-    return "", 201
+
+    return "Success", 201
 
 
 @api.route('/users/roles/<user_id>', methods=['PUT'])
@@ -137,7 +141,7 @@ def user_role(current_user, user_id):
     user = User.query.get(user_id)
     user.role = request.get_json()['role']
     db.session.commit()
-    return "", 201
+    return "Success", 201
 
 
 @api.route('/users/<user_id>', methods=['DELETE'])
@@ -148,7 +152,7 @@ def delete_user(current_user, user_id):
     user = User.query.get(user_id)
     db.session.delete(user)
     db.session.commit()
-    return "", 201
+    return "Success", 201
 
 
 # GOOGLE API
@@ -213,7 +217,7 @@ def delete_room(current_user, room_id):
     db.session.delete(room)
     db.session.commit()
 
-    return "", 201
+    return "Success", 201
 
 
 @api.route("/rooms/<room_id>", methods=['PUT'])
@@ -239,7 +243,7 @@ def edit_room(current_user, room_id):
         source.room_id = room_id
 
     db.session.commit()
-    return "", 200
+    return "Success", 200
 
 
 @api.route('/startRec', methods=['POST'])

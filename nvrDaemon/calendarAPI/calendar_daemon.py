@@ -1,14 +1,15 @@
 import time
 from datetime import datetime
-from driveAPI import startstop
 from calendarAPI.calendarSettings import get_events
 from threading import Thread, local
 import requests
-from nvrAPI.models import nvr_db_context, Room
-import os
+from API.models import nvr_db_context, Room
 from pprint import pprint
+import os
 
 started = []
+
+NVR_API_URL = os.environ.get('BASE_URL')
 
 
 def events(app) -> None:
@@ -43,17 +44,26 @@ def parse_date(date: str) -> str:
     return "{}-{}-{} {}:{}".format(year, month, day, hour, minute)
 
 
-# TODO fix requests on server
 @nvr_db_context
 def record(app, room: dict, dur: int) -> None:
     event_id = room['event']['id']
 
     room = Room.query.get(room['id'])
     calendar_id = room.calendar
-    startstop.start(app, room.id)
+    res = requests.post(f'{NVR_API_URL}/startRec',
+                        json={
+                            'id': room.id
+                        },
+                        headers={"Authorization": 'Bearer: daemon'}
+                        )
     time.sleep(dur)
     started.remove(event_id)
-    startstop.stop(app, room.id, calendar_id, event_id)
+    requests.post(f'{NVR_API_URL}/stopRec',
+                  json={
+                      'id': room.id
+                  },
+                  headers={"Authorization": 'Bearer: daemon'}
+                  )
 
 
 def run_daemon(app) -> None:
