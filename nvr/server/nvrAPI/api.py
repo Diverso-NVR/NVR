@@ -332,7 +332,7 @@ def sound_change(current_user):
 def upload_merged():
     post_data = request.get_json(force=True)
 
-    room_id = post_data["room_id"]
+    room_id = int(post_data["room_id"])
 
     room = Room.query.get(room_id)
 

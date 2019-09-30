@@ -8,7 +8,7 @@ lock = Lock()
 home = str(Path.home())
 
 
-def merge_video(client_url: str, screen_num: str, video_cam_num: str, record_num: str, room_id: str, calendar_id: str, event_id: str) -> None:
+def merge_video(client_url: str, screen_num: str, video_cam_num: str, record_num: str, room_id: int, calendar_id: str, event_id: str) -> None:
     lock.acquire()
 
     mid1 = subprocess.Popen(
