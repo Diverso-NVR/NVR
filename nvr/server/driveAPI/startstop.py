@@ -103,7 +103,7 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
                           "screen_num": screen_num,
                           "video_cam_num": video_cam_num,
                           "record_num": record_names[room_id],
-                          "room_id": rooms[room_id]['name'],
+                          "room_id": room_id,
                           "calendar_id": calendar_id,
                           "event_id": event_id
                       },
