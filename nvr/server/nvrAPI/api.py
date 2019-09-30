@@ -11,7 +11,7 @@ import os
 import jwt
 from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions
 from driveAPI.startstop import start, stop, upload_file
-from driveAPI.driveSettings import create_folder
+from driveAPI.driveSettings import create_folder, move_file
 
 api = Blueprint('api', __name__)
 
@@ -161,9 +161,11 @@ def move_file():
     data = request.get_json()
 
     file_id = data['file_id']
-    room_name = data['room_name']
+    room_id = data['room_id']
 
-    move_file(file_id, room_name)
+    room = Room.query.get(room_id)
+
+    move_file(file_id, room.drive)
     return "Success", 201
 
 
@@ -273,7 +275,7 @@ def start_rec(current_user):
     return "Started", 200
 
 
-def start_timer(app, id):
+def start_timer(app, id: int) -> None:
     with app.app_context():
         while not Room.query.get(id).free:
             Room.query.get(id).timestamp += 1
@@ -287,6 +289,9 @@ def stop_rec(current_user):
     post_data = request.get_json()
     id = post_data['id']
 
+    calendar_id = post_data.get('calendar_id')
+    event_id = post_data.get('event_id')
+
     room = Room.query.get(id)
 
     if room.free:
@@ -296,7 +301,7 @@ def stop_rec(current_user):
     db.session.commit()
 
     try:
-        stop(current_app._get_current_object(), id)
+        stop(current_app._get_current_object(), id, calendar_id, event_id)
     except Exception as e:
         pass
     finally:
@@ -329,8 +334,9 @@ def upload_merged():
 
     Thread(target=upload_file,
            args=(
+               current_app._get_current_object(),
                post_data["file_name"],
-               post_data["room_name"],
+               post_data["room_id"],
                post_data.get('calendar_id'),
                post_data.get('event_id')
            ),

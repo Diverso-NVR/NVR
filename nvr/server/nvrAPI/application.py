@@ -11,7 +11,7 @@ from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
 
 
-def create_app(app_name: str = "NVR_API"):
+def create_app(app_name="NVR_API"):
     """
     Creates flask_app instance
     """

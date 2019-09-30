@@ -15,7 +15,7 @@ merge_url = os.environ.get('MERGE_SERVER_URL')
 lock = RLock()
 rooms = {}
 processes = {}
-records = {}
+record_names = {}
 
 
 def config(room_id: int, name: str, sources: list) -> None:
@@ -31,7 +31,7 @@ def config(room_id: int, name: str, sources: list) -> None:
         str(curr_time.hour) if curr_time.hour < 10 else str(curr_time.hour)
     minute = "0" + \
         str(curr_time.minute) if curr_time.minute < 10 else str(curr_time.minute)
-    records[room_id] = f"{today.year}-{today.month}-{today.day}_{hour}:{minute}_{rooms[room_id]['name']}_"
+    record_names[room_id] = f"{today.year}-{today.month}-{today.day}_{hour}:{minute}_{rooms[room_id]['name']}_"
 
     rooms[room_id]['sound'] = {'cam': [], 'enc': []}
     rooms[room_id]['vid'] = []
@@ -60,19 +60,19 @@ def start(room_id: int) -> None:
         enc = subprocess.Popen("ffmpeg -rtsp_transport http -i rtsp://" +
                                rooms[room_id]['sound']['enc'][0] +
                                " -y -c:a copy -vn -f mp4 " + home + "/vids/sound_"
-                               + records[room_id] + ".aac 1>/dev/null", shell=True, preexec_fn=os.setsid)
+                               + record_names[room_id] + ".aac 1>/dev/null", shell=True, preexec_fn=os.setsid)
         processes[room_id].append(enc)
     else:
         camera = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://" +
                                   rooms[room_id]['sound']['cam'][0] +
                                   " -y -c:a copy -vn -f mp4 " + home + "/vids/sound_"
-                                  + records[room_id] + ".aac 1>/dev/null", shell=True, preexec_fn=os.setsid)
+                                  + record_names[room_id] + ".aac 1>/dev/null", shell=True, preexec_fn=os.setsid)
         processes[room_id].append(camera)
 
     for cam in rooms[room_id]['vid']:
         process = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://" +
                                    cam + " -y -c:v copy -an -f mp4 " + home + "/vids/vid_" +
-                                   records[room_id] + cam.split('/')[0].split('.')[-1] + ".mp4 1>/dev/null", shell=True,
+                                   record_names[room_id] + cam.split('/')[0].split('.')[-1] + ".mp4 1>/dev/null", shell=True,
                                    preexec_fn=os.setsid)
         processes[room_id].append(process)
 
@@ -90,30 +90,32 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
 
     kill_records(room_id)
 
-    try:
-        requests.post(merge_url,
-                      json={
-                          "screen_num": records[room_id] +
-                          rooms[room_id]['sound']['enc'][0].split(
-                              '/')[0].split('.')[-1],
-                          "video_cam_num": records[room_id] +
-                          rooms[room_id]['main_cam'].split(
-                              '/')[0].split('.')[-1],
-                          "record_num": records[room_id],
-                          "room_name": rooms[room_id]['name'],
-                          "calendar_id": calendar_id,
-                          "event_id": event_id
-                      },
-                      headers={'content-type': 'application/json'})
-    except Exception as e:
-        print(e)
+    screen_num = record_names[room_id] + \
+        rooms[room_id]['sound']['enc'][0].split('/')[0].split('.')[-1]
+    video_cam_num = record_names[room_id] + \
+        rooms[room_id]['main_cam'].split('/')[0].split('.')[-1]
+
+    if os.path.exists(screen_num) and os.path.exists(video_cam_num):
+        try:
+            requests.post(merge_url,
+                          json={
+                              "screen_num": screen_num,
+                              "video_cam_num": video_cam_num,
+                              "record_num": record_names[room_id],
+                              "room_id": rooms[room_id]['name'],
+                              "calendar_id": calendar_id,
+                              "event_id": event_id
+                          },
+                          headers={'content-type': 'application/json'})
+        except Exception as e:
+            print(e)
 
     with lock:
         res = ""
-        if os.path.exists(f'{home}/vids/sound_{records[room_id]}.aac'):
+        if os.path.exists(f'{home}/vids/sound_{record_names[room_id]}.aac'):
             for cam in rooms[room_id]['vid']:
-                add_sound(records[room_id] +
-                          cam.split('/')[0].split('.')[-1], records[room_id])
+                add_sound(record_names[room_id] +
+                          cam.split('/')[0].split('.')[-1], record_names[room_id])
         else:
             res = "vid_"
 
@@ -121,7 +123,7 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
 
         for cam in rooms[room_id]['vid']:
             try:
-                upload(home + "/vids/" + res + records[room_id]
+                upload(home + "/vids/" + res + record_names[room_id]
                        + cam.split('/')[0].split('.')[-1] + ".mp4",
                        room.drive.split('/')[-1])
             except Exception as e:
@@ -136,10 +138,11 @@ def add_sound(video_cam_num: str, audio_cam_num: str) -> None:
     proc.wait()
 
 
-def upload_file(file_name: str, room_name: str, calendar_id: str, event_id: str):
+@nvr_db_context
+def upload_file(file_name: str, room_id: str, calendar_id: str, event_id: str):
     try:
         file_id = upload(home + "/vids/" + file_name,
-                         room_name)
+                         room_id)
     except Exception as e:
         print(e)
 

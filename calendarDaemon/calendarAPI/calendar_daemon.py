@@ -49,7 +49,6 @@ def record(app, room: dict, dur: int) -> None:
     event_id = room['event']['id']
 
     room = Room.query.get(room['id'])
-    calendar_id = room.calendar
     res = requests.post(f'{NVR_API_URL}/startRec',
                         json={
                             'id': room.id
@@ -60,7 +59,9 @@ def record(app, room: dict, dur: int) -> None:
     started.remove(event_id)
     requests.post(f'{NVR_API_URL}/stopRec',
                   json={
-                      'id': room.id
+                      'id': room.id,
+                      'calendar_id': room.calendar,
+                      'event_id': event_id
                   },
                   headers={"Authorization": 'Bearer: daemon'}
                   )

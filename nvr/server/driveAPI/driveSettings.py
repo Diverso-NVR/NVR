@@ -57,15 +57,14 @@ def delete_folder(folder_id: str) -> None:
     drive_service.files().delete(fileId=folder_id).execute()
 
 
-# def move_file(file_id: str, room: str):
-#     folder_id = [rooms[room]]
-#     file = drive_service.files().get(fileId=file_id,
-#                                      fields='parents').execute()
-#     previous_parents = ",".join(file.get('parents'))
-#     file = drive_service.files().update(fileId=file_id,
-#                                         addParents=folder_id,
-#                                         removeParents=previous_parents,
-#                                         fields='id, parents').execute()
+def move_file(file_id: str, folder_id: str):
+    file = drive_service.files().get(fileId=file_id,
+                                     fields='parents').execute()
+    previous_parents = ",".join(file.get('parents'))
+    file = drive_service.files().update(fileId=file_id,
+                                        addParents=folder_id,
+                                        removeParents=previous_parents,
+                                        fields='id, parents').execute()
 
 
 def upload(filename: str, drive_url: int, names: list = []) -> str:
