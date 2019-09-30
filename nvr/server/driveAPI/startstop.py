@@ -140,10 +140,10 @@ def add_sound(video_cam_num: str, audio_cam_num: str) -> None:
 
 
 @nvr_db_context
-def upload_file(file_name: str, room_id: str, calendar_id: str, event_id: str):
+def upload_file(file_name: str, folder_id: str, calendar_id: str, event_id: str):
     try:
         file_id = upload(home + "/vids/" + file_name,
-                         room_id)
+                         folder_id)
     except Exception as e:
         print(e)
 

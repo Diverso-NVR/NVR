@@ -332,11 +332,15 @@ def sound_change(current_user):
 def upload_merged():
     post_data = request.get_json(force=True)
 
+    room_id = post_data["room_id"]
+
+    room = Room.query.get(room_id)
+
     Thread(target=upload_file,
            args=(
                current_app._get_current_object(),
                post_data["file_name"],
-               post_data["room_id"],
+               room.drive.split('/')[-1],
                post_data.get('calendar_id'),
                post_data.get('event_id')
            ),
