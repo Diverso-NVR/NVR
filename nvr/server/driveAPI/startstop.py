@@ -11,7 +11,8 @@ from calendarAPI.calendarSettings import add_attachment
 
 tracking_url = 'http://172.18.198.31:5000/tracking'
 home = str(Path.home())
-merge_url = os.environ.get('MERGE_SERVER_URL')
+MERGE_SERVER_URL = os.environ.get('MERGE_SERVER_URL')
+BASE_URL = os.environ.get('BASE_URL')
 lock = RLock()
 rooms = {}
 processes = {}
@@ -97,8 +98,9 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
 
     if os.path.exists(screen_num) and os.path.exists(video_cam_num):
         try:
-            requests.post(merge_url,
+            requests.post(MERGE_SERVER_URL,
                           json={
+                              'url': BASE_URL,
                               "screen_num": screen_num,
                               "video_cam_num": video_cam_num,
                               "record_num": record_names[room_id],
