@@ -83,8 +83,8 @@
             >Ничего не найдено по запросу "{{ search }}".</v-alert>
           </template>
         </v-data-table>
+        <app-add-source :room="roomCopy"></app-add-source>
       </v-layout>
-      <app-add-source :room="roomCopy"></app-add-source>
     </v-card>
   </v-dialog>
 </template>
