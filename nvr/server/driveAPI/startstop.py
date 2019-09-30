@@ -96,21 +96,20 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
     video_cam_num = record_names[room_id] + \
         rooms[room_id]['main_cam'].split('/')[0].split('.')[-1]
 
-    if os.path.exists(screen_num) and os.path.exists(video_cam_num):
-        try:
-            requests.post(MERGE_SERVER_URL,
-                          json={
-                              'url': BASE_URL,
-                              "screen_num": screen_num,
-                              "video_cam_num": video_cam_num,
-                              "record_num": record_names[room_id],
-                              "room_id": rooms[room_id]['name'],
-                              "calendar_id": calendar_id,
-                              "event_id": event_id
-                          },
-                          headers={'content-type': 'application/json'})
-        except Exception as e:
-            print(e)
+    try:
+        requests.post(MERGE_SERVER_URL,
+                      json={
+                          'url': BASE_URL,
+                          "screen_num": screen_num,
+                          "video_cam_num": video_cam_num,
+                          "record_num": record_names[room_id],
+                          "room_id": rooms[room_id]['name'],
+                          "calendar_id": calendar_id,
+                          "event_id": event_id
+                      },
+                      headers={'content-type': 'application/json'})
+    except Exception as e:
+        print(e)
 
     with lock:
         res = ""
