@@ -1,4 +1,4 @@
-from .models import db, Room, Source, User
+from .models import db, Room, Source, User, nvr_db_context
 from .email import send_verify_email
 from flask import Blueprint, jsonify, request, current_app
 
@@ -184,20 +184,20 @@ def create_room(current_user):
     return jsonify({'name': name}), 201
 
 
-def config_room(app, name):
-    with app.app_context():
-        room = Room(name=name)
-        room.drive = create_folder(
-            CAMPUS,
-            name
-        )
-        room.calendar = create_calendar(
-            CAMPUS,
-            name
-        )
-        room.sources = []
-        db.session.add(room)
-        db.session.commit()
+@nvr_db_context
+def config_room(name):
+    room = Room(name=name)
+    room.drive = create_folder(
+        CAMPUS,
+        name
+    )
+    room.calendar = create_calendar(
+        CAMPUS,
+        name
+    )
+    room.sources = []
+    db.session.add(room)
+    db.session.commit()
 
 
 @api.route('/rooms/', methods=['GET'])
@@ -275,12 +275,12 @@ def start_rec(current_user):
     return "Started", 200
 
 
-def start_timer(app, id: int) -> None:
-    with app.app_context():
-        while not Room.query.get(id).free:
-            Room.query.get(id).timestamp += 1
-            db.session.commit()
-            time.sleep(1)
+@nvr_db_context
+def start_timer(id: int) -> None:
+    while not Room.query.get(id).free:
+        Room.query.get(id).timestamp += 1
+        db.session.commit()
+        time.sleep(1)
 
 
 @api.route('/stopRec', methods=["POST"])
@@ -300,14 +300,16 @@ def stop_rec(current_user):
     room.processing = True
     db.session.commit()
 
-    Thread(target=stop_record, args=(room_id, calendar_id, event_id)).start()
+    Thread(target=stop_record, args=(current_app._get_current_object(),
+                                     room_id, calendar_id, event_id)).start()
 
     return 'Stopped', 200
 
 
+@nvr_db_context
 def stop_record(room_id, calendar_id, event_id):
     try:
-        stop(current_app._get_current_object(), id, calendar_id, event_id)
+        stop(current_app._get_current_object(), room_id, calendar_id, event_id)
     except Exception as e:
         pass
     finally:
