@@ -252,7 +252,7 @@ def edit_room(current_user, room_id):
 @token_required
 def start_rec(current_user):
     post_data = request.get_json()
-    id = post_data['id']
+    room_id = post_data['id']
     room = Room.query.get(id)
 
     if not room.free:
@@ -263,13 +263,13 @@ def start_rec(current_user):
 
     Thread(
         target=start_timer,
-        args=(current_app._get_current_object(), id),
+        args=(current_app._get_current_object(), room_id),
         daemon=True
     ).start()
 
     Thread(
         target=start,
-        args=(current_app._get_current_object(), id)
+        args=(current_app._get_current_object(), room_id)
     ).start()
 
     return "Started", 200
@@ -287,7 +287,7 @@ def start_timer(app, id: int) -> None:
 @token_required
 def stop_rec(current_user):
     post_data = request.get_json()
-    id = post_data['id']
+    room_id = post_data['id']
 
     calendar_id = post_data.get('calendar_id')
     event_id = post_data.get('event_id')
@@ -300,6 +300,12 @@ def stop_rec(current_user):
     room.processing = True
     db.session.commit()
 
+    Thread(target=stop_record, args=(room_id, calendar_id, event_id)).start()
+
+    return 'Stopped', 200
+
+
+def stop_record(room_id, calendar_id, event_id):
     try:
         stop(current_app._get_current_object(), id, calendar_id, event_id)
     except Exception as e:
@@ -310,8 +316,6 @@ def stop_rec(current_user):
         room.free = True
         room.timestamp = 0
         db.session.commit()
-
-    return 'Stopped', 200
 
 
 @api.route('/sound', methods=['POST'])
