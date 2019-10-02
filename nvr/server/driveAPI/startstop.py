@@ -3,7 +3,7 @@ import os
 import signal
 import subprocess
 from pathlib import Path
-from threading import RLock
+from threading import RLock, Thread
 from nvrAPI.models import nvr_db_context, Room
 import requests
 from driveAPI.driveSettings import upload
@@ -61,19 +61,19 @@ def start(room_id: int) -> None:
         enc = subprocess.Popen("ffmpeg -rtsp_transport http -i rtsp://" +
                                rooms[room_id]['sound']['enc'][0] +
                                " -y -c:a copy -vn -f mp4 " + home + "/vids/sound_"
-                               + record_names[room_id] + ".aac 1>/dev/null", shell=True, preexec_fn=os.setsid)
+                               + record_names[room_id] + ".aac", shell=True, preexec_fn=os.setsid)
         processes[room_id].append(enc)
     else:
         camera = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://" +
                                   rooms[room_id]['sound']['cam'][0] +
                                   " -y -c:a copy -vn -f mp4 " + home + "/vids/sound_"
-                                  + record_names[room_id] + ".aac 1>/dev/null", shell=True, preexec_fn=os.setsid)
+                                  + record_names[room_id] + ".aac", shell=True, preexec_fn=os.setsid)
         processes[room_id].append(camera)
 
     for cam in rooms[room_id]['vid']:
         process = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://" +
                                    cam + " -y -c:v copy -an -f mp4 " + home + "/vids/vid_" +
-                                   record_names[room_id] + cam.split('/')[0].split('.')[-1] + ".mp4 1>/dev/null", shell=True,
+                                   record_names[room_id] + cam.split('/')[0].split('.')[-1] + ".mp4", shell=True,
                                    preexec_fn=os.setsid)
         processes[room_id].append(process)
 
@@ -93,16 +93,17 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
 
     screen_num = record_names[room_id] + \
         rooms[room_id]['sound']['enc'][0].split('/')[0].split('.')[-1]
-    video_cam_num = record_names[room_id] + \
+    record_name = record_names[room_id] + \
         rooms[room_id]['main_cam'].split('/')[0].split('.')[-1]
+    record_name = record_names[room_id]
 
     try:
         requests.post(MERGE_SERVER_URL,
                       json={
                           'url': BASE_URL,
                           "screen_num": screen_num,
-                          "video_cam_num": video_cam_num,
-                          "record_num": record_names[room_id],
+                          "record_name": record_name,
+                          "record_num": record_name,
                           "room_id": room_id,
                           "calendar_id": calendar_id,
                           "event_id": event_id
@@ -111,36 +112,40 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
     except Exception as e:
         print(e)
 
+    room = Room.query.get(room_id)
+
+    Thread(target=sync_and_upload, args=(
+        room_id, record_name, rooms[room_id]['vid'], room.drive.split('/')[-1])).start()
+
+
+def sync_and_upload(room_id: int, record_name: str, room_sources: list, folder_id: str) -> None:
     with lock:
         res = ""
-        if os.path.exists(f'{home}/vids/sound_{record_names[room_id]}.aac'):
-            for cam in rooms[room_id]['vid']:
-                add_sound(record_names[room_id] +
-                          cam.split('/')[0].split('.')[-1], record_names[room_id])
+        if os.path.exists(f'{home}/vids/sound_{record_name}.aac'):
+            for cam in room_sources:
+                add_sound(record_name,
+                          cam.split('/')[0].split('.')[-1])
         else:
             res = "vid_"
 
-        room = Room.query.get(room_id)
-
-        for cam in rooms[room_id]['vid']:
+        for cam in room_sources:
             try:
-                upload(home + "/vids/" + res + record_names[room_id]
+                upload(home + "/vids/" + res + record_name
                        + cam.split('/')[0].split('.')[-1] + ".mp4",
-                       room.drive.split('/')[-1])
+                       folder_id)
             except Exception as e:
                 print(e)
 
 
-def add_sound(video_cam_num: str, audio_cam_num: str) -> None:
-    proc = subprocess.Popen(["ffmpeg", "-i", home + "/vids/sound_" + audio_cam_num + ".aac", "-i",
-                             home + "/vids/vid_" + video_cam_num +
+def add_sound(record_name: str, source_id: str) -> None:
+    proc = subprocess.Popen(["ffmpeg", "-i", home + "/vids/sound_" + record_name + ".aac", "-i",
+                             home + "/vids/vid_" + record_name + source_id +
                              ".mp4", "-y", "-shortest", "-c", "copy",
-                             home + "/vids/" + video_cam_num + ".mp4"], shell=False)
+                             home + "/vids/" + record_name + source_id + ".mp4"], shell=False)
     proc.wait()
 
 
-@nvr_db_context
-def upload_file(file_name: str, folder_id: str, calendar_id: str, event_id: str):
+def upload_file(file_name: str, folder_id: str, calendar_id: str, event_id: str) -> None:
     try:
         file_id = upload(home + "/vids/" + file_name,
                          folder_id)

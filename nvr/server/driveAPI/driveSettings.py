@@ -29,12 +29,12 @@ if not creds or not creds.valid:
 drive_service = build('drive', 'v3', credentials=creds)
 
 
-def create_folder(building: str, room: str) -> str:
+def create_folder(building: str, room_name: str) -> str:
     """
-    Creates folder in format: 'building'-'room'
+    Creates folder in format: 'building'-'room_name'
     """
     folder_metadata = {
-        'name': building + '-' + room,
+        'name': building + '-' + room_name,
         'mimeType': 'application/vnd.google-apps.folder',
     }
     folder = drive_service.files().create(body=folder_metadata,
@@ -67,14 +67,14 @@ def move_file(file_id: str, folder_id: str):
                                         fields='id, parents').execute()
 
 
-def upload(filename: str, drive_url: int, names: list = []) -> str:
+def upload(filename: str, folder_id: str, names: list = []) -> str:
     """
-    Upload file "filename" on drive folder 'drive_url'
+    Upload file "filename" on drive folder 'folder_id'
     """
     media = MediaFileUpload(filename, mimetype="video/mp4", resumable=True)
     file_data = {
         "name": filename.split('/')[4],
-        "parents": [drive_url],
+        "parents": [folder_id],
         'description': 'На занятии присутсвовали: ' + ','.join(names)
     }
     file = drive_service.files().create(
