@@ -78,14 +78,6 @@ def start(room_id: int) -> None:
         processes[room_id].append(process)
 
 
-def kill_records(room_id):
-    for process in processes[room_id]:
-        try:
-            os.killpg(process.pid, signal.SIGTERM)
-        except OSError:
-            os.system("kill %s" % (process.pid))  # sudo for server
-
-
 @nvr_db_context
 def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
 
@@ -97,25 +89,33 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
         rooms[room_id]['main_cam'].split('/')[0].split('.')[-1]
     record_name = record_names[room_id]
 
-    try:
-        requests.post(MERGE_SERVER_URL,
-                      json={
-                          'url': BASE_URL,
-                          "screen_num": screen_num,
-                          "record_name": record_name,
-                          "record_num": record_name,
-                          "room_id": room_id,
-                          "calendar_id": calendar_id,
-                          "event_id": event_id
-                      },
-                      headers={'content-type': 'application/json'})
-    except Exception as e:
-        print(e)
+    # try:
+    #     requests.post(MERGE_SERVER_URL,
+    #                   json={
+    #                       'url': BASE_URL,
+    #                       "screen_num": screen_num,
+    #                       "record_name": record_name,
+    #                       "record_num": record_name,
+    #                       "room_id": room_id,
+    #                       "calendar_id": calendar_id,
+    #                       "event_id": event_id
+    #                   },
+    #                   headers={'content-type': 'application/json'})
+    # except Exception as e:
+    #     print(e)
 
     room = Room.query.get(room_id)
 
     Thread(target=sync_and_upload, args=(
         room_id, record_name, rooms[room_id]['vid'], room.drive.split('/')[-1])).start()
+
+
+def kill_records(room_id: int) -> None:
+    for process in processes[room_id]:
+        try:
+            os.killpg(process.pid, signal.SIGTERM)
+        except OSError:
+            os.system("kill %s" % (process.pid))  # sudo for server
 
 
 def sync_and_upload(room_id: int, record_name: str, room_sources: list, folder_id: str) -> None:
@@ -133,8 +133,8 @@ def sync_and_upload(room_id: int, record_name: str, room_sources: list, folder_i
                 upload(home + "/vids/" + res + record_name
                        + cam.split('/')[0].split('.')[-1] + ".mp4",
                        folder_id)
-            except Exception as e:
-                print(e)
+            except:
+                pass
 
 
 def add_sound(record_name: str, source_id: str) -> None:
@@ -149,11 +149,11 @@ def upload_file(file_name: str, folder_id: str, calendar_id: str, event_id: str)
     try:
         file_id = upload(home + "/vids/" + file_name,
                          folder_id)
-    except Exception as e:
-        print(e)
+    except:
+        pass
 
     if calendar_id:
         try:
             add_attachment(calendar_id, event_id, file_id)
-        except Exception as e:
-            print(e)
+        except:
+            pass

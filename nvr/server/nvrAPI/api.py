@@ -253,7 +253,7 @@ def edit_room(current_user, room_id):
 def start_rec(current_user):
     post_data = request.get_json()
     room_id = post_data['id']
-    room = Room.query.get(id)
+    room = Room.query.get(room_id)
 
     if not room.free:
         return "Already recording", 401
@@ -276,9 +276,9 @@ def start_rec(current_user):
 
 
 @nvr_db_context
-def start_timer(id: int) -> None:
-    while not Room.query.get(id).free:
-        Room.query.get(id).timestamp += 1
+def start_timer(room_id: int) -> None:
+    while not Room.query.get(room_id).free:
+        Room.query.get(room_id).timestamp += 1
         db.session.commit()
         time.sleep(1)
 
@@ -292,7 +292,7 @@ def stop_rec(current_user):
     calendar_id = post_data.get('calendar_id')
     event_id = post_data.get('event_id')
 
-    room = Room.query.get(id)
+    room = Room.query.get(room_id)
 
     if room.free:
         return "Already stoped", 401
@@ -313,7 +313,7 @@ def stop_record(room_id, calendar_id, event_id):
     except Exception as e:
         pass
     finally:
-        room = Room.query.get(id)
+        room = Room.query.get(room_id)
         room.processing = False
         room.free = True
         room.timestamp = 0
@@ -324,10 +324,10 @@ def stop_record(room_id, calendar_id, event_id):
 @token_required
 def sound_change(current_user):
     post_data = request.get_json()
-    id = post_data['id']
+    room_id = post_data['id']
     sound_type = post_data['sound']
 
-    room = Room.query.get(id)
+    room = Room.query.get(room_id)
     room.chosen_sound = sound_type
     db.session.commit()
 
