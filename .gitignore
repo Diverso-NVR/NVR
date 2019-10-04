@@ -8,3 +8,5 @@ venv/
 logs/
 *.iml
 .idea
+.env
+*.pyc

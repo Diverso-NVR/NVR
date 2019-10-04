@@ -1,0 +1,101 @@
+<template>
+  <v-container fluid fill-height>
+    <v-layout align-center justify-center>
+      <v-flex xs12 sm8 md6>
+        <v-card class="elevation-12">
+          <v-toolbar dark color="black">
+            <v-toolbar-title>Регистрация</v-toolbar-title>
+          </v-toolbar>
+          <v-card-text>
+            <v-form v-model="valid" ref="form" validation>
+              <v-text-field
+                color="black"
+                prepend-icon="person"
+                name="email"
+                label="Почта"
+                type="email"
+                v-model="email"
+                :rules="emailRules"
+              ></v-text-field>
+              <v-text-field
+                prepend-icon="lock"
+                color="black"
+                name="password"
+                label="Пароль"
+                type="password"
+                @keyup.enter="onSubmit"
+                v-model="password"
+                :rules="passwordRules"
+              ></v-text-field>
+              <v-text-field
+                prepend-icon="lock"
+                color="black"
+                name="confirmPassword"
+                label="Подтвердить пароль"
+                type="password"
+                @keyup.enter="onSubmit"
+                v-model="confirmPassword"
+                :rules="confirmPasswordRules"
+              ></v-text-field>
+            </v-form>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="black"
+              class="white--text"
+              @click="onSubmit"
+              :loading="loading"
+              :disabled="!valid || loading"
+            >Отправить</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-flex>
+    </v-layout>
+  </v-container>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      valid: false,
+      email: "",
+      password: "",
+      confirmPassword: "",
+      emailRules: [
+        v => !!v || "Обязательное поле",
+        v =>
+          /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v) ||
+          "Некорректный адрес почты"
+      ],
+      passwordRules: [
+        v => !!v || "Обязательное поле",
+        v =>
+          (v && v.length >= 6) || "Пароль должен содержать не менее 6 символов"
+      ],
+      confirmPasswordRules: [
+        v => !!v || "Обязательное поле",
+        v => v === this.password || "Пароли должны совпадать"
+      ]
+    };
+  },
+  computed: {
+    loading() {
+      return this.$store.getters.loading;
+    }
+  },
+  methods: {
+    async onSubmit() {
+      if (this.$refs.form.validate()) {
+        await this.$store.dispatch("register", {
+          email: this.email,
+          password: this.password
+        });
+
+        this.$router.push("/");
+      }
+    }
+  }
+};
+</script>

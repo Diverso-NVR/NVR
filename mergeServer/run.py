@@ -14,10 +14,9 @@ def main():
 @app.route('/merge', methods=["POST"])
 def start_merge():
     json = request.get_json(force=True)
-    url = "http://172.16.87.10/api"
     Thread(target=merge_video,
-           args=(url, json["screen_num"], json["video_cam_num"], json["record_num"],
-                 json["room_name"], json['calendar_id'], json['event_id']),
+           args=(json['url'], json["screen_num"], json["video_cam_num"], json["record_num"],
+                 json["room_id"], json['calendar_id'], json['event_id']),
            daemon=True
            ).start()
     return "Merge started", 200
