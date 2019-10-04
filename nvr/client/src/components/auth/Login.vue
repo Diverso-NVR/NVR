@@ -14,6 +14,7 @@
                 name="email"
                 label="Почта"
                 type="email"
+                @keyup.enter="onSubmit"
                 v-model.trim="email"
                 :rules="emailRules"
               ></v-text-field>
@@ -23,6 +24,7 @@
                 name="password"
                 label="Пароль"
                 type="password"
+                @keyup.enter="onSubmit"
                 v-model.trim="password"
                 :rules="passwordRules"
               ></v-text-field>

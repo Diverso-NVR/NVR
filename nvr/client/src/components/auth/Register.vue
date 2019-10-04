@@ -23,6 +23,7 @@
                 name="password"
                 label="Пароль"
                 type="password"
+                @keyup.enter="onSubmit"
                 v-model="password"
                 :rules="passwordRules"
               ></v-text-field>
@@ -32,6 +33,7 @@
                 name="confirmPassword"
                 label="Подтвердить пароль"
                 type="password"
+                @keyup.enter="onSubmit"
                 v-model="confirmPassword"
                 :rules="confirmPasswordRules"
               ></v-text-field>
