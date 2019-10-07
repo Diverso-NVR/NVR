@@ -15,7 +15,7 @@ def main():
 def start_merge():
     json = request.get_json(force=True)
     Thread(target=merge_video,
-           args=(json['url'], json["screen_num"], json["video_cam_num"], json["record_num"],
+           args=(json['url'], json["screen_num"], json["record_name"], json["record_num"],
                  json["room_id"], json['calendar_id'], json['event_id']),
            daemon=True
            ).start()
