@@ -11,7 +11,7 @@ home = str(Path.home())
 def merge_video(client_url: str, screen_num: str, video_cam_num: str, record_num: str, room_id: int, calendar_id: str, event_id: str) -> None:
     lock.acquire()
 
-    first = subprocess.Popen(["ffmpeg", "-i", "../vids/vid_" + video_cam_num + ".mp4", "-i", "../vids/vid_" +
+    first = subprocess.Popen(["ffmpeg", "-i", home + "/vids/vid_" + video_cam_num + ".mp4", "-i", "../vids/vid_" +
                               screen_num + ".mp4", "-filter_complex", "hstack=inputs=2", "../vids/vid_" +
                               record_num + "merged.mp4"], shell=False)
     os.system("renice -n 20 %s" % (first.pid, ))
