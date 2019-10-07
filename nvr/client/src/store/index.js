@@ -41,7 +41,8 @@ const mutations = {
   },
   setRooms(state, payload) {
     state.rooms = payload;
-    for (let room of state.rooms) {
+
+    state.rooms.forEach(room => {
       if (room.processing) room.status = "processing";
       else room.status = room.free ? "free" : "busy";
       room.timer = room.free
@@ -49,7 +50,7 @@ const mutations = {
         : setInterval(() => {
             room.timestamp++;
           }, 1000);
-    }
+    });
   },
   setUsers(state, payload) {
     state.users = payload;
@@ -120,7 +121,11 @@ const actions = {
   },
   async changeRole({ commit, state }, { user }) {
     try {
-      await changeUserRole(user.id, user.role, state.jwt.token);
+      await changeUserRole({
+        id: user.id,
+        role: user.role,
+        token: state.jwt.token
+      });
     } catch (error) {
       commit("setError", error);
     }
@@ -143,7 +148,7 @@ const actions = {
   },
   async switchSound({ commit, state }, { room, sound }) {
     try {
-      await soundSwitch(room.id, sound, state.jwt.token);
+      await soundSwitch({ id: room.id, sound, token: state.jwt.token });
       room.chosen_sound = sound;
     } catch (error) {
       commit("setError", error);
@@ -196,7 +201,7 @@ const actions = {
   },
   async editRoom({ commit, state }, { id, sources }) {
     try {
-      await edit(id, sources, state.jwt.token);
+      await edit({ id, sources, token: state.jwt.token });
       commit("setMessage", "Изменения сохранены");
     } catch (error) {
       commit("setError", error);

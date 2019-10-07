@@ -225,8 +225,7 @@ export default {
         busy: "red lighten-4"
       },
       newRoomLoader: false,
-      isMobile: false,
-      campus: "ФКМД"
+      isMobile: false
     };
   },
   components: {
@@ -321,7 +320,7 @@ export default {
     padding-right: 0.5em;
     text-align: center;
     display: block;
-    color: #999;
+    color: #999999;
   }
   .v-datatable__actions__select {
     width: 50%;

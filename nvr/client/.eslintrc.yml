@@ -1,0 +1,33 @@
+env:
+  es6: true
+
+plugins: [fp]
+
+parser: "babel-eslint"
+
+parserOptions:
+  sourceType: "module"
+
+rules:
+  max-lines-per-function:
+    - warn
+    - 20
+  complexity:
+    - warn
+    - 5
+  max-nested-callbacks:
+    - warn
+    - 2
+  max-depth:
+    - warn
+    - 3
+  fp/no-mutation: warn
+  no-param-reassign: warn
+  fp/no-mutating-assign: warn
+  fp/no-mutating-methods: warn
+  fp/no-let: warn
+  fp/no-loops: warn
+  fp/no-delete: warn
+  max-params:
+    - warn
+    - 3

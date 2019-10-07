@@ -23,7 +23,7 @@ export function delUser(id, token) {
   });
 }
 
-export function changeUserRole(id, role, token) {
+export function changeUserRole({ id, role, token }) {
   return axios.put(
     `${API_URL}/users/roles/${id}`,
     { role },
@@ -48,7 +48,7 @@ export function getRooms() {
   return axios.get(`${API_URL}/rooms/`);
 }
 
-export function soundSwitch(id, sound, token) {
+export function soundSwitch({ id, sound, token }) {
   return axios.post(
     `${API_URL}/sound`,
     { id, sound },
@@ -86,7 +86,7 @@ export function add(name, token) {
   );
 }
 
-export function edit(id, sources, token) {
+export function edit({ id, sources, token }) {
   return axios.put(
     `${API_URL}/rooms/${id}`,
     { sources },
