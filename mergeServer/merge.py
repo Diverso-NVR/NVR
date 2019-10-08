@@ -30,7 +30,7 @@ def merge_video(client_url: str, screen_num: str, cam_num: str, record_name: str
     mid2.wait()
 
     crop1 = subprocess.Popen(
-        ["ffmpeg", "-i", home + "/vids/" + record_num + "mid_cam.mp4", "-filter:v", "crop=640:720:40:0",
+        ["ffmpeg", "-i", home + "/vids/" + record_name + "mid_cam.mp4", "-filter:v", "crop=640:720:40:0",
          home + "/vids/" + record_name + "cropped.mp4"], shell=False)
     os.system("renice -n 20 %s" % (crop1.pid,))
     crop1.wait()
