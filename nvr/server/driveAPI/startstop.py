@@ -89,16 +89,6 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
         rooms[room_id]['main_cam'].split('/')[0].split('.')[-1]
     record_name = record_names[room_id]
 
-    print({
-        'url': BASE_URL,
-        "screen_num": screen_num,
-        "record_name": record_name,
-        "record_num": record_num,
-        "room_id": room_id,
-        "calendar_id": calendar_id,
-        "event_id": event_id
-    })
-
     try:
         requests.post(MERGE_SERVER_URL,
                       json={
