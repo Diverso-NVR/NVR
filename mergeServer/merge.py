@@ -15,7 +15,7 @@ def merge_video(client_url: str, screen_num: str, cam_num: str, record_name: str
     #                           screen_num + ".mp4", "-filter_complex", "hstack=inputs=2", home + "/vids/vid_" +
     #                           record_name + "merged.mp4"], shell=False)
     # os.system("renice -n 20 %s" % (first.pid, ))
-    # first.wait(
+    # first.wait()
 
     mid1 = subprocess.Popen(
         ["ffmpeg", "-i", home + "/vids/vid_" + screen_num + ".mp4", "-s", "hd720",
