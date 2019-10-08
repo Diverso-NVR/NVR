@@ -1,7 +1,7 @@
 from threading import Thread
 
 from merge import merge_video
-from flask import Flask, request
+from flask import Flask, request, jsonify
 
 app = Flask("NVR_VIDEO_MERGE")
 
