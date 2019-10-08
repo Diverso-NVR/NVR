@@ -85,7 +85,7 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
 
     screen_num = record_names[room_id] + \
         rooms[room_id]['sound']['enc'][0].split('/')[0].split('.')[-1]
-    record_num = record_names[room_id] + \
+    cam_num = record_names[room_id] + \
         rooms[room_id]['main_cam'].split('/')[0].split('.')[-1]
     record_name = record_names[room_id]
 
@@ -94,8 +94,8 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
                       json={
                           'url': BASE_URL,
                           "screen_num": screen_num,
+                          "cam_num": cam_num,
                           "record_name": record_name,
-                          "record_num": record_num,
                           "room_id": room_id,
                           "calendar_id": calendar_id,
                           "event_id": event_id
