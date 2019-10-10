@@ -103,20 +103,24 @@ export default {
     links() {
       let links = [];
       if (this.isUserLoggedIn) {
-        links = [{ title: "Аудитории", icon: "camera", url: "/rooms" }];
+        links = [
+          { title: "Аудитории", icon: "view_list", url: "/rooms" },
+          { title: "API", icon: "code", url: "/manage_api" }
+        ];
         if (this.user.role === "admin") {
           links = [
-            {
-              title: "Запросы на доступ",
-              icon: "verified_user",
-              url: "/access_requests"
-            },
+            links[0],
             {
               title: "Пользователи",
               icon: "supervised_user_circle",
               url: "/users"
             },
-            ...links
+            {
+              title: "Запросы на доступ",
+              icon: "verified_user",
+              url: "/access_requests"
+            },
+            links[1]
           ];
         }
       } else {

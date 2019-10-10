@@ -99,7 +99,7 @@ def login():
         return jsonify({'message': 'Почта не подтверждена', 'authenticated': False}), 401
 
     if not user.access:
-        return jsonify({'message': 'Ошибка доступа. Администратор ещё не открыл доступ для этого аккаунта',
+        return jsonify({'message': 'Администратор ещё не открыл доступ для этого аккаунта',
                         'authenticated': False}), 401
 
     token = jwt.encode({

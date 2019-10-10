@@ -2,6 +2,7 @@ import Vue from "vue";
 import Router from "vue-router";
 import { adminOnly, authRequired } from "./authGuard";
 
+import ManageApi from "@/components/api/ManageApi";
 import Rooms from "@/components/campus/Rooms";
 import Login from "@/components/auth/Login";
 import Register from "@/components/auth/Register";
@@ -38,6 +39,11 @@ export default new Router({
       path: "/users",
       component: Users,
       beforeEnter: adminOnly
+    },
+    {
+      path: "/manage_api",
+      component: ManageApi,
+      beforeEnter: authRequired
     }
   ],
   mode: "history"
