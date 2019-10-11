@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app :dark="isDarkMode">
     <v-navigation-drawer app temporary v-model="drawer" dark color="black">
       <v-list>
         <v-list-tile v-for="link of links" :key="link.title" :to="link.url">
@@ -52,6 +52,12 @@
       </v-container>
     </v-content>
 
+    <v-fab-transition>
+      <v-btn small dark fab fixed bottom right @click="switchColorMode()">
+        <v-icon>invert_colors</v-icon>
+      </v-btn>
+    </v-fab-transition>
+
     <template v-if="error">
       <v-snackbar
         :multi-line="true"
@@ -100,6 +106,9 @@ export default {
     user() {
       return this.$store.getters.user;
     },
+    isDarkMode() {
+      return this.$store.getters.isDarkMode;
+    },
     links() {
       let links = [];
       if (this.isUserLoggedIn) {
@@ -134,6 +143,9 @@ export default {
     }
   },
   methods: {
+    switchColorMode() {
+      this.$store.dispatch("switchColorMode");
+    },
     closeError() {
       this.$store.dispatch("clearError");
     },

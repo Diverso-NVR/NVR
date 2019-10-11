@@ -2,7 +2,7 @@
   <v-layout align-center justify-center>
     <v-flex xs12 sm8 md6>
       <v-card>
-        <v-list two-line v-if="users.length > 0" v-resize="onResize">
+        <v-list v-if="users.length > 0" v-resize="onResize">
           <template v-for="(user,index) in users">
             <v-list-tile avatar :key="user.id">
               <v-list-tile-content>

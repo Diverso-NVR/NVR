@@ -220,9 +220,9 @@ export default {
       ],
       newRoom: "",
       background: {
-        free: "green lighten-4",
+        free: "green lighten-3",
         processing: "yellow lighten-3",
-        busy: "red lighten-4"
+        busy: "red lighten-3"
       },
       newRoomLoader: false,
       isMobile: false

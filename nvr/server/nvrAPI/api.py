@@ -16,6 +16,7 @@ from driveAPI.driveSettings import create_folder, move_file
 api = Blueprint('api', __name__)
 
 CAMPUS = os.environ.get('CAMPUS')
+NVR_URL = os.environ.get('NVR_URL')
 
 
 # AUTHENTICATE

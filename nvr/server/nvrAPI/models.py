@@ -32,6 +32,8 @@ class User(db.Model):
     email_verified = db.Column(db.Boolean, default=False)
     access = db.Column(db.Boolean, default=False)
 
+    api_key = db.Column(db.String(255), unique=True)
+
     def __init__(self, email, password):
         self.email = email
         self.password = generate_password_hash(password, method='sha256')
