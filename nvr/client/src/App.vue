@@ -53,7 +53,7 @@
     </v-content>
 
     <v-fab-transition>
-      <v-btn small dark fab fixed bottom right @click="switchColorMode()">
+      <v-btn small fab fixed bottom right @click="switchColorMode()">
         <v-icon>invert_colors</v-icon>
       </v-btn>
     </v-fab-transition>
@@ -113,8 +113,8 @@ export default {
       let links = [];
       if (this.isUserLoggedIn) {
         links = [
-          { title: "Аудитории", icon: "view_list", url: "/rooms" },
-          { title: "API", icon: "code", url: "/manage_api" }
+          { title: "Аудитории", icon: "view_list", url: "/rooms" }
+          // { title: "API", icon: "code", url: "/manage_api" }
         ];
         if (this.user.role === "admin") {
           links = [

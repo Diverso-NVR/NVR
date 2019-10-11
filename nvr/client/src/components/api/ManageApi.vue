@@ -1,7 +1,7 @@
 <template>
   <v-app>
-    <div class="d-flex justify-between align-right mb-3">
-      <v-btn @click="all" flat>
+    <div style="text-align:right">
+      <v-btn @click="all" icon>
         <v-icon>list</v-icon>
       </v-btn>
     </div>
