@@ -113,8 +113,8 @@ export default {
       let links = [];
       if (this.isUserLoggedIn) {
         links = [
-          { title: "Аудитории", icon: "view_list", url: "/rooms" }
-          // { title: "API", icon: "code", url: "/manage_api" }
+          { title: "Аудитории", icon: "view_list", url: "/rooms" },
+          { title: "API", icon: "code", url: "/manage_api" }
         ];
         if (this.user.role === "admin") {
           links = [

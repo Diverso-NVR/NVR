@@ -4,7 +4,7 @@ export default {
     error: "",
     timer: null,
     message: "",
-    isDarkMode: true
+    isDarkMode: false
   },
   mutations: {
     switchLoading(state, payload) {
