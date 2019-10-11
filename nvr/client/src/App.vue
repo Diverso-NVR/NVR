@@ -128,8 +128,7 @@ export default {
               title: "Запросы на доступ",
               icon: "verified_user",
               url: "/access_requests"
-            },
-            links[1]
+            }
           ];
         }
       } else {
