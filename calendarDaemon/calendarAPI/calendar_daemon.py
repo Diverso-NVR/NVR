@@ -4,7 +4,6 @@ from calendarAPI.calendarSettings import get_events
 from threading import Thread, local
 import requests
 from API.models import nvr_db_context, Room
-from pprint import pprint
 import os
 
 started = []
@@ -49,7 +48,7 @@ def record(app, room: dict, dur: int) -> None:
     event_id = room['event']['id']
 
     room = Room.query.get(room['id'])
-    res = requests.post(f'{NVR_API_URL}/startRec',
+    res = requests.post(f'{NVR_API_URL}/start-record',
                         json={
                             'id': room.id
                         },
@@ -57,7 +56,7 @@ def record(app, room: dict, dur: int) -> None:
                         )
     time.sleep(dur)
     started.remove(event_id)
-    requests.post(f'{NVR_API_URL}/stopRec',
+    requests.post(f'{NVR_API_URL}/stop-record',
                   json={
                       'id': room.id,
                       'calendar_id': room.calendar,

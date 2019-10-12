@@ -31,7 +31,7 @@ export default new Router({
       beforeEnter: authRequired
     },
     {
-      path: "/access_requests",
+      path: "/access-requests",
       component: AccessRequests,
       beforeEnter: adminOnly
     },
@@ -41,7 +41,7 @@ export default new Router({
       beforeEnter: adminOnly
     },
     {
-      path: "/manage_api",
+      path: "/manage-api",
       component: ManageApi,
       beforeEnter: authRequired
     }

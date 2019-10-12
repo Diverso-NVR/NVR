@@ -42,6 +42,7 @@
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn
+              depressed
               color="black"
               class="white--text"
               @click="onSubmit"

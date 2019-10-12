@@ -50,7 +50,7 @@ def merge_video(client_url: str, screen_num: str, cam_num: str, record_name: str
     else:
         res = "vid_"
 
-    requests.post(client_url + "/upload_merged",
+    requests.post(client_url + "/upload-merged",
                   json={
                       "file_name": res + record_name + "merged.mp4",
                       "room_id": room_id,

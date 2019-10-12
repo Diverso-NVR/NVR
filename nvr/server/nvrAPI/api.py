@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from functools import wraps
 from threading import Thread
 import os
-
+import uuid
 import jwt
 from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions
 from driveAPI.startstop import start, stop, upload_file
@@ -77,7 +77,7 @@ def register():
     return jsonify(user.to_dict()), 201
 
 
-@api.route('/verify_email/<token>', methods=['POST', 'GET'])
+@api.route('/verify-email/<token>', methods=['POST', 'GET'])
 def verify_email(token):
     user = User.verify_email_token(token)
     if not user:
@@ -104,7 +104,7 @@ def login():
                         'authenticated': False}), 401
 
     token = jwt.encode({
-        'sub': {'email': user.email, 'role': user.role},
+        'sub': {'email': user.email, 'role': user.role, 'api_key': user.api_key},
         'iat': datetime.utcnow(),
         'exp': datetime.utcnow() + timedelta(minutes=80)},
         current_app.config['SECRET_KEY'])
@@ -154,6 +154,33 @@ def delete_user(current_user, user_id):
     db.session.delete(user)
     db.session.commit()
     return "Success", 201
+
+
+@api.route('/api-key/<email>', methods=['POST', 'PUT', 'DELETE'])
+@token_required
+def create_api_key(current_user, email):
+    user = User.query.filter_by(email=email).first()
+
+    if request.method == 'POST':
+        if user.api_key:
+            return jsonify({'message': 'Ключ API уже существует'}), 401
+
+        user.api_key = uuid.uuid4().hex
+        db.session.commit()
+
+        return jsonify({'api_key': user.api_key}), 200
+
+    if request.method == 'PUT':
+        user.api_key = uuid.uuid4().hex
+        db.session.commit()
+
+        return jsonify({'api_key': user.api_key}), 200
+
+    if request.method == 'DELETE':
+        user.api_key = None
+        db.session.commit()
+
+        return jsonify({'api_key': user.api_key}), 200
 
 
 # GOOGLE API
@@ -249,7 +276,7 @@ def edit_room(current_user, room_id):
     return "Success", 200
 
 
-@api.route('/startRec', methods=['POST'])
+@api.route('/start-record', methods=['POST'])
 @token_required
 def start_rec(current_user):
     post_data = request.get_json()
@@ -284,7 +311,7 @@ def start_timer(room_id: int) -> None:
         time.sleep(1)
 
 
-@api.route('/stopRec', methods=["POST"])
+@api.route('/stop-record', methods=["POST"])
 @token_required
 def stop_rec(current_user):
     post_data = request.get_json()
@@ -321,7 +348,7 @@ def stop_record(room_id, calendar_id, event_id):
         db.session.commit()
 
 
-@api.route('/sound', methods=['POST'])
+@api.route('/sound-change', methods=['POST'])
 @token_required
 def sound_change(current_user):
     post_data = request.get_json()
@@ -335,7 +362,7 @@ def sound_change(current_user):
     return "Sound source changed", 200
 
 
-@api.route('/upload_merged', methods=["POST"])
+@api.route('/upload-merged', methods=["POST"])
 def upload_merged():
     post_data = request.get_json(force=True)
 

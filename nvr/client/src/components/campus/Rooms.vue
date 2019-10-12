@@ -17,14 +17,14 @@
             <td class="text-xs-center">
               <v-btn-toggle mandatory v-model="props.item.chosen_sound">
                 <v-btn
-                  flat
+                  depressed
                   :loading="loader"
                   value="enc"
                   :disabled="!props.item.free"
                   @click="soundSwitch(props.item, 'enc')"
                 >Кодер</v-btn>
                 <v-btn
-                  flat
+                  depressed
                   :loading="loader"
                   value="cam"
                   :disabled="!props.item.free"
@@ -170,8 +170,8 @@
           <v-text-field v-model.trim="newRoom" label="Новая аудитория" :disabled="newRoomLoader"></v-text-field>
         </v-flex>
         <v-btn
-          color="black"
-          class="white--text"
+          dark
+          depressed
           @click="addRoom"
           :loading="newRoomLoader"
           :disabled="newRoomLoader"

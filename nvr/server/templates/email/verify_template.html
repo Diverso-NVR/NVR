@@ -1,7 +1,7 @@
 <p>Здравствуйте, {{ user.email }}</p>
 <p>
   Чтобы подтвердить почту
-  <a href="{{ url_for('api.verify_email', token=token, _external=True) }}">
+  <a href="{{ url_for('api.verify-email', token=token, _external=True) }}">
     кликните по ссылке </a
   >.
 </p>

@@ -18,8 +18,8 @@
                 </v-btn>
               </div>
               <div v-else>
-                <v-btn color="warning" @click="changeRole(user)">Изменить роль</v-btn>
-                <v-btn color="error" @click="deleteUser(user)">Удалить</v-btn>
+                <v-btn color="warning" depressed @click="changeRole(user)">Изменить роль</v-btn>
+                <v-btn color="error" depressed @click="deleteUser(user)">Удалить</v-btn>
               </div>
             </v-list-tile>
             <v-divider v-if="index + 1 < users.length" :key="index"></v-divider>

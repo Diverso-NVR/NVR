@@ -17,8 +17,8 @@
                 </v-btn>
               </div>
               <div v-else>
-                <v-btn color="success" @click="grantAccess(user)">Подтвердить</v-btn>
-                <v-btn color="error" @click="deleteUser(user)">Отклонить</v-btn>
+                <v-btn color="success" depressed @click="grantAccess(user)">Подтвердить</v-btn>
+                <v-btn color="error" depressed @click="deleteUser(user)">Отклонить</v-btn>
               </div>
             </v-list-tile>
             <v-divider v-if="index + 1 < users.length" :key="index"></v-divider>

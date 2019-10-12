@@ -114,7 +114,7 @@ export default {
       if (this.isUserLoggedIn) {
         links = [
           { title: "Аудитории", icon: "view_list", url: "/rooms" },
-          { title: "API", icon: "code", url: "/manage_api" }
+          { title: "API", icon: "code", url: "/manage-api" }
         ];
         if (this.user.role === "admin") {
           links = [
@@ -127,8 +127,9 @@ export default {
             {
               title: "Запросы на доступ",
               icon: "verified_user",
-              url: "/access_requests"
-            }
+              url: "/access-requests"
+            },
+            links[1]
           ];
         }
       } else {

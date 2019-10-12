@@ -1,5 +1,6 @@
 <template >
   <v-dialog
+    :dark="isDarkMode"
     v-model="modal"
     :disabled="!room.free"
     fullscreen
@@ -139,6 +140,11 @@ export default {
       ],
       roomCopy: Object.assign({}, this.room)
     };
+  },
+  computed: {
+    isDarkMode() {
+      return this.$store.getters.isDarkMode;
+    }
   },
   methods: {
     onResize() {
