@@ -2,7 +2,7 @@
   <v-layout align-center justify-center>
     <v-flex xs12 sm8 md6>
       <v-card>
-        <v-list two-line v-if="users.length > 0" v-resize="onResize">
+        <v-list v-if="users.length > 0" v-resize="onResize">
           <template v-for="(user,index) in users">
             <v-list-tile avatar :key="user.id">
               <v-list-tile-content>
@@ -18,8 +18,8 @@
                 </v-btn>
               </div>
               <div v-else>
-                <v-btn color="warning" @click="changeRole(user)">Изменить роль</v-btn>
-                <v-btn color="error" @click="deleteUser(user)">Удалить</v-btn>
+                <v-btn color="warning" depressed @click="changeRole(user)">Изменить роль</v-btn>
+                <v-btn color="error" depressed @click="deleteUser(user)">Удалить</v-btn>
               </div>
             </v-list-tile>
             <v-divider v-if="index + 1 < users.length" :key="index"></v-divider>

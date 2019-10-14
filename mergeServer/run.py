@@ -19,11 +19,6 @@ def start_merge():
                  json["room_id"], json['calendar_id'], json['event_id']),
            daemon=True
            ).start()
-    # try:
-    #     merge_video(json['url'], json["screen_num"], json["record_name"], json["record_num"],
-    #                 json["room_id"], json['calendar_id'], json['event_id'])
-    # except Exception as e:
-    #     return jsonify({'error': str(e)}), 401
 
     return "Merge started", 200
 

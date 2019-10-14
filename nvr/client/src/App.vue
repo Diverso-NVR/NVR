@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app :dark="isDarkMode">
     <v-navigation-drawer app temporary v-model="drawer" dark color="black">
       <v-list>
         <v-list-tile v-for="link of links" :key="link.title" :to="link.url">
@@ -52,6 +52,12 @@
       </v-container>
     </v-content>
 
+    <v-fab-transition>
+      <v-btn small fab fixed bottom right @click="switchColorMode()">
+        <v-icon>invert_colors</v-icon>
+      </v-btn>
+    </v-fab-transition>
+
     <template v-if="error">
       <v-snackbar
         :multi-line="true"
@@ -100,23 +106,27 @@ export default {
     user() {
       return this.$store.getters.user;
     },
+    isDarkMode() {
+      return this.$store.getters.isDarkMode;
+    },
     links() {
       let links = [];
       if (this.isUserLoggedIn) {
-        links = [{ title: "Аудитории", icon: "camera", url: "/rooms" }];
+        links = [{ title: "Аудитории", icon: "view_list", url: "/rooms" }];
         if (this.user.role === "admin") {
           links = [
-            {
-              title: "Запросы на доступ",
-              icon: "verified_user",
-              url: "/access_requests"
-            },
+            links[0],
             {
               title: "Пользователи",
               icon: "supervised_user_circle",
               url: "/users"
             },
-            ...links
+            {
+              title: "Запросы на доступ",
+              icon: "verified_user",
+              url: "/access-requests"
+            },
+            { title: "API", icon: "code", url: "/manage-api" }
           ];
         }
       } else {
@@ -130,6 +140,9 @@ export default {
     }
   },
   methods: {
+    switchColorMode() {
+      this.$store.dispatch("switchColorMode");
+    },
     closeError() {
       this.$store.dispatch("clearError");
     },

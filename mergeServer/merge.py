@@ -7,6 +7,8 @@ from threading import Lock
 lock = Lock()
 home = str(Path.home())
 
+NVR_API_KEY = 'dc1f3c63cd3145f886a31ba2759c56e5'
+
 
 def merge_video(client_url: str, screen_num: str, cam_num: str, record_name: str,  room_id: int, calendar_id: str, event_id: str) -> None:
     lock.acquire()
@@ -50,14 +52,16 @@ def merge_video(client_url: str, screen_num: str, cam_num: str, record_name: str
     else:
         res = "vid_"
 
-    requests.post(client_url + "/upload_merged",
+    requests.post(client_url + "/upload-merged",
                   json={
                       "file_name": res + record_name + "merged.mp4",
                       "room_id": room_id,
                       "calendar_id": calendar_id,
                       "event_id": event_id
                   },
-                  headers={'content-type': 'application/json'})
+                  headers={'content-type': 'application/json',
+                           "key": NVR_API_KEY}
+                  )
 
     lock.release()
 

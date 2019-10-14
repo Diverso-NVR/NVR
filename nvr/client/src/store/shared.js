@@ -1,9 +1,10 @@
 export default {
   state: {
     loading: false,
-    error: null,
+    error: "",
     timer: null,
-    message: null
+    message: "",
+    isDarkMode: false
   },
   mutations: {
     switchLoading(state, payload) {
@@ -29,6 +30,9 @@ export default {
     clearTimer(state) {
       clearInterval(state.timer);
       state.timer = null;
+    },
+    switchColorMode(state) {
+      state.isDarkMode = !state.isDarkMode;
     }
   },
   actions: {
@@ -52,6 +56,9 @@ export default {
     },
     clearTimer({ commit }) {
       commit("clearTimer");
+    },
+    switchColorMode({ commit }) {
+      commit("switchColorMode");
     }
   },
   getters: {
@@ -66,6 +73,9 @@ export default {
     },
     timer(state) {
       return state.timer;
+    },
+    isDarkMode(state) {
+      return state.isDarkMode;
     }
   }
 };

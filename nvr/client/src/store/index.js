@@ -2,19 +2,22 @@ import Vue from "vue";
 import Vuex from "vuex";
 import shared from "./shared";
 import {
+  authenticate,
+  register,
   getUsers,
   delUser,
   changeUserRole,
   grantUser,
+  createAPIKey,
+  updateAPIKey,
+  deleteAPIKey,
   getRooms,
   soundSwitch,
   start,
   stop,
   del,
   add,
-  edit,
-  authenticate,
-  register
+  edit
 } from "@/api";
 import { isValidJwt } from "@/utils";
 
@@ -38,6 +41,9 @@ const mutations = {
     state.userData = {};
     state.jwt = "";
     localStorage.token = "";
+  },
+  setKey(state, payload) {
+    state.user.api_key = payload.api_key;
   },
   setRooms(state, payload) {
     state.rooms = payload;
@@ -79,6 +85,7 @@ const actions = {
       const body = JSON.parse(atob(tokenParts[1]));
       state.user.email = body.sub.email;
       state.user.role = body.sub.role;
+      state.user.api_key = body.sub.api_key;
       commit("switchLoading");
       return true;
     } catch (error) {
@@ -134,6 +141,32 @@ const actions = {
     try {
       await grantUser(user.id, state.jwt.token);
       commit("grantAccess", user);
+    } catch (error) {
+      commit("setError", error);
+    }
+  },
+  async createKey({ commit, state }) {
+    try {
+      let res = await createAPIKey(state.user.email, state.jwt.token);
+      commit("setKey", res.data);
+      return res;
+    } catch (error) {
+      commit("setError", error);
+    }
+  },
+  async updateKey({ commit, state }) {
+    try {
+      let res = await updateAPIKey(state.user.email, state.jwt.token);
+      commit("setKey", res.data);
+      return res;
+    } catch (error) {
+      commit("setError", error);
+    }
+  },
+  async deleteKey({ commit, state }) {
+    try {
+      let res = await deleteAPIKey(state.user.email, state.jwt.token);
+      commit("setKey", res.data);
     } catch (error) {
       commit("setError", error);
     }

@@ -8,7 +8,6 @@ import jwt
 from flask import current_app
 from time import time, sleep
 
-
 db = SQLAlchemy()
 
 
@@ -32,6 +31,8 @@ class User(db.Model):
     email_verified = db.Column(db.Boolean, default=False)
     access = db.Column(db.Boolean, default=False)
 
+    api_key = db.Column(db.String(255), unique=True)
+
     def __init__(self, email, password):
         self.email = email
         self.password = generate_password_hash(password, method='sha256')
@@ -49,6 +50,12 @@ class User(db.Model):
             return None
 
         return user
+
+    @classmethod
+    def create_api_key(cls, user_id):
+        if cls.query.get(user_id).api_key:
+            return
+        return uuid.uuid4().hex
 
     def get_verify_token(self, token_expiration: int):
         """
@@ -86,7 +93,8 @@ class User(db.Model):
                     email=self.email,
                     role=self.role,
                     email_verified=self.email_verified,
-                    access=self.access)
+                    access=self.access,
+                    api_key=self.api_key)
 
 
 class Room(db.Model):

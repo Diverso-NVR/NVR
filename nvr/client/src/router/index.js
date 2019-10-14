@@ -2,6 +2,7 @@ import Vue from "vue";
 import Router from "vue-router";
 import { adminOnly, authRequired } from "./authGuard";
 
+import ManageApi from "@/components/api/ManageApi";
 import Rooms from "@/components/campus/Rooms";
 import Login from "@/components/auth/Login";
 import Register from "@/components/auth/Register";
@@ -30,13 +31,18 @@ export default new Router({
       beforeEnter: authRequired
     },
     {
-      path: "/access_requests",
+      path: "/access-requests",
       component: AccessRequests,
       beforeEnter: adminOnly
     },
     {
       path: "/users",
       component: Users,
+      beforeEnter: adminOnly
+    },
+    {
+      path: "/manage-api",
+      component: ManageApi,
       beforeEnter: adminOnly
     }
   ],
