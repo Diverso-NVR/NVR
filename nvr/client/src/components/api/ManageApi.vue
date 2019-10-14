@@ -62,16 +62,19 @@
                 </template>
 
                 <template>
-                  <v-card>
+                  <v-card :color="isDarkMode ? 'grey darken-4' : 'grey lighten-3'">
                     <v-card-text>
                       <div class="subheading font-weight-bold">Описание</div>
-                      <div>{{route.doc}}</div>
+                      <div class="subheading">{{route.doc}}</div>
                     </v-card-text>
                   </v-card>
-                  <v-card v-if="route.json">
+                  <v-card
+                    v-if="route.json"
+                    :color="isDarkMode ? 'grey darken-4' : 'grey lighten-3'"
+                  >
                     <v-card-text>
                       <div class="subheading font-weight-bold">Параметры json</div>
-                      <div>{{route.json}}</div>
+                      <div class="subheading">{{route.json}}</div>
                     </v-card-text>
                   </v-card>
                 </template>
@@ -95,29 +98,51 @@ export default {
         {
           name: "/rooms/",
           method: "GET",
-          doc: "Возвращает массив словарей данных о комнате в формате json"
+          doc: "Возвращает массив словарей данных о комнатах в формате json"
         },
         {
           name: "/rooms/",
           method: "POST",
           doc: "Создаёт комнату с названием 'name'",
-          json: "{name: name}"
+          json: "{name: <имя создаваемой комнаты>}"
         },
         {
           name: "/rooms/{id}",
           method: "DELETE",
-          doc: ""
+          doc: "Удаляет комнату по id"
         },
         {
           name: "/rooms/{id}",
           method: "PUT",
-          doc: ""
+          doc: "Изменяет данные об источниках в комнате с переданным id",
+          json: "{sources: <полный список источников записи комнаты>}"
         },
-        { name: "/start-record", method: "POST", doc: "" },
-        { name: "/stop-record", method: "POST", doc: "" },
-        { name: "/sound-change", method: "POST", doc: "" }
+        {
+          name: "/start-record",
+          method: "POST",
+          doc: "Запускает запись в комнате с переданным id",
+          json: "{id: <id комнаты>}"
+        },
+        {
+          name: "/stop-record",
+          method: "POST",
+          doc: "Останавливает запись в комнате с переданным id",
+          json: "{id: <id комнаты>}"
+        },
+        {
+          name: "/sound-change",
+          method: "POST",
+          doc:
+            "Изменяет источник звука для комнаты. sound принимает одно из значений: enc -- кодер, cam -- камера",
+          json: "{id: <id комнаты>, sound: <cam || enc>}"
+        }
       ]
     };
+  },
+  computed: {
+    isDarkMode() {
+      return this.$store.getters.isDarkMode;
+    }
   },
   methods: {
     async createKey() {
