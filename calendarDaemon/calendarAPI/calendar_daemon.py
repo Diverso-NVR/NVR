@@ -9,7 +9,9 @@ import os
 started = []
 
 NVR_API_URL = os.environ.get('BASE_URL')
-NVR_API_KEY = 'dc1f3c63cd3145f886a31ba2759c56e5'
+NVR_API_KEY = '4dd66a0275334167a69e8295b0c44a41'
+
+nvr_querystring = {"key": NVR_API_KEY}
 
 
 def events(app) -> None:
@@ -53,7 +55,7 @@ def record(app, room: dict, dur: int) -> None:
                         json={
                             'id': room.id
                         },
-                        headers={"key": NVR_API_KEY}
+                        headers=nvr_querystring
                         )
     time.sleep(dur)
     started.remove(event_id)
@@ -63,7 +65,7 @@ def record(app, room: dict, dur: int) -> None:
                       'calendar_id': room.calendar,
                       'event_id': event_id
                   },
-                  headers={"key": NVR_API_KEY}
+                  headers=nvr_querystring
                   )
 
 

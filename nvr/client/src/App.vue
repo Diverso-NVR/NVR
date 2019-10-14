@@ -112,10 +112,7 @@ export default {
     links() {
       let links = [];
       if (this.isUserLoggedIn) {
-        links = [
-          { title: "Аудитории", icon: "view_list", url: "/rooms" },
-          { title: "API", icon: "code", url: "/manage-api" }
-        ];
+        links = [{ title: "Аудитории", icon: "view_list", url: "/rooms" }];
         if (this.user.role === "admin") {
           links = [
             links[0],
@@ -129,7 +126,7 @@ export default {
               icon: "verified_user",
               url: "/access-requests"
             },
-            links[1]
+            { title: "API", icon: "code", url: "/manage-api" }
           ];
         }
       } else {

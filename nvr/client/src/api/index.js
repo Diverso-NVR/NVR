@@ -74,10 +74,24 @@ export function getRooms() {
   return axios.get(`${API_URL}/rooms/`);
 }
 
-export function soundSwitch({ id, sound, token }) {
+export function del(id, token) {
+  return axios.delete(`${API_URL}/rooms/${id}`, {
+    headers: { Authorization: `Bearer: ${token}` }
+  });
+}
+
+export function add(name, token) {
   return axios.post(
-    `${API_URL}/sound-change`,
-    { id, sound },
+    `${API_URL}/rooms`,
+    { name },
+    { headers: { Authorization: `Bearer: ${token}` } }
+  );
+}
+
+export function edit({ id, sources, token }) {
+  return axios.put(
+    `${API_URL}/rooms/${id}`,
+    { sources },
     { headers: { Authorization: `Bearer: ${token}` } }
   );
 }
@@ -98,24 +112,10 @@ export function stop(id, token) {
   );
 }
 
-export function del(id, token) {
-  return axios.delete(`${API_URL}/rooms/${id}`, {
-    headers: { Authorization: `Bearer: ${token}` }
-  });
-}
-
-export function add(name, token) {
+export function soundSwitch({ id, sound, token }) {
   return axios.post(
-    `${API_URL}/rooms`,
-    { name },
-    { headers: { Authorization: `Bearer: ${token}` } }
-  );
-}
-
-export function edit({ id, sources, token }) {
-  return axios.put(
-    `${API_URL}/rooms/${id}`,
-    { sources },
+    `${API_URL}/sound-change`,
+    { id, sound },
     { headers: { Authorization: `Bearer: ${token}` } }
   );
 }

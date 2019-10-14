@@ -43,7 +43,7 @@ export default new Router({
     {
       path: "/manage-api",
       component: ManageApi,
-      beforeEnter: authRequired
+      beforeEnter: adminOnly
     }
   ],
   mode: "history"

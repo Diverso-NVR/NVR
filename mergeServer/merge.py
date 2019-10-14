@@ -60,7 +60,8 @@ def merge_video(client_url: str, screen_num: str, cam_num: str, record_name: str
                       "event_id": event_id
                   },
                   headers={'content-type': 'application/json',
-                           "key": NVR_API_KEY})
+                           "key": NVR_API_KEY}
+                  )
 
     lock.release()
 
