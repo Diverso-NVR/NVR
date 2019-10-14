@@ -149,6 +149,7 @@ const actions = {
     try {
       let res = await createAPIKey(state.user.email, state.jwt.token);
       commit("setKey", res.data);
+      return res;
     } catch (error) {
       commit("setError", error);
     }
@@ -157,6 +158,7 @@ const actions = {
     try {
       let res = await updateAPIKey(state.user.email, state.jwt.token);
       commit("setKey", res.data);
+      return res;
     } catch (error) {
       commit("setError", error);
     }

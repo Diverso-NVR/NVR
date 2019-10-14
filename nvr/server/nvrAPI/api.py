@@ -20,13 +20,14 @@ NVR_URL = os.environ.get('NVR_URL')
 
 
 # AUTHENTICATE
-def token_required(f):
+def auth_required(f):
     """
     Verification wrapper to make sure that user is logged in
     """
     @wraps(f)
     def _verify(*args, **kwargs):
         auth_headers = request.headers.get('Authorization', '').split()
+        api_key = request.headers.get('key', '')
 
         invalid_msg = {
             'message': 'Ошибка доступа',
@@ -37,24 +38,30 @@ def token_required(f):
             'autheticated': False
         }
 
-        if len(auth_headers) != 2:
-            return jsonify(invalid_msg), 401
+        if len(auth_headers) == 2:
+            try:
+                token = auth_headers[1]
+                data = jwt.decode(token, current_app.config['SECRET_KEY'])
+                user = User.query.filter_by(email=data['sub']['email']).first()
+                if not user:
+                    raise RuntimeError('Пользователь не найден')
+                return f(user, *args, **kwargs)
+            except jwt.ExpiredSignatureError:
+                return jsonify(expired_msg), 401
+            except (jwt.InvalidTokenError):
+                return jsonify(invalid_msg), 401
+            except Exception as e:
+                return jsonify({'error': str(e)}), 401
+        elif api_key:
+            try:
+                user = User.query.filter_by(api_key=api_key).first()
+                if not user:
+                    raise RuntimeError('Пользователь не найден')
+                return f(user, *args, **kwargs)
+            except Exception as e:
+                return jsonify({'error': str(e)}), 401
 
-        try:
-            token = auth_headers[1]
-            if token == 'daemon':
-                return f('daemon', *args, **kwargs)
-            data = jwt.decode(token, current_app.config['SECRET_KEY'])
-            user = User.query.filter_by(email=data['sub']['email']).first()
-            if not user:
-                raise RuntimeError('Пользователь не найден')
-            return f(user, *args, **kwargs)
-        except jwt.ExpiredSignatureError:
-            return jsonify(expired_msg), 401
-        except (jwt.InvalidTokenError):
-            return jsonify(invalid_msg), 401
-        except Exception as e:
-            return jsonify({'error': str(e)}), 401
+        return jsonify(invalid_msg), 401
 
     return _verify
 
@@ -113,14 +120,14 @@ def login():
 
 
 @api.route('/users', methods=['GET'])
-@token_required
+@auth_required
 def get_users(current_user):
     users = [u.to_dict() for u in User.query.all() if u.email_verified]
     return jsonify(users)
 
 
 @api.route('/users/<user_id>', methods=['PUT'])
-@token_required
+@auth_required
 def grant_access(current_user, user_id):
     if current_user.role != 'admin':
         return jsonify({'message': "Ошибка доступа"}), 401
@@ -135,7 +142,7 @@ def grant_access(current_user, user_id):
 
 
 @api.route('/users/roles/<user_id>', methods=['PUT'])
-@token_required
+@auth_required
 def user_role(current_user, user_id):
     if current_user.role != 'admin':
         return jsonify({'message': "Ошибка доступа"}), 401
@@ -146,7 +153,7 @@ def user_role(current_user, user_id):
 
 
 @api.route('/users/<user_id>', methods=['DELETE'])
-@token_required
+@auth_required
 def delete_user(current_user, user_id):
     if current_user.role != 'admin':
         return jsonify({'message': "Ошибка доступа"}), 401
@@ -157,7 +164,7 @@ def delete_user(current_user, user_id):
 
 
 @api.route('/api-key/<email>', methods=['POST', 'PUT', 'DELETE'])
-@token_required
+@auth_required
 def create_api_key(current_user, email):
     user = User.query.filter_by(email=email).first()
 
@@ -199,7 +206,7 @@ def move_file():
 
 # RECORD AND GOOGLE API
 @api.route('/rooms', methods=['POST'])
-@token_required
+@auth_required
 def create_room(current_user):
     if current_user.role != 'admin':
         return jsonify({'message': "Ошибка доступа"}), 401
@@ -235,7 +242,7 @@ def get_rooms():
 
 
 @api.route('/rooms/<room_id>', methods=['DELETE'])
-@token_required
+@auth_required
 def delete_room(current_user, room_id):
     if current_user.role != 'admin':
         return jsonify({'message': "Ошибка доступа"}), 401
@@ -251,7 +258,7 @@ def delete_room(current_user, room_id):
 
 
 @api.route("/rooms/<room_id>", methods=['PUT'])
-@token_required
+@auth_required
 def edit_room(current_user, room_id):
     if current_user.role != 'admin':
         return jsonify({'message': "Ошибка доступа"}), 401
@@ -277,7 +284,7 @@ def edit_room(current_user, room_id):
 
 
 @api.route('/start-record', methods=['POST'])
-@token_required
+@auth_required
 def start_rec(current_user):
     post_data = request.get_json()
     room_id = post_data['id']
@@ -312,7 +319,7 @@ def start_timer(room_id: int) -> None:
 
 
 @api.route('/stop-record', methods=["POST"])
-@token_required
+@auth_required
 def stop_rec(current_user):
     post_data = request.get_json()
     room_id = post_data['id']
@@ -349,7 +356,7 @@ def stop_record(room_id, calendar_id, event_id):
 
 
 @api.route('/sound-change', methods=['POST'])
-@token_required
+@auth_required
 def sound_change(current_user):
     post_data = request.get_json()
     room_id = post_data['id']
@@ -363,6 +370,7 @@ def sound_change(current_user):
 
 
 @api.route('/upload-merged', methods=["POST"])
+@auth_required
 def upload_merged():
     post_data = request.get_json(force=True)
 

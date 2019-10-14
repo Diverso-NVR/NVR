@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <template v-if="!user.api_key">
+    <template v-if="!api_key">
       <v-card>
         <v-card-text>
           <v-layout align-center mb-3>
@@ -30,7 +30,7 @@
         <v-card-title primary-title>
           <h3 class="title mb-0">
             Ваш ключ API:
-            <b>{{ user.api_key }}</b>
+            <b>{{ api_key }}</b>
           </h3>
         </v-card-title>
 
@@ -65,6 +65,7 @@ export default {
   data() {
     return {
       panel: [],
+      api_key: "",
       urls: [
         {
           name: "/rooms/",
@@ -77,20 +78,22 @@ export default {
       ]
     };
   },
-  computed: {
-    user() {
-      return this.$store.getters.user;
-    }
-  },
   methods: {
-    createKey() {
-      this.$store.dispatch("createKey");
+    async createKey() {
+      let res = await this.$store.dispatch("createKey");
+      this.api_key = res.data.api_key;
     },
-    updateKey() {
-      this.$store.dispatch("updateKey");
+    async updateKey() {
+      if (confirm("Вы уверены, что хотите обновить ключ API?")) {
+        let res = await this.$store.dispatch("updateKey");
+        this.api_key = res.data.api_key;
+      }
     },
-    deleteKey() {
-      this.$store.dispatch("deleteKey");
+    async deleteKey() {
+      if (confirm("Вы уверены, что хотите удалить ключ API?")) {
+        await this.$store.dispatch("deleteKey");
+        this.api_key = "";
+      }
     },
     all() {
       this.panel =
@@ -98,6 +101,9 @@ export default {
           ? [...Array(this.urls.length).keys()].map(_ => true)
           : [];
     }
+  },
+  created() {
+    this.api_key = this.$store.getters.user.api_key;
   }
 };
 </script>
