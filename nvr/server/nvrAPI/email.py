@@ -1,21 +1,21 @@
 from flask_mail import Mail, Message
-from threading import Thread, Lock
+from threading import Thread
 from flask import render_template, current_app
 import os
+import time
 
 NVR_URL = os.environ.get('BASE_URL').split('/')[-2]
 
 mail = Mail()
-lock = Lock()
 
 
 def send_async_email(app, msg: Message) -> None:
     """
     Sends message asynchronously
     """
-    with lock:
-        with app.app_context():
-            mail.send(msg)
+    with app.app_context():
+        time.sleep(5)
+        mail.send(msg)
 
 
 def send_email(subject: str, sender: str, recipients: list, text_body, html_body) -> None:
