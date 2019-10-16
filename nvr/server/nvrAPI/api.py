@@ -92,6 +92,9 @@ def verify_email(token):
     if not user:
         return "Ошибка. Время на подтверждение вышло", 401
 
+    if user.email_verified:
+        return "Почта уже подтверждена", 401
+
     user.email_verified = True
     db.session.commit()
 
