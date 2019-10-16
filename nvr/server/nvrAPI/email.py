@@ -14,7 +14,6 @@ def send_async_email(app, msg: Message) -> None:
     Sends message asynchronously
     """
     with app.app_context():
-        time.sleep(5)
         mail.send(msg)
 
 
@@ -25,8 +24,7 @@ def send_email(subject: str, sender: str, recipients: list, text_body, html_body
     msg = Message(subject, sender=sender, recipients=recipients)
     msg.body = text_body
     msg.html = html_body
-    Thread(target=send_async_email,
-           args=(current_app._get_current_object(), msg)).start()
+    send_async_email(current_app._get_current_object(), msg)
 
 
 def send_verify_email(user, token_expiration: int) -> None:
@@ -38,9 +36,9 @@ def send_verify_email(user, token_expiration: int) -> None:
                sender=current_app.config['ADMINS'][0],
                recipients=[user.email],
                text_body=render_template('email/verify_template.txt',
-                                         user=user, token=token),
+                                         user=user, token=token, NVR_URL=NVR_URL),
                html_body=render_template('email/verify_template.html',
-                                         user=user, token=token)
+                                         user=user, token=token, NVR_URL=NVR_URL)
                )
 
 
