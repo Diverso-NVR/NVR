@@ -4,7 +4,8 @@ from flask import render_template, current_app
 import os
 import time
 
-NVR_URL = os.environ.get('BASE_URL').split('/')[-2]
+NVR_URL = '/'.join(os.environ.get('BASE_URL').split('/')[:-1])
+
 
 mail = Mail()
 
@@ -32,13 +33,16 @@ def send_verify_email(user, token_expiration: int) -> None:
     Creates token, and email body
     """
     token = user.get_verify_token(token_expiration)
+
+    url = f'{NVR_URL}/verify-email/{token}'
+
     send_email('[NVR] Подтверждение аккаунта',
                sender=current_app.config['ADMINS'][0],
                recipients=[user.email],
                text_body=render_template('email/verify_template.txt',
-                                         user=user, token=token, NVR_URL=NVR_URL),
+                                         user=user, url=url),
                html_body=render_template('email/verify_template.html',
-                                         user=user, token=token, NVR_URL=NVR_URL)
+                                         user=user, url=url)
                )
 
 
