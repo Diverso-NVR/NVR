@@ -1,5 +1,5 @@
 from .models import db, Room, Source, User, nvr_db_context
-from .email import send_verify_email
+from .email import send_verify_email, send_access_request_email
 from flask import Blueprint, jsonify, request, current_app
 
 import time
@@ -16,7 +16,6 @@ from driveAPI.driveSettings import create_folder, move_file
 api = Blueprint('api', __name__)
 
 CAMPUS = os.environ.get('CAMPUS')
-NVR_URL = os.environ.get('NVR_URL')
 
 
 # AUTHENTICATE
@@ -77,9 +76,12 @@ def register():
         return jsonify({"message": 'Пользователь с данной почтой существует'}), 400
 
     token_expiration = 600
-    send_verify_email(user, token_expiration)
-    Thread(target=user.delete_user_after_token_expiration,
-           args=(current_app._get_current_object(), token_expiration)).start()
+    try:
+        send_verify_email(user, token_expiration)
+        Thread(target=user.delete_user_after_token_expiration,
+               args=(current_app._get_current_object(), token_expiration)).start()
+    except Exception as e:
+        print(e)
 
     return jsonify(user.to_dict()), 201
 
@@ -92,6 +94,10 @@ def verify_email(token):
 
     user.email_verified = True
     db.session.commit()
+
+    send_access_request_email(
+        [u.email for u in User.query.all() if u.role != 'user'], user.email)
+
     return "Подтверждение успешно, ожидайте одобрения администратора", 201
 
 
@@ -129,7 +135,7 @@ def get_users(current_user):
 @api.route('/users/<user_id>', methods=['PUT'])
 @auth_required
 def grant_access(current_user, user_id):
-    if current_user.role != 'admin':
+    if current_user.role == 'user':
         return jsonify({'message': "Ошибка доступа"}), 401
     user = User.query.get(user_id)
     user.access = True
@@ -144,7 +150,7 @@ def grant_access(current_user, user_id):
 @api.route('/users/roles/<user_id>', methods=['PUT'])
 @auth_required
 def user_role(current_user, user_id):
-    if current_user.role != 'admin':
+    if current_user.role == 'user':
         return jsonify({'message': "Ошибка доступа"}), 401
     user = User.query.get(user_id)
     user.role = request.get_json()['role']
@@ -155,7 +161,7 @@ def user_role(current_user, user_id):
 @api.route('/users/<user_id>', methods=['DELETE'])
 @auth_required
 def delete_user(current_user, user_id):
-    if current_user.role != 'admin':
+    if current_user.role == 'user':
         return jsonify({'message': "Ошибка доступа"}), 401
     user = User.query.get(user_id)
     db.session.delete(user)
@@ -208,7 +214,7 @@ def move_file():
 @api.route('/rooms', methods=['POST'])
 @auth_required
 def create_room(current_user):
-    if current_user.role != 'admin':
+    if current_user.role == 'user':
         return jsonify({'message': "Ошибка доступа"}), 401
 
     name = request.get_json()['name']
@@ -244,7 +250,7 @@ def get_rooms():
 @api.route('/rooms/<room_id>', methods=['DELETE'])
 @auth_required
 def delete_room(current_user, room_id):
-    if current_user.role != 'admin':
+    if current_user.role == 'user':
         return jsonify({'message': "Ошибка доступа"}), 401
 
     room = Room.query.get(room_id)
@@ -260,7 +266,7 @@ def delete_room(current_user, room_id):
 @api.route("/rooms/<room_id>", methods=['PUT'])
 @auth_required
 def edit_room(current_user, room_id):
-    if current_user.role != 'admin':
+    if current_user.role == 'user':
         return jsonify({'message': "Ошибка доступа"}), 401
 
     post_data = request.get_json()

@@ -3,6 +3,8 @@ from threading import Thread
 from flask import render_template, current_app
 import os
 
+NVR_URL = os.environ.get('BASE_URL').split('/')[-2]
+
 mail = Mail()
 
 
@@ -38,3 +40,13 @@ def send_verify_email(user, token_expiration: int) -> None:
                html_body=render_template('email/verify_template.html',
                                          user=user, token=token)
                )
+
+
+def send_access_request_email(admins: list, user_email: str) -> None:
+    send_email('[NVR] Запрос на доступ',
+               sender=current_app.config['ADMINS'][0],
+               recipients=admins,
+               text_body=render_template('email/access_request_template.txt',
+                                         user_email=user_email, NVR_URL=NVR_URL),
+               html_body=render_template('email/access_request_template.html',
+                                         user_email=user_email, NVR_URL=NVR_URL))

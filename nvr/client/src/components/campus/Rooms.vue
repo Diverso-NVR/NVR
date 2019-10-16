@@ -78,7 +78,7 @@
                 <v-icon>folder</v-icon>
               </v-btn>
             </td>
-            <td class="text-xs-center" v-if="user.role === 'admin'">
+            <td class="text-xs-center" v-if="user.role !== 'user'">
               <app-edit-room :room="props.item"></app-edit-room>
               <v-btn icon @click="del(props.item)" :disabled="!props.item.free">
                 <v-icon>delete</v-icon>
@@ -152,7 +152,7 @@
 
                 <li
                   class="flex-item subheading key-elems"
-                  v-if="user.role === 'admin'"
+                  v-if="user.role !== 'user'"
                   data-label="Изменить"
                 >
                   <app-edit-room :room="props.item"></app-edit-room>
@@ -165,7 +165,7 @@
           </tr>
         </template>
       </v-data-table>
-      <v-layout row wrap class="addRoom" v-if="user.role === 'admin'">
+      <v-layout row wrap class="addRoom" v-if="user.role !== 'user'">
         <v-flex xs6 sm4 md2>
           <v-text-field v-model.trim="newRoom" label="Новая аудитория" :disabled="newRoomLoader"></v-text-field>
         </v-flex>
@@ -273,7 +273,7 @@ export default {
     }
   },
   beforeMount() {
-    if (this.user.role === "admin")
+    if (this.user.role !== "user")
       this.headers.push({
         text: "Изменить",
         value: "edit",

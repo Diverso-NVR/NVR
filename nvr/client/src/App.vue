@@ -113,7 +113,7 @@ export default {
       let links = [];
       if (this.isUserLoggedIn) {
         links = [{ title: "Аудитории", icon: "view_list", url: "/rooms" }];
-        if (this.user.role === "admin") {
+        if (this.user.role !== "user") {
           links = [
             links[0],
             {
