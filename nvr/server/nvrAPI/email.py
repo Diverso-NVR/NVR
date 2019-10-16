@@ -4,7 +4,7 @@ from flask import render_template, current_app
 import os
 import time
 
-NVR_URL = '/'.join(os.environ.get('BASE_URL').split('/')[:-1])
+NVR_URL = os.environ.get('BASE_URL')
 
 
 mail = Mail()
@@ -47,10 +47,11 @@ def send_verify_email(user, token_expiration: int) -> None:
 
 
 def send_access_request_email(admins: list, user_email: str) -> None:
+    url = NVR_URL.split('/')[-2]
     send_email('[NVR] Запрос на доступ',
                sender=current_app.config['ADMINS'][0],
                recipients=admins,
                text_body=render_template('email/access_request_template.txt',
-                                         user_email=user_email, NVR_URL=NVR_URL),
+                                         user_email=user_email, url=url),
                html_body=render_template('email/access_request_template.html',
-                                         user_email=user_email, NVR_URL=NVR_URL))
+                                         user_email=user_email, url=url))
