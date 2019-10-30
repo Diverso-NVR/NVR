@@ -49,7 +49,7 @@ def config(room_id: int, name: str, sources: list) -> None:
                   ]['tracking'] = cam['ip']
 
 
-# TODO do smth with rtsp protocols'
+# TODO: do smth with rtsp protocols
 @nvr_db_context
 def start(room_id: int) -> None:
 
