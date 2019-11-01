@@ -1,6 +1,7 @@
 import Vue from "vue";
 import Vuex from "vuex";
 import shared from "./shared";
+import socketio from "./socketio";
 import {
   authenticate,
   register,
@@ -30,6 +31,45 @@ const state = {
   users: []
 };
 const mutations = {
+  START_REC(state, message) {
+    let i;
+    state.rooms.forEach((room, index) => {
+      if (room.id === message.id) i = index;
+    });
+    let room = state.rooms.find(room => {
+      return room.id === message.id;
+    });
+    room.timer = setInterval(() => {
+      room.timestamp++;
+    }, 1000);
+    room.free = false;
+    room.status = "busy";
+  },
+  STOP_REC(state, message) {
+    let room = state.rooms.find(room => {
+      return room.id === message.id;
+    });
+    room.timestamp = 0;
+    clearInterval(room.timer);
+    room.free = true;
+    room.status = "free";
+  },
+  SOUND_CHANGE(state, message) {
+    let room = state.rooms.find(room => {
+      return room.id === message.id;
+    });
+    room.chosen_sound = message.sound;
+  },
+  DELETE_ROOM(state, message) {
+    let i;
+    state.rooms.forEach((room, index) => {
+      if (room.id === message.id) i = index;
+    });
+    state.rooms.splice(i, 1);
+  },
+  ADD_ROOM(state, message) {
+    state.rooms.push(message.room);
+  },
   setUserData(state, payload) {
     state.userData = payload.userData;
   },
@@ -37,7 +77,7 @@ const mutations = {
     localStorage.token = payload.jwt.token;
     state.jwt = payload.jwt;
   },
-  cleaUserData(state) {
+  clearUserData(state) {
     state.userData = {};
     state.jwt = "";
     localStorage.token = "";
@@ -58,6 +98,10 @@ const mutations = {
           }, 1000);
     });
   },
+  deleteRoom(state, payload) {
+    let i = state.rooms.indexOf(payload);
+    state.rooms.splice(i, 1);
+  },
   setUsers(state, payload) {
     state.users = payload;
   },
@@ -68,17 +112,63 @@ const mutations = {
   grantAccess(state, payload) {
     let i = state.users.indexOf(payload);
     state.users[i].access = true;
-  },
-  deleteRoom(state, payload) {
-    let i = state.rooms.indexOf(payload);
-    state.rooms.splice(i, 1);
   }
 };
 const actions = {
+  async emitStartRec({}, { room }) {
+    await this._vm.$socket.client.emit("start_rec", { id: room.id });
+  },
+  async socket_startRec({ commit }, message) {
+    try {
+      await commit("START_REC", message);
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  async emitStopRec({}, { room }) {
+    await this._vm.$socket.client.emit("stop_rec", { id: room.id });
+  },
+  async socket_stopRec({ commit }, message) {
+    try {
+      await commit("STOP_REC", message);
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  async emitSoundChange({}, { room, sound }) {
+    await this._vm.$socket.client.emit("sound_change", { id: room.id, sound });
+  },
+  async socket_soundChange({ commit }, message) {
+    try {
+      await commit("SOUND_CHANGE", message);
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  async emitDeleteRoom({}, { room }) {
+    await this._vm.$socket.client.emit("delete_room", { id: room.id });
+  },
+  socket_deleteRoom({ commit }, message) {
+    try {
+      commit("DELETE_ROOM", message);
+      commit("setMessage", `Комната ${message.name} удалена`);
+    } catch (error) {}
+  },
+  async emitAddRoom({ commit }, { name }) {
+    await this._vm.$socket.client.emit("add_room", { name });
+    commit("setMessage", `Процесс создания комнаты ${name} запущен`);
+  },
+  async socket_addRoom({ commit }, message) {
+    try {
+      await commit("ADD_ROOM", message);
+      await commit("setMessage", `Комната ${message.room.name} создана`);
+    } catch (error) {}
+  },
+
   async login({ commit, state }, userData) {
     try {
-      commit("setUserData", { userData });
       commit("switchLoading");
+      commit("setUserData", { userData });
       let res = await authenticate(userData);
       commit("setJwtToken", { jwt: res.data });
       const tokenParts = res.data.token.split(".");
@@ -86,20 +176,23 @@ const actions = {
       state.user.email = body.sub.email;
       state.user.role = body.sub.role;
       state.user.api_key = body.sub.api_key;
-      commit("switchLoading");
-      return true;
+      return body.sub.role;
     } catch (error) {
       commit("setError", error);
+      return "";
+    } finally {
       commit("switchLoading");
-      return false;
     }
   },
   async getUsers({ commit, state }) {
     try {
+      commit("switchLoading");
       let res = await getUsers(state.jwt.token);
       commit("setUsers", res.data);
     } catch (error) {
       commit("setError", error);
+    } finally {
+      commit("switchLoading");
     }
   },
   async register({ commit }, userData) {
@@ -108,14 +201,14 @@ const actions = {
       commit("setUserData", { userData });
       await register(userData);
       commit("setMessage", "Письмо с подтверждением выслано на почту");
-      commit("switchLoading");
     } catch (error) {
       commit("setError", error);
+    } finally {
       commit("switchLoading");
     }
   },
   logout({ commit }) {
-    commit("cleaUserData");
+    commit("clearUserData");
   },
   async deleteUser({ commit, state }, { user }) {
     try {
@@ -147,72 +240,48 @@ const actions = {
   },
   async createKey({ commit, state }) {
     try {
+      commit("switchLoading");
       let res = await createAPIKey(state.user.email, state.jwt.token);
       commit("setKey", res.data);
       return res;
     } catch (error) {
       commit("setError", error);
+    } finally {
+      commit("switchLoading");
     }
   },
   async updateKey({ commit, state }) {
     try {
+      commit("switchLoading");
       let res = await updateAPIKey(state.user.email, state.jwt.token);
       commit("setKey", res.data);
       return res;
     } catch (error) {
       commit("setError", error);
+    } finally {
+      commit("switchLoading");
     }
   },
   async deleteKey({ commit, state }) {
     try {
+      commit("switchLoading");
       let res = await deleteAPIKey(state.user.email, state.jwt.token);
       commit("setKey", res.data);
     } catch (error) {
       commit("setError", error);
+    } finally {
+      commit("switchLoading");
     }
   },
   async loadRooms({ commit }) {
     try {
+      commit("switchLoading");
       let res = await getRooms();
       commit("setRooms", res.data);
     } catch (error) {
       commit("setError", error);
-    }
-  },
-  async switchSound({ commit, state }, { room, sound }) {
-    try {
-      await soundSwitch({ id: room.id, sound, token: state.jwt.token });
-      room.chosen_sound = sound;
-    } catch (error) {
-      commit("setError", error);
-    }
-  },
-  async startRec({ commit, state }, { room }) {
-    try {
-      room.timer = setInterval(() => {
-        room.timestamp++;
-      }, 1000);
-      room.free = false;
-      room.status = "busy";
-      await start(room.id, state.jwt.token);
-    } catch (error) {
-      commit("setError", error);
-    }
-  },
-  async stopRec({ commit, state }, { room }) {
-    try {
-      room.timestamp = 0;
-      room.status = "processing";
-      clearInterval(room.timer);
-
-      await stop(room.id, state.jwt.token);
-
-      room.free = true;
-      room.status = "free";
-    } catch (error) {
-      room.free = true;
-      room.status = "free";
-      commit("setError", error);
+    } finally {
+      commit("switchLoading");
     }
   },
   async deleteRoom({ commit, state }, { room }) {
@@ -252,7 +321,8 @@ const getters = {
 
 export default new Vuex.Store({
   modules: {
-    shared
+    shared,
+    socketio
   },
   state,
   mutations,

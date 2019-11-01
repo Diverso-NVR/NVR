@@ -1,7 +1,7 @@
 <template>
   <v-layout align-center justify-center>
     <v-flex xs12 sm8 md6>
-      <v-card>
+      <v-card v-if="!loader">
         <v-list v-if="users.length > 0" v-resize="onResize">
           <template v-for="(user,index) in users">
             <v-list-tile avatar :key="user.id">
@@ -27,6 +27,9 @@
         </v-list>
         <v-alert v-else :value="true" color="info" icon="info">Список пользователей пуст</v-alert>
       </v-card>
+      <template v-else>
+        <v-progress-linear :indeterminate="true"></v-progress-linear>
+      </template>
     </v-flex>
   </v-layout>
 </template>
@@ -45,7 +48,10 @@ export default {
           user.access === true &&
           user.email !== state.user.email &&
           user.role !== "superadmin"
-      )
+      ),
+    loader() {
+      return this.$store.getters.loading;
+    }
   }),
   methods: {
     onResize() {
@@ -60,9 +66,6 @@ export default {
         this.$store.dispatch("deleteUser", { user });
       }
     }
-  },
-  beforeMount() {
-    this.$store.dispatch("getUsers");
   }
 };
 </script>

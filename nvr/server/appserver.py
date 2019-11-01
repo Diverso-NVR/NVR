@@ -5,5 +5,6 @@
 
 if __name__ == "__main__":
     from nvrAPI.application import create_app
-    app = create_app()
-    app.run(host='0.0.0.0')
+    app, socketio = create_app()
+    socketio.run(app)
+    # app.run(host='0.0.0.0')

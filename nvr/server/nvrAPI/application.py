@@ -3,8 +3,9 @@
 """
 
 
-from flask import Flask
+from flask import Flask, render_template
 from flask_cors import CORS
+
 
 import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
@@ -28,6 +29,9 @@ def create_app(app_name="NVR_API"):
 
     from nvrAPI.email import mail
     mail.init_app(app)
+
+    from nvrAPI.socketio import create_socketio
+    socketio = create_socketio(app)
 
     # logging
     if not app.debug:
@@ -59,4 +63,4 @@ def create_app(app_name="NVR_API"):
         app.logger.setLevel(logging.INFO)
         app.logger.info('NVR started')
 
-    return app
+    return app, socketio

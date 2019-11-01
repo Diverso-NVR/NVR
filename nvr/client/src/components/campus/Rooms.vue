@@ -9,6 +9,7 @@
         :class="{mobile: isMobile}"
         hide-actions
         disable-initial-sort
+        :loading="loader"
       >
         <template v-slot:items="props">
           <tr v-if="!isMobile">
@@ -18,14 +19,12 @@
               <v-btn-toggle mandatory v-model="props.item.chosen_sound">
                 <v-btn
                   depressed
-                  :loading="loader"
                   value="enc"
                   :disabled="!props.item.free"
                   @click="soundSwitch(props.item, 'enc')"
                 >Кодер</v-btn>
                 <v-btn
                   depressed
-                  :loading="loader"
                   value="cam"
                   :disabled="!props.item.free"
                   @click="soundSwitch(props.item, 'cam')"
@@ -37,19 +36,17 @@
               <v-btn-toggle mandatory v-model="props.item.status">
                 <v-btn
                   flat
-                  :loading="loader"
                   color="green"
                   value="free"
                   @click="startRec(props.item)"
-                  :disabled="!props.item.free || props.item.status === 'processing'"
+                  :disabled="!props.item.free"
                 >Старт</v-btn>
                 <v-btn
                   flat
-                  :loading="loader"
                   color="error"
                   value="busy"
                   @click="stopRec(props.item)"
-                  :disabled="props.item.free || props.item.status === 'processing'"
+                  :disabled="props.item.free"
                 >Стоп</v-btn>
               </v-btn-toggle>
             </td>
@@ -60,7 +57,6 @@
               v-switch="props.item.status"
             >
               <span class="green--text text--darken-4" v-case="'free'">Свободна</span>
-              <span class="yellow--text text--darken-4" v-case="'processing'">Обработка</span>
               <span class="red--text text--darken-4" v-case="'busy'">Идёт запись</span>
             </td>
 
@@ -78,7 +74,7 @@
                 <v-icon>folder</v-icon>
               </v-btn>
             </td>
-            <td class="text-xs-center" v-if="user.role !== 'user'">
+            <td class="text-xs-center" v-if="/^\w*admin$/.test(user.role)">
               <app-edit-room :room="props.item"></app-edit-room>
               <v-btn icon @click="del(props.item)" :disabled="!props.item.free">
                 <v-icon>delete</v-icon>
@@ -96,19 +92,17 @@
                   <v-btn-toggle mandatory v-model="props.item.status">
                     <v-btn
                       flat
-                      :loading="loader"
                       color="green"
                       value="free"
                       @click="startRec(props.item)"
-                      :disabled="!props.item.free || props.item.status === 'processing'"
+                      :disabled="!props.item.free"
                     >Старт</v-btn>
                     <v-btn
                       flat
-                      :loading="loader"
                       color="error"
                       value="busy"
                       @click="stopRec(props.item)"
-                      :disabled="props.item.free || props.item.status === 'processing'"
+                      :disabled="props.item.free"
                     >Стоп</v-btn>
                   </v-btn-toggle>
                 </li>
@@ -116,14 +110,12 @@
                   <v-btn-toggle mandatory v-model="props.item.chosen_sound">
                     <v-btn
                       flat
-                      :loading="loader"
                       value="enc"
                       :disabled="!props.item.free"
                       @click="soundSwitch(props.item, 'enc')"
                     >Кодер</v-btn>
                     <v-btn
                       flat
-                      :loading="loader"
                       value="cam"
                       :disabled="!props.item.free"
                       @click="soundSwitch(props.item, 'cam')"
@@ -133,7 +125,6 @@
 
                 <li class="flex-item subheading" data-label="Статус" v-switch="props.item.status">
                   <span class="green--text text--darken-4" v-case="'free'">Свободна</span>
-                  <span class="yellow--text text--darken-4" v-case="'processing'">Обработка</span>
                   <span class="red--text text--darken-4" v-case="'busy'">Идёт запись</span>
                 </li>
                 <li class="flex-item subheading" data-label="Время записи">
@@ -152,7 +143,7 @@
 
                 <li
                   class="flex-item subheading key-elems"
-                  v-if="user.role !== 'user'"
+                  v-if="/^\w*admin$/.test(user.role)"
                   data-label="Изменить"
                 >
                   <app-edit-room :room="props.item"></app-edit-room>
@@ -165,9 +156,12 @@
           </tr>
         </template>
       </v-data-table>
+      <template v-if="loader && isMobile">
+        <v-progress-linear :indeterminate="true"></v-progress-linear>
+      </template>
       <v-layout row wrap class="addRoom" v-if="user.role !== 'user'">
         <v-flex xs6 sm4 md2>
-          <v-text-field v-model.trim="newRoom" label="Новая аудитория" :disabled="newRoomLoader"></v-text-field>
+          <v-text-field v-model.trim="newRoom" label="Новая аудитория" :loading="newRoomLoader"></v-text-field>
         </v-flex>
         <v-btn
           dark
@@ -250,24 +244,29 @@ export default {
       return `${h} ч. ${m} м. ${seconds} с.`;
     },
     soundSwitch(room, sound) {
-      this.$store.dispatch("switchSound", { room, sound });
+      // this.$store.dispatch("switchSound", { room, sound });
+      this.$store.dispatch("emitSoundChange", { room, sound });
     },
     startRec(room) {
-      this.$store.dispatch("startRec", { room });
+      // this.$store.dispatch("startRec", { room });
+      this.$store.dispatch("emitStartRec", { room });
     },
     stopRec(room) {
-      this.$store.dispatch("stopRec", { room });
+      // this.$store.dispatch("stopRec", { room });
+      this.$store.dispatch("emitStopRec", { room });
     },
     del(room) {
       confirm("Вы уверены, что хотите удалить эту аудиторию?") &&
-        this.$store.dispatch("deleteRoom", { room });
+        // this.$store.dispatch("deleteRoom", { room });
+        this.$store.dispatch("emitDeleteRoom", { room });
     },
     async addRoom() {
       if (this.newRoom === "") {
         return;
       }
       this.newRoomLoader = true;
-      await this.$store.dispatch("addRoom", { name: this.newRoom });
+      // await this.$store.dispatch("addRoom", { name: this.newRoom });
+      this.$store.dispatch("emitAddRoom", { name: this.newRoom });
       this.newRoom = "";
       this.newRoomLoader = false;
     }
