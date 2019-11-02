@@ -137,8 +137,7 @@ export default {
           sortable: false,
           align: "center"
         }
-      ],
-      roomCopy: { ...this.room }
+      ]
     };
   },
   computed: {
@@ -162,6 +161,9 @@ export default {
           this.modal = false;
         });
     }
+  },
+  created() {
+    this.roomCopy = { ...this.room };
   }
 };
 </script>

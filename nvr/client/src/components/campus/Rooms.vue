@@ -215,7 +215,6 @@ export default {
       newRoom: "",
       background: {
         free: "green lighten-3",
-        processing: "yellow lighten-3",
         busy: "red lighten-3"
       },
       newRoomLoader: false,

@@ -97,7 +97,8 @@ def create_socketio(app):
 
         room = Room.query.get(room_id)
 
-        Thread(target=delete_calendar, args=(room.calendar,)).start()
+        Thread(target=delete_calendar, args=(
+            room.calendar,), daemon=True).start()
 
         db.session.delete(room)
         db.session.commit()

@@ -1,7 +1,6 @@
 import Vue from "vue";
 import Vuex from "vuex";
 import shared from "./shared";
-import socketio from "./socketio";
 import {
   authenticate,
   register,
@@ -12,13 +11,7 @@ import {
   createAPIKey,
   updateAPIKey,
   deleteAPIKey,
-  getRooms,
-  soundSwitch,
-  start,
-  stop,
-  del,
-  add,
-  edit
+  getRooms
 } from "@/api";
 import { isValidJwt } from "@/utils";
 
@@ -103,10 +96,6 @@ const mutations = {
             room.timestamp++;
           }, 1000);
     });
-  },
-  deleteRoom(state, payload) {
-    let i = state.rooms.indexOf(payload);
-    state.rooms.splice(i, 1);
   },
   setUsers(state, payload) {
     state.users = payload;
@@ -311,8 +300,7 @@ const getters = {
 
 export default new Vuex.Store({
   modules: {
-    shared,
-    socketio
+    shared
   },
   state,
   mutations,
