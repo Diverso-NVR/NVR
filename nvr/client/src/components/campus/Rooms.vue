@@ -244,20 +244,16 @@ export default {
       return `${h} ч. ${m} м. ${seconds} с.`;
     },
     soundSwitch(room, sound) {
-      // this.$store.dispatch("switchSound", { room, sound });
       this.$store.dispatch("emitSoundChange", { room, sound });
     },
     startRec(room) {
-      // this.$store.dispatch("startRec", { room });
       this.$store.dispatch("emitStartRec", { room });
     },
     stopRec(room) {
-      // this.$store.dispatch("stopRec", { room });
       this.$store.dispatch("emitStopRec", { room });
     },
     del(room) {
       confirm("Вы уверены, что хотите удалить эту аудиторию?") &&
-        // this.$store.dispatch("deleteRoom", { room });
         this.$store.dispatch("emitDeleteRoom", { room });
     },
     async addRoom() {
@@ -265,7 +261,6 @@ export default {
         return;
       }
       this.newRoomLoader = true;
-      // await this.$store.dispatch("addRoom", { name: this.newRoom });
       this.$store.dispatch("emitAddRoom", { name: this.newRoom });
       this.newRoom = "";
       this.newRoomLoader = false;

@@ -32,13 +32,10 @@ const state = {
 };
 const mutations = {
   START_REC(state, message) {
-    let i;
-    state.rooms.forEach((room, index) => {
-      if (room.id === message.id) i = index;
-    });
     let room = state.rooms.find(room => {
       return room.id === message.id;
     });
+
     room.timer = setInterval(() => {
       room.timestamp++;
     }, 1000);
@@ -49,6 +46,7 @@ const mutations = {
     let room = state.rooms.find(room => {
       return room.id === message.id;
     });
+
     room.timestamp = 0;
     clearInterval(room.timer);
     room.free = true;
@@ -58,6 +56,7 @@ const mutations = {
     let room = state.rooms.find(room => {
       return room.id === message.id;
     });
+
     room.chosen_sound = message.sound;
   },
   DELETE_ROOM(state, message) {
@@ -65,10 +64,17 @@ const mutations = {
     state.rooms.forEach((room, index) => {
       if (room.id === message.id) i = index;
     });
+
     state.rooms.splice(i, 1);
   },
   ADD_ROOM(state, message) {
     state.rooms.push(message.room);
+  },
+  EDIT_ROOM(state, message) {
+    let room = state.rooms.find(room => {
+      return room.id === message.id;
+    });
+    room.sources = message.sources;
   },
   setUserData(state, payload) {
     state.userData = payload.userData;
@@ -158,11 +164,20 @@ const actions = {
     await this._vm.$socket.client.emit("add_room", { name });
     commit("setMessage", `Процесс создания комнаты ${name} запущен`);
   },
-  async socket_addRoom({ commit }, message) {
+  socket_addRoom({ commit }, message) {
     try {
-      await commit("ADD_ROOM", message);
-      await commit("setMessage", `Комната ${message.room.name} создана`);
-    } catch (error) {}
+      commit("ADD_ROOM", message);
+      commit("setMessage", `Комната ${message.room.name} создана`);
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  async emitEditRoom({ commit }, { id, sources }) {
+    await this._vm.$socket.client.emit("edit_room", { id, sources });
+    commit("setMessage", "Изменения сохранены");
+  },
+  socket_editRoom({ commit }, message) {
+    commit("EDIT_ROOM", message);
   },
 
   async login({ commit, state }, userData) {
@@ -282,31 +297,6 @@ const actions = {
       commit("setError", error);
     } finally {
       commit("switchLoading");
-    }
-  },
-  async deleteRoom({ commit, state }, { room }) {
-    try {
-      await del(room.id, state.jwt.token);
-      commit("deleteRoom", room);
-      commit("setMessage", `Комната ${room.name} удалена`);
-    } catch (error) {
-      commit("setError", error);
-    }
-  },
-  async addRoom({ commit, state }, { name }) {
-    try {
-      let res = await add(name, state.jwt.token);
-      commit("setMessage", `Процесс создания комнаты ${res.data.name} запущен`);
-    } catch (error) {
-      commit("setError", error);
-    }
-  },
-  async editRoom({ commit, state }, { id, sources }) {
-    try {
-      await edit({ id, sources, token: state.jwt.token });
-      commit("setMessage", "Изменения сохранены");
-    } catch (error) {
-      commit("setError", error);
     }
   }
 };

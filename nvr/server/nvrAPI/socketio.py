@@ -113,14 +113,46 @@ def create_socketio(app):
             CAMPUS,
             name
         )
-        room.calendar = create_calendar(
-            CAMPUS,
-            name
-        )
         room.sources = []
         db.session.add(room)
         db.session.commit()
 
-        emit('add_room', {'room': room.to_dict()}, broadcast=True)
+        Thread(target=make_calendar, args=(
+            current_app._get_current_object(), name), daemon=True).start()
+
+        emit('add_room', {'room': room.to_dict()},
+             broadcast=True)
+
+    @nvr_db_context
+    def make_calendar(name):
+        room = Room(name=name)
+        room.calendar = create_calendar(
+            CAMPUS,
+            name
+        )
+        db.session.commit()
+
+    @socketio.on('edit_room', namespace='/test')
+    def edit_room(msg_json):
+        room_id = msg_json['id']
+        room = Room.query.get(room_id)
+        room.sources = []
+        for s in msg_json['sources']:
+            if s.get('id'):
+                source = Source.query.get(s['id'])
+            else:
+                source = Source()
+            room.sources.append(source)
+            source.ip = s['ip']
+            source.name = s['name']
+            source.sound = s['sound'] if s['sound'] != False else None
+            source.tracking = s.get('tracking')
+            source.main_cam = s.get('main_cam')
+            source.room_id = room_id
+
+        db.session.commit()
+
+        emit('edit_room', {'id': room.id, 'sources': [
+             s.to_dict() for s in room.sources]}, broadcast=True)
 
     return socketio
