@@ -59,11 +59,11 @@ export default {
     },
     changeRole(user) {
       user.role = user.role === "user" ? "admin" : "user";
-      this.$store.dispatch("changeRole", { user });
+      this.$store.dispatch("emitChangeRole", { user });
     },
     deleteUser(user) {
       if (confirm("Вы уверены, что хотите удалить этого пользователя?")) {
-        this.$store.dispatch("deleteUser", { user });
+        this.$store.dispatch("emitDeleteUser", { user });
       }
     }
   }

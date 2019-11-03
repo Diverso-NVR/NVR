@@ -156,4 +156,33 @@ def create_socketio(app):
         emit('edit_room', {'id': room.id, 'sources': [
              s.to_dict() for s in room.sources]}, broadcast=True)
 
+    @socketio.on('delete_user', namespace='/test')
+    def delete_user(msg_json):
+        user = User.query.get(msg_json['id'])
+        db.session.delete(user)
+        db.session.commit()
+
+        emit('delete_user', {'id': user.id}, broadcast=True)
+
+    @socketio.on('change_role', namespace='/test')
+    def change_role(msg_json):
+        user = User.query.get(msg_json['id'])
+        user.role = msg_json['role']
+        db.session.commit()
+
+        emit('change_role', {'id': user.id, 'role': user.role}, broadcast=True)
+
+    @socketio.on('grant_access', namespace='/test')
+    def grant_access(msg_json):
+        user = User.query.get(msg_json['id'])
+        user.access = True
+        db.session.commit()
+
+        Thread(target=give_permissions,
+               args=(
+                   current_app._get_current_object(), CAMPUS, user.email),
+               daemon=True).start()
+
+        emit('grant_access', {'id': user.id}, broadcast=True)
+
     return socketio

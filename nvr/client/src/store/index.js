@@ -55,7 +55,10 @@ const mutations = {
   DELETE_ROOM(state, message) {
     let i;
     state.rooms.forEach((room, index) => {
-      if (room.id === message.id) i = index;
+      if (room.id === message.id) {
+        i = index;
+        return;
+      }
     });
 
     state.rooms.splice(i, 1);
@@ -69,6 +72,30 @@ const mutations = {
     });
     room.sources = message.sources;
   },
+  DELETE_USER(state, message) {
+    let i;
+    state.users.forEach((user, index) => {
+      if (user.id === message.id) {
+        i = index;
+        return;
+      }
+    });
+    state.users.splice(i, 1);
+  },
+  CHANGE_ROLE(state, message) {
+    let user = state.users.find(user => {
+      return user.id === message.id;
+    });
+
+    user.role = message.role;
+  },
+  GRANT_ACCESS(state, message) {
+    let user = state.users.find(user => {
+      return user.id === message.id;
+    });
+    user.access = true;
+  },
+
   setUserData(state, payload) {
     state.userData = payload.userData;
   },
@@ -99,14 +126,6 @@ const mutations = {
   },
   setUsers(state, payload) {
     state.users = payload;
-  },
-  deleteUser(state, payload) {
-    let i = state.users.indexOf(payload);
-    state.users.splice(i, 1);
-  },
-  grantAccess(state, payload) {
-    let i = state.users.indexOf(payload);
-    state.users[i].access = true;
   }
 };
 const actions = {
@@ -168,6 +187,51 @@ const actions = {
   socket_editRoom({ commit }, message) {
     commit("EDIT_ROOM", message);
   },
+  async emitDeleteUser({ commit }, { user }) {
+    await this._vm.$socket.client.emit("delete_user", { id: user.id });
+    commit("setMessage", `Пользователь ${user.email} удалён`);
+  },
+  socket_deleteUser({ commit }, message) {
+    commit("DELETE_USER", message);
+  },
+  async emitChangeRole({}, { user }) {
+    await this._vm.$socket.client.emit("change_role", {
+      id: user.id,
+      role: user.role
+    });
+  },
+  socket_changeRole({ commit }, message) {
+    commit("CHANGE_ROLE", message);
+  },
+  async emitGrantAccess({}, { user }) {
+    await this._vm.$socket.client.emit("grant_access", { id: user.id });
+  },
+  socket_grantAccess({ commit }, message) {
+    commit("GRANT_ACCESS", message);
+  },
+
+  async loadRooms({ commit }) {
+    try {
+      commit("switchLoading");
+      let res = await getRooms();
+      commit("setRooms", res.data);
+    } catch (error) {
+      commit("setError", error);
+    } finally {
+      commit("switchLoading");
+    }
+  },
+  async getUsers({ commit, state }) {
+    try {
+      commit("switchLoading");
+      let res = await getUsers(state.jwt.token);
+      commit("setUsers", res.data);
+    } catch (error) {
+      commit("setError", error);
+    } finally {
+      commit("switchLoading");
+    }
+  },
 
   async login({ commit, state }, userData) {
     try {
@@ -188,21 +252,9 @@ const actions = {
       commit("switchLoading");
     }
   },
-  async getUsers({ commit, state }) {
-    try {
-      commit("switchLoading");
-      let res = await getUsers(state.jwt.token);
-      commit("setUsers", res.data);
-    } catch (error) {
-      commit("setError", error);
-    } finally {
-      commit("switchLoading");
-    }
-  },
   async register({ commit }, userData) {
     try {
       commit("switchLoading");
-      commit("setUserData", { userData });
       await register(userData);
       commit("setMessage", "Письмо с подтверждением выслано на почту");
     } catch (error) {
@@ -214,34 +266,7 @@ const actions = {
   logout({ commit }) {
     commit("clearUserData");
   },
-  async deleteUser({ commit, state }, { user }) {
-    try {
-      await delUser(user.id, state.jwt.token);
-      commit("deleteUser", user);
-      commit("setMessage", `Пользователь ${user.email} удалён`);
-    } catch (error) {
-      commit("setError", error);
-    }
-  },
-  async changeRole({ commit, state }, { user }) {
-    try {
-      await changeUserRole({
-        id: user.id,
-        role: user.role,
-        token: state.jwt.token
-      });
-    } catch (error) {
-      commit("setError", error);
-    }
-  },
-  async grantAccess({ commit, state }, { user }) {
-    try {
-      await grantUser(user.id, state.jwt.token);
-      commit("grantAccess", user);
-    } catch (error) {
-      commit("setError", error);
-    }
-  },
+
   async createKey({ commit, state }) {
     try {
       commit("switchLoading");
@@ -271,17 +296,6 @@ const actions = {
       commit("switchLoading");
       let res = await deleteAPIKey(state.user.email, state.jwt.token);
       commit("setKey", res.data);
-    } catch (error) {
-      commit("setError", error);
-    } finally {
-      commit("switchLoading");
-    }
-  },
-  async loadRooms({ commit }) {
-    try {
-      commit("switchLoading");
-      let res = await getRooms();
-      commit("setRooms", res.data);
     } catch (error) {
       commit("setError", error);
     } finally {

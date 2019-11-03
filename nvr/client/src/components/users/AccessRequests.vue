@@ -58,10 +58,10 @@ export default {
       this.isMobile = window.innerWidth < 769;
     },
     grantAccess(user) {
-      this.$store.dispatch("grantAccess", { user });
+      this.$store.dispatch("emitGrantAccess", { user });
     },
     deleteUser(user) {
-      this.$store.dispatch("deleteUser", { user });
+      this.$store.dispatch("emitDeleteUser", { user });
     }
   }
 };
