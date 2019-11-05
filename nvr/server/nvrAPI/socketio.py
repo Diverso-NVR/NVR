@@ -11,27 +11,6 @@ import time
 CAMPUS = 'dev'
 
 
-@nvr_db_context
-def start_timer(room_id: int) -> None:
-    while not Room.query.get(room_id).free:
-        Room.query.get(room_id).timestamp += 1
-        db.session.commit()
-        time.sleep(1)
-
-
-@nvr_db_context
-def stop_record(room_id, calendar_id, event_id):
-    try:
-        stop(current_app._get_current_object(), room_id, calendar_id, event_id)
-    except Exception as e:
-        pass
-    finally:
-        room = Room.query.get(room_id)
-        room.free = True
-        room.timestamp = 0
-        db.session.commit()
-
-
 def create_socketio(app):
     socketio = SocketIO(app,
                         cors_allowed_origins='http://127.0.0.1:8080',
@@ -74,6 +53,13 @@ def create_socketio(app):
 
         emit('start_rec', {'id': room.id}, broadcast=True)
 
+    @nvr_db_context
+    def start_timer(room_id: int) -> None:
+        while not Room.query.get(room_id).free:
+            Room.query.get(room_id).timestamp += 1
+            db.session.commit()
+            time.sleep(1)
+
     @socketio.on('stop_rec', namespace='/test')
     def stop_rec(msg_json):
         room_id = msg_json['id']
@@ -90,6 +76,19 @@ def create_socketio(app):
                                          room_id, calendar_id, event_id)).start()
 
         emit('stop_rec', {'id': room.id}, broadcast=True)
+
+    @nvr_db_context
+    def stop_record(room_id, calendar_id, event_id):
+        try:
+            stop(current_app._get_current_object(),
+                 room_id, calendar_id, event_id)
+        except Exception as e:
+            pass
+        finally:
+            room = Room.query.get(room_id)
+            room.free = True
+            room.timestamp = 0
+            db.session.commit()
 
     @socketio.on('delete_room', namespace='/test')
     def delete_room(msg_json):
