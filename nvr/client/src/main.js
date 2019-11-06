@@ -10,8 +10,9 @@ import store from "./store";
 import VueSocketIOExt from "vue-socket.io-extended";
 import io from "socket.io-client";
 
-const socket = io(`http://127.0.0.1:5000/test`);
+const SOCKET_URL = `${process.env.NVR_URL}/nvr-socket`;
 
+const socket = io(SOCKET_URL);
 Vue.use(VueSocketIOExt, socket, { store });
 
 Vue.use(VSwitch);

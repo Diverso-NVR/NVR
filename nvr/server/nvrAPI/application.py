@@ -3,13 +3,16 @@
 """
 
 
-from flask import Flask
+from flask import Flask, request
 from flask_cors import CORS
+from flask_socketio import SocketIO
 
 
 import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
+
+NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
 
 
 def create_app(app_name="NVR_API"):
@@ -30,8 +33,12 @@ def create_app(app_name="NVR_API"):
     from nvrAPI.email import mail
     mail.init_app(app)
 
-    from nvrAPI.socketio import create_socketio
-    socketio = create_socketio(app)
+    from nvrAPI.socketio import NvrNamespace
+    socketio = SocketIO(app,
+                        cors_allowed_origins=NVR_CLIENT_URL,
+                        logger=True, engineio_logger=True,
+                        )
+    socketio.on_namespace(NvrNamespace('/nvr-socket'))
 
     # logging
     if not app.debug:

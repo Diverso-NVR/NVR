@@ -98,8 +98,11 @@ def verify_email(token):
     user.email_verified = True
     db.session.commit()
 
-    send_access_request_email(
-        [u.email for u in User.query.all() if u.role != 'user'], user.email)
+    try:
+        send_access_request_email(
+            [u.email for u in User.query.all() if u.role != 'user'], user.email)
+    except Exception:
+        pass
 
     return "Подтверждение успешно, ожидайте одобрения администратора", 201
 
