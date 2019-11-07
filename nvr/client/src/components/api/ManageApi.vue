@@ -179,7 +179,7 @@ export default {
   },
   created() {
     this.api_key = this.$store.getters.user.api_key;
-    this.API_URL = process.env.API_URL;
+    this.API_URL = process.env.NVR_URL + "/api";
   }
 };
 </script>
