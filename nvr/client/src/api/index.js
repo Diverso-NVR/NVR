@@ -17,32 +17,6 @@ export function getUsers(token) {
   });
 }
 
-export function delUser(id, token) {
-  return axios.delete(`${API_URL}/users/${id}`, {
-    headers: { Authorization: `Bearer: ${token}` }
-  });
-}
-
-export function changeUserRole({ id, role, token }) {
-  return axios.put(
-    `${API_URL}/users/roles/${id}`,
-    { role },
-    {
-      headers: { Authorization: `Bearer: ${token}` }
-    }
-  );
-}
-
-export function grantUser(id, token) {
-  return axios.put(
-    `${API_URL}/users/${id}`,
-    {},
-    {
-      headers: { Authorization: `Bearer: ${token}` }
-    }
-  );
-}
-
 export function createAPIKey(email, token) {
   return axios.post(
     `${API_URL}/api-key/${email}`,

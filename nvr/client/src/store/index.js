@@ -5,9 +5,6 @@ import {
   authenticate,
   register,
   getUsers,
-  delUser,
-  changeUserRole,
-  grantUser,
   createAPIKey,
   updateAPIKey,
   deleteAPIKey,
@@ -96,15 +93,12 @@ const mutations = {
     user.access = true;
   },
 
-  setUserData(state, payload) {
-    state.userData = payload.userData;
-  },
+  setUserData(state, payload) {},
   setJwtToken(state, payload) {
     localStorage.token = payload.jwt.token;
     state.jwt = payload.jwt;
   },
   clearUserData(state) {
-    state.userData = {};
     state.jwt = "";
     localStorage.token = "";
   },
@@ -115,8 +109,7 @@ const mutations = {
     state.rooms = payload;
 
     state.rooms.forEach(room => {
-      if (room.processing) room.status = "processing";
-      else room.status = room.free ? "free" : "busy";
+      room.status = room.free ? "free" : "busy";
       room.timer = room.free
         ? null
         : setInterval(() => {
@@ -236,7 +229,6 @@ const actions = {
   async login({ commit, state }, userData) {
     try {
       commit("switchLoading");
-      commit("setUserData", { userData });
       let res = await authenticate(userData);
       commit("setJwtToken", { jwt: res.data });
       const tokenParts = res.data.token.split(".");
