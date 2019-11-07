@@ -40,6 +40,11 @@ def create_app(app_name="NVR_API"):
                         )
     socketio.on_namespace(NvrNamespace('/nvr-socket'))
 
+    @socketio.on_error_default
+    def default_error_handler(e):
+        print(request.event["message"])
+        print(request.event["args"])
+
     # logging
     if not app.debug:
         if app.config['MAIL_SERVER']:
