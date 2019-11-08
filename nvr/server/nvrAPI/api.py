@@ -380,7 +380,7 @@ def sound_change(current_user):
 
 @api.route('/upload-merged', methods=["POST"])
 @auth_required
-def upload_merged():
+def upload_merged(current_user):
     post_data = request.get_json(force=True)
 
     room_id = post_data["room_id"]
