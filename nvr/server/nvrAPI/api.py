@@ -58,7 +58,8 @@ def auth_required(f):
                     raise RuntimeError('Пользователь не найден')
                 return f(user, *args, **kwargs)
             except Exception as e:
-                return jsonify({'error': str(e)}), 401
+                print(e)
+                return jsonify({'error': "Check logs"}), 401
 
         return jsonify(invalid_msg), 401
 
