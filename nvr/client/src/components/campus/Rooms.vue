@@ -341,6 +341,7 @@ export default {
 }
 
 .flex-item {
+  margin: 5px 0;
   padding: auto;
   text-align: center;
   width: 50%;
