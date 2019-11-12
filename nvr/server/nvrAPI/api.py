@@ -9,7 +9,7 @@ from threading import Thread
 import os
 import uuid
 import jwt
-from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions
+from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions, create_event_
 from driveAPI.startstop import start, stop, upload_file
 from driveAPI.driveSettings import create_folder, move_file
 
@@ -212,8 +212,31 @@ def move_file():
     room = Room.query.get(room_id)
 
     move_file(file_id, room.drive)
-    return "Success", 201
+    return "Success", 200
 
+
+@api.route('/create-event', methods=['POST'])
+@auth_required
+def create_event(current_user):
+    data = request.get_json()
+
+    try:
+        room_name = str(data['room_name'])
+        start_time = data['start_time']
+    except KeyError:
+        return jsonify({'error': 'Key error: room name and start time required'}), 400
+
+    end_time = data.get('end_time', None)
+    summary = data.get('summary', '')
+
+    try:
+        event_link = create_event_(
+            current_app._get_current_object(), room_name=room_name,
+            start_time=start_time, end_time=end_time, summary=summary)
+    except ValueError:
+        return jsonify({'error': 'Format error: date format should be YYYY:MM:DDTHH:mm'}), 400
+
+    return jsonify({'message': f"Successfully created event: {event_link}"}), 201
 
 # RECORD AND GOOGLE API
 @api.route('/rooms', methods=['POST'])

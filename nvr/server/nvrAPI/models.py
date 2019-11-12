@@ -15,9 +15,9 @@ def nvr_db_context(func):
     """
     Decorator to provide functions access to db
     """
-    def wrapper(app, *args):
+    def wrapper(app, *args, **kwargs):
         with app.app_context():
-            return func(*args)
+            return func(*args, **kwargs)
     return wrapper
 
 
