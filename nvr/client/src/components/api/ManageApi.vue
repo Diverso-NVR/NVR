@@ -104,7 +104,7 @@ export default {
           name: "/rooms/",
           method: "POST",
           doc: "Создаёт комнату с названием 'name'",
-          json: "{name: <имя создаваемой комнаты>}"
+          json: "{name: string}"
         },
         {
           name: "/rooms/{id}",
@@ -115,26 +115,34 @@ export default {
           name: "/rooms/{id}",
           method: "PUT",
           doc: "Изменяет данные об источниках в комнате с переданным id",
-          json: "{sources: <полный список источников записи комнаты>}"
+          json: "{sources: array}"
         },
         {
           name: "/start-record",
           method: "POST",
           doc: "Запускает запись в комнате с переданным id",
-          json: "{id: <id комнаты>}"
+          json: "{id: int}"
         },
         {
           name: "/stop-record",
           method: "POST",
           doc: "Останавливает запись в комнате с переданным id",
-          json: "{id: <id комнаты>}"
+          json: "{id: int}"
         },
         {
           name: "/sound-change",
           method: "POST",
           doc:
             "Изменяет источник звука для комнаты. sound принимает одно из значений: enc -- кодер, cam -- камера",
-          json: "{id: <id комнаты>, sound: <cam || enc>}"
+          json: "{id: int, sound: string = cam || enc}"
+        },
+        {
+          name: "/create-event",
+          method: "POST",
+          doc:
+            "Создаёт событие в календаре в указанной комнате в указанное время (end_time, summary -- необязательно)",
+          json:
+            "{room_name: string, start_time: date(YYYY:MM:DDTHH:mm), end_time: date(YYYY:MM:DDTHH:mm), summary: string}"
         }
       ]
     };
