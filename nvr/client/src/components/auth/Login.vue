@@ -38,7 +38,6 @@
               class="white--text"
               @click="onSubmit"
               :loading="loading"
-              :disabled="!valid || loading"
             >Вход</v-btn>
           </v-card-actions>
         </v-card>
@@ -80,14 +79,10 @@ export default {
           email: this.email,
           password: this.password
         });
+        this.$router.push("/rooms");
         if (res) {
           await this.$store.dispatch("loadRooms");
-          let roomsUpdateTimer = setInterval(() => {
-            this.$store.dispatch("loadRooms");
-          }, 1000);
-          this.$store.dispatch("setTimer", roomsUpdateTimer);
-
-          this.$router.push("/rooms");
+          if (/^\w*admin$/.test(res)) await this.$store.dispatch("getUsers");
         }
       }
     }

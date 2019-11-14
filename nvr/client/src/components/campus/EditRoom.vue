@@ -137,8 +137,7 @@ export default {
           sortable: false,
           align: "center"
         }
-      ],
-      roomCopy: Object.assign({}, this.room)
+      ]
     };
   },
   computed: {
@@ -157,11 +156,14 @@ export default {
     },
     saveChanges(room) {
       this.$store
-        .dispatch("editRoom", { id: room.id, sources: room.sources })
+        .dispatch("emitEditRoom", { id: room.id, sources: room.sources })
         .then(() => {
           this.modal = false;
         });
     }
+  },
+  created() {
+    this.roomCopy = { ...this.room };
   }
 };
 </script>

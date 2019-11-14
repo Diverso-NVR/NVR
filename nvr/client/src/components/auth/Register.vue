@@ -47,7 +47,6 @@
               class="white--text"
               @click="onSubmit"
               :loading="loading"
-              :disabled="!valid || loading"
             >Отправить</v-btn>
           </v-card-actions>
         </v-card>
