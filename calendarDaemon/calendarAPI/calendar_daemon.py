@@ -8,7 +8,7 @@ import os
 
 started = []
 
-NVR_API_URL = os.environ.get('BASE_URL')
+NVR_API_URL = os.environ.get('NVR_API_URL')
 NVR_API_KEY = os.environ.get('NVR_API_KEY')
 
 nvr_querystring = {"key": NVR_API_KEY}

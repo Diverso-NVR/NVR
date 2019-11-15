@@ -96,8 +96,11 @@ def give_permissions(building: str, mail: str) -> None:
     }
 
     for room in Room.query.all():
-        created_rule = calendar_service.acl().insert(
-            calendarId=room.calendar, body=rule).execute()
+        try:
+            created_rule = calendar_service.acl().insert(
+                calendarId=room.calendar, body=rule).execute()
+        except:
+            pass
 
 
 # def delete_permissions(building, mail):

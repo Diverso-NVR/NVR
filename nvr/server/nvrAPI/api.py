@@ -100,8 +100,11 @@ def verify_email(token):
     user.email_verified = True
     db.session.commit()
 
-    send_access_request_email(
-        [u.email for u in User.query.all() if u.role != 'user'], user.email)
+    try:
+        send_access_request_email(
+            [u.email for u in User.query.all() if u.role != 'user'], user.email)
+    except Exception:
+        pass
 
     return "Подтверждение успешно, ожидайте одобрения администратора", 201
 
@@ -306,11 +309,11 @@ def edit_room(current_user, room_id):
         else:
             source = Source()
         room.sources.append(source)
-        source.ip = s['ip']
-        source.name = s['name']
-        source.sound = s.get('sound')
-        source.tracking = s.get('tracking')
-        source.main_cam = s.get('main_cam')
+        source.ip = s.get('ip', "0.0.0.0")
+        source.name = s.get('name', 'камера')
+        source.sound = s.get('sound', None)
+        source.tracking = s.get('tracking', False)
+        source.main_cam = s.get('main_cam', False)
         source.room_id = room_id
 
     db.session.commit()

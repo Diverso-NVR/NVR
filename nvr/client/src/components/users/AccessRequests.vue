@@ -1,7 +1,7 @@
 <template>
   <v-layout align-center justify-center>
     <v-flex xs12 sm8 md6>
-      <v-card>
+      <v-card v-if="!loader">
         <v-list v-if="users.length > 0" v-resize="onResize">
           <template v-for="(user,index) in users">
             <v-list-tile avatar :key="user.id">
@@ -26,6 +26,13 @@
         </v-list>
         <v-alert v-else :value="true" color="info" icon="info">Список запросов на доступ пуст</v-alert>
       </v-card>
+      <template v-else>
+        <v-progress-linear :indeterminate="true"></v-progress-linear>
+      </template>
+    </v-flex>
+  </v-layout>
+</template>
+      </v-card>
     </v-flex>
   </v-layout>
 </template>
@@ -41,21 +48,21 @@ export default {
     users: state =>
       state.users.filter(
         user => user.email_verified === true && user.access === false
-      )
+      ),
+    loader() {
+      return this.$store.getters.loading;
+    }
   }),
   methods: {
     onResize() {
       this.isMobile = window.innerWidth < 769;
     },
     grantAccess(user) {
-      this.$store.dispatch("grantAccess", { user });
+      this.$store.dispatch("emitGrantAccess", { user });
     },
     deleteUser(user) {
-      this.$store.dispatch("deleteUser", { user });
+      this.$store.dispatch("emitDeleteUser", { user });
     }
-  },
-  beforeMount() {
-    this.$store.dispatch("getUsers");
   }
 };
 </script>
