@@ -4,7 +4,8 @@ from flask import render_template, current_app
 import os
 import time
 
-NVR_URL = os.environ.get('BASE_URL')
+NVR_API_URL = os.environ.get('NVR_API_URL')
+NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
 
 
 mail = Mail()
@@ -34,7 +35,7 @@ def send_verify_email(user, token_expiration: int) -> None:
     """
     token = user.get_verify_token(token_expiration)
 
-    url = f'{NVR_URL}/verify-email/{token}'
+    url = f'{NVR_API_URL}/verify-email/{token}'
 
     send_email('[NVR] Подтверждение аккаунта',
                sender=current_app.config['ADMINS'][0],
@@ -47,11 +48,10 @@ def send_verify_email(user, token_expiration: int) -> None:
 
 
 def send_access_request_email(admins: list, user_email: str) -> None:
-    url = NVR_URL.split('/')[-2]
     send_email('[NVR] Запрос на доступ',
                sender=current_app.config['ADMINS'][0],
                recipients=admins,
                text_body=render_template('email/access_request_template.txt',
-                                         user_email=user_email, url=url),
+                                         user_email=user_email, url=NVR_CLIENT_URL),
                html_body=render_template('email/access_request_template.html',
-                                         user_email=user_email, url=url))
+                                         user_email=user_email, url=NVR_CLIENT_URL))
