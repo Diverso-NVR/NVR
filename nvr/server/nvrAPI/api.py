@@ -50,7 +50,8 @@ def auth_required(f):
             except (jwt.InvalidTokenError):
                 return jsonify(invalid_msg), 401
             except Exception as e:
-                return jsonify({'error': str(e)}), 401
+                print(e)
+                return jsonify({'error': "Check logs"}), 401
         elif api_key:
             try:
                 user = User.query.filter_by(api_key=api_key).first()
@@ -58,7 +59,8 @@ def auth_required(f):
                     raise RuntimeError('Пользователь не найден')
                 return f(user, *args, **kwargs)
             except Exception as e:
-                return jsonify({'error': str(e)}), 401
+                print(e)
+                return jsonify({'error': "Check logs"}), 401
 
         return jsonify(invalid_msg), 401
 
@@ -286,7 +288,7 @@ def edit_room(current_user, room_id):
         room.sources.append(source)
         source.ip = s['ip']
         source.name = s['name']
-        source.sound = s['sound'] if s['sound'] != False else None
+        source.sound = s.get('sound')
         source.tracking = s.get('tracking')
         source.main_cam = s.get('main_cam')
         source.room_id = room_id
@@ -383,7 +385,7 @@ def sound_change(current_user):
 
 @api.route('/upload-merged', methods=["POST"])
 @auth_required
-def upload_merged():
+def upload_merged(current_user):
     post_data = request.get_json(force=True)
 
     room_id = post_data["room_id"]

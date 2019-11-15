@@ -36,7 +36,7 @@
               <v-card-title primary-title>
                 <h3 class="title mb-0">
                   Ваш ключ API:
-                  <b>{{ api_key }}</b>
+                  <b class="subheading">{{ api_key }}</b>
                 </h3>
               </v-card-title>
 

@@ -38,15 +38,27 @@
           class="elevation-4"
           disable-initial-sort
         >
-          <template v-slot:items="props">
+          <template v-slot:items="props" justify="space-around">
             <tr v-if="!isMobile">
-              <td class="text-xs-center">{{ props.item.name }}</td>
-              <td class="text-xs-center">{{props.item.ip}}</td>
-              <td class="text-xs-center">{{props.item.sound}}</td>
-              <td class="text-xs-center">{{props.item.tracking}}</td>
-              <td class="text-xs-center">{{props.item.main_cam}}</td>
               <td class="text-xs-center">
-                <app-edit-source :source="props.item"></app-edit-source>
+                <v-text-field class="body-1" v-model.trim="props.item.name"></v-text-field>
+              </td>
+              <td class="text-xs-center">
+                <v-text-field class="body-1" v-model.trim="props.item.ip"></v-text-field>
+              </td>
+              <td class="text-xs-center">
+                <v-btn-toggle v-model="props.item.sound">
+                  <v-btn value="enc" class="body-1" flat>Кодер</v-btn>
+                  <v-btn value="cam" class="body-1" flat>Камера</v-btn>
+                </v-btn-toggle>
+              </td>
+              <td class="text-xs-center">
+                <v-checkbox class="v-c" v-model="props.item.tracking"></v-checkbox>
+              </td>
+              <td class="text-xs-center">
+                <v-checkbox class="v-c" v-model="props.item.main_cam"></v-checkbox>
+              </td>
+              <td class="text-xs-center">
                 <v-btn icon @click="del(props.item)">
                   <v-icon>delete</v-icon>
                 </v-btn>
@@ -55,19 +67,25 @@
             <tr v-else>
               <td>
                 <ul class="flex-content">
-                  <li
-                    class="flex-item key-elems subheading"
-                    data-label="Название"
-                  >{{ props.item.name }}</li>
-                  <li class="flex-item key-elems subheading" data-label="IP">{{props.item.ip}}</li>
-                  <li class="flex-item subheading" data-label="Источник звука">{{props.item.sound}}</li>
-                  <li class="flex-item subheading" data-label="Трекинг">{{props.item.tracking}}</li>
-                  <li
-                    class="flex-item subheading"
-                    data-label="Главная камера"
-                  >{{props.item.main_cam}}</li>
-                  <li class="flex-item subheading" data-label="Изменить">
-                    <app-edit-source :source="props.item"></app-edit-source>
+                  <li class="flex-item key-elems subheading" data-label="Название">
+                    <v-text-field class="body-1" v-model.trim="props.item.name"></v-text-field>
+                  </li>
+                  <li class="flex-item key-elems subheading" data-label="IP">
+                    <v-text-field class="body-1" v-model.trim="props.item.ip"></v-text-field>
+                  </li>
+                  <li class="flex-item subheading" data-label="Источник звука">
+                    <v-btn-toggle v-model="props.item.sound">
+                      <v-btn value="enc" class="body-1" flat>Кодер</v-btn>
+                      <v-btn value="cam" class="body-1" flat>Камера</v-btn>
+                    </v-btn-toggle>
+                  </li>
+                  <li class="flex-item subheading" data-label="Трекинг">
+                    <v-checkbox class="v-c" v-model="props.item.tracking"></v-checkbox>
+                  </li>
+                  <li class="flex-item subheading" data-label="Главная камера">
+                    <v-checkbox class="v-c" v-model="props.item.main_cam"></v-checkbox>
+                  </li>
+                  <li class="flex-item subheading" data-label="Удалить">
                     <v-btn icon @click="del(props.item)">
                       <v-icon medium>delete</v-icon>
                     </v-btn>
@@ -132,7 +150,7 @@ export default {
           align: "center"
         },
         {
-          text: "Изменить",
+          text: "Удалить",
           value: "change",
           sortable: false,
           align: "center"
@@ -167,3 +185,13 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.v-c {
+  margin: auto;
+  margin-left: 45%;
+  padding: auto;
+  width: 30px;
+  height: 30px;
+}
+</style>
