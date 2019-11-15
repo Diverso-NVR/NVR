@@ -286,11 +286,11 @@ def edit_room(current_user, room_id):
         else:
             source = Source()
         room.sources.append(source)
-        source.ip = s['ip']
-        source.name = s['name']
-        source.sound = s.get('sound')
-        source.tracking = s.get('tracking')
-        source.main_cam = s.get('main_cam')
+        source.ip = s.get('ip', "0.0.0.0")
+        source.name = s.get('name', 'камера')
+        source.sound = s.get('sound', None)
+        source.tracking = s.get('tracking', False)
+        source.main_cam = s.get('main_cam', False)
         source.room_id = room_id
 
     db.session.commit()

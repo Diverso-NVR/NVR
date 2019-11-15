@@ -41,8 +41,8 @@ class NvrNamespace(Namespace):
         ).start()
 
         Thread(
-             target=start,
-             args=(current_app._get_current_object(), room_id)
+            target=start,
+            args=(current_app._get_current_object(), room_id)
         ).start()
 
         emit('start_rec', {'id': room.id}, broadcast=True)
@@ -136,11 +136,11 @@ class NvrNamespace(Namespace):
             else:
                 source = Source()
             room.sources.append(source)
-            source.ip = s['ip']
-            source.name = s['name']
-            source.sound = s['sound'] if s['sound'] != False else None
-            source.tracking = s.get('tracking')
-            source.main_cam = s.get('main_cam')
+            source.ip = s.get('ip', "0.0.0.0")
+            source.name = s.get('name', 'камера')
+            source.sound = s.get('sound', None)
+            source.tracking = s.get('tracking', False)
+            source.main_cam = s.get('main_cam', False)
             source.room_id = room_id
 
         db.session.commit()
