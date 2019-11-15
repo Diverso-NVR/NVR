@@ -1,7 +1,8 @@
 """
 - creates a Flask app instance and registers the database object
 """
-
+from gevent import monkey
+monkey.patch_all()
 
 from flask import Flask, request
 from flask_cors import CORS
@@ -35,8 +36,8 @@ def create_app(app_name="NVR_API"):
 
     from nvrAPI.socketio import NvrNamespace
     socketio = SocketIO(app,
-                        cors_allowed_origins=NVR_CLIENT_URL,
-                        logger=True, engineio_logger=True,
+                        cors_allowed_origins=NVR_CLIENT_URL, async_mode='gevent',
+                        logger=True, engineio_logger=True
                         )
     socketio.on_namespace(NvrNamespace('/nvr-socket'))
 

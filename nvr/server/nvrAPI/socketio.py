@@ -40,10 +40,10 @@ class NvrNamespace(Namespace):
             daemon=True
         ).start()
 
-        # Thread(
-        #     target=start,
-        #     args=(current_app._get_current_object(), room_id)
-        # ).start()
+        Thread(
+             target=start,
+             args=(current_app._get_current_object(), room_id)
+        ).start()
 
         emit('start_rec', {'id': room.id}, broadcast=True)
 
