@@ -10,7 +10,7 @@ class BaseConfig(object):
     """
     Config variables for app
     """
-    DEBUG = True
+    DEBUG = False
     SECRET_KEY = uuid.uuid4().hex  # for encryption and session managment
     SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
