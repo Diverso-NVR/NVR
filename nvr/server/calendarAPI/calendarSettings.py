@@ -41,7 +41,7 @@ def add_attachment(calendar_id: str, event_id: str, file_id: str) -> None:
     """
     event = calendar_service.events().get(
         calendarId=calendar_id, eventId=event_id).execute()
-    description = event['description'] + \
+    description = event.get('description', '') + \
         f"\nhttps://drive.google.com/a/auditory.ru/file/d/{file_id}/view?usp=drive_web"
     changes = {
         'description': description
