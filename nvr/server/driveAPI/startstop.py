@@ -9,7 +9,7 @@ import requests
 from driveAPI.driveSettings import upload
 from calendarAPI.calendarSettings import add_attachment
 
-tracking_url = 'http://172.18.198.31:5000/tracking'
+TRACKING_URL = "http://217.73.60.64:5000/track"
 home = str(Path.home())
 MERGE_SERVER_URL = os.environ.get('MERGE_SERVER_URL')
 BASE_URL = os.environ.get('BASE_URL')
@@ -57,6 +57,12 @@ def start(room_id: int) -> None:
     config(room.id, room.name, [source.to_dict()
                                 for source in room.sources])
 
+    try:
+        requests.post(TRACKING_URL, json={'ip': rooms[room_id]['tracking'].split('@')[-1]})
+    except Exception as e:
+        print(e)
+   
+
     if room.chosen_sound == "enc":
         enc = subprocess.Popen("ffmpeg -rtsp_transport http -i rtsp://" +
                                rooms[room_id]['sound']['enc'][0] +
@@ -82,6 +88,11 @@ def start(room_id: int) -> None:
 def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
 
     kill_records(room_id)
+
+    try:
+        requests.delete(TRACKING_URL)
+    except Exception as e:
+        print(e)
 
     screen_num = record_names[room_id] + \
         rooms[room_id]['sound']['enc'][0].split('/')[0].split('.')[-1]
