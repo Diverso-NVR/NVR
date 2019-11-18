@@ -1,10 +1,7 @@
 import store from "@/store";
 
 export function adminOnly(to, from, next) {
-  if (
-    store.getters.user.role === "admin" ||
-    store.getters.user.role === "superadmin"
-  ) {
+  if (/^\w*admin$/.test(store.getters.user.role)) {
     next();
   } else next("/login");
 }

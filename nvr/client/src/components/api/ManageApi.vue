@@ -22,7 +22,13 @@
               </v-card-text>
             </v-card>
 
-            <v-btn @click="createKey" depressed block color="info">Создать ключ API</v-btn>
+            <v-btn
+              @click="createKey"
+              :loading="loader"
+              depressed
+              block
+              color="info"
+            >Создать ключ API</v-btn>
           </template>
 
           <template v-else>
@@ -30,7 +36,7 @@
               <v-card-title primary-title>
                 <h3 class="title mb-0">
                   Ваш ключ API:
-                  <b>{{ api_key }}</b>
+                  <b class="subheading">{{ api_key }}</b>
                 </h3>
               </v-card-title>
 
@@ -42,8 +48,8 @@
               </v-card-text>
 
               <v-card-actions>
-                <v-btn depressed color="warning" @click="updateKey">Обновить</v-btn>
-                <v-btn depressed color="error" @click="deleteKey">Удалить</v-btn>
+                <v-btn depressed color="warning" :loading="loader" @click="updateKey">Обновить</v-btn>
+                <v-btn depressed color="error" :loading="loader" @click="deleteKey">Удалить</v-btn>
               </v-card-actions>
             </v-card>
 
@@ -142,6 +148,9 @@ export default {
   computed: {
     isDarkMode() {
       return this.$store.getters.isDarkMode;
+    },
+    loader() {
+      return this.$store.getters.loading;
     }
   },
   methods: {
@@ -170,7 +179,7 @@ export default {
   },
   created() {
     this.api_key = this.$store.getters.user.api_key;
-    this.API_URL = process.env.API_URL;
+    this.API_URL = process.env.NVR_URL + "/api";
   }
 };
 </script>

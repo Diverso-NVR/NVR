@@ -7,6 +7,14 @@ import VSwitch from "v-switch-case";
 import "vuetify/dist/vuetify.min.css";
 import store from "./store";
 
+import VueSocketIOExt from "vue-socket.io-extended";
+import io from "socket.io-client";
+
+const SOCKET_URL = `${process.env.NVR_URL}/nvr-socket`;
+
+const socket = io(SOCKET_URL);
+Vue.use(VueSocketIOExt, socket, { store });
+
 Vue.use(VSwitch);
 Vue.use(Vuetify);
 Vue.config.productionTip = false;
