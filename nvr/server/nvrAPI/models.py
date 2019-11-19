@@ -103,7 +103,7 @@ class Room(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     free = db.Column(db.Boolean,  default=True)
-    processing = db.Column(db.Boolean,  default=False)
+    tracking_state = db.Column(db.Boolean,  default=False)
     timestamp = db.Column(db.Integer,  default=0)
     chosen_sound = db.Column(db.String(100), default='enc')
     sources = db.relationship('Source', backref='room', lazy=False)
@@ -114,7 +114,7 @@ class Room(db.Model):
         return dict(id=self.id,
                     name=self.name,
                     free=self.free,
-                    processing=self.processing,
+                    tracking_state=self.tracking_state,
                     timestamp=self.timestamp,
                     chosen_sound=self.chosen_sound,
                     sources=[source.to_dict() for source in self.sources],

@@ -32,6 +32,17 @@
               </v-btn-toggle>
             </td>
 
+
+            <td class="text-xs-center">
+                <v-btn
+                flat
+                :class="props.item.tracking_state === true ? 'error': 'success'"
+                @click="trackingSwitch(props.item)"
+                >
+                  {{props.item.tracking_state === true ? 'Выкл': 'Вкл'}}
+                </v-btn>
+            </td>
+
             <td class="text-xs-center">
               <v-btn-toggle mandatory v-model="props.item.status">
                 <v-btn
@@ -88,6 +99,22 @@
                   class="flex-item subheading key-elems"
                   data-label="Аудитория"
                 >{{ props.item.name }}</li>
+                 <li class="flex-item subheading" data-label="Источник звука">
+                  <v-btn-toggle mandatory v-model="props.item.chosen_sound">
+                    <v-btn
+                      flat
+                      value="enc"
+                      :disabled="!props.item.free"
+                      @click="soundSwitch(props.item, 'enc')"
+                    >Кодер</v-btn>
+                    <v-btn
+                      flat
+                      value="cam"
+                      :disabled="!props.item.free"
+                      @click="soundSwitch(props.item, 'cam')"
+                    >Камера</v-btn>
+                  </v-btn-toggle>
+                </li>
                 <li class="flex-item subheading" data-label="Запись">
                   <v-btn-toggle mandatory v-model="props.item.status">
                     <v-btn
@@ -106,21 +133,16 @@
                     >Стоп</v-btn>
                   </v-btn-toggle>
                 </li>
-                <li class="flex-item subheading" data-label="Источник звука">
-                  <v-btn-toggle mandatory v-model="props.item.chosen_sound">
-                    <v-btn
-                      flat
-                      value="enc"
-                      :disabled="!props.item.free"
-                      @click="soundSwitch(props.item, 'enc')"
-                    >Кодер</v-btn>
-                    <v-btn
-                      flat
-                      value="cam"
-                      :disabled="!props.item.free"
-                      @click="soundSwitch(props.item, 'cam')"
-                    >Камера</v-btn>
-                  </v-btn-toggle>
+               
+
+                <li class="flex-item subheading" data-label="Трекинг">
+                <v-btn
+                flat
+                :class="props.item.tracking_state === true ? 'error': 'success'"
+                @click="trackingSwitch(props.item)"
+                >
+                  {{props.item.tracking_state === true ? 'Выкл': 'Вкл'}}
+                </v-btn>
                 </li>
 
                 <li class="flex-item subheading" data-label="Статус" v-switch="props.item.status">
@@ -129,6 +151,7 @@
                 </li>
                 <li class="flex-item subheading" data-label="Время записи">
                   <div v-if="props.item.status === 'busy'">{{getTsString(props.item.timestamp)}}</div>
+                  <div v-else>00:00:00</div>
                 </li>
                 <li class="flex-item subheading" data-label="Календарь">
                   <v-btn icon target="_blank" href="https://calendar.google.com/calendar/r">
@@ -161,14 +184,12 @@
       </template>
       <v-layout row wrap class="addRoom" v-if="user.role !== 'user'">
         <v-flex xs6 sm4 md2>
-          <v-text-field v-model.trim="newRoom" label="Новая аудитория" :loading="newRoomLoader"></v-text-field>
+          <v-text-field v-model.trim="newRoom" label="Новая аудитория"></v-text-field>
         </v-flex>
         <v-btn
           dark
           depressed
           @click="addRoom"
-          :loading="newRoomLoader"
-          :disabled="newRoomLoader"
         >Добавить</v-btn>
       </v-layout>
     </v-layout>
@@ -196,6 +217,7 @@ export default {
           sortable: false,
           align: "center"
         },
+        { text: "Трекинг", value: "tracking", sortable: true, align: "center" },
         { text: "Запись", value: "record", sortable: true, align: "center" },
         { text: "Статус", value: "free", sortable: true, align: "center" },
         {
@@ -217,7 +239,6 @@ export default {
         free: "green lighten-3",
         busy: "red lighten-3"
       },
-      newRoomLoader: false,
       isMobile: false
     };
   },
@@ -245,6 +266,9 @@ export default {
     soundSwitch(room, sound) {
       this.$store.dispatch("emitSoundChange", { room, sound });
     },
+    trackingSwitch(room) {
+      this.$store.dispatch("emitTrackingStateChange", { room, tracking_state:room.tracking_state });
+    },
     startRec(room) {
       this.$store.dispatch("emitStartRec", { room });
     },
@@ -259,10 +283,8 @@ export default {
       if (this.newRoom === "") {
         return;
       }
-      this.newRoomLoader = true;
       this.$store.dispatch("emitAddRoom", { name: this.newRoom });
       this.newRoom = "";
-      this.newRoomLoader = false;
     }
   },
   beforeMount() {
@@ -281,6 +303,16 @@ export default {
 .addRoom {
   margin-top: 15px;
 }
+
+.v-datatable .v-input--selection-controls{
+  width: 30px;
+  height: 30px;
+  margin-left: 43%;
+  margin-top: 5%; 
+  padding: auto;
+}
+
+
 .mobile {
   color: #333;
 }
@@ -344,4 +376,5 @@ export default {
 .key-elems {
   width: 100%;
 }
+
 </style>

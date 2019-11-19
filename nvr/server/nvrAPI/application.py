@@ -1,16 +1,7 @@
 """
 - creates a Flask app instance and registers the database object
 """
-<<<<<<< HEAD
-from flask import Flask, request
-from flask_cors import CORS
-from flask_socketio import SocketIO
-import logging
-from logging.handlers import SMTPHandler, RotatingFileHandler
-import os
-from gevent import monkey
-monkey.patch_all()
-=======
+
 from gevent import monkey
 monkey.patch_all()
 
@@ -20,7 +11,6 @@ import logging
 from flask_socketio import SocketIO
 from flask_cors import CORS
 from flask import Flask, request
->>>>>>> 66e4e9a35265b9c96b4c5a25b61d27da93fcec95
 
 
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
@@ -45,15 +35,11 @@ def create_app(app_name="NVR_API"):
     mail.init_app(app)
 
     from nvrAPI.socketio import NvrNamespace
-<<<<<<< HEAD
-    socketio = SocketIO(app, message_queue='redis://',
-                        cors_allowed_origins=NVR_CLIENT_URL, async_mode='gevent',
-=======
+
     socketio = SocketIO(app,
                         message_queue='redis://',
                         cors_allowed_origins=NVR_CLIENT_URL,
                         async_mode='gevent',
->>>>>>> 66e4e9a35265b9c96b4c5a25b61d27da93fcec95
                         logger=True, engineio_logger=True
                         )
     socketio.on_namespace(NvrNamespace('/nvr-socket'))

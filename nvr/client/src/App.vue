@@ -155,6 +155,9 @@ export default {
         this.$router.push("/");
       });
     }
+  },
+  beforeMount(){
+    this.$store.dispatch('setColorMode');
   }
 };
 </script>

@@ -49,6 +49,13 @@ const mutations = {
 
     room.chosen_sound = message.sound;
   },
+  TRACKING_CHANGE(state, message){
+    let room = state.rooms.find(room => {
+      return room.id === message.id;
+    });
+
+    room.tracking_state = message.tracking_state;
+  },
   DELETE_ROOM(state, message) {
     let i;
     state.rooms.forEach((room, index) => {
@@ -149,6 +156,16 @@ const actions = {
     try {
       await commit("SOUND_CHANGE", message);
     } catch (error) {
+      console.error(error);
+    }
+  },
+  async emitTrackingStateChange({}, {room, tracking_state}){
+    await this._vm.$socket.client.emit("tracking_state_change", { id: room.id, tracking_state });
+  },
+  async socket_trackingStateChange({commit}, message){
+    try{
+      await commit("TRACKING_CHANGE", message);
+    }catch(error){
       console.error(error);
     }
   },

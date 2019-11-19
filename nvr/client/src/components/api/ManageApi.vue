@@ -149,6 +149,12 @@ export default {
             "Создаёт событие в календаре в указанной комнате в указанное время (end_time, summary -- необязательно)",
           json:
             "{room_name: string, start_time: date(YYYY:MM:DDTHH:mm), end_time: date(YYYY:MM:DDTHH:mm), summary: string}"
+        },
+        {
+          name: "/tracking-change",
+          method: "POST",
+          doc: "Включает/отключает трекинг в указанной комнате",
+          json: "{room_name: string, tracking_state: bool}"
         }
       ]
     };

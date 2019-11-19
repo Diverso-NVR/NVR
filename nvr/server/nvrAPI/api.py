@@ -369,7 +369,6 @@ def stop_rec(current_user):
     if room.free:
         return "Already stoped", 401
 
-    room.processing = True
     db.session.commit()
 
     Thread(target=stop_record, args=(current_app._get_current_object(),
@@ -404,6 +403,19 @@ def sound_change(current_user):
     db.session.commit()
 
     return "Sound source changed", 200
+
+@api.route('/tracking-change', methods=['POST'])
+@auth_required
+def tracking_change():
+    post_data = request.get_json()
+    room_name = str(post_data['room_name'])
+    tracking_state = post_data['tracking_state']
+
+    room = Room.query.filter_by(name=room_name).first()
+    room.tracking_state = tracking_state
+    db.session.commit()
+
+    return "Tracking state changed", 200
 
 
 @api.route('/upload-merged', methods=["POST"])

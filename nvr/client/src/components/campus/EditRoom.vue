@@ -188,10 +188,10 @@ export default {
 
 <style scoped>
 .v-c {
-  margin: auto;
-  margin-left: 45%;
-  padding: auto;
   width: 30px;
   height: 30px;
+  margin-left: 45%;
+  margin-top: 5%; 
+  padding: auto;
 }
 </style>
