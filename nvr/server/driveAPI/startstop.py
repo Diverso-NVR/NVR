@@ -38,7 +38,8 @@ def config(room_id: int, name: str, sources: list) -> None:
     rooms[room_id]['vid'] = []
     for cam in sources:
         rooms[room_id]['vid'].append(cam['ip'])
-        if cam['sound']:
+        if cam['sound'] in ['cam', 'enc']:
+            print(cam)
             rooms[room_id
                   ]['sound'][cam['sound']].append(cam['ip'])
         if cam['main_cam']:
@@ -49,7 +50,6 @@ def config(room_id: int, name: str, sources: list) -> None:
                   ]['tracking'] = cam['ip']
 
 
-# TODO: do smth with rtsp protocols
 @nvr_db_context
 def start(room_id: int) -> None:
 
@@ -58,10 +58,10 @@ def start(room_id: int) -> None:
                                 for source in room.sources])
 
     try:
-        requests.post(TRACKING_URL, json={'ip': rooms[room_id]['tracking'].split('@')[-1]})
+        requests.post(TRACKING_URL, json={
+                      'ip': rooms[room_id]['tracking'].split('@')[-1]})
     except Exception as e:
         print(e)
-   
 
     if room.chosen_sound == "enc":
         enc = subprocess.Popen("ffmpeg -rtsp_transport http -i rtsp://" +

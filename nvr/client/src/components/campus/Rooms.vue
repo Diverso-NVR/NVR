@@ -297,12 +297,8 @@ export default {
   margin-top: 15px;
 }
 
-.v-datatable .v-input--selection-controls {
-  width: 30px;
-  height: 30px;
-  margin-left: 43%;
-  margin-top: 5%;
-  padding: auto;
+.v-datatable thead th.column.sortable {
+  padding-left: 8px;
 }
 
 .mobile {
