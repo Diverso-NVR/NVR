@@ -10,14 +10,14 @@ import {
   deleteAPIKey,
   getRooms
 } from "@/api";
-import { isValidJwt } from "@/utils";
+import { isValidToken } from "@/utils";
 
 Vue.use(Vuex);
 
 const state = {
   rooms: [],
   user: {},
-  jwt: "",
+  jwt: {token:localStorage.token || ''},
   users: []
 };
 const mutations = {
@@ -243,6 +243,15 @@ const actions = {
     }
   },
 
+  async setDataFromToken({state}){
+    const tokenParts = localStorage.token.split(".");
+    const body = JSON.parse(atob(tokenParts[1]));
+    state.user.email = body.sub.email;
+    state.user.role = body.sub.role;
+    state.user.api_key = body.sub.api_key;
+    return body.sub.role;
+  },
+
   async login({ commit, state }, userData) {
     try {
       commit("switchLoading");
@@ -314,7 +323,7 @@ const actions = {
 };
 const getters = {
   isAutheticated(state) {
-    return isValidJwt(state.jwt.token);
+    return isValidToken(state.jwt.token);
   },
   user(state) {
     return state.user;
