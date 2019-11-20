@@ -61,8 +61,8 @@ export default {
     switchColorMode({ commit }) {
       commit("switchColorMode");
     },
-    setColorMode({state}){
-      state.isDarkMode = localStorage.isDarkMode === 'true' ? true : false;
+    setColorMode({ state }) {
+      state.isDarkMode = localStorage.isDarkMode === "true" ? true : false;
     }
   },
   getters: {

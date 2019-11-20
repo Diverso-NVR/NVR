@@ -191,7 +191,7 @@ export default {
   width: 30px;
   height: 30px;
   margin-left: 45%;
-  margin-top: 5%; 
+  margin-top: 5%;
   padding: auto;
 }
 </style>

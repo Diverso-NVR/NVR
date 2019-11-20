@@ -32,15 +32,12 @@
               </v-btn-toggle>
             </td>
 
-
             <td class="text-xs-center">
-                <v-btn
+              <v-btn
                 flat
                 :class="props.item.tracking_state === true ? 'error': 'success'"
                 @click="trackingSwitch(props.item)"
-                >
-                  {{props.item.tracking_state === true ? 'Выкл': 'Вкл'}}
-                </v-btn>
+              >{{props.item.tracking_state === true ? 'Выкл': 'Вкл'}}</v-btn>
             </td>
 
             <td class="text-xs-center">
@@ -99,7 +96,7 @@
                   class="flex-item subheading key-elems"
                   data-label="Аудитория"
                 >{{ props.item.name }}</li>
-                 <li class="flex-item subheading" data-label="Источник звука">
+                <li class="flex-item subheading" data-label="Источник звука">
                   <v-btn-toggle mandatory v-model="props.item.chosen_sound">
                     <v-btn
                       flat
@@ -133,16 +130,13 @@
                     >Стоп</v-btn>
                   </v-btn-toggle>
                 </li>
-               
 
                 <li class="flex-item subheading" data-label="Трекинг">
-                <v-btn
-                flat
-                :class="props.item.tracking_state === true ? 'error': 'success'"
-                @click="trackingSwitch(props.item)"
-                >
-                  {{props.item.tracking_state === true ? 'Выкл': 'Вкл'}}
-                </v-btn>
+                  <v-btn
+                    flat
+                    :class="props.item.tracking_state === true ? 'error': 'success'"
+                    @click="trackingSwitch(props.item)"
+                  >{{props.item.tracking_state === true ? 'Выкл': 'Вкл'}}</v-btn>
                 </li>
 
                 <li class="flex-item subheading" data-label="Статус" v-switch="props.item.status">
@@ -186,11 +180,7 @@
         <v-flex xs6 sm4 md2>
           <v-text-field v-model.trim="newRoom" label="Новая аудитория"></v-text-field>
         </v-flex>
-        <v-btn
-          dark
-          depressed
-          @click="addRoom"
-        >Добавить</v-btn>
+        <v-btn dark depressed @click="addRoom">Добавить</v-btn>
       </v-layout>
     </v-layout>
   </v-app>
@@ -267,7 +257,10 @@ export default {
       this.$store.dispatch("emitSoundChange", { room, sound });
     },
     trackingSwitch(room) {
-      this.$store.dispatch("emitTrackingStateChange", { room, tracking_state:room.tracking_state });
+      this.$store.dispatch("emitTrackingStateChange", {
+        room,
+        tracking_state: room.tracking_state
+      });
     },
     startRec(room) {
       this.$store.dispatch("emitStartRec", { room });
@@ -304,14 +297,13 @@ export default {
   margin-top: 15px;
 }
 
-.v-datatable .v-input--selection-controls{
+.v-datatable .v-input--selection-controls {
   width: 30px;
   height: 30px;
   margin-left: 43%;
-  margin-top: 5%; 
+  margin-top: 5%;
   padding: auto;
 }
-
 
 .mobile {
   color: #333;
@@ -376,5 +368,4 @@ export default {
 .key-elems {
   width: 100%;
 }
-
 </style>

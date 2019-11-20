@@ -17,7 +17,7 @@ Vue.use(Vuex);
 const state = {
   rooms: [],
   user: {},
-  jwt: {token:localStorage.token || ''},
+  jwt: { token: localStorage.token || "" },
   users: []
 };
 const mutations = {
@@ -49,7 +49,7 @@ const mutations = {
 
     room.chosen_sound = message.sound;
   },
-  TRACKING_CHANGE(state, message){
+  TRACKING_CHANGE(state, message) {
     let room = state.rooms.find(room => {
       return room.id === message.id;
     });
@@ -159,13 +159,16 @@ const actions = {
       console.error(error);
     }
   },
-  async emitTrackingStateChange({}, {room, tracking_state}){
-    await this._vm.$socket.client.emit("tracking_state_change", { id: room.id, tracking_state });
+  async emitTrackingStateChange({}, { room, tracking_state }) {
+    await this._vm.$socket.client.emit("tracking_state_change", {
+      id: room.id,
+      tracking_state
+    });
   },
-  async socket_trackingStateChange({commit}, message){
-    try{
+  async socket_trackingStateChange({ commit }, message) {
+    try {
       await commit("TRACKING_CHANGE", message);
-    }catch(error){
+    } catch (error) {
       console.error(error);
     }
   },
@@ -243,20 +246,19 @@ const actions = {
     }
   },
 
-  async setDataFromToken({commit, state}){
-    try{
+  async setDataFromToken({ commit, state }) {
+    try {
       commit("switchLoading");
-    const tokenParts = localStorage.token.split(".");
-    const body = JSON.parse(atob(tokenParts[1]));
-    state.user.email = body.sub.email;
-    state.user.role = body.sub.role;
-    state.user.api_key = body.sub.api_key;
-    return body.sub.role;
-    }catch(error){
+      const tokenParts = localStorage.token.split(".");
+      const body = JSON.parse(atob(tokenParts[1]));
+      state.user.email = body.sub.email;
+      state.user.role = body.sub.role;
+      state.user.api_key = body.sub.api_key;
+      return body.sub.role;
+    } catch (error) {
       commit("setError", error);
       return "";
-    }
-    finally{
+    } finally {
       commit("switchLoading");
     }
   },

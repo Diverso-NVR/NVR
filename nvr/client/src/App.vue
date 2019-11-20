@@ -156,8 +156,8 @@ export default {
       });
     }
   },
-  beforeMount(){
-    this.$store.dispatch('setColorMode');
+  beforeMount() {
+    this.$store.dispatch("setColorMode");
   }
 };
 </script>

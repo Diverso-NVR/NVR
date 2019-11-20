@@ -102,9 +102,9 @@ class Room(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    free = db.Column(db.Boolean,  default=True)
-    tracking_state = db.Column(db.Boolean,  default=False)
-    timestamp = db.Column(db.Integer,  default=0)
+    free = db.Column(db.Boolean, default=True)
+    tracking_state = db.Column(db.Boolean, default=False)
+    timestamp = db.Column(db.Integer, default=0)
     chosen_sound = db.Column(db.String(100), default='enc')
     sources = db.relationship('Source', backref='room', lazy=False)
     drive = db.Column(db.String(200))

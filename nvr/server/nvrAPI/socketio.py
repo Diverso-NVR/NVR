@@ -23,7 +23,7 @@ class NvrNamespace(Namespace):
 
         emit('sound_change', {'id': room.id,
                               'sound': sound_type}, broadcast=True)
-    
+
     def on_tracking_state_change(self, msg_json):
         room_id = msg_json['id']
         tracking_state = msg_json['tracking_state']
@@ -32,8 +32,8 @@ class NvrNamespace(Namespace):
         room.tracking_state = not tracking_state
         db.session.commit()
 
-        emit('tracking_state_change', {'id':room.id,
-                                     'tracking_state':room.tracking_state}, broadcast=True)
+        emit('tracking_state_change', {
+             'id': room.id, 'tracking_state': room.tracking_state}, broadcast=True)
 
     def on_start_rec(self, msg_json):
         room_id = msg_json['id']

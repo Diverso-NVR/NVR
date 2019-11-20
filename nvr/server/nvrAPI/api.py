@@ -404,6 +404,7 @@ def sound_change(current_user):
 
     return "Sound source changed", 200
 
+
 @api.route('/tracking-change', methods=['POST'])
 @auth_required
 def tracking_change(current_user):
