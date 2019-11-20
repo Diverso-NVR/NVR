@@ -406,7 +406,7 @@ def sound_change(current_user):
 
 @api.route('/tracking-change', methods=['POST'])
 @auth_required
-def tracking_change():
+def tracking_change(current_user):
     post_data = request.get_json()
     room_name = str(post_data['room_name'])
     tracking_state = post_data['tracking_state']
