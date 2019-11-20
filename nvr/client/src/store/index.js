@@ -243,13 +243,22 @@ const actions = {
     }
   },
 
-  async setDataFromToken({state}){
+  async setDataFromToken({commit, state}){
+    try{
+      commit("switchLoading");
     const tokenParts = localStorage.token.split(".");
     const body = JSON.parse(atob(tokenParts[1]));
     state.user.email = body.sub.email;
     state.user.role = body.sub.role;
     state.user.api_key = body.sub.api_key;
     return body.sub.role;
+    }catch(error){
+      commit("setError", error);
+      return "";
+    }
+    finally{
+      commit("switchLoading");
+    }
   },
 
   async login({ commit, state }, userData) {
