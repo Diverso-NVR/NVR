@@ -9,13 +9,15 @@ from threading import Thread
 import os
 import uuid
 import jwt
-from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions
+import requests
+from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions, create_event_
 from driveAPI.startstop import start, stop, upload_file
 from driveAPI.driveSettings import create_folder, move_file
 
 api = Blueprint('api', __name__)
 
 CAMPUS = os.environ.get('CAMPUS')
+TRACKING_URL = os.environ.get('TRACKING_URL')
 
 
 # AUTHENTICATE
@@ -215,8 +217,31 @@ def move_file():
     room = Room.query.get(room_id)
 
     move_file(file_id, room.drive)
-    return "Success", 201
+    return "Success", 200
 
+
+@api.route('/create-event', methods=['POST'])
+@auth_required
+def create_event(current_user):
+    data = request.get_json()
+
+    try:
+        room_name = str(data['room_name'])
+        start_time = data['start_time']
+    except KeyError:
+        return jsonify({'error': 'Key error: room name and start time required'}), 400
+
+    end_time = data.get('end_time', None)
+    summary = data.get('summary', '')
+
+    try:
+        event_link = create_event_(
+            current_app._get_current_object(), room_name=room_name,
+            start_time=start_time, end_time=end_time, summary=summary)
+    except ValueError:
+        return jsonify({'error': 'Format error: date format should be YYYY-MM-DDTHH:mm'}), 400
+
+    return jsonify({'message': f"Successfully created event: {event_link}"}), 201
 
 # RECORD AND GOOGLE API
 @api.route('/rooms', methods=['POST'])
@@ -346,7 +371,6 @@ def stop_rec(current_user):
     if room.free:
         return "Already stoped", 401
 
-    room.processing = True
     db.session.commit()
 
     Thread(target=stop_record, args=(current_app._get_current_object(),
@@ -381,6 +405,56 @@ def sound_change(current_user):
     db.session.commit()
 
     return "Sound source changed", 200
+
+
+@api.route('/tracking', methods=['POST'])
+@auth_required
+def tracking_manage(current_user):
+    post_data = request.get_json()
+    if not post_data:
+        return jsonify({"error": "json data required"}), 400
+
+    room_name = post_data.get('room_name')
+    command = post_data.get('command')
+
+    if not room_name:
+        return jsonify({"error": "Room name required"}), 400
+    if not command:
+        return jsonify({"error": "Command required"}), 400
+    if command not in ['start', 'stop']:
+        return jsonify({'error': "Incorrect command"}), 400
+
+    room = Room.query.filter_by(name=str(room_name)).first()
+    if not room:
+        return jsonify({"error": "No room found with given room_name"}), 404
+
+    tracking_cam_ip = get_tracking_cam(
+        [s.to_dict() for s in room.sources])
+
+    if not tracking_cam_ip:
+        return jsonify({"error": "No tracking cam selected in requested room"}), 405
+
+    command = command.lower()
+
+    try:
+        if command == 'start':
+            res = requests.post(TRACKING_URL, json={
+                                'ip': tracking_cam_ip}, timeout=2)
+        else:
+            res = requests.delete(TRACKING_URL)
+
+        room.tracking_state = True if command == 'start' else False
+        db.session.commit()
+
+        return jsonify(res.json())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 417
+
+
+def get_tracking_cam(sources):
+    for source in sources:
+        if source['tracking']:
+            return source['ip'].split('@')[-1]
 
 
 @api.route('/upload-merged', methods=["POST"])

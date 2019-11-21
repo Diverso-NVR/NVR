@@ -110,7 +110,7 @@ export default {
           name: "/rooms/",
           method: "POST",
           doc: "Создаёт комнату с названием 'name'",
-          json: "{name: <имя создаваемой комнаты>}"
+          json: "{name: string}"
         },
         {
           name: "/rooms/{id}",
@@ -121,26 +121,39 @@ export default {
           name: "/rooms/{id}",
           method: "PUT",
           doc: "Изменяет данные об источниках в комнате с переданным id",
-          json: "{sources: <полный список источников записи комнаты>}"
+          json: "{sources: array}"
         },
         {
           name: "/start-record",
           method: "POST",
           doc: "Запускает запись в комнате с переданным id",
-          json: "{id: <id комнаты>}"
+          json: "{id: int}"
         },
         {
           name: "/stop-record",
           method: "POST",
           doc: "Останавливает запись в комнате с переданным id",
-          json: "{id: <id комнаты>}"
+          json: "{id: int}"
         },
         {
           name: "/sound-change",
           method: "POST",
-          doc:
-            "Изменяет источник звука для комнаты. sound принимает одно из значений: enc -- кодер, cam -- камера",
-          json: "{id: <id комнаты>, sound: <cam || enc>}"
+          doc: `Изменяет источник звука для комнаты. 
+            sound принимает одно из значений: "enc" -- кодер, "cam" -- камера`,
+          json: `{id: int, sound: string}`
+        },
+        {
+          name: "/create-event",
+          method: "POST",
+          doc: `Создаёт событие в календаре в указанной комнате в указанное время. Формат дат: "YYYY-MM-DDTHH:mm", Например: 2019-08-21T15:00`,
+          json:
+            "{room_name: string, start_time: string, end_time: string, summary: string}"
+        },
+        {
+          name: "/tracking",
+          method: "POST",
+          doc: `Включает/отключает трекинг в указанной комнате. command принимает значения "start", "stop"`,
+          json: `{room_name: string, command: string}`
         }
       ]
     };

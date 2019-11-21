@@ -79,8 +79,8 @@ export default {
           email: this.email,
           password: this.password
         });
-        this.$router.push("/rooms");
         if (res) {
+          this.$router.push("/rooms");
           await this.$store.dispatch("loadRooms");
           if (/^\w*admin$/.test(res)) await this.$store.dispatch("getUsers");
         }

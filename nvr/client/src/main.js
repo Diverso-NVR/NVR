@@ -19,6 +19,13 @@ Vue.use(VSwitch);
 Vue.use(Vuetify);
 Vue.config.productionTip = false;
 
+if (store.getters.isAutheticated) {
+  store.dispatch("setDataFromToken").then(userRole => {
+    store.dispatch("loadRooms");
+    if (/^\w*admin$/.test(userRole)) store.dispatch("getUsers");
+  });
+}
+
 new Vue({
   el: "#app",
   router,

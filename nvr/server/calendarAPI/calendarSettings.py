@@ -7,6 +7,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 import json
 from pprint import pprint
+from datetime import datetime, timedelta
 
 from nvrAPI.models import nvr_db_context, Room
 
@@ -49,6 +50,36 @@ def add_attachment(calendar_id: str, event_id: str, file_id: str) -> None:
     calendar_service.events().patch(calendarId=calendar_id, eventId=event_id,
                                     body=changes,
                                     supportsAttachments=True).execute()
+
+
+@nvr_db_context
+def create_event_(room_name: str, start_time: str, end_time: str, summary: str) -> str:
+    """
+        format 2019-11-12T15:00
+    """
+    room = Room.query.filter_by(name=room_name).first()
+    date_format = "%Y-%m-%dT%H:%M:%S"
+
+    start_dateTime = datetime.strptime(start_time, date_format[:-3])
+    end_StartTime = datetime.strptime(end_time, date_format[:-3]) \
+        if end_time else start_dateTime + timedelta(minutes=80)
+
+    event = {
+        'summary': summary,
+        'start': {
+            'dateTime': start_dateTime.strftime(date_format),
+            'timeZone': "Europe/Moscow"
+        },
+        'end': {
+            'dateTime': end_StartTime.strftime(date_format),
+            'timeZone': "Europe/Moscow"
+        }
+    }
+
+    event = calendar_service.events().insert(
+        calendarId=room.calendar, body=event).execute()
+
+    return event['htmlLink']
 
 
 @nvr_db_context

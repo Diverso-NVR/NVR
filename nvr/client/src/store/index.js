@@ -10,14 +10,14 @@ import {
   deleteAPIKey,
   getRooms
 } from "@/api";
-import { isValidJwt } from "@/utils";
+import { isValidToken } from "@/utils";
 
 Vue.use(Vuex);
 
 const state = {
   rooms: [],
   user: {},
-  jwt: "",
+  jwt: { token: localStorage.token || "" },
   users: []
 };
 const mutations = {
@@ -48,6 +48,13 @@ const mutations = {
     });
 
     room.chosen_sound = message.sound;
+  },
+  TRACKING_CHANGE(state, message) {
+    let room = state.rooms.find(room => {
+      return room.id === message.id;
+    });
+
+    room.tracking_state = message.tracking_state;
   },
   DELETE_ROOM(state, message) {
     let i;
@@ -152,6 +159,22 @@ const actions = {
       console.error(error);
     }
   },
+  async emitTrackingStateChange({}, { room, tracking_state }) {
+    await this._vm.$socket.client.emit("tracking_state_change", {
+      id: room.id,
+      tracking_state
+    });
+  },
+  async socket_trackingStateChange({ commit }, message) {
+    try {
+      await commit("TRACKING_CHANGE", message);
+      let msg = `Трекинг комнаты ${message.room_name}`;
+      msg += message.tracking_state ? " включён" : " отключён";
+      commit("setMessage", msg);
+    } catch (error) {
+      console.error(error);
+    }
+  },
   async emitDeleteRoom({}, { room }) {
     await this._vm.$socket.client.emit("delete_room", { id: room.id });
   },
@@ -221,6 +244,23 @@ const actions = {
       commit("setUsers", res.data);
     } catch (error) {
       commit("setError", error);
+    } finally {
+      commit("switchLoading");
+    }
+  },
+
+  async setDataFromToken({ commit, state }) {
+    try {
+      commit("switchLoading");
+      const tokenParts = localStorage.token.split(".");
+      const body = JSON.parse(atob(tokenParts[1]));
+      state.user.email = body.sub.email;
+      state.user.role = body.sub.role;
+      state.user.api_key = body.sub.api_key;
+      return body.sub.role;
+    } catch (error) {
+      commit("setError", error);
+      return "";
     } finally {
       commit("switchLoading");
     }
@@ -297,7 +337,7 @@ const actions = {
 };
 const getters = {
   isAutheticated(state) {
-    return isValidJwt(state.jwt.token);
+    return isValidToken(state.jwt.token);
   },
   user(state) {
     return state.user;

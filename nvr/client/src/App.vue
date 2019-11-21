@@ -152,9 +152,12 @@ export default {
     onLogout() {
       this.$store.dispatch("logout").then(() => {
         this.$store.dispatch("clearTimer");
-        this.$router.push("/");
+        this.$router.push("/login");
       });
     }
+  },
+  beforeMount() {
+    this.$store.dispatch("setColorMode");
   }
 };
 </script>
