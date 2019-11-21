@@ -259,7 +259,7 @@ export default {
     trackingSwitch(room) {
       this.$store.dispatch("emitTrackingStateChange", {
         room,
-        tracking_state: room.tracking_state
+        tracking_state: !room.tracking_state
       });
     },
     startRec(room) {

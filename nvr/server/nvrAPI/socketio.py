@@ -2,6 +2,7 @@ from flask_socketio import emit, Namespace
 from .models import db, Room, Source, User, nvr_db_context
 from threading import Thread
 from flask import current_app
+import requests
 
 from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions
 from driveAPI.startstop import start, stop
@@ -10,6 +11,8 @@ import time
 import os
 
 CAMPUS = os.environ.get('CAMPUS')
+
+TRACKING_URL = os.environ.get('TRACKING_URL')
 
 
 class NvrNamespace(Namespace):
@@ -26,14 +29,33 @@ class NvrNamespace(Namespace):
 
     def on_tracking_state_change(self, msg_json):
         room_id = msg_json['id']
-        tracking_state = msg_json['tracking_state']
+        new_tracking_state = msg_json['tracking_state']
 
         room = Room.query.get(room_id)
-        room.tracking_state = not tracking_state
+
+        tracking_cam_ip = NvrNamespace.get_tracking_cam(
+            [s.to_dict() for s in room.sources])
+
+        if not tracking_cam_ip:
+            return
+
+        if new_tracking_state:
+            requests.post(TRACKING_URL, json={
+                'ip': tracking_cam_ip}, timeout=4)
+        else:
+            requests.delete(TRACKING_URL, timeout=4)
+        room.tracking_state = new_tracking_state
         db.session.commit()
 
         emit('tracking_state_change', {
-             'id': room.id, 'tracking_state': room.tracking_state}, broadcast=True)
+             'id': room.id, 'tracking_state': room.tracking_state, 'room_name': room.name},
+             broadcast=True)
+
+    @staticmethod
+    def get_tracking_cam(sources):
+        for source in sources:
+            if source['tracking']:
+                return source['ip'].split('@')[-1]
 
     def on_start_rec(self, msg_json):
         room_id = msg_json['id']

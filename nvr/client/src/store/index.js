@@ -168,6 +168,9 @@ const actions = {
   async socket_trackingStateChange({ commit }, message) {
     try {
       await commit("TRACKING_CHANGE", message);
+      let msg = `Трекинг комнаты ${message.room_name}`;
+      msg += message.tracking_state ? " включён" : " отключён";
+      commit("setMessage", msg);
     } catch (error) {
       console.error(error);
     }

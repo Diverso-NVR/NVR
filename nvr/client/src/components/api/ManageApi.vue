@@ -138,23 +138,22 @@ export default {
         {
           name: "/sound-change",
           method: "POST",
-          doc:
-            "Изменяет источник звука для комнаты. sound принимает одно из значений: enc -- кодер, cam -- камера",
-          json: "{id: int, sound: string = cam || enc}"
+          doc: `Изменяет источник звука для комнаты. 
+            sound принимает одно из значений: "enc" -- кодер, "cam" -- камера`,
+          json: `{id: int, sound: string}`
         },
         {
           name: "/create-event",
           method: "POST",
-          doc:
-            "Создаёт событие в календаре в указанной комнате в указанное время (end_time, summary -- необязательно)",
+          doc: `Создаёт событие в календаре в указанной комнате в указанное время. Формат дат: "YYYY-MM-DDTHH:mm", Например: 2019-08-21T15:00`,
           json:
-            "{room_name: string, start_time: date(YYYY:MM:DDTHH:mm), end_time: date(YYYY:MM:DDTHH:mm), summary: string}"
+            "{room_name: string, start_time: string, end_time: string, summary: string}"
         },
         {
-          name: "/tracking-change",
+          name: "/tracking",
           method: "POST",
-          doc: "Включает/отключает трекинг в указанной комнате",
-          json: "{room_name: string, tracking_state: bool}"
+          doc: `Включает/отключает трекинг в указанной комнате. command принимает значения "start", "stop"`,
+          json: `{room_name: string, command: string}`
         }
       ]
     };
