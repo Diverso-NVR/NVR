@@ -152,7 +152,7 @@ export default {
         {
           name: "/tracking",
           method: "POST",
-          doc: `Включает/отключает трекинг в указанной комнате. command принимает значения "start", "stop"`,
+          doc: `Включает/отключает трекинг в указанной комнате. command принимает значения "start", "stop", "status"`,
           json: `{room_name: string, command: string}`
         }
       ]

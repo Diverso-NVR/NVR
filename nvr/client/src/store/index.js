@@ -226,10 +226,10 @@ const actions = {
     commit("GRANT_ACCESS", message);
   },
 
-  async loadRooms({ commit }) {
+  async loadRooms({ commit, state }) {
     try {
       commit("switchLoading");
-      let res = await getRooms();
+      let res = await getRooms(state.jwt.token);
       commit("setRooms", res.data);
     } catch (error) {
       commit("setError", error);

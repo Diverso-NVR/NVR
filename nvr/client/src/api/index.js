@@ -44,6 +44,8 @@ export function deleteAPIKey(email, token) {
 }
 
 //rooms
-export function getRooms() {
-  return axios.get(`${API_URL}/rooms/`);
+export function getRooms(token) {
+  return axios.get(`${API_URL}/rooms/`, {
+    headers: { Authorization: `Bearer: ${token}` }
+  });
 }

@@ -20,7 +20,7 @@ CAMPUS = os.environ.get('CAMPUS')
 TRACKING_URL = os.environ.get('TRACKING_URL')
 
 
-# AUTHENTICATE
+# DECORATORS
 def auth_required(f):
     """
     Verification wrapper to make sure that user is logged in
@@ -53,51 +53,66 @@ def auth_required(f):
                 return jsonify(invalid_msg), 401
             except Exception as e:
                 print(e)
-                return jsonify({'error': "Check logs"}), 401
+                return jsonify({'error': str(e)}), 400
         elif api_key:
             try:
                 user = User.query.filter_by(api_key=api_key).first()
                 if not user:
-                    raise RuntimeError('Пользователь не найден')
+                    raise RuntimeError('Неверный ключ API')
                 return f(user, *args, **kwargs)
             except Exception as e:
                 print(e)
-                return jsonify({'error': "Check logs"}), 401
+                return jsonify({'error': str(e)}), 500
 
         return jsonify(invalid_msg), 401
 
     return _verify
 
 
+def json_data_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        post_data = request.get_json()
+        if not post_data:
+            return jsonify({"error": "json data required"}), 400
+
+        return f(*args, **kwargs)
+
+    return wrapper
+
+# AUTHENTICATE
 @api.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
     user = User(**data)
+
     try:
         db.session.add(user)
         db.session.commit()
     except:
-        return jsonify({"message": 'Пользователь с данной почтой существует'}), 400
+        return jsonify({"message": 'Пользователь с данной почтой существует'}), 409
 
     token_expiration = 600
+
     try:
         send_verify_email(user, token_expiration)
         Thread(target=user.delete_user_after_token_expiration,
                args=(current_app._get_current_object(), token_expiration)).start()
     except Exception as e:
         print(e)
+        return jsonify({"message": str(e)}), 500
 
-    return jsonify(user.to_dict()), 201
+    return jsonify(user.to_dict()), 202
 
 
 @api.route('/verify-email/<token>', methods=['POST', 'GET'])
 def verify_email(token):
     user = User.verify_email_token(token)
     if not user:
-        return "Ошибка. Время на подтверждение вышло", 401
+        return "Время на подтверждение вышло. Можете зарегистрироваться ещё раз", 404
 
     if user.email_verified:
-        return "Почта уже подтверждена", 401
+        return "Почта уже подтверждена", 200
 
     user.email_verified = True
     db.session.commit()
@@ -105,10 +120,10 @@ def verify_email(token):
     try:
         send_access_request_email(
             [u.email for u in User.query.all() if u.role != 'user'], user.email)
-    except Exception:
-        pass
+    except Exception as e:
+        return str(e), 500
 
-    return "Подтверждение успешно, ожидайте одобрения администратора", 201
+    return "Подтверждение успешно, ожидайте одобрения администратора", 202
 
 
 @api.route('/login', methods=['POST'])
@@ -132,14 +147,14 @@ def login():
         'exp': datetime.utcnow() + timedelta(minutes=80)},
         current_app.config['SECRET_KEY'])
 
-    return jsonify({'token': token.decode('UTF-8')})
+    return jsonify({'token': token.decode('UTF-8')}), 202
 
 
 @api.route('/users', methods=['GET'])
 @auth_required
 def get_users(current_user):
     users = [u.to_dict() for u in User.query.all() if u.email_verified]
-    return jsonify(users)
+    return jsonify(users), 200
 
 
 @api.route('/users/<user_id>', methods=['PUT'])
@@ -147,6 +162,7 @@ def get_users(current_user):
 def grant_access(current_user, user_id):
     if current_user.role == 'user':
         return jsonify({'message': "Ошибка доступа"}), 401
+
     user = User.query.get(user_id)
     user.access = True
     db.session.commit()
@@ -154,7 +170,7 @@ def grant_access(current_user, user_id):
     Thread(target=give_permissions, args=(
         current_app._get_current_object(), CAMPUS, user.email)).start()
 
-    return "Success", 201
+    return jsonify({"message": "Access granted"}), 202
 
 
 @api.route('/users/roles/<user_id>', methods=['PUT'])
@@ -162,10 +178,11 @@ def grant_access(current_user, user_id):
 def user_role(current_user, user_id):
     if current_user.role == 'user':
         return jsonify({'message': "Ошибка доступа"}), 401
+
     user = User.query.get(user_id)
     user.role = request.get_json()['role']
     db.session.commit()
-    return "Success", 201
+    return jsonify({"message": "User role changed"}), 200
 
 
 @api.route('/users/<user_id>', methods=['DELETE'])
@@ -173,10 +190,11 @@ def user_role(current_user, user_id):
 def delete_user(current_user, user_id):
     if current_user.role == 'user':
         return jsonify({'message': "Ошибка доступа"}), 401
+
     user = User.query.get(user_id)
     db.session.delete(user)
     db.session.commit()
-    return "Success", 201
+    return jsonify({"message": "User deleted"}), 200
 
 
 @api.route('/api-key/<email>', methods=['POST', 'PUT', 'DELETE'])
@@ -186,76 +204,88 @@ def create_api_key(current_user, email):
 
     if request.method == 'POST':
         if user.api_key:
-            return jsonify({'message': 'Ключ API уже существует'}), 401
+            return jsonify({'message': 'Ключ API уже существует'}), 409
 
         user.api_key = uuid.uuid4().hex
         db.session.commit()
 
-        return jsonify({'api_key': user.api_key}), 200
+        return jsonify({'api_key': user.api_key}), 201
 
     if request.method == 'PUT':
         user.api_key = uuid.uuid4().hex
         db.session.commit()
 
-        return jsonify({'api_key': user.api_key}), 200
+        return jsonify({'api_key': user.api_key}), 202
 
     if request.method == 'DELETE':
         user.api_key = None
         db.session.commit()
 
-        return jsonify({'api_key': user.api_key}), 200
+        return jsonify({'api_key': user.api_key}), 202
 
 
 # GOOGLE API
-@api.route('/move-file', methods=['POST'])
-def move_file():
-    data = request.get_json()
+# @api.route('/move-file', methods=['POST'])
+# @auth_required
+# @json_data_required
+# def move_file(current_user):
+#     data = request.get_json()
 
-    file_id = data['file_id']
-    room_id = data['room_id']
+#     file_id = data['file_id']
+#     room_id = data['room_id']
 
-    room = Room.query.get(room_id)
+#     room = Room.query.get(room_id)
 
-    move_file(file_id, room.drive)
-    return "Success", 200
+#     move_file(file_id, room.drive)
+#     return "Success", 200
 
 
 @api.route('/create-event', methods=['POST'])
 @auth_required
+@json_data_required
 def create_event(current_user):
     data = request.get_json()
 
-    try:
-        room_name = str(data['room_name'])
-        start_time = data['start_time']
-    except KeyError:
-        return jsonify({'error': 'Key error: room name and start time required'}), 400
+    room_name = data.get('room_name')
+    start_time = data.get('start_time')
 
-    end_time = data.get('end_time', None)
+    if not room_name:
+        return jsonify({"error": "Room name required"}), 400
+    if not start_time:
+        return jsonify({"error": "Start time required"}), 400
+
+    end_time = data.get('end_time')
     summary = data.get('summary', '')
 
     try:
         event_link = create_event_(
-            current_app._get_current_object(), room_name=room_name,
+            current_app._get_current_object(), room_name=str(room_name),
             start_time=start_time, end_time=end_time, summary=summary)
     except ValueError:
         return jsonify({'error': 'Format error: date format should be YYYY-MM-DDTHH:mm'}), 400
+    except NameError:
+        return jsonify({'error': f'No room found with name: {room_name}'}), 404
 
     return jsonify({'message': f"Successfully created event: {event_link}"}), 201
 
 # RECORD AND GOOGLE API
-@api.route('/rooms', methods=['POST'])
+@api.route('/rooms/', methods=['POST'])
 @auth_required
+@json_data_required
 def create_room(current_user):
     if current_user.role == 'user':
         return jsonify({'message': "Ошибка доступа"}), 401
 
-    name = request.get_json()['name']
+    post_data = request.get_json()
+    room_name = post_data.get('room_name')
+
+    if not room_name:
+        return jsonify({"error": "Room name required"}), 400
 
     Thread(target=config_room, args=(
-        current_app._get_current_object(), name)).start()
+        current_app._get_current_object(), room_name)).start()
 
-    return jsonify({'name': name}), 201
+    return jsonify({'name': room_name}), 201
 
 
 @nvr_db_context
@@ -275,18 +305,29 @@ def config_room(name):
 
 
 @api.route('/rooms/', methods=['GET'])
-def get_rooms():
-    rooms = Room.query.all()
-    return jsonify([r.to_dict() for r in rooms]), 200
-
-
-@api.route('/rooms/<room_id>', methods=['DELETE'])
 @auth_required
-def delete_room(current_user, room_id):
+def get_rooms(current_user):
+    return jsonify([r.to_dict() for r in Room.query.all()]), 200
+
+
+@api.route('/rooms/<room_name>', methods=['GET'])
+@auth_required
+def get_room(current_user, room_name):
+    return jsonify({"room": Room.query.filter_by(name=str(room_name)).first().to_dict()}), 200
+
+
+@api.route('/rooms/<room_name>', methods=['DELETE'])
+@auth_required
+def delete_room(current_user, room_name=None):
     if current_user.role == 'user':
         return jsonify({'message': "Ошибка доступа"}), 401
 
-    room = Room.query.get(room_id)
+    if not room_name:
+        return jsonify({"error": "Room name required"}), 400
+
+    room = Room.query.filter_by(name=str(room_name)).first()
+    if not room:
+        return jsonify({"error": "No room found with given room_name"}), 404
 
     Thread(target=delete_calendar, args=(room.calendar,)).start()
 
@@ -296,14 +337,22 @@ def delete_room(current_user, room_id):
     return "Success", 201
 
 
-@api.route("/rooms/<room_id>", methods=['PUT'])
+@api.route("/rooms/", methods=['PUT'])
 @auth_required
-def edit_room(current_user, room_id):
+@json_data_required
+def edit_room(current_user):
     if current_user.role == 'user':
         return jsonify({'message': "Ошибка доступа"}), 401
 
     post_data = request.get_json()
-    room = Room.query.get(room_id)
+
+    room_name = post_data.get('room_name')
+    if not room_name:
+        return jsonify({"error": "Room name required"}), 400
+    room = Room.query.filter_by(name=str(room_name)).first()
+    if not room:
+        return jsonify({"error": "No room found with given room_name"}), 404
+
     room.sources = []
     for s in post_data['sources']:
         if s.get('id'):
@@ -313,40 +362,46 @@ def edit_room(current_user, room_id):
         room.sources.append(source)
         source.ip = s.get('ip', "0.0.0.0")
         source.name = s.get('name', 'камера')
-        source.sound = s.get('sound', None)
+        source.sound = s.get('sound', 'enc')
         source.tracking = s.get('tracking', False)
         source.main_cam = s.get('main_cam', False)
-        source.room_id = room_id
+        source.room_id = room.id
 
     db.session.commit()
-    return "Success", 200
+    return jsonify({"message": "Room edited"}), 200
 
 
 @api.route('/start-record', methods=['POST'])
 @auth_required
+@json_data_required
 def start_rec(current_user):
     post_data = request.get_json()
-    room_id = post_data['id']
-    room = Room.query.get(room_id)
+    room_name = post_data.get('room_name')
+
+    if not room_name:
+        return jsonify({"error": "Room name required"}), 400
+    room = Room.query.filter_by(name=str(room_name)).first()
+    if not room:
+        return jsonify({"error": "No room found with given room_name"}), 404
 
     if not room.free:
-        return "Already recording", 401
+        return jsonify({"message": "Already recording"}), 409
 
     room.free = False
     db.session.commit()
 
     Thread(
         target=start_timer,
-        args=(current_app._get_current_object(), room_id),
+        args=(current_app._get_current_object(), room.id),
         daemon=True
     ).start()
 
     Thread(
         target=start,
-        args=(current_app._get_current_object(), room_id)
+        args=(current_app._get_current_object(), room.id)
     ).start()
 
-    return "Started", 200
+    return jsonify({"message": f"Record started in {room.name}"}), 200
 
 
 @nvr_db_context
@@ -359,24 +414,27 @@ def start_timer(room_id: int) -> None:
 
 @api.route('/stop-record', methods=["POST"])
 @auth_required
+@json_data_required
 def stop_rec(current_user):
     post_data = request.get_json()
-    room_id = post_data['id']
+    room_name = post_data.get('room_name')
+
+    if not room_name:
+        return jsonify({"error": "Room name required"}), 400
+    room = Room.query.filter_by(name=str(room_name)).first()
+    if not room:
+        return jsonify({"error": "No room found with given room_name"}), 404
 
     calendar_id = post_data.get('calendar_id')
     event_id = post_data.get('event_id')
 
-    room = Room.query.get(room_id)
-
     if room.free:
-        return "Already stoped", 401
-
-    db.session.commit()
+        return jsonify({"message": "Already stopped"}), 409
 
     Thread(target=stop_record, args=(current_app._get_current_object(),
-                                     room_id, calendar_id, event_id)).start()
+                                     room.id, calendar_id, event_id)).start()
 
-    return 'Stopped', 200
+    return jsonify({"message": f"Record stopped in {room.name}"}), 200
 
 
 @nvr_db_context
@@ -395,34 +453,47 @@ def stop_record(room_id, calendar_id, event_id):
 
 @api.route('/sound-change', methods=['POST'])
 @auth_required
+@json_data_required
 def sound_change(current_user):
     post_data = request.get_json()
-    room_id = post_data['id']
-    sound_type = post_data['sound']
+    room_name = post_data.get('room_name')
+    sound_type = post_data.get('sound')
 
-    room = Room.query.get(room_id)
+    if not sound_type:
+        return jsonify({"error": "Sound source required"}), 400
+
+    if not room_name:
+        return jsonify({"error": "Room name required"}), 400
+    room = Room.query.filter_by(name=str(room_name)).first()
+    if not room:
+        return jsonify({"error": "No room found with given room_name"}), 404
+
     room.chosen_sound = sound_type
     db.session.commit()
 
-    return "Sound source changed", 200
+    return jsonify({"message": "Sound source changed"}), 200
 
 
 @api.route('/tracking', methods=['POST'])
 @auth_required
+@json_data_required
 def tracking_manage(current_user):
     post_data = request.get_json()
-    if not post_data:
-        return jsonify({"error": "json data required"}), 400
 
     room_name = post_data.get('room_name')
     command = post_data.get('command')
 
-    if not room_name:
-        return jsonify({"error": "Room name required"}), 400
     if not command:
         return jsonify({"error": "Command required"}), 400
-    if command not in ['start', 'stop']:
+    if command not in ['start', 'stop', 'status']:
         return jsonify({'error': "Incorrect command"}), 400
+
+    if command == 'status':
+        res = requests.get(f'{TRACKING_URL}/status', timeout=5)
+        return jsonify(res.json()), 200
+
+    if not room_name:
+        return jsonify({"error": "Room name required"}), 400
 
     room = Room.query.filter_by(name=str(room_name)).first()
     if not room:
@@ -438,15 +509,15 @@ def tracking_manage(current_user):
 
     try:
         if command == 'start':
-            res = requests.post(TRACKING_URL, json={
-                                'ip': tracking_cam_ip}, timeout=2)
+            res = requests.post(f'{TRACKING_URL}/track', json={
+                                'ip': tracking_cam_ip}, timeout=5)
         else:
-            res = requests.delete(TRACKING_URL)
+            res = requests.delete(f'{TRACKING_URL}/track')
 
         room.tracking_state = True if command == 'start' else False
         db.session.commit()
 
-        return jsonify(res.json())
+        return jsonify(res.json()), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 417
 
@@ -459,10 +530,13 @@ def get_tracking_cam(sources):
 
 @api.route('/upload-merged', methods=["POST"])
 @auth_required
+@json_data_required
 def upload_merged(current_user):
     post_data = request.get_json(force=True)
 
-    room_id = post_data["room_id"]
+    room_id = post_data.get("room_id")
+    if not room_id:
+        return jsonify({"error": "Room id required"}), 400
 
     room = Room.query.get(room_id)
 
@@ -476,4 +550,4 @@ def upload_merged(current_user):
            daemon=True
            ).start()
 
-    return "Video uploaded", 200
+    return jsonify({"message": "Video uploaded"}), 200
