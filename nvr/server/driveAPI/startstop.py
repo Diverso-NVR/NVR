@@ -57,7 +57,7 @@ def start(room_id: int) -> None:
                                 for source in room.sources])
 
     if room.chosen_sound == "enc":
-        enc = subprocess.Popen("ffmpeg -rtsp_transport http -i rtsp://" +
+        enc = subprocess.Popen("ffmpeg -use_wallclock_as_timestamps true -rtsp_transport tcp -i rtsp://" +
                                rooms[room_id]['sound']['enc'][0] +
                                " -y -c:a copy -vn -f mp4 " + home + "/vids/sound_"
                                + record_names[room_id] + ".aac", shell=True, preexec_fn=os.setsid)
@@ -70,7 +70,7 @@ def start(room_id: int) -> None:
         processes[room_id].append(camera)
 
     for cam in rooms[room_id]['vid']:
-        process = subprocess.Popen("ffmpeg -rtsp_transport tcp -i rtsp://" +
+        process = subprocess.Popen("ffmpeg -use_wallclock_as_timestamps true -rtsp_transport tcp -i rtsp://" +
                                    cam + " -y -c:v copy -an -f mp4 " + home + "/vids/vid_" +
                                    record_names[room_id] + cam.split('/')[0].split('.')[-1] + ".mp4", shell=True,
                                    preexec_fn=os.setsid)
