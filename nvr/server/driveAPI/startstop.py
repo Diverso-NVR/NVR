@@ -82,11 +82,6 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
 
     kill_records(room_id)
 
-    try:
-        requests.delete(TRACKING_URL)
-    except Exception as e:
-        print(e)
-
     screen_num = record_names[room_id] + \
         rooms[room_id]['sound']['enc'][0].split('/')[0].split('.')[-1]
     cam_num = record_names[room_id] + \
