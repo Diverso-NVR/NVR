@@ -80,6 +80,7 @@ def run_daemon(app) -> None:
         events(app)
         current_time = datetime.now()
         for room in rooms:
+            print(room['event'])
             if room['event'] == {}:
                 continue
             start = parse_date(room['event']['start'].get('dateTime'))
