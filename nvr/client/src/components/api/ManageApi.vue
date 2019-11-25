@@ -107,33 +107,35 @@ export default {
           doc: "Возвращает массив словарей данных о комнатах в формате json"
         },
         {
-          name: "/rooms/",
+          name: "/rooms/{room_name}",
+          method: "GET",
+          doc: "Возвращает комнату с названием room_name в формате json"
+        },
+        {
+          name: "/rooms/{room_name}",
           method: "POST",
-          doc: "Создаёт комнату с названием 'name'",
-          json: "{name: string}"
+          doc: "Создаёт комнату с названием 'room_name'"
         },
         {
-          name: "/rooms/{id}",
+          name: "/rooms/{room_name}",
           method: "DELETE",
-          doc: "Удаляет комнату по id"
+          doc: "Удаляет комнату по названию"
         },
         {
-          name: "/rooms/{id}",
+          name: "/rooms/{room_name}",
           method: "PUT",
           doc: "Изменяет данные об источниках в комнате с переданным id",
           json: "{sources: array}"
         },
         {
-          name: "/start-record",
+          name: "/start-record/room_name",
           method: "POST",
-          doc: "Запускает запись в комнате с переданным id",
-          json: "{id: int}"
+          doc: "Запускает запись в комнате с переданным room_name"
         },
         {
-          name: "/stop-record",
+          name: "/stop-record/room_name",
           method: "POST",
-          doc: "Останавливает запись в комнате с переданным id",
-          json: "{id: int}"
+          doc: "Останавливает запись в комнате с переданным room_name"
         },
         {
           name: "/sound-change",
@@ -152,7 +154,7 @@ export default {
         {
           name: "/tracking",
           method: "POST",
-          doc: `Включает/отключает трекинг в указанной комнате. command принимает значения "start", "stop"`,
+          doc: `Включает/отключает трекинг в указанной комнате. command принимает значения "start", "stop", "status"`,
           json: `{room_name: string, command: string}`
         }
       ]

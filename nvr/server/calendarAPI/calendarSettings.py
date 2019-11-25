@@ -58,6 +58,9 @@ def create_event_(room_name: str, start_time: str, end_time: str, summary: str) 
         format 2019-11-12T15:00
     """
     room = Room.query.filter_by(name=room_name).first()
+    if not room:
+        raise NameError()
+
     date_format = "%Y-%m-%dT%H:%M:%S"
 
     start_dateTime = datetime.strptime(start_time, date_format[:-3])
