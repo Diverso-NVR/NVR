@@ -128,12 +128,12 @@ export default {
           json: "{sources: array}"
         },
         {
-          name: "/start-record/room_name",
+          name: "/start-record/{room_name}",
           method: "POST",
           doc: "Запускает запись в комнате с переданным room_name"
         },
         {
-          name: "/stop-record/room_name",
+          name: "/stop-record/{room_name}",
           method: "POST",
           doc: "Останавливает запись в комнате с переданным room_name"
         },
