@@ -128,12 +128,12 @@ export default {
           json: "{sources: array}"
         },
         {
-          name: "/start-record/room_name",
+          name: "/start-record/{room_name}",
           method: "POST",
           doc: "Запускает запись в комнате с переданным room_name"
         },
         {
-          name: "/stop-record/room_name",
+          name: "/stop-record/{room_name}",
           method: "POST",
           doc: "Останавливает запись в комнате с переданным room_name"
         },
@@ -142,7 +142,7 @@ export default {
           method: "POST",
           doc: `Изменяет источник звука для комнаты. 
             sound принимает одно из значений: "enc" -- кодер, "cam" -- камера`,
-          json: `{id: int, sound: string}`
+          json: `{room_name: string, sound: string}`
         },
         {
           name: "/create-event",
