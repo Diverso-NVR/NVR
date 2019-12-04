@@ -43,7 +43,7 @@
               <v-card-text>
                 <div class="subheading">
                   <div>API url: {{API_URL}}</div>
-                  <div>Добавьте в headers вашего запроса: {"key": {{api_key}}}</div>
+                  <div>Добавьте в headers вашего запроса: {"key": "{{api_key}}"}</div>
                 </div>
               </v-card-text>
 
