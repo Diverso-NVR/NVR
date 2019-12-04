@@ -39,7 +39,7 @@ def create_app(app_name="NVR_API"):
                         message_queue='redis://',
                         cors_allowed_origins=NVR_CLIENT_URL,
                         async_mode='gevent',
-                        logger=True, engineio_logger=True
+#                        logger=True, engineio_logger=True
                         )
     socketio.on_namespace(NvrNamespace('/nvr-socket'))
 

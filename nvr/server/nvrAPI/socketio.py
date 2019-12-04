@@ -40,10 +40,11 @@ class NvrNamespace(Namespace):
             return
 
         if new_tracking_state:
-            requests.post(TRACKING_URL, json={
+            res = requests.post(f'{TRACKING_URL}/track', json={
                 'ip': tracking_cam_ip}, timeout=4)
         else:
-            requests.delete(TRACKING_URL, timeout=4)
+            res = requests.delete(f'{TRACKING_URL}/track', timeout=4)
+        print(res.json())
         room.tracking_state = new_tracking_state
         db.session.commit()
 

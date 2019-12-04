@@ -51,17 +51,14 @@ def record(app, room: dict, dur: int) -> None:
     event_id = room['event']['id']
 
     room = Room.query.get(room['id'])
-    res = requests.post(f'{NVR_API_URL}/start-record',
-                        json={
-                            'id': room.id
-                        },
+    res = requests.post(f'{NVR_API_URL}/start-record/{room.name}',
                         headers=nvr_querystring
                         )
+    print(res.json())
     time.sleep(dur)
     started.remove(event_id)
-    requests.post(f'{NVR_API_URL}/stop-record',
+    requests.post(f'{NVR_API_URL}/stop-record/{room.name}',
                   json={
-                      'id': room.id,
                       'calendar_id': room.calendar,
                       'event_id': event_id
                   },
