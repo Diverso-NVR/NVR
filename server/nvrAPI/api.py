@@ -168,7 +168,7 @@ def grant_access(current_user, user_id):
     db.session.commit()
 
     Thread(target=give_permissions, args=(
-        current_app._get_current_object(), CAMPUS, user.email)).start()
+        current_app._get_current_object(), user.email)).start()
 
     return jsonify({"message": "Access granted"}), 202
 
@@ -240,17 +240,14 @@ def create_api_key(current_user, email):
 #     return "Success", 200
 
 
-@api.route('/create-event', methods=['POST'])
+@api.route('/create-event/<room_name>', methods=['POST'])
 @auth_required
 @json_data_required
-def create_event(current_user):
+def create_event(current_user, room_name):
     data = request.get_json()
 
-    room_name = data.get('room_name')
     start_time = data.get('start_time')
 
-    if not room_name:
-        return jsonify({"error": "Room name required"}), 400
     if not start_time:
         return jsonify({"error": "Start time required"}), 400
 
@@ -295,14 +292,8 @@ def create_room(current_user, room_name):
 @nvr_db_context
 def config_room(name):
     room = Room.query.filter_by(name=name).first()
-    room.drive = create_folder(
-        CAMPUS,
-        name
-    )
-    room.calendar = create_calendar(
-        CAMPUS,
-        name
-    )
+    room.drive = create_folder(f'{CAMPUS}-{name}')
+    room.calendar = create_calendar(CAMPUS, name)
     room.sources = []
     db.session.commit()
 
@@ -337,18 +328,15 @@ def delete_room(current_user, room_name):
     return jsonify({"message": "Room deleted"}), 200
 
 # TODO test
-@api.route("/rooms/", methods=['PUT'])
+@api.route("/rooms/<room_name>", methods=['PUT'])
 @auth_required
 @json_data_required
-def edit_room(current_user):
+def edit_room(current_user, room_name):
     if current_user.role == 'user':
         return jsonify({'message': "Ошибка доступа"}), 401
 
     post_data = request.get_json()
 
-    room_name = post_data.get('room_name')
-    if not room_name:
-        return jsonify({"error": "Room name required"}), 400
     room = Room.query.filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": "No room found with given room_name"}), 404
@@ -360,6 +348,7 @@ def edit_room(current_user):
             source = Source.query.get(s['id'])
         else:
             source = Source()
+            room.sources.append(source)
         source.ip = s.get('ip', "0.0.0.0")
         source.name = s.get('name', 'камера')
         source.sound = s.get('sound', 'enc')
@@ -450,19 +439,16 @@ def stop_record(room_id, calendar_id, event_id):
         db.session.commit()
 
 
-@api.route('/sound-change', methods=['POST'])
+@api.route('/sound-change/<room_name>', methods=['POST'])
 @auth_required
 @json_data_required
-def sound_change(current_user):
+def sound_change(current_user, room_name):
     post_data = request.get_json()
-    room_name = post_data.get('room_name')
     sound_type = post_data.get('sound')
 
     if not sound_type:
         return jsonify({"error": "Sound type required"}), 400
 
-    if not room_name:
-        return jsonify({"error": "Room name required"}), 400
     room = Room.query.filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": "No room found with given room_name"}), 404
@@ -473,13 +459,12 @@ def sound_change(current_user):
     return jsonify({"message": "Sound source changed"}), 200
 
 
-@api.route('/tracking', methods=['POST'])
+@api.route('/tracking/<room_name>', methods=['POST'])
 @auth_required
 @json_data_required
-def tracking_manage(current_user):
+def tracking_manage(current_user, room_name):
     post_data = request.get_json()
 
-    room_name = post_data.get('room_name')
     command = post_data.get('command')
 
     if not command:
@@ -490,9 +475,6 @@ def tracking_manage(current_user):
     if command == 'status':
         res = requests.get(f'{TRACKING_URL}/status', timeout=5)
         return jsonify(res.json()), 200
-
-    if not room_name:
-        return jsonify({"error": "Room name required"}), 400
 
     room = Room.query.filter_by(name=str(room_name)).first()
     if not room:

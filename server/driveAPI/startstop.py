@@ -6,7 +6,7 @@ from pathlib import Path
 from threading import RLock, Thread
 from nvrAPI.models import nvr_db_context, Room
 import requests
-from driveAPI.driveSettings import upload
+from driveAPI.driveSettings import upload, create_folder, get_folders
 from calendarAPI.calendarSettings import add_attachment
 
 home = str(Path.home())
@@ -25,20 +25,25 @@ def config(room_id: int, name: str, sources: list) -> None:
     processes[room_id] = []
 
     today = datetime.date.today()
-    curr_time = datetime.datetime.now().time()
+    current_time = datetime.datetime.now().time()
 
+    month = "0" + \
+        str(today.month) if today.month < 10 else str(today.month)
+    day = "0" + \
+        str(today.day) if today.day < 10 else str(today.day)
     hour = "0" + \
-        str(curr_time.hour) if curr_time.hour < 10 else str(curr_time.hour)
+        str(current_time.hour) if current_time.hour < 10 else str(current_time.hour)
     minute = "0" + \
-        str(curr_time.minute) if curr_time.minute < 10 else str(curr_time.minute)
-    record_names[room_id] = f"{today.year}-{today.month}-{today.day}_{hour}:{minute}_{rooms[room_id]['name']}_"
+        str(current_time.minute) if current_time.minute < 10 else str(
+            current_time.minute)
+
+    record_names[room_id] = f"{today.year}-{month}-{day}_{hour}:{minute}_{rooms[room_id]['name']}_"
 
     rooms[room_id]['sound'] = {'cam': [], 'enc': []}
     rooms[room_id]['vid'] = []
     for cam in sources:
         rooms[room_id]['vid'].append(cam['ip'])
         if cam['sound'] in ['cam', 'enc']:
-            print(cam)
             rooms[room_id
                   ]['sound'][cam['sound']].append(cam['ip'])
         if cam['main_cam']:
@@ -99,7 +104,8 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
                           "calendar_id": calendar_id,
                           "event_id": event_id
                       },
-                      headers={'content-type': 'application/json'})
+                      headers={'content-type': 'application/json'},
+                      timeout=2)
     except Exception as e:
         print(e)
 
@@ -127,13 +133,27 @@ def sync_and_upload(room_id: int, record_name: str, room_sources: list, folder_i
         else:
             res = "vid_"
 
+        date, time = record_name.split('_')[0], record_name.split('_')[1]
+        url = ''
+        folders = get_folders()
+
+        for folder in folders:
+            if folder != date:
+                continue
+            if folders[folder]['parent'] == folder_id:
+                url = create_folder(time, folders[folder]['id'])
+                break
+        else:
+            url = create_folder(date, folder_id)
+            url = create_folder(time, url.split('/')[-1])
+
         for cam in room_sources:
             try:
                 upload(home + "/vids/" + res + record_name
                        + cam.split('/')[0].split('.')[-1] + ".mp4",
-                       folder_id)
+                       url.split('/')[-1])
             except:
-                pass
+                print(e)
 
 
 def add_sound(record_name: str, source_id: str) -> None:
@@ -149,10 +169,10 @@ def upload_file(file_name: str, folder_id: str, calendar_id: str, event_id: str)
         file_id = upload(home + "/vids/" + file_name,
                          folder_id)
     except:
-        pass
+        print(e)
 
     if calendar_id:
         try:
             add_attachment(calendar_id, event_id, file_id)
         except:
-            pass
+            print(e)

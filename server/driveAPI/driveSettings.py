@@ -29,14 +29,16 @@ if not creds or not creds.valid:
 drive_service = build('drive', 'v3', credentials=creds)
 
 
-def create_folder(building: str, room_name: str) -> str:
+def create_folder(folder_name: str, folder_parent_id: str = '') -> str:
     """
-    Creates folder in format: 'building'-'room_name'
+    Creates folder in format: 'folder_name'
     """
     folder_metadata = {
-        'name': building + '-' + room_name,
-        'mimeType': 'application/vnd.google-apps.folder',
+        'name': folder_name,
+        'mimeType': 'application/vnd.google-apps.folder'
     }
+    if folder_parent_id:
+        folder_metadata['parents'] = [folder_parent_id]
     folder = drive_service.files().create(body=folder_metadata,
                                           fields='id').execute()
 
@@ -47,6 +49,7 @@ def create_folder(building: str, room_name: str) -> str:
 
     drive_service.permissions().create(
         fileId=folder['id'], body=new_perm).execute()
+
     return "https://drive.google.com/drive/u/1/folders/" + folder['id']
 
 
@@ -67,16 +70,34 @@ def move_file(file_id: str, folder_id: str):
                                         fields='id, parents').execute()
 
 
-def upload(filename: str, folder_id: str, names: list = []) -> str:
+def upload(filename: str, folder_id: str) -> str:
     """
     Upload file "filename" on drive folder 'folder_id'
     """
+
     media = MediaFileUpload(filename, mimetype="video/mp4", resumable=True)
     file_data = {
         "name": filename.split('/')[4],
-        "parents": [folder_id],
-        'description': 'На занятии присутсвовали: ' + ','.join(names)
+        "parents": [folder_id]
     }
     file = drive_service.files().create(
         body=file_data, media_body=media).execute()
     return file.get('id')
+
+
+def get_folders():
+    page_token = None
+
+    while True:
+        response = drive_service.files().list(q="mimeType='application/vnd.google-apps.folder'",
+                                              spaces='drive',
+                                              fields='nextPageToken, files(name, id, parents)',
+                                              pageToken=page_token).execute()
+        page_token = response.get('nextPageToken', None)
+
+        if page_token is None:
+            break
+
+    return {folder['name']: {'id': folder['id'],
+                             'parent': folder.get('parents', [''])[0]}
+            for folder in response['files']}

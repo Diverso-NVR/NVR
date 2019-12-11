@@ -86,9 +86,9 @@ def create_event_(room_name: str, start_time: str, end_time: str, summary: str) 
 
 
 @nvr_db_context
-def give_permissions(building: str, mail: str) -> None:
+def give_permissions(mail: str) -> None:
     """
-    Give write permissions to user 'mail', according his 'building'
+    Give write permissions to user 'mail'
     """
     rule = {
         'scope': {
@@ -125,7 +125,7 @@ def create_calendar(building: str, room: str) -> None:
     and grant access to all users from same campus
     """
     calendar_metadata = {
-        'summary': building + "-" + room,
+        'summary': f'{building}-{room}',
         'timeZone': 'Europe/Moscow'
     }
 
@@ -158,4 +158,4 @@ def delete_calendar(calendar_id: str) -> None:
     try:
         calendar_service.calendars().delete(calendarId=calendar_id).execute()
     except Exception as e:
-        pass
+        print(e)

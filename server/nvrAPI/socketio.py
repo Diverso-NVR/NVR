@@ -11,7 +11,6 @@ import time
 import os
 
 CAMPUS = os.environ.get('CAMPUS')
-
 TRACKING_URL = os.environ.get('TRACKING_URL')
 
 
@@ -136,10 +135,7 @@ class NvrNamespace(Namespace):
         name = msg_json['name']
 
         room = Room(name=name)
-        room.drive = create_folder(
-            CAMPUS,
-            name
-        )
+        room.drive = create_folder(f'{CAMPUS}-{name}')
         room.sources = []
         db.session.add(room)
         db.session.commit()
@@ -153,17 +149,15 @@ class NvrNamespace(Namespace):
     @staticmethod
     @nvr_db_context
     def make_calendar(name):
-        room = Room(name=name)
-        room.calendar = create_calendar(
-            CAMPUS,
-            name
-        )
+        room = Room.query.filter_by(name=name).first()
+        room.calendar = create_calendar(CAMPUS, name)
         db.session.commit()
 
     def on_edit_room(self, msg_json):
         room_id = msg_json['id']
         room = Room.query.get(room_id)
         room.sources = []
+
         for s in msg_json['sources']:
             if s.get('id'):
                 source = Source.query.get(s['id'])
@@ -203,7 +197,7 @@ class NvrNamespace(Namespace):
 
         Thread(target=give_permissions,
                args=(
-                   current_app._get_current_object(), CAMPUS, user.email),
+                   current_app._get_current_object(), user.email),
                daemon=True).start()
 
         emit('grant_access', {'id': user.id}, broadcast=True)
