@@ -12,7 +12,8 @@ from calendarAPI.calendarSettings import add_attachment
 home = str(Path.home())
 MERGE_SERVER_URL = os.environ.get('MERGE_SERVER_URL')
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
-lock = RLock()
+lock = Lock()
+lock2 = Lock()
 rooms = {}
 processes = {}
 record_names = {}
@@ -165,14 +166,15 @@ def add_sound(record_name: str, source_id: str) -> None:
 
 
 def upload_file(file_name: str, folder_id: str, calendar_id: str, event_id: str) -> None:
-    try:
-        file_id = upload(home + "/vids/" + file_name,
-                         folder_id)
-    except:
-        print(e)
-
-    if calendar_id:
+    with lock2:
         try:
-            add_attachment(calendar_id, event_id, file_id)
+            file_id = upload(home + "/vids/" + file_name,
+                             folder_id)
         except:
             print(e)
+
+        if calendar_id:
+            try:
+                add_attachment(calendar_id, event_id, file_id)
+            except:
+                print(e)

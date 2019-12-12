@@ -531,4 +531,4 @@ def upload_merged(current_user):
            daemon=True
            ).start()
 
-    return jsonify({"message": "Video uploaded"}), 200
+    return jsonify({"message": "Video uploading"}), 200
