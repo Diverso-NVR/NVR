@@ -11,7 +11,7 @@ from calendarAPI.calendarSettings import add_attachment
 
 home = str(Path.home())
 MERGE_SERVER_URL = os.environ.get('MERGE_SERVER_URL')
-BASE_URL = os.environ.get('BASE_URL')
+NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
 lock = RLock()
 rooms = {}
 processes = {}
@@ -96,7 +96,7 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
     try:
         requests.post(MERGE_SERVER_URL,
                       json={
-                          'url': BASE_URL,
+                          'url': NVR_CLIENT_URL,
                           "screen_num": screen_num,
                           "cam_num": cam_num,
                           "record_name": record_name,
