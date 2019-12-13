@@ -94,6 +94,23 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
         rooms[room_id]['main_cam'].split('/')[0].split('.')[-1]
     record_name = record_names[room_id]
 
+    room = Room.query.get(room_id)
+    folder_id = room.drive.split('/')[-1]
+
+    date, time = record_name.split('_')[0], record_name.split('_')[1]
+    url = ''
+    folders = get_folders()
+
+    for folder in folders:
+        if folder != date:
+            continue
+        if folders[folder]['parent'] == folder_id:
+            url = create_folder(time, folders[folder]['id'])
+            break
+    else:
+        url = create_folder(date, folder_id)
+        url = create_folder(time, url.split('/')[-1])
+
     try:
         res = requests.post(MERGE_SERVER_URL,
                       json={
@@ -102,6 +119,7 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
                           "cam_num": cam_num,
                           "record_name": record_name,
                           "room_id": room_id,
+                          "folder_id": url.split('/')[-1],
                           "calendar_id": calendar_id,
                           "event_id": event_id
                       },
@@ -111,10 +129,8 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
     except Exception as e:
         print(e)
 
-    room = Room.query.get(room_id)
-
     Thread(target=sync_and_upload, args=(
-        room_id, record_name, rooms[room_id]['vid'], room.drive.split('/')[-1])).start()
+        room_id, record_name, rooms[room_id]['vid'], url.split('/')[-1])).start()
 
 
 def kill_records(room_id: int) -> None:
@@ -135,25 +151,11 @@ def sync_and_upload(room_id: int, record_name: str, room_sources: list, folder_i
         else:
             res = "vid_"
 
-        date, time = record_name.split('_')[0], record_name.split('_')[1]
-        url = ''
-        folders = get_folders()
-
-        for folder in folders:
-            if folder != date:
-                continue
-            if folders[folder]['parent'] == folder_id:
-                url = create_folder(time, folders[folder]['id'])
-                break
-        else:
-            url = create_folder(date, folder_id)
-            url = create_folder(time, url.split('/')[-1])
-
         for cam in room_sources:
             try:
                 upload(home + "/vids/" + res + record_name
                        + cam.split('/')[0].split('.')[-1] + ".mp4",
-                       url.split('/')[-1])
+                       folder_id)
             except Exception as e:
                 print(e)
 
@@ -171,11 +173,11 @@ def upload_file(file_name: str, folder_id: str, calendar_id: str, event_id: str)
         try:
             file_id = upload(home + "/vids/" + file_name,
                              folder_id)
-        except:
+        except Exception as e:
             print(e)
 
         if calendar_id:
             try:
                 add_attachment(calendar_id, event_id, file_id)
-            except:
+            except Exception as e:
                 print(e)
