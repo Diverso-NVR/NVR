@@ -3,7 +3,7 @@ import os
 import signal
 import subprocess
 from pathlib import Path
-from threading import Lock, Thread
+from threading import RLock, Thread
 from nvrAPI.models import nvr_db_context, Room
 import requests
 from driveAPI.driveSettings import upload, create_folder, get_folders
@@ -12,8 +12,8 @@ from calendarAPI.calendarSettings import add_attachment
 home = str(Path.home())
 MERGE_SERVER_URL = os.environ.get('MERGE_SERVER_URL')
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
-lock = Lock()
-lock2 = Lock()
+lock = RLock()
+lock2 = RLock()
 rooms = {}
 processes = {}
 record_names = {}
@@ -95,7 +95,7 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
     record_name = record_names[room_id]
 
     try:
-        requests.post(MERGE_SERVER_URL,
+        res = requests.post(MERGE_SERVER_URL,
                       json={
                           'url': NVR_CLIENT_URL,
                           "screen_num": screen_num,
@@ -107,6 +107,7 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
                       },
                       headers={'content-type': 'application/json'},
                       timeout=2)
+        print(res.json())
     except Exception as e:
         print(e)
 
@@ -153,7 +154,7 @@ def sync_and_upload(room_id: int, record_name: str, room_sources: list, folder_i
                 upload(home + "/vids/" + res + record_name
                        + cam.split('/')[0].split('.')[-1] + ".mp4",
                        url.split('/')[-1])
-            except:
+            except Exception as e:
                 print(e)
 
 
