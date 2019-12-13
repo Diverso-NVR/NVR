@@ -3,7 +3,7 @@ import os
 import signal
 import subprocess
 from pathlib import Path
-from threading import RLock, Thread
+from threading import Lock, Thread
 from nvrAPI.models import nvr_db_context, Room
 import requests
 from driveAPI.driveSettings import upload, create_folder, get_folders
