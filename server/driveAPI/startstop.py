@@ -3,7 +3,7 @@ import os
 import signal
 import subprocess
 from pathlib import Path
-from threading import RLock, Thread
+from threading import Lock, Thread
 from nvrAPI.models import nvr_db_context, Room
 import requests
 from driveAPI.driveSettings import upload, create_folder, get_folders
@@ -12,8 +12,8 @@ from calendarAPI.calendarSettings import add_attachment
 home = str(Path.home())
 MERGE_SERVER_URL = os.environ.get('MERGE_SERVER_URL')
 NVR_API_URL = os.environ.get('NVR_API_URL')
-lock = RLock()
-lock2 = RLock()
+lock = Lock()
+lock2 = Lock()
 rooms = {}
 processes = {}
 record_names = {}
@@ -169,15 +169,16 @@ def add_sound(record_name: str, source_id: str) -> None:
 
 
 def upload_file(file_name: str, folder_id: str, calendar_id: str, event_id: str) -> None:
-    with lock2:
-        try:
-            file_id = upload(home + "/vids/" + file_name,
+  with lock2:
+      print(file_name, folder_id)
+      try:
+          file_id = upload(home + "/vids/" + file_name,
                              folder_id)
-        except Exception as e:
-            print(e)
+      except Exception as e:
+          print(e)
 
-        if calendar_id:
-            try:
-                add_attachment(calendar_id, event_id, file_id)
-            except Exception as e:
-                print(e)
+      if calendar_id:
+          try:
+              add_attachment(calendar_id, event_id, file_id)
+          except Exception as e:
+              print(e)

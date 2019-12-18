@@ -524,7 +524,6 @@ def upload_merged(current_user):
     Thread(target=upload_file,
            args=(
                post_data["file_name"],
-               room.drive.split('/')[-1],
                post_data["folder_id"],
                post_data.get('calendar_id'),
                post_data.get('event_id')
