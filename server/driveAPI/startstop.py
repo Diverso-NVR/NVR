@@ -112,7 +112,7 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
         url = create_folder(time, url.split('/')[-1])
 
     try:
-        requests.post(MERGE_SERVER_URL,
+        res = requests.post(MERGE_SERVER_URL,
                       json={
                           'url': NVR_API_URL,
                           "screen_num": screen_num,
@@ -125,6 +125,7 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
                       },
                       headers={'content-type': 'application/json'},
                       timeout=2)
+        print(res.json())
     except Exception as e:
         print(e)
 
