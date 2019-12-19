@@ -1,6 +1,7 @@
 from .models import db, Room, Source, User, nvr_db_context
 from .email import send_verify_email, send_access_request_email
 from flask import Blueprint, jsonify, request, current_app
+from flask_socketio import SocketIO
 
 import time
 from datetime import datetime, timedelta
@@ -18,6 +19,19 @@ api = Blueprint('api', __name__)
 
 CAMPUS = os.environ.get('CAMPUS')
 TRACKING_URL = os.environ.get('TRACKING_URL')
+NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
+
+socketio = SocketIO(message_queue='redis://',
+                    cors_allowed_origins=NVR_CLIENT_URL,
+                    # logger=True, engineio_logger=True
+                    )
+
+
+def emit_event(event, data):
+    socketio.emit(event,
+                  data,
+                  broadcast=True,
+                  namespace='/nvr-socket')
 
 
 # DECORATORS
@@ -170,6 +184,8 @@ def grant_access(current_user, user_id):
     Thread(target=give_permissions, args=(
         current_app._get_current_object(), user.email)).start()
 
+    emit_event('grant_access', {'id': user.id})
+
     return jsonify({"message": "Access granted"}), 202
 
 
@@ -182,6 +198,9 @@ def user_role(current_user, user_id):
     user = User.query.get(user_id)
     user.role = request.get_json()['role']
     db.session.commit()
+
+    emit_event('change_role', {'id': user.id, 'role': user.role})
+
     return jsonify({"message": "User role changed"}), 200
 
 
@@ -194,6 +213,9 @@ def delete_user(current_user, user_id):
     user = User.query.get(user_id)
     db.session.delete(user)
     db.session.commit()
+
+    emit_event('delete_user', {'id': user.id})
+
     return jsonify({"message": "User deleted"}), 200
 
 
@@ -297,6 +319,8 @@ def config_room(name):
     room.sources = []
     db.session.commit()
 
+    emit_event('add_room', {'room': room.to_dict()})
+
 
 @api.route('/rooms/', methods=['GET'])
 @auth_required
@@ -325,9 +349,11 @@ def delete_room(current_user, room_name):
     db.session.delete(room)
     db.session.commit()
 
+    emit_event('delete_room', {'id': room.id, 'name': room.name})
+
     return jsonify({"message": "Room deleted"}), 200
 
-# TODO test
+
 @api.route("/rooms/<room_name>", methods=['PUT'])
 @auth_required
 @json_data_required
@@ -357,15 +383,16 @@ def edit_room(current_user, room_name):
         source.room_id = room.id
 
     db.session.commit()
+
+    emit_event('edit_room', {'id': room.id, 'sources': [
+        s.to_dict() for s in room.sources]})
+
     return jsonify({"message": "Room edited"}), 200
 
 
 @api.route('/start-record/<room_name>', methods=['POST'])
 @auth_required
 def start_rec(current_user, room_name):
-
-    if not room_name:
-        return jsonify({"error": "Room name required"}), 400
     room = Room.query.filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": "No room found with given room_name"}), 404
@@ -387,6 +414,8 @@ def start_rec(current_user, room_name):
         args=(current_app._get_current_object(), room.id)
     ).start()
 
+    emit_event('start_rec', {'id': room.id})
+
     return jsonify({"message": f"Record started in {room.name}"}), 200
 
 
@@ -401,9 +430,6 @@ def start_timer(room_id: int) -> None:
 @api.route('/stop-record/<room_name>', methods=["POST"])
 @auth_required
 def stop_rec(current_user, room_name):
-
-    if not room_name:
-        return jsonify({"error": "Room name required"}), 400
     room = Room.query.filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": "No room found with given room_name"}), 404
@@ -419,8 +445,11 @@ def stop_rec(current_user, room_name):
     if room.free:
         return jsonify({"message": "Already stopped"}), 409
 
-    Thread(target=stop_record, args=(current_app._get_current_object(),
-                                     room.id, calendar_id, event_id)).start()
+    Thread(target=stop_record,
+           args=(current_app._get_current_object(),
+                 room.id, calendar_id, event_id)).start()
+
+    emit_event('stop_rec', {'id': room.id})
 
     return jsonify({"message": f"Record stopped in {room.name}"}), 200
 
@@ -455,6 +484,9 @@ def sound_change(current_user, room_name):
 
     room.chosen_sound = sound_type
     db.session.commit()
+
+    emit_event('sound_change', {'id': room.id,
+                                'sound': sound_type})
 
     return jsonify({"message": "Sound source changed"}), 200
 
@@ -497,6 +529,9 @@ def tracking_manage(current_user, room_name):
 
         room.tracking_state = True if command == 'start' else False
         db.session.commit()
+
+        emit_event('tracking_state_change', {
+            'id': room.id, 'tracking_state': room.tracking_state, 'room_name': room.name})
 
         return jsonify(res.json()), 200
     except Exception as e:
