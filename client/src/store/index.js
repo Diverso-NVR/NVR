@@ -99,8 +99,6 @@ const mutations = {
     });
     user.access = true;
   },
-
-  setUserData(state, payload) {},
   setJwtToken(state, payload) {
     localStorage.token = payload.jwt.token;
     state.jwt = payload.jwt;

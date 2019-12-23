@@ -97,7 +97,7 @@ class NvrNamespace(Namespace):
         room = Room.query.get(room_id)
 
         if room.free:
-            return "Already stoped", 401
+            return "Already stopped", 401
 
         Thread(target=NvrNamespace.stop_record, args=(current_app._get_current_object(),
                                                       room_id, calendar_id, event_id)).start()
@@ -133,6 +133,10 @@ class NvrNamespace(Namespace):
 
     def on_add_room(self, msg_json):
         name = msg_json['name']
+
+        room = Room.query.filter_by(name=name).first()
+        if room:
+            return
 
         room = Room(name=name)
         room.drive = create_folder(f'{CAMPUS}-{name}')
