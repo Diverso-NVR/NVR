@@ -99,24 +99,14 @@ class NvrNamespace(Namespace):
         if room.free:
             return "Already stopped", 401
 
-        Thread(target=NvrNamespace.stop_record, args=(current_app._get_current_object(),
-                                                      room_id, calendar_id, event_id)).start()
+        Thread(target=stop, args=(current_app._get_current_object(),
+                                  room_id, calendar_id, event_id)).start()
+
+        room.free = True
+        room.timestamp = 0
+        db.session.commit()
 
         emit('stop_rec', {'id': room.id}, broadcast=True)
-
-    @staticmethod
-    @nvr_db_context
-    def stop_record(room_id, calendar_id, event_id):
-        try:
-            stop(current_app._get_current_object(),
-                 room_id, calendar_id, event_id)
-        except Exception as e:
-            pass
-        finally:
-            room = Room.query.get(room_id)
-            room.free = True
-            room.timestamp = 0
-            db.session.commit()
 
     def on_delete_room(self, msg_json):
         room_id = msg_json['id']

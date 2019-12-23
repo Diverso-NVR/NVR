@@ -445,27 +445,18 @@ def stop_rec(current_user, room_name):
     if room.free:
         return jsonify({"message": "Already stopped"}), 409
 
-    Thread(target=stop_record,
+    Thread(target=stop,
            args=(current_app._get_current_object(),
                  room.id, calendar_id, event_id)).start()
+
+    room = Room.query.get(room.id)
+    room.free = True
+    room.timestamp = 0
+    db.session.commit()
 
     emit_event('stop_rec', {'id': room.id})
 
     return jsonify({"message": f"Record stopped in {room.name}"}), 200
-
-
-@nvr_db_context
-def stop_record(room_id, calendar_id, event_id):
-    try:
-        stop(current_app._get_current_object(), room_id, calendar_id, event_id)
-    except Exception as e:
-        pass
-    finally:
-        room = Room.query.get(room_id)
-        room.processing = False
-        room.free = True
-        room.timestamp = 0
-        db.session.commit()
 
 
 @api.route('/sound-change/<room_name>', methods=['POST'])
