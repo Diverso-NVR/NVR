@@ -401,13 +401,8 @@ def start_rec(current_user, room_name):
         return jsonify({"message": "Already recording"}), 409
 
     room.free = False
+    room.timestamp = int(time.time())
     db.session.commit()
-
-    Thread(
-        target=start_timer,
-        args=(current_app._get_current_object(), room.id),
-        daemon=True
-    ).start()
 
     Thread(
         target=start,
@@ -417,14 +412,6 @@ def start_rec(current_user, room_name):
     emit_event('start_rec', {'id': room.id})
 
     return jsonify({"message": f"Record started in {room.name}"}), 200
-
-
-@nvr_db_context
-def start_timer(room_id: int) -> None:
-    while not Room.query.get(room_id).free:
-        Room.query.get(room_id).timestamp += 1
-        db.session.commit()
-        time.sleep(1)
 
 
 @api.route('/stop-record/<room_name>', methods=["POST"])
