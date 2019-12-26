@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="modal" max-width="600px">
+  <v-dialog v-model="modal" max-width="600px" :dark="isDarkMode">
     <v-btn block color="black" class="white--text" slot="activator">Добавить</v-btn>
 
     <v-card>
@@ -53,6 +53,11 @@ export default {
       },
       fieldsRules: [v => !!v || "Обязательное поле"]
     };
+  },
+  computed: {
+    isDarkMode() {
+      return this.$store.getters.isDarkMode;
+    }
   },
   methods: {
     addSource() {

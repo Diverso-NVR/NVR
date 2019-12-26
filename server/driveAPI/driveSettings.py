@@ -91,12 +91,12 @@ def upload(filename: str, folder_id: str) -> str:
         return file.get('id')
 
 
-def get_folders():
+def get_folder_by_date(date):
     with lock:
         page_token = None
 
         while True:
-            response = drive_service.files().list(q="mimeType='application/vnd.google-apps.folder'",
+            response = drive_service.files().list(q=f"mimeType='application/vnd.google-apps.folder' and name='{date}'",
                                                   spaces='drive',
                                                   fields='nextPageToken, files(name, id, parents)',
                                                   pageToken=page_token).execute()
@@ -105,6 +105,4 @@ def get_folders():
             if page_token is None:
                 break
 
-        return {folder['name']: {'id': folder['id'],
-                                 'parent': folder.get('parents', [''])[0]}
-                for folder in response['files']}
+        return {folder['id']: folder.get('parents', [''])[0] for folder in response['files']}

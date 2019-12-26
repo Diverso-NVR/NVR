@@ -6,8 +6,11 @@ from pathlib import Path
 from threading import RLock, Thread
 from nvrAPI.models import nvr_db_context, Room
 import requests
-from driveAPI.driveSettings import upload, create_folder, get_folders
+from driveAPI.driveSettings import upload, create_folder, get_folder_by_date
 from calendarAPI.calendarSettings import add_attachment
+
+
+from pprint import pprint
 
 home = str(Path.home())
 MERGE_SERVER_URL = os.environ.get('MERGE_SERVER_URL')
@@ -92,22 +95,23 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
     record_name = record_names[room_id]
 
     room = Room.query.get(room_id)
-    folder_id = room.drive.split('/')[-1]
+    room_folder_id = room.drive.split('/')[-1]
 
     date, time = record_name.split('_')[0], record_name.split('_')[1]
     time_folder_url = ''
     date_folder_url = ''
-    folders = get_folders()
+    folders = get_folder_by_date(date)
 
-    for folder in folders:
-        if folder != date:
-            continue
-        if folders[folder]['parent'] == folder_id:
-            time_folder_url = create_folder(time, folders[folder]['id'])
+    pprint(folders)
+
+    for folder_id, folder_parent_id in folders.items():
+        if folder_parent_id == room_folder_id:
+            time_folder_url = create_folder(time, folder_id)
             break
     else:
-        date_folder_url = create_folder(date, folder_id)
-        time_folder_url = create_folder(time, date_folder_url.split('/')[-1])
+        date_folder_url = create_folder(date, room_folder_id)
+        time_folder_url = create_folder(
+            time, date_folder_url.split('/')[-1])
 
     try:
         res = requests.post(MERGE_SERVER_URL,
@@ -136,7 +140,7 @@ def kill_records(room_id: int) -> None:
         try:
             os.killpg(process.pid, signal.SIGTERM)
         except OSError:
-            os.system("kill %s" % (process.pid))  # sudo for server
+            os.system("kill %s" % (process.pid))
 
 
 def sync_and_upload(room_id: int, record_name: str, room_sources: list, folder_id: str) -> None:
