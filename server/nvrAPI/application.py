@@ -40,7 +40,7 @@ def create_app(app_name="NVR_API"):
                         async_mode='gevent',
                         # logger=True, engineio_logger=True
                         )
-    socketio.on_namespace(NvrNamespace('/nvr-socket'))
+    socketio.on_namespace(NvrNamespace('/websocket'))
 
     @socketio.on_error_default
     def default_error_handler(e):
@@ -72,8 +72,10 @@ def create_app(app_name="NVR_API"):
         file_handler.setFormatter(logging.Formatter(
             '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
         file_handler.setLevel(logging.INFO)
-        app.logger.addHandler(file_handler)
+        file_handler.setLevel(logging.ERROR)
+        file_handler.setLevel(logging.WARNING)
 
+        app.logger.addHandler(file_handler)
         app.logger.setLevel(logging.INFO)
         app.logger.info('NVR started')
 

@@ -12,7 +12,7 @@ export default {
     },
     setError(state, payload) {
       try {
-        state.error = payload["response"].data.message;
+        state.error = payload["response"].data.error;
       } catch (error) {}
     },
     clearError(state) {

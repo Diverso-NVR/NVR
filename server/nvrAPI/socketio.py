@@ -10,6 +10,8 @@ from driveAPI.driveSettings import create_folder
 import time
 import os
 
+from .api import get_tracking_cam
+
 CAMPUS = os.environ.get('CAMPUS')
 TRACKING_URL = os.environ.get('TRACKING_URL')
 
@@ -32,30 +34,23 @@ class NvrNamespace(Namespace):
 
         room = Room.query.get(room_id)
 
-        tracking_cam_ip = NvrNamespace.get_tracking_cam(
-            [s.to_dict() for s in room.sources])
+        tracking_cam_ip = get_tracking_cam([s.to_dict() for s in room.sources])
 
         if not tracking_cam_ip:
             return
 
         if new_tracking_state:
             res = requests.post(f'{TRACKING_URL}/track', json={
-                'ip': tracking_cam_ip}, timeout=4)
+                'ip': tracking_cam_ip}, timeout=3)
         else:
-            res = requests.delete(f'{TRACKING_URL}/track', timeout=4)
-        print(res.json())
+            res = requests.delete(f'{TRACKING_URL}/track', timeout=3)
+
         room.tracking_state = new_tracking_state
         db.session.commit()
 
         emit('tracking_state_change', {
              'id': room.id, 'tracking_state': room.tracking_state, 'room_name': room.name},
              broadcast=True)
-
-    @staticmethod
-    def get_tracking_cam(sources):
-        for source in sources:
-            if source['tracking']:
-                return source['ip'].split('@')[-1]
 
     def on_start_rec(self, msg_json):
         room_id = msg_json['id']

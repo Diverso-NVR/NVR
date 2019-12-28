@@ -155,6 +155,12 @@ export default {
           method: "POST",
           doc: `Взаимодействие с трекингом в указанной комнате. command принимает значения "start", "stop", "status"`,
           json: `{command: string}`
+        },
+        {
+          name: "/login",
+          method: "POST",
+          doc: `Авторизация через NVR`,
+          json: `{email: string, password: string}`
         }
       ]
     };

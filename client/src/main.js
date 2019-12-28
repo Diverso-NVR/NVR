@@ -10,7 +10,7 @@ import store from "./store";
 import VueSocketIOExt from "vue-socket.io-extended";
 import io from "socket.io-client";
 
-const SOCKET_URL = `${process.env.NVR_URL}/nvr-socket`;
+const SOCKET_URL = `${process.env.NVR_URL}/websocket`;
 
 const socket = io(SOCKET_URL);
 Vue.use(VueSocketIOExt, socket, { store });
