@@ -44,6 +44,10 @@ export default new Router({
       path: "/manage-api",
       component: ManageApi,
       beforeEnter: adminOnly
+    },
+    {
+      path: "/*",
+      redirect: "/rooms"
     }
   ],
   mode: "history"

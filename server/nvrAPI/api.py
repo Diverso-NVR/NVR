@@ -1,9 +1,5 @@
-from .models import db, Room, Source, User, nvr_db_context
-from .email import send_verify_email, send_access_request_email
 from flask import Blueprint, jsonify, request, current_app
 from flask_socketio import SocketIO
-
-import time
 from datetime import datetime, timedelta
 from functools import wraps
 from threading import Thread
@@ -11,9 +7,13 @@ import os
 import uuid
 import jwt
 import requests
-from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions, create_event_
-from driveAPI.startstop import start, stop, upload_file
-from driveAPI.driveSettings import create_folder, move_file
+import time
+
+from .models import db, Room, Source, User, nvr_db_context
+from .email import send_verify_email, send_access_request_email
+# from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions, create_event_
+# from driveAPI.startstop import start, stop, upload_file
+# from driveAPI.driveSettings import create_folder, move_file
 
 api = Blueprint('api', __name__)
 

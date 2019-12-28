@@ -15,6 +15,9 @@ export default {
         state.error = payload["response"].data.error;
       } catch (error) {}
     },
+    setErrorFromText(state, payload) {
+      state.error = payload.error;
+    },
     clearError(state) {
       state.error = null;
     },

@@ -191,7 +191,6 @@ const actions = {
   },
   async emitAddRoom({ commit }, { name }) {
     await this._vm.$socket.client.emit("add_room", { name });
-    commit("setMessage", `Процесс создания комнаты ${name} запущен`);
   },
   socket_addRoom({ commit }, message) {
     try {
@@ -230,7 +229,9 @@ const actions = {
   socket_grantAccess({ commit }, message) {
     commit("GRANT_ACCESS", message);
   },
-
+  socket_error({ commit }, message) {
+    commit("setErrorFromText", message);
+  },
   async loadRooms({ commit, state }) {
     try {
       commit("switchLoading");

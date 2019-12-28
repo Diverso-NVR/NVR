@@ -1,14 +1,15 @@
 from flask_socketio import emit, Namespace
-from .models import db, Room, Source, User, nvr_db_context
 from threading import Thread
 from flask import current_app
 import requests
-
-from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions
-from driveAPI.startstop import start, stop
-from driveAPI.driveSettings import create_folder
 import time
 import os
+
+from .models import db, Room, Source, User, nvr_db_context
+# from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions
+# from driveAPI.startstop import start, stop
+# from driveAPI.driveSettings import create_folder
+
 
 from .api import get_tracking_cam
 
@@ -37,6 +38,8 @@ class NvrNamespace(Namespace):
         tracking_cam_ip = get_tracking_cam([s.to_dict() for s in room.sources])
 
         if not tracking_cam_ip:
+            emit(
+                'error', {"error": "Камера для трекинга не выбрана в настройках комнаты"})
             return
 
         if new_tracking_state:
@@ -57,7 +60,7 @@ class NvrNamespace(Namespace):
         room = Room.query.get(room_id)
 
         if not room.free:
-            return "Already recording", 401
+            return
 
         room.free = False
         room.timestamp = int(time.time())
@@ -79,7 +82,7 @@ class NvrNamespace(Namespace):
         room = Room.query.get(room_id)
 
         if room.free:
-            return "Already stopped", 401
+            return
 
         Thread(target=stop, args=(current_app._get_current_object(),
                                   room_id, calendar_id, event_id)).start()
@@ -108,6 +111,7 @@ class NvrNamespace(Namespace):
 
         room = Room.query.filter_by(name=name).first()
         if room:
+            emit('error', {"error": f"Комната {name} уже существует"})
             return
 
         room = Room(name=name)
