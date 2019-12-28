@@ -87,7 +87,6 @@ def json_data_required(f):
         post_data = request.get_json()
         if not post_data:
             return jsonify({"error": "json data required"}), 400
-
         return f(*args, **kwargs)
     return wrapper
 
