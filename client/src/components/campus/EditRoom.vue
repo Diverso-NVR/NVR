@@ -109,13 +109,11 @@
 </template>
 
 <script>
-import EditSource from "./EditSource";
 import AddSource from "./AddSource";
 
 export default {
   props: ["room"],
   components: {
-    appEditSource: EditSource,
     appAddSource: AddSource
   },
   data() {

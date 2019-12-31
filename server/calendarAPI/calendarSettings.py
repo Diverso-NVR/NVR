@@ -11,6 +11,8 @@ from datetime import datetime, timedelta
 
 from nvrAPI.models import nvr_db_context, Room
 
+from threading import RLock
+lock = RLock()
 
 SCOPES = 'https://www.googleapis.com/auth/calendar'
 """
@@ -40,16 +42,17 @@ def add_attachment(calendar_id: str, event_id: str, file_id: str) -> None:
     """
     Adds url of drive file 'file_id' to calendar event 'event_id'
     """
-    event = calendar_service.events().get(
-        calendarId=calendar_id, eventId=event_id).execute()
-    description = event.get('description', '') + \
-        f"\nhttps://drive.google.com/a/auditory.ru/file/d/{file_id}/view?usp=drive_web"
-    changes = {
-        'description': description
-    }
-    calendar_service.events().patch(calendarId=calendar_id, eventId=event_id,
-                                    body=changes,
-                                    supportsAttachments=True).execute()
+    with lock:
+        event = calendar_service.events().get(
+            calendarId=calendar_id, eventId=event_id).execute()
+        description = event.get('description', '') + \
+            f"\nhttps://drive.google.com/a/auditory.ru/file/d/{file_id}/view?usp=drive_web"
+        changes = {
+            'description': description
+        }
+        calendar_service.events().patch(calendarId=calendar_id, eventId=event_id,
+                                        body=changes,
+                                        supportsAttachments=True).execute()
 
 
 @nvr_db_context
@@ -57,32 +60,33 @@ def create_event_(room_name: str, start_time: str, end_time: str, summary: str) 
     """
         format 2019-11-12T15:00
     """
-    room = Room.query.filter_by(name=room_name).first()
-    if not room:
-        raise NameError()
+    with lock:
+        room = Room.query.filter_by(name=room_name).first()
+        if not room:
+            raise NameError()
 
-    date_format = "%Y-%m-%dT%H:%M:%S"
+        date_format = "%Y-%m-%dT%H:%M:%S"
 
-    start_dateTime = datetime.strptime(start_time, date_format[:-3])
-    end_StartTime = datetime.strptime(end_time, date_format[:-3]) \
-        if end_time else start_dateTime + timedelta(minutes=80)
+        start_dateTime = datetime.strptime(start_time, date_format[:-3])
+        end_StartTime = datetime.strptime(end_time, date_format[:-3]) \
+            if end_time else start_dateTime + timedelta(minutes=80)
 
-    event = {
-        'summary': summary,
-        'start': {
-            'dateTime': start_dateTime.strftime(date_format),
-            'timeZone': "Europe/Moscow"
-        },
-        'end': {
-            'dateTime': end_StartTime.strftime(date_format),
-            'timeZone': "Europe/Moscow"
+        event = {
+            'summary': summary,
+            'start': {
+                'dateTime': start_dateTime.strftime(date_format),
+                'timeZone': "Europe/Moscow"
+            },
+            'end': {
+                'dateTime': end_StartTime.strftime(date_format),
+                'timeZone': "Europe/Moscow"
+            }
         }
-    }
 
-    event = calendar_service.events().insert(
-        calendarId=room.calendar, body=event).execute()
+        event = calendar_service.events().insert(
+            calendarId=room.calendar, body=event).execute()
 
-    return event['htmlLink']
+        return event['htmlLink']
 
 
 @nvr_db_context
@@ -90,20 +94,21 @@ def give_permissions(mail: str) -> None:
     """
     Give write permissions to user 'mail'
     """
-    rule = {
-        'scope': {
-            'type': 'user',
-            'value': mail,
-        },
-        'role': 'writer'
-    }
+    with lock:
+        rule = {
+            'scope': {
+                'type': 'user',
+                'value': mail,
+            },
+            'role': 'writer'
+        }
 
-    for room in Room.query.all():
-        try:
-            created_rule = calendar_service.acl().insert(
-                calendarId=room.calendar, body=rule).execute()
-        except:
-            pass
+        for room in Room.query.all():
+            try:
+                created_rule = calendar_service.acl().insert(
+                    calendarId=room.calendar, body=rule).execute()
+            except:
+                pass
 
 
 # def delete_permissions(building, mail):
@@ -124,38 +129,40 @@ def create_calendar(building: str, room: str) -> None:
     Creates calendar with name: 'building'-'room'
     and grant access to all users from same campus
     """
-    calendar_metadata = {
-        'summary': f'{building}-{room}',
-        'timeZone': 'Europe/Moscow'
-    }
+    with lock:
+        calendar_metadata = {
+            'summary': f'{building}-{room}',
+            'timeZone': 'Europe/Moscow'
+        }
 
-    calendars = calendar_service.calendarList().list(pageToken=None).execute()
-    copy_perm = ""
-    for item in calendars['items']:
-        if item['summary'].split('-')[0] == building:
-            copy_perm = item['id']
-            break
+        calendars = calendar_service.calendarList().list(pageToken=None).execute()
+        copy_perm = ""
+        for item in calendars['items']:
+            if item['summary'].split('-')[0] == building:
+                copy_perm = item['id']
+                break
 
-    created_calendar = calendar_service.calendars().insert(
-        body=calendar_metadata).execute()
+        created_calendar = calendar_service.calendars().insert(
+            body=calendar_metadata).execute()
 
-    if copy_perm:
-        calendar = calendar_service.acl().list(
-            calendarId=copy_perm).execute()
+        if copy_perm:
+            calendar = calendar_service.acl().list(
+                calendarId=copy_perm).execute()
 
-        for rule in calendar['items']:
-            if rule['role'] == 'writer':
-                new_rule = calendar_service.acl().insert(
-                    calendarId=created_calendar["id"], body=rule).execute()
+            for rule in calendar['items']:
+                if rule['role'] == 'writer':
+                    new_rule = calendar_service.acl().insert(
+                        calendarId=created_calendar["id"], body=rule).execute()
 
-    return created_calendar["id"]  # calendarAPI link
+        return created_calendar["id"]  # calendarAPI link
 
 
 def delete_calendar(calendar_id: str) -> None:
     """
     Delete calendar with 'calendar_id' id
     """
-    try:
-        calendar_service.calendars().delete(calendarId=calendar_id).execute()
-    except Exception as e:
-        print(e)
+    with lock:
+        try:
+            calendar_service.calendars().delete(calendarId=calendar_id).execute()
+        except Exception as e:
+            print(e)

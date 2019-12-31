@@ -65,13 +65,8 @@ class NvrNamespace(Namespace):
             return "Already recording", 401
 
         room.free = False
+        room.timestamp = int(time.time())
         db.session.commit()
-
-        Thread(
-            target=NvrNamespace.start_timer,
-            args=(current_app._get_current_object(), room_id),
-            daemon=True
-        ).start()
 
         Thread(
             target=start,
@@ -79,14 +74,6 @@ class NvrNamespace(Namespace):
         ).start()
 
         emit('start_rec', {'id': room.id}, broadcast=True)
-
-    @staticmethod
-    @nvr_db_context
-    def start_timer(room_id: int) -> None:
-        while not Room.query.get(room_id).free:
-            Room.query.get(room_id).timestamp += 1
-            db.session.commit()
-            time.sleep(1)
 
     def on_stop_rec(self, msg_json):
         room_id = msg_json['id']
@@ -97,26 +84,16 @@ class NvrNamespace(Namespace):
         room = Room.query.get(room_id)
 
         if room.free:
-            return "Already stoped", 401
+            return "Already stopped", 401
 
-        Thread(target=NvrNamespace.stop_record, args=(current_app._get_current_object(),
-                                                      room_id, calendar_id, event_id)).start()
+        Thread(target=stop, args=(current_app._get_current_object(),
+                                  room_id, calendar_id, event_id)).start()
+
+        room.free = True
+        room.timestamp = 0
+        db.session.commit()
 
         emit('stop_rec', {'id': room.id}, broadcast=True)
-
-    @staticmethod
-    @nvr_db_context
-    def stop_record(room_id, calendar_id, event_id):
-        try:
-            stop(current_app._get_current_object(),
-                 room_id, calendar_id, event_id)
-        except Exception as e:
-            pass
-        finally:
-            room = Room.query.get(room_id)
-            room.free = True
-            room.timestamp = 0
-            db.session.commit()
 
     def on_delete_room(self, msg_json):
         room_id = msg_json['id']
@@ -133,6 +110,10 @@ class NvrNamespace(Namespace):
 
     def on_add_room(self, msg_json):
         name = msg_json['name']
+
+        room = Room.query.filter_by(name=name).first()
+        if room:
+            return
 
         room = Room(name=name)
         room.drive = create_folder(f'{CAMPUS}-{name}')

@@ -26,6 +26,11 @@ const mutations = {
       return room.id === message.id;
     });
 
+    room.timestamp =
+      room.timestamp == 0
+        ? 0
+        : Math.round(new Date().getTime() / 1000) - timestamp;
+
     room.timer = setInterval(() => {
       room.timestamp++;
     }, 1000);
@@ -99,8 +104,6 @@ const mutations = {
     });
     user.access = true;
   },
-
-  setUserData(state, payload) {},
   setJwtToken(state, payload) {
     localStorage.token = payload.jwt.token;
     state.jwt = payload.jwt;
@@ -114,9 +117,11 @@ const mutations = {
   },
   setRooms(state, payload) {
     state.rooms = payload;
-
     state.rooms.forEach(room => {
       room.status = room.free ? "free" : "busy";
+      room.timestamp = room.free
+        ? 0
+        : Math.round(new Date().getTime() / 1000) - room.timestamp;
       room.timer = room.free
         ? null
         : setInterval(() => {

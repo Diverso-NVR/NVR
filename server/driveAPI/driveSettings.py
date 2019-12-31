@@ -6,6 +6,9 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.http import MediaFileUpload
 
+from threading import RLock
+lock = RLock()
+
 
 SCOPES = 'https://www.googleapis.com/auth/drive'
 """
@@ -34,31 +37,33 @@ def create_folder(folder_name: str, folder_parent_id: str = '') -> str:
     """
     Creates folder in format: 'folder_name'
     """
-    folder_metadata = {
-        'name': folder_name,
-        'mimeType': 'application/vnd.google-apps.folder'
-    }
-    if folder_parent_id:
-        folder_metadata['parents'] = [folder_parent_id]
-    folder = drive_service.files().create(body=folder_metadata,
-                                          fields='id').execute()
+    with lock:
+        folder_metadata = {
+            'name': folder_name,
+            'mimeType': 'application/vnd.google-apps.folder'
+        }
+        if folder_parent_id:
+            folder_metadata['parents'] = [folder_parent_id]
+        folder = drive_service.files().create(body=folder_metadata,
+                                              fields='id').execute()
 
-    new_perm = {
-        'type': 'anyone',
-        'role': 'reader'
-    }
+        new_perm = {
+            'type': 'anyone',
+            'role': 'reader'
+        }
 
-    drive_service.permissions().create(
-        fileId=folder['id'], body=new_perm).execute()
+        drive_service.permissions().create(
+            fileId=folder['id'], body=new_perm).execute()
 
-    return "https://drive.google.com/drive/u/1/folders/" + folder['id']
+        return "https://drive.google.com/drive/u/1/folders/" + folder['id']
 
 
 def delete_folder(folder_id: str) -> None:
     """
     Deletes folder with 'folder_id' id
     """
-    drive_service.files().delete(fileId=folder_id).execute()
+    with lock:
+        drive_service.files().delete(fileId=folder_id).execute()
 
 
 def move_file(file_id: str, folder_id: str):
@@ -75,29 +80,29 @@ def upload(filename: str, folder_id: str) -> str:
     """
     Upload file "filename" on drive folder 'folder_id'
     """
-    media = MediaFileUpload(filename, mimetype="video/mp4", resumable=True)
-    file_data = {
-        "name": filename.split('/')[4],
-        "parents": [folder_id]
-    }
-    file = drive_service.files().create(
-        body=file_data, media_body=media).execute()
-    return file.get('id')
+    with lock:
+        media = MediaFileUpload(filename, mimetype="video/mp4", resumable=True)
+        file_data = {
+            "name": filename.split('/')[4],
+            "parents": [folder_id]
+        }
+        file = drive_service.files().create(
+            body=file_data, media_body=media).execute()
+        return file.get('id')
 
 
-def get_folders():
-    page_token = None
+def get_folder_by_date(date):
+    with lock:
+        page_token = None
 
-    while True:
-        response = drive_service.files().list(q="mimeType='application/vnd.google-apps.folder'",
-                                              spaces='drive',
-                                              fields='nextPageToken, files(name, id, parents)',
-                                              pageToken=page_token).execute()
-        page_token = response.get('nextPageToken', None)
+        while True:
+            response = drive_service.files().list(q=f"mimeType='application/vnd.google-apps.folder' and name='{date}'",
+                                                  spaces='drive',
+                                                  fields='nextPageToken, files(name, id, parents)',
+                                                  pageToken=page_token).execute()
+            page_token = response.get('nextPageToken', None)
 
-        if page_token is None:
-            break
+            if page_token is None:
+                break
 
-    return {folder['name']: {'id': folder['id'],
-                             'parent': folder.get('parents', [''])[0]}
-            for folder in response['files']}
+        return {folder['id']: folder.get('parents', [''])[0] for folder in response['files']}
