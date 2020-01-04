@@ -7,6 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 from flask import current_app
 from time import time, sleep
+import uuid
 
 db = SQLAlchemy()
 
@@ -62,8 +63,10 @@ class User(db.Model):
         Creates verification token
         """
         return jwt.encode(
-            {'verify_user': self.id, 'exp': time() + token_expiration},
-            current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+            {'verify_user': self.id,
+             'exp': time() + token_expiration},
+            current_app.config['SECRET_KEY'],
+            algorithm='HS256').decode('utf-8')
 
     def delete_user_after_token_expiration(self, app, token_expiration: int) -> None:
         """
@@ -82,7 +85,8 @@ class User(db.Model):
         Check if token is valid
         """
         try:
-            id = jwt.decode(token, current_app.config['SECRET_KEY'],
+            id = jwt.decode(token,
+                            current_app.config['SECRET_KEY'],
                             algorithms=['HS256'])['verify_user']
         except:
             return

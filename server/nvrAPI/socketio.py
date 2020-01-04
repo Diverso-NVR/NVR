@@ -6,9 +6,9 @@ import time
 import os
 
 from .models import db, Room, Source, User, nvr_db_context
-# from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions
-# from driveAPI.startstop import start, stop
-# from driveAPI.driveSettings import create_folder
+from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions
+from driveAPI.startstop import start, stop
+from driveAPI.driveSettings import create_folder
 
 
 from .api import get_tracking_cam
@@ -18,6 +18,9 @@ TRACKING_URL = os.environ.get('TRACKING_URL')
 
 
 class NvrNamespace(Namespace):
+    def emit_error(self, err):
+        emit("error", {"error": err})
+
     def on_sound_change(self, msg_json):
         room_id = msg_json['id']
         sound_type = msg_json['sound']
@@ -38,15 +41,19 @@ class NvrNamespace(Namespace):
         tracking_cam_ip = get_tracking_cam([s.to_dict() for s in room.sources])
 
         if not tracking_cam_ip:
-            emit(
-                'error', {"error": "Камера для трекинга не выбрана в настройках комнаты"})
+            self.emit_error(
+                "Камера для трекинга не выбрана в настройках комнаты")
             return
 
-        if new_tracking_state:
-            res = requests.post(f'{TRACKING_URL}/track', json={
-                'ip': tracking_cam_ip}, timeout=3)
-        else:
-            res = requests.delete(f'{TRACKING_URL}/track', timeout=3)
+        try:
+            if new_tracking_state:
+                res = requests.post(f'{TRACKING_URL}/track', json={
+                    'ip': tracking_cam_ip}, timeout=3)
+            else:
+                res = requests.delete(f'{TRACKING_URL}/track', timeout=3)
+        except:
+            self.emit_error("Ошибка при запуске трекинга")
+            return
 
         room.tracking_state = new_tracking_state
         db.session.commit()
@@ -111,7 +118,7 @@ class NvrNamespace(Namespace):
 
         room = Room.query.filter_by(name=name).first()
         if room:
-            emit('error', {"error": f"Комната {name} уже существует"})
+            self.emit_error(f"Комната {name} уже существует")
             return
 
         room = Room(name=name)

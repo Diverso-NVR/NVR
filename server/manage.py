@@ -7,7 +7,7 @@ from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 
 from nvrAPI.application import create_app
-from nvrAPI.models import db, Room, Source, User
+from nvrAPI.models import db, Room, Source
 
 app, _ = create_app()
 

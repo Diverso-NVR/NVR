@@ -6,7 +6,6 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 import json
-from pprint import pprint
 from datetime import datetime, timedelta
 
 from nvrAPI.models import nvr_db_context, Room
@@ -105,7 +104,7 @@ def give_permissions(mail: str) -> None:
 
         for room in Room.query.all():
             try:
-                created_rule = calendar_service.acl().insert(
+                calendar_service.acl().insert(
                     calendarId=room.calendar, body=rule).execute()
             except Exception as e:
                 print(e)

@@ -11,9 +11,9 @@ import time
 
 from .models import db, Room, Source, User, nvr_db_context
 from .email import send_verify_email, send_access_request_email
-# from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions, create_event_
-# from driveAPI.startstop import start, stop, upload_file
-# from driveAPI.driveSettings import create_folder, move_file
+from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions, create_event_
+from driveAPI.startstop import start, stop, upload_file
+from driveAPI.driveSettings import create_folder, move_file
 
 api = Blueprint('api', __name__)
 
@@ -217,8 +217,10 @@ def delete_user(current_user, user_id):
 
 @api.route('/api-key/<email>', methods=['POST', 'PUT', 'DELETE'])
 @auth_required
-def create_api_key(current_user, email):
+def manage_api_key(current_user, email):
     user = User.query.filter_by(email=email).first()
+    if current_user.role == 'user' or email != current_user.email:
+        return jsonify({'error': "Access error"}), 401
 
     if request.method == 'POST':
         if user.api_key:
