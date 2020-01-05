@@ -4,13 +4,12 @@ import signal
 import subprocess
 from pathlib import Path
 from threading import RLock, Thread
-from nvrAPI.models import nvr_db_context, Room
 import requests
+
+from nvrAPI.models import nvr_db_context, Room
 from driveAPI.driveSettings import upload, create_folder, get_folder_by_date
 from calendarAPI.calendarSettings import add_attachment
 
-
-from pprint import pprint
 
 home = str(Path.home())
 MERGE_SERVER_URL = os.environ.get('MERGE_SERVER_URL')
@@ -24,12 +23,10 @@ record_names = {}
 
 def config(room_id: int, name: str, sources: list) -> None:
     rooms[room_id] = {"name": name}
-
     processes[room_id] = []
 
     today = datetime.date.today()
     current_time = datetime.datetime.now().time()
-
     month = "0" + \
         str(today.month) if today.month < 10 else str(today.month)
     day = "0" + \
@@ -88,12 +85,7 @@ def start(room_id: int) -> None:
 def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
     kill_records(room_id)
 
-    screen_num = record_names[room_id] + \
-        rooms[room_id]['sound']['enc'][0].split('/')[0].split('.')[-1]
-    cam_num = record_names[room_id] + \
-        rooms[room_id]['main_cam'].split('/')[0].split('.')[-1]
     record_name = record_names[room_id]
-
     room = Room.query.get(room_id)
     room_folder_id = room.drive.split('/')[-1]
 
@@ -101,8 +93,6 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
     time_folder_url = ''
     date_folder_url = ''
     folders = get_folder_by_date(date)
-
-    pprint(folders)
 
     for folder_id, folder_parent_id in folders.items():
         if folder_parent_id == room_folder_id:
@@ -114,6 +104,11 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
             time, date_folder_url.split('/')[-1])
 
     try:
+        screen_num = record_names[room_id] + \
+            rooms[room_id]['sound']['enc'][0].split('/')[0].split('.')[-1]
+        cam_num = record_names[room_id] + \
+            rooms[room_id]['main_cam'].split('/')[0].split('.')[-1]
+
         res = requests.post(MERGE_SERVER_URL,
                             json={
                                 'url': NVR_API_URL,

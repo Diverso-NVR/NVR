@@ -16,6 +16,7 @@ Setting up drive
 """
 creds = None
 token_path = '.creds/tokenDrive.pickle'
+creds_path = '.creds/credentials.json'
 
 if os.path.exists(token_path):
     with open(token_path, 'rb') as token:
@@ -25,7 +26,7 @@ if not creds or not creds.valid:
         creds.refresh(Request())
     else:
         flow = InstalledAppFlow.from_client_secrets_file(
-            '.creds/credentials.json', SCOPES)
+            creds_path, SCOPES)
         creds = flow.run_local_server(port=0)
     with open(token_path, 'wb') as token:
         pickle.dump(creds, token)
@@ -96,7 +97,8 @@ def get_folder_by_date(date):
         page_token = None
 
         while True:
-            response = drive_service.files().list(q=f"mimeType='application/vnd.google-apps.folder' and name='{date}'",
+            response = drive_service.files().list(q=f"mimeType='application/vnd.google-apps.folder'"
+                                                    f"and name='{date}'",
                                                   spaces='drive',
                                                   fields='nextPageToken, files(name, id, parents)',
                                                   pageToken=page_token).execute()

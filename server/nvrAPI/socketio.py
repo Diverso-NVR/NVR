@@ -1,20 +1,26 @@
 from flask_socketio import emit, Namespace
-from .models import db, Room, Source, User, nvr_db_context
 from threading import Thread
 from flask import current_app
 import requests
+import time
+import os
 
+from .models import db, Room, Source, User, nvr_db_context
 from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions
 from driveAPI.startstop import start, stop
 from driveAPI.driveSettings import create_folder
-import time
-import os
+
+
+from .api import get_tracking_cam
 
 CAMPUS = os.environ.get('CAMPUS')
 TRACKING_URL = os.environ.get('TRACKING_URL')
 
 
 class NvrNamespace(Namespace):
+    def emit_error(self, err):
+        emit("error", {"error": err})
+
     def on_sound_change(self, msg_json):
         room_id = msg_json['id']
         sound_type = msg_json['sound']
@@ -32,18 +38,23 @@ class NvrNamespace(Namespace):
 
         room = Room.query.get(room_id)
 
-        tracking_cam_ip = NvrNamespace.get_tracking_cam(
-            [s.to_dict() for s in room.sources])
+        tracking_cam_ip = get_tracking_cam([s.to_dict() for s in room.sources])
 
         if not tracking_cam_ip:
+            self.emit_error(
+                "Камера для трекинга не выбрана в настройках комнаты")
             return
 
-        if new_tracking_state:
-            res = requests.post(f'{TRACKING_URL}/track', json={
-                'ip': tracking_cam_ip}, timeout=4)
-        else:
-            res = requests.delete(f'{TRACKING_URL}/track', timeout=4)
-        print(res.json())
+        try:
+            if new_tracking_state:
+                res = requests.post(f'{TRACKING_URL}/track', json={
+                    'ip': tracking_cam_ip}, timeout=3)
+            else:
+                res = requests.delete(f'{TRACKING_URL}/track', timeout=3)
+        except:
+            self.emit_error("Ошибка при запуске трекинга")
+            return
+
         room.tracking_state = new_tracking_state
         db.session.commit()
 
@@ -51,18 +62,12 @@ class NvrNamespace(Namespace):
              'id': room.id, 'tracking_state': room.tracking_state, 'room_name': room.name},
              broadcast=True)
 
-    @staticmethod
-    def get_tracking_cam(sources):
-        for source in sources:
-            if source['tracking']:
-                return source['ip'].split('@')[-1]
-
     def on_start_rec(self, msg_json):
         room_id = msg_json['id']
         room = Room.query.get(room_id)
 
         if not room.free:
-            return "Already recording", 401
+            return
 
         room.free = False
         room.timestamp = int(time.time())
@@ -84,7 +89,7 @@ class NvrNamespace(Namespace):
         room = Room.query.get(room_id)
 
         if room.free:
-            return "Already stopped", 401
+            return
 
         Thread(target=stop, args=(current_app._get_current_object(),
                                   room_id, calendar_id, event_id)).start()
@@ -113,6 +118,7 @@ class NvrNamespace(Namespace):
 
         room = Room.query.filter_by(name=name).first()
         if room:
+            self.emit_error(f"Комната {name} уже существует")
             return
 
         room = Room(name=name)
@@ -137,20 +143,14 @@ class NvrNamespace(Namespace):
     def on_edit_room(self, msg_json):
         room_id = msg_json['id']
         room = Room.query.get(room_id)
-        room.sources = []
+
+        for s in room.sources:
+            db.session.delete(s)
 
         for s in msg_json['sources']:
-            if s.get('id'):
-                source = Source.query.get(s['id'])
-            else:
-                source = Source()
-            room.sources.append(source)
-            source.ip = s.get('ip', "0.0.0.0")
-            source.name = s.get('name', 'камера')
-            source.sound = s.get('sound', None)
-            source.tracking = s.get('tracking', False)
-            source.main_cam = s.get('main_cam', False)
-            source.room_id = room_id
+            source = Source(**s)
+            source.room_id = room.id
+            db.session.add(source)
 
         db.session.commit()
 

@@ -1,9 +1,5 @@
-from .models import db, Room, Source, User, nvr_db_context
-from .email import send_verify_email, send_access_request_email
 from flask import Blueprint, jsonify, request, current_app
 from flask_socketio import SocketIO
-
-import time
 from datetime import datetime, timedelta
 from functools import wraps
 from threading import Thread
@@ -11,6 +7,10 @@ import os
 import uuid
 import jwt
 import requests
+import time
+
+from .models import db, Room, Source, User, nvr_db_context
+from .email import send_verify_email, send_access_request_email
 from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions, create_event_
 from driveAPI.startstop import start, stop, upload_file
 from driveAPI.driveSettings import create_folder, move_file
@@ -22,16 +22,14 @@ TRACKING_URL = os.environ.get('TRACKING_URL')
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
 
 socketio = SocketIO(message_queue='redis://',
-                    cors_allowed_origins=NVR_CLIENT_URL,
-                    # logger=True, engineio_logger=True
-                    )
+                    cors_allowed_origins=NVR_CLIENT_URL)
 
 
 def emit_event(event, data):
     socketio.emit(event,
                   data,
                   broadcast=True,
-                  namespace='/nvr-socket')
+                  namespace='/websocket')
 
 
 # DECORATORS
@@ -45,11 +43,11 @@ def auth_required(f):
         api_key = request.headers.get('key', '')
 
         invalid_msg = {
-            'message': 'Ошибка доступа',
+            'error': 'Ошибка доступа',
             'autheticated': False
         }
         expired_msg = {
-            'message': 'Истёкшая сессия',
+            'error': 'Истёкшая сессия',
             'autheticated': False
         }
 
@@ -89,9 +87,7 @@ def json_data_required(f):
         post_data = request.get_json()
         if not post_data:
             return jsonify({"error": "json data required"}), 400
-
         return f(*args, **kwargs)
-
     return wrapper
 
 # AUTHENTICATE
@@ -104,7 +100,7 @@ def register():
         db.session.add(user)
         db.session.commit()
     except:
-        return jsonify({"message": 'Пользователь с данной почтой существует'}), 409
+        return jsonify({"error": 'Пользователь с данной почтой существует'}), 409
 
     token_expiration = 600
 
@@ -114,7 +110,7 @@ def register():
                args=(current_app._get_current_object(), token_expiration)).start()
     except Exception as e:
         print(e)
-        return jsonify({"message": str(e)}), 500
+        return jsonify({"error": str(e)}), 500
 
     return jsonify(user.to_dict()), 202
 
@@ -123,7 +119,7 @@ def register():
 def verify_email(token):
     user = User.verify_email_token(token)
     if not user:
-        return "Время на подтверждение вышло. Можете зарегистрироваться ещё раз", 404
+        return "Время на подтверждение вышло. Зарегистрируйтесь ещё раз", 404
 
     if user.email_verified:
         return "Почта уже подтверждена", 200
@@ -146,13 +142,13 @@ def login():
     user = User.authenticate(**data)
 
     if not user:
-        return jsonify({'message': "Неверные данные", 'authenticated': False}), 401
+        return jsonify({'error': "Неверные данные", 'authenticated': False}), 401
 
     if not user.email_verified:
-        return jsonify({'message': 'Почта не подтверждена', 'authenticated': False}), 401
+        return jsonify({'error': 'Почта не подтверждена', 'authenticated': False}), 401
 
     if not user.access:
-        return jsonify({'message': 'Администратор ещё не открыл доступ для этого аккаунта',
+        return jsonify({'error': 'Администратор ещё не открыл доступ для этого аккаунта',
                         'authenticated': False}), 401
 
     token = jwt.encode({
@@ -175,7 +171,7 @@ def get_users(current_user):
 @auth_required
 def grant_access(current_user, user_id):
     if current_user.role == 'user':
-        return jsonify({'message': "Ошибка доступа"}), 401
+        return jsonify({'error': "Access error"}), 401
 
     user = User.query.get(user_id)
     user.access = True
@@ -193,7 +189,7 @@ def grant_access(current_user, user_id):
 @auth_required
 def user_role(current_user, user_id):
     if current_user.role == 'user':
-        return jsonify({'message': "Ошибка доступа"}), 401
+        return jsonify({'error': "Access error"}), 401
 
     user = User.query.get(user_id)
     user.role = request.get_json()['role']
@@ -208,7 +204,7 @@ def user_role(current_user, user_id):
 @auth_required
 def delete_user(current_user, user_id):
     if current_user.role == 'user':
-        return jsonify({'message': "Ошибка доступа"}), 401
+        return jsonify({'error': "Access error"}), 401
 
     user = User.query.get(user_id)
     db.session.delete(user)
@@ -221,12 +217,14 @@ def delete_user(current_user, user_id):
 
 @api.route('/api-key/<email>', methods=['POST', 'PUT', 'DELETE'])
 @auth_required
-def create_api_key(current_user, email):
+def manage_api_key(current_user, email):
     user = User.query.filter_by(email=email).first()
+    if current_user.role == 'user' or email != current_user.email:
+        return jsonify({'error': "Access error"}), 401
 
     if request.method == 'POST':
         if user.api_key:
-            return jsonify({'message': 'Ключ API уже существует'}), 409
+            return jsonify({'error': 'Ключ API уже существует'}), 409
 
         user.api_key = uuid.uuid4().hex
         db.session.commit()
@@ -247,21 +245,6 @@ def create_api_key(current_user, email):
 
 
 # GOOGLE API
-# @api.route('/move-file', methods=['POST'])
-# @auth_required
-# @json_data_required
-# def move_file(current_user):
-#     data = request.get_json()
-
-#     file_id = data['file_id']
-#     room_id = data['room_id']
-
-#     room = Room.query.get(room_id)
-
-#     move_file(file_id, room.drive)
-#     return "Success", 200
-
-
 @api.route('/create-event/<room_name>', methods=['POST'])
 @auth_required
 @json_data_required
@@ -283,23 +266,23 @@ def create_event(current_user, room_name):
     except ValueError:
         return jsonify({'error': 'Format error: date format should be YYYY-MM-DDTHH:mm'}), 400
     except NameError:
-        return jsonify({'error': f'No room found with name: {room_name}'}), 404
+        return jsonify({'error': f"No room found with name '{room_name}'"}), 404
 
     return jsonify({'message': f"Successfully created event: {event_link}"}), 201
 
-# RECORD AND GOOGLE API
+# ROOMS
 @api.route('/rooms/<room_name>', methods=['POST'])
 @auth_required
 def create_room(current_user, room_name):
     if current_user.role == 'user':
-        return jsonify({'message': "Ошибка доступа"}), 401
+        return jsonify({'error': "Access error"}), 401
 
     if not room_name:
         return jsonify({"error": "Room name required"}), 400
 
     room = Room.query.filter_by(name=room_name).first()
     if room:
-        return jsonify({"error": f"Room {room_name} already exist"}), 409
+        return jsonify({"error": f"Room '{room_name}' already exist"}), 409
 
     room = Room(name=room_name)
     db.session.add(room)
@@ -308,7 +291,7 @@ def create_room(current_user, room_name):
     Thread(target=config_room, args=(
         current_app._get_current_object(), room_name)).start()
 
-    return jsonify({'name': room_name}), 201
+    return jsonify({'message': f"Started creating '{room_name}'"}), 201
 
 
 @nvr_db_context
@@ -331,14 +314,14 @@ def get_rooms(current_user):
 @api.route('/rooms/<room_name>', methods=['GET'])
 @auth_required
 def get_room(current_user, room_name):
-    return jsonify({"room": Room.query.filter_by(name=str(room_name)).first().to_dict()}), 200
+    return jsonify(Room.query.filter_by(name=str(room_name)).first().to_dict()), 200
 
 
 @api.route('/rooms/<room_name>', methods=['DELETE'])
 @auth_required
 def delete_room(current_user, room_name):
     if current_user.role == 'user':
-        return jsonify({'message': "Ошибка доступа"}), 401
+        return jsonify({'error': "Access error"}), 401
 
     room = Room.query.filter_by(name=str(room_name)).first()
     if not room:
@@ -359,28 +342,28 @@ def delete_room(current_user, room_name):
 @json_data_required
 def edit_room(current_user, room_name):
     if current_user.role == 'user':
-        return jsonify({'message': "Ошибка доступа"}), 401
+        return jsonify({'error': "Access error"}), 401
 
     post_data = request.get_json()
 
     room = Room.query.filter_by(name=str(room_name)).first()
     if not room:
-        return jsonify({"error": "No room found with given room_name"}), 404
+        return jsonify({"error": "No room found with given 'room_name'"}), 404
     if not post_data.get('sources'):
-        return jsonify({"error": "Sources required"}), 400
+        return jsonify({"error": "Sources array required"}), 400
 
     for s in post_data['sources']:
         if s.get('id'):
             source = Source.query.get(s['id'])
+            source_dict = source.to_dict()
+            updated_source_dict = {**source_dict, **s}
+            db.session.delete(source)
+            source = Source(**updated_source_dict)
+            db.session.add(source)
         else:
-            source = Source()
-            room.sources.append(source)
-        source.ip = s.get('ip', "0.0.0.0")
-        source.name = s.get('name', 'камера')
-        source.sound = s.get('sound', 'enc')
-        source.tracking = s.get('tracking', False)
-        source.main_cam = s.get('main_cam', False)
-        source.room_id = room.id
+            source = Source(**s)
+            source.room_id = room.id
+            db.session.add(source)
 
     db.session.commit()
 
@@ -388,6 +371,72 @@ def edit_room(current_user, room_name):
         s.to_dict() for s in room.sources]})
 
     return jsonify({"message": "Room edited"}), 200
+
+
+@api.route("/sources/", methods=['GET'])
+@auth_required
+def get_sources(current_user):
+    return jsonify([s.to_dict() for s in Source.query.all()]), 200
+
+
+@api.route("/sources/<path:ip>", methods=['POST', 'GET', 'DELETE', 'PUT'])
+@auth_required
+def manage_source(current_user, ip):
+    if request.method == 'POST':
+        data = request.get_json()
+        room_name = data.get('room_name')
+        if not room_name:
+            return jsonify({"error": "room_name required"}), 400
+        room = Room.query.filter_by(name=str(room_name))
+        if not room:
+            return jsonify({"error": "No room found with provided room_name"}), 400
+
+        del data['room_name']
+        data['room_id'] = room.id
+        source = Source(ip=ip, **data)
+        db.session.add(source)
+        db.session.commit()
+
+        emit_event('edit_room', {'id': room.id, 'sources': [
+            s.to_dict() for s in room.sources]})
+
+        return jsonify({'message': 'Added'}), 201
+
+    for source in Source.query.all():
+        if ip in source.ip:
+            break
+    else:
+        return jsonify({'error': 'No source with provided ip found'}), 400
+
+    room_id = source.room_id
+
+    if request.method == 'GET':
+        return jsonify(source.to_dict()), 200
+
+    if request.method == 'DELETE':
+        db.session.delete(source)
+        db.session.commit()
+
+        emit_event('edit_room', {'id': room_id, 'sources': [
+            s.to_dict() for s in Room.query.get(room_id).sources]})
+
+        return jsonify({'message': 'Deleted'}), 200
+
+    if request.method == 'PUT':
+        s = request.get_json()
+        source_dict = source.to_dict()
+        updated_source_dict = {**source_dict, **s}
+
+        db.session.delete(source)
+
+        source = Source(**updated_source_dict)
+        db.session.add(source)
+        db.session.commit()
+
+        emit_event('edit_room', {'id': room_id, 'sources': [
+            s.to_dict() for s in Room.query.get(room_id).sources]})
+
+        return jsonify({'message': 'Updated'}), 200
 
 
 @api.route('/start-record/<room_name>', methods=['POST'])
@@ -411,7 +460,7 @@ def start_rec(current_user, room_name):
 
     emit_event('start_rec', {'id': room.id})
 
-    return jsonify({"message": f"Record started in {room.name}"}), 200
+    return jsonify({"message": f"Record started in '{room.name}'"}), 200
 
 
 @api.route('/stop-record/<room_name>', methods=["POST"])
@@ -443,7 +492,7 @@ def stop_rec(current_user, room_name):
 
     emit_event('stop_rec', {'id': room.id})
 
-    return jsonify({"message": f"Record stopped in {room.name}"}), 200
+    return jsonify({"message": f"Record stopped in '{room.name}'"}), 200
 
 
 @api.route('/sound-change/<room_name>', methods=['POST'])

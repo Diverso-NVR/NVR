@@ -6,7 +6,6 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 import json
-from pprint import pprint
 from datetime import datetime, timedelta
 
 from nvrAPI.models import nvr_db_context, Room
@@ -19,8 +18,8 @@ SCOPES = 'https://www.googleapis.com/auth/calendar'
 Setting up calendar
 """
 creds = None
-
 token_path = '.creds/tokenCalendar.pickle'
+creds_path = '.creds/credentials.json'
 
 if os.path.exists(token_path):
     with open(token_path, 'rb') as token:
@@ -30,7 +29,7 @@ if not creds or not creds.valid:
         creds.refresh(Request())
     else:
         flow = InstalledAppFlow.from_client_secrets_file(
-            '.creds/credentials.json', SCOPES)
+            creds_path, SCOPES)
         creds = flow.run_local_server(port=0)
     with open(token_path, 'wb') as token:
         pickle.dump(creds, token)
@@ -92,7 +91,7 @@ def create_event_(room_name: str, start_time: str, end_time: str, summary: str) 
 @nvr_db_context
 def give_permissions(mail: str) -> None:
     """
-    Give write permissions to user 'mail'
+    Give write permissions to user with 'mail'
     """
     with lock:
         rule = {
@@ -105,10 +104,10 @@ def give_permissions(mail: str) -> None:
 
         for room in Room.query.all():
             try:
-                created_rule = calendar_service.acl().insert(
+                calendar_service.acl().insert(
                     calendarId=room.calendar, body=rule).execute()
-            except:
-                pass
+            except Exception as e:
+                print(e)
 
 
 # def delete_permissions(building, mail):

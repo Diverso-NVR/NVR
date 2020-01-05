@@ -7,6 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 from flask import current_app
 from time import time, sleep
+import uuid
 
 db = SQLAlchemy()
 
@@ -62,8 +63,10 @@ class User(db.Model):
         Creates verification token
         """
         return jwt.encode(
-            {'verify_user': self.id, 'exp': time() + token_expiration},
-            current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+            {'verify_user': self.id,
+             'exp': time() + token_expiration},
+            current_app.config['SECRET_KEY'],
+            algorithm='HS256').decode('utf-8')
 
     def delete_user_after_token_expiration(self, app, token_expiration: int) -> None:
         """
@@ -82,7 +85,8 @@ class User(db.Model):
         Check if token is valid
         """
         try:
-            id = jwt.decode(token, current_app.config['SECRET_KEY'],
+            id = jwt.decode(token,
+                            current_app.config['SECRET_KEY'],
                             algorithms=['HS256'])['verify_user']
         except:
             return
@@ -132,6 +136,14 @@ class Source(db.Model):
     tracking = db.Column(db.Boolean, default=False)
     main_cam = db.Column(db.Boolean, default=False)
     room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
+
+    def __init__(self, **kwargs):
+        self.ip = kwargs.get('ip', "0.0.0.0")
+        self.name = kwargs.get('name', 'камера')
+        self.sound = kwargs.get('sound')
+        self.tracking = kwargs.get('tracking', False)
+        self.main_cam = kwargs.get('main_cam', False)
+        self.room_id = kwargs.get('room_id')
 
     def to_dict(self):
         return dict(id=self.id,

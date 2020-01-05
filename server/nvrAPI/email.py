@@ -4,10 +4,8 @@ from flask import render_template, current_app
 import os
 import time
 
-NVR_API_URL = os.environ.get('NVR_API_URL')
+
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
-
-
 mail = Mail()
 
 
@@ -34,8 +32,7 @@ def send_verify_email(user, token_expiration: int) -> None:
     Creates token, and email body
     """
     token = user.get_verify_token(token_expiration)
-
-    url = f'{NVR_API_URL}/verify-email/{token}'
+    url = f'{NVR_CLIENT_URL}/api/verify-email/{token}'
 
     send_email('[NVR] Подтверждение аккаунта',
                sender=current_app.config['ADMINS'][0],
