@@ -314,7 +314,7 @@ def get_rooms(current_user):
 @api.route('/rooms/<room_name>', methods=['GET'])
 @auth_required
 def get_room(current_user, room_name):
-    return jsonify({"room": Room.query.filter_by(name=str(room_name)).first().to_dict()}), 200
+    return jsonify(Room.query.filter_by(name=str(room_name)).first().to_dict()), 200
 
 
 @api.route('/rooms/<room_name>', methods=['DELETE'])
@@ -348,22 +348,22 @@ def edit_room(current_user, room_name):
 
     room = Room.query.filter_by(name=str(room_name)).first()
     if not room:
-        return jsonify({"error": "No room found with given room_name"}), 404
+        return jsonify({"error": "No room found with given 'room_name'"}), 404
     if not post_data.get('sources'):
-        return jsonify({"error": "Sources required"}), 400
+        return jsonify({"error": "Sources array required"}), 400
 
     for s in post_data['sources']:
         if s.get('id'):
             source = Source.query.get(s['id'])
+            source_dict = source.to_dict()
+            updated_source_dict = {**source_dict, **s}
+            db.session.delete(source)
+            source = Source(**updated_source_dict)
+            db.session.add(source)
         else:
-            source = Source()
-            room.sources.append(source)
-        source.ip = s.get('ip', "0.0.0.0")
-        source.name = s.get('name', 'камера')
-        source.sound = s.get('sound', 'enc')
-        source.tracking = s.get('tracking', False)
-        source.main_cam = s.get('main_cam', False)
-        source.room_id = room.id
+            source = Source(**s)
+            source.room_id = room.id
+            db.session.add(source)
 
     db.session.commit()
 
@@ -371,6 +371,72 @@ def edit_room(current_user, room_name):
         s.to_dict() for s in room.sources]})
 
     return jsonify({"message": "Room edited"}), 200
+
+
+@api.route("/sources/", methods=['GET'])
+@auth_required
+def get_sources(current_user):
+    return jsonify([s.to_dict() for s in Source.query.all()]), 200
+
+
+@api.route("/sources/<path:ip>", methods=['POST', 'GET', 'DELETE', 'PUT'])
+@auth_required
+def manage_source(current_user, ip):
+    if request.method == 'POST':
+        data = request.get_json()
+        room_name = data.get('room_name')
+        if not room_name:
+            return jsonify({"error": "room_name required"}), 400
+        room = Room.query.filter_by(name=str(room_name))
+        if not room:
+            return jsonify({"error": "No room found with provided room_name"}), 400
+
+        del data['room_name']
+        data['room_id'] = room.id
+        source = Source(ip=ip, **data)
+        db.session.add(source)
+        db.session.commit()
+
+        emit_event('edit_room', {'id': room.id, 'sources': [
+            s.to_dict() for s in room.sources]})
+
+        return jsonify({'message': 'Added'}), 201
+
+    for source in Source.query.all():
+        if ip in source.ip:
+            break
+    else:
+        return jsonify({'error': 'No source with provided ip found'}), 400
+
+    room_id = source.room_id
+
+    if request.method == 'GET':
+        return jsonify(source.to_dict()), 200
+
+    if request.method == 'DELETE':
+        db.session.delete(source)
+        db.session.commit()
+
+        emit_event('edit_room', {'id': room_id, 'sources': [
+            s.to_dict() for s in Room.query.get(room_id).sources]})
+
+        return jsonify({'message': 'Deleted'}), 200
+
+    if request.method == 'PUT':
+        s = request.get_json()
+        source_dict = source.to_dict()
+        updated_source_dict = {**source_dict, **s}
+
+        db.session.delete(source)
+
+        source = Source(**updated_source_dict)
+        db.session.add(source)
+        db.session.commit()
+
+        emit_event('edit_room', {'id': room_id, 'sources': [
+            s.to_dict() for s in Room.query.get(room_id).sources]})
+
+        return jsonify({'message': 'Updated'}), 200
 
 
 @api.route('/start-record/<room_name>', methods=['POST'])

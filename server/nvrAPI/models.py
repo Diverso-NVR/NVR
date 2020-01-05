@@ -137,6 +137,14 @@ class Source(db.Model):
     main_cam = db.Column(db.Boolean, default=False)
     room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
 
+    def __init__(self, **kwargs):
+        self.ip = kwargs.get('ip', "0.0.0.0")
+        self.name = kwargs.get('name', 'камера')
+        self.sound = kwargs.get('sound')
+        self.tracking = kwargs.get('tracking', False)
+        self.main_cam = kwargs.get('main_cam', False)
+        self.room_id = kwargs.get('room_id')
+
     def to_dict(self):
         return dict(id=self.id,
                     ip=self.ip,

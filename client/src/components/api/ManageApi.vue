@@ -104,28 +104,58 @@ export default {
         {
           name: "/rooms/",
           method: "GET",
-          doc: "Возвращает массив словарей данных о комнатах в формате json"
+          doc: "Возвращает массив словарей данных о комнатах"
         },
         {
           name: "/rooms/{room_name}",
           method: "GET",
-          doc: "Возвращает комнату с названием room_name в формате json"
+          doc: "Возвращает комнату с указанным room_name"
         },
         {
           name: "/rooms/{room_name}",
           method: "POST",
-          doc: "Создаёт комнату с названием 'room_name'"
+          doc: "Создаёт комнату с указанным room_name"
         },
         {
           name: "/rooms/{room_name}",
           method: "DELETE",
-          doc: "Удаляет комнату по названию"
+          doc: "Удаляет комнату с указанным room_name"
         },
         {
           name: "/rooms/{room_name}",
           method: "PUT",
           doc: "Изменяет данные об источниках в комнате с room_name",
           json: "{sources: array}"
+        },
+        {
+          name: "/sources/",
+          method: "GET",
+          doc: "Возвращает массив словарей данных об источниках"
+        },
+        {
+          name: "/sources/{ip}",
+          method: "GET",
+          doc: "Возвращает источник с указанным ip"
+        },
+        {
+          name: "/sources/{ip}",
+          method: "POST",
+          doc: "Создаёт источник с указанным ip. room_name - обязательное поле",
+          json:
+            "{room_name: string, main_cam: bool, name: string,  sound: string, tracking: bool}"
+        },
+        {
+          name: "/sources/{ip}",
+          method: "DELETE",
+          doc: "Удаляет источник с указанным ip"
+        },
+        {
+          name: "/sources/{ip}",
+          method: "PUT",
+          doc:
+            "Обновляет данные в источнике с указанным ip. room_name используется для соотношения источника к комнате",
+          json:
+            "{room_name: string, main_cam: bool, name: string,  sound: string, tracking: bool}"
         },
         {
           name: "/start-record/{room_name}",

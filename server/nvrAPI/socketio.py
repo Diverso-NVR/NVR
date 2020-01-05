@@ -143,20 +143,14 @@ class NvrNamespace(Namespace):
     def on_edit_room(self, msg_json):
         room_id = msg_json['id']
         room = Room.query.get(room_id)
-        room.sources = []
+
+        for s in room.sources:
+            db.session.delete(s)
 
         for s in msg_json['sources']:
-            if s.get('id'):
-                source = Source.query.get(s['id'])
-            else:
-                source = Source()
-            room.sources.append(source)
-            source.ip = s.get('ip', "0.0.0.0")
-            source.name = s.get('name', 'камера')
-            source.sound = s.get('sound', None)
-            source.tracking = s.get('tracking', False)
-            source.main_cam = s.get('main_cam', False)
-            source.room_id = room_id
+            source = Source(**s)
+            source.room_id = room.id
+            db.session.add(source)
 
         db.session.commit()
 
