@@ -191,6 +191,26 @@ export default {
           method: "POST",
           doc: `Авторизация через NVR`,
           json: `{email: string, password: string}`
+        },
+        {
+          name: "/api-key/{email}",
+          method: "POST",
+          doc: `Создаёт ключ API`
+        },
+        {
+          name: "/api-key/{email}",
+          method: "GET",
+          doc: `Возвращает ключ API`
+        },
+        {
+          name: "/api-key/{email}",
+          method: "PUT",
+          doc: `Обновляет ключ API`
+        },
+        {
+          name: "/api-key/{email}",
+          method: "DELETE",
+          doc: `Удаляет ключ API`
         }
       ]
     };

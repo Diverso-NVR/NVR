@@ -231,6 +231,9 @@ def manage_api_key(current_user, email):
 
         return jsonify({'api_key': user.api_key}), 201
 
+    if request.method == 'GET':
+        return jsonify({"api_key": user.api_key}), 200
+
     if request.method == 'PUT':
         user.api_key = uuid.uuid4().hex
         db.session.commit()
