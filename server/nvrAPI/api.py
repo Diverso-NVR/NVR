@@ -394,7 +394,6 @@ def manage_source(current_user, ip):
         if not room:
             return jsonify({"error": "No room found with provided room_name"}), 400
 
-        del data['room_name']
         data['room_id'] = room.id
         source = Source(ip=ip, **data)
         db.session.add(source)
