@@ -41,22 +41,7 @@
             </td>
 
             <td class="text-xs-center">
-              <v-btn-toggle mandatory v-model="props.item.status">
-                <v-btn
-                  flat
-                  color="green"
-                  value="free"
-                  @click="startRec(props.item)"
-                  :disabled="!props.item.free"
-                >Старт</v-btn>
-                <v-btn
-                  flat
-                  color="error"
-                  value="busy"
-                  @click="stopRec(props.item)"
-                  :disabled="props.item.free"
-                >Стоп</v-btn>
-              </v-btn-toggle>
+              <app-add-event :room="props.item"></app-add-event>
             </td>
 
             <td
@@ -113,22 +98,7 @@
                   </v-btn-toggle>
                 </li>
                 <li class="flex-item subheading" data-label="Запись">
-                  <v-btn-toggle mandatory v-model="props.item.status">
-                    <v-btn
-                      flat
-                      color="green"
-                      value="free"
-                      @click="startRec(props.item)"
-                      :disabled="!props.item.free"
-                    >Старт</v-btn>
-                    <v-btn
-                      flat
-                      color="error"
-                      value="busy"
-                      @click="stopRec(props.item)"
-                      :disabled="props.item.free"
-                    >Стоп</v-btn>
-                  </v-btn-toggle>
+                  <app-add-event :room="props.item"></app-add-event>
                 </li>
 
                 <li class="flex-item subheading" data-label="Трекинг">
@@ -190,6 +160,7 @@
 import { mapState } from "vuex";
 
 import EditRoom from "./EditRoom";
+import AddEvent from "./AddEvent";
 
 export default {
   data() {
@@ -233,7 +204,8 @@ export default {
     };
   },
   components: {
-    appEditRoom: EditRoom
+    appEditRoom: EditRoom,
+    appAddEvent: AddEvent
   },
   computed: mapState({
     rooms: state => state.rooms,
