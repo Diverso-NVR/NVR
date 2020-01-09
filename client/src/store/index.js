@@ -8,7 +8,8 @@ import {
   createAPIKey,
   updateAPIKey,
   deleteAPIKey,
-  getRooms
+  getRooms,
+  createMontageEvent
 } from "@/api";
 import { isValidToken } from "@/utils";
 
@@ -241,6 +242,14 @@ const actions = {
       commit("setError", error);
     } finally {
       commit("switchLoading");
+    }
+  },
+  async createMontageEvent({ commit }, payload) {
+    try {
+      await createMontageEvent(payload, state.jwt.token);
+      commit("setMessage", "Событие создано");
+    } catch (error) {
+      commit("setError", error);
     }
   },
   async getUsers({ commit, state }) {

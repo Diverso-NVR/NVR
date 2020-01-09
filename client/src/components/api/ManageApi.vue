@@ -175,10 +175,17 @@ export default {
           json: `{sound: string}`
         },
         {
-          name: "/create-event/{room_name}",
+          name: "/gcalendar-event/{room_name}",
           method: "POST",
           doc: `Создаёт событие в календаре в указанной комнате в указанное время. Формат дат: "YYYY-MM-DDTHH:mm", Например: 2019-08-21T15:00`,
           json: "{start_time: string, end_time: string, summary: string}"
+        },
+
+        {
+          name: "/montage-event/{room_name}",
+          method: "POST",
+          doc: `Создаёт событие на склеку материала в указанной комнате в указанный промежуток времени. Формат даты: "YYYY-MM-DD", Например: 2019-08-21`,
+          json: "{start_time: string, end_time: string, date: string}"
         },
         {
           name: "/tracking/{room_name}",

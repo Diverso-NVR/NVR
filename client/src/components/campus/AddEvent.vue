@@ -127,11 +127,14 @@ export default {
     }
   },
   methods: {
-    addEvent() {
+    async addEvent() {
       this.modal = false;
-      console.log(this.date);
-      console.log(this.startTime);
-      console.log(this.endTime);
+      await this.$store.dispatch("createMontageEvent", {
+        room_name: this.room.name,
+        date: this.date,
+        start_time: this.startTime,
+        end_time: this.endTime
+      });
       this.date = new Date().toISOString().substr(0, 10);
       this.startTime = this.endTime = null;
     }

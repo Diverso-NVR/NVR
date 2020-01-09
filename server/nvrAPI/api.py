@@ -248,10 +248,10 @@ def manage_api_key(current_user, email):
 
 
 # GOOGLE API
-@api.route('/create-event/<room_name>', methods=['POST'])
+@api.route('/gcalendar-event/<room_name>', methods=['POST'])
 @auth_required
 @json_data_required
-def create_event(current_user, room_name):
+def create_calendar_event(current_user, room_name):
     data = request.get_json()
 
     start_time = data.get('start_time')
@@ -439,6 +439,37 @@ def manage_source(current_user, ip):
             s.to_dict() for s in Room.query.get(room_id).sources]})
 
         return jsonify({'message': 'Updated'}), 200
+
+
+@api.route('/montage-event/<room_name>', methods=['POST'])
+@auth_required
+@json_data_required
+def create_montage_event(current_user, room_name):
+    data = request.get_json()
+    date = data.get('date')
+    start_time = data.get('start_time')
+    end_time = data.get('end_time')
+
+    room = Room.query.filter_by(name=str(room_name)).first()
+    if not room:
+        return jsonify({"error": "No room found with given room_name"}), 400
+
+    if not date:
+        return jsonify({"error": "date required"}), 400
+    if not start_time:
+        return jsonify({"error": "start_time required"}), 400
+    if not end_time:
+        return jsonify({"error": "end_time required"}), 400
+
+    date_time_start = datetime.strptime(
+        f'{date} {start_time}', '%Y-%m-%d %H:%M')
+    date_time_end = datetime.strptime(
+        f'{date} {end_time}', '%Y-%m-%d %H:%M')
+
+    start_timestamp = int(date_time_start.timestamp())
+    end_timestamp = int(date_time_end.timestamp())
+
+    return jsonify({"message": "Record event created"}), 201
 
 
 @api.route('/start-record/<room_name>', methods=['POST'])
