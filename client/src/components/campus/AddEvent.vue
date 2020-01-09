@@ -6,6 +6,7 @@
         <v-form ref="form" validation v-model="valid">
           <v-layout wrap>
             <v-flex xs12 sm6 md8>
+              <v-text-field v-model="eventName" label="Название" prepend-icon="label" v-on="on"></v-text-field>
               <v-menu
                 v-model="dateMenu"
                 :close-on-content-click="false"
@@ -113,6 +114,7 @@ export default {
       modal: false,
       valid: false,
       fieldsRules: [v => !!v || "Обязательное поле"],
+      eventName: "",
       date: new Date().toISOString().substr(0, 10),
       dateMenu: false,
       startTime: null,
@@ -131,12 +133,14 @@ export default {
       this.modal = false;
       await this.$store.dispatch("createMontageEvent", {
         room_name: this.room.name,
+        event_name: this.eventName,
         date: this.date,
         start_time: this.startTime,
         end_time: this.endTime
       });
       this.date = new Date().toISOString().substr(0, 10);
       this.startTime = this.endTime = null;
+      this.eventName = "";
     }
   }
 };

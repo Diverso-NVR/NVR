@@ -51,12 +51,12 @@ export function getRooms(token) {
 }
 
 export function createMontageEvent(
-  { roomName, date, start_time, end_time },
+  { room_name, event_name, date, start_time, end_time },
   token
 ) {
   return axios.post(
-    `${API_URL}/montage-event/${roomName}`,
-    { date, start_time, end_time },
+    `${API_URL}/montage-event/${room_name}`,
+    { event_name, date, start_time, end_time },
     {
       headers: { Authorization: `Bearer: ${token}` }
     }

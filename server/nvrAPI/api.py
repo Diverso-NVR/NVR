@@ -446,6 +446,7 @@ def manage_source(current_user, ip):
 @json_data_required
 def create_montage_event(current_user, room_name):
     data = request.get_json()
+    event_name = data.get('event_name')
     date = data.get('date')
     start_time = data.get('start_time')
     end_time = data.get('end_time')

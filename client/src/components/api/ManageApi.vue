@@ -100,6 +100,7 @@ export default {
       panel: [],
       api_key: "",
       API_URL: "",
+      date: new Date().toISOString(),
       routes: [
         {
           name: "/rooms/",
@@ -177,15 +178,20 @@ export default {
         {
           name: "/gcalendar-event/{room_name}",
           method: "POST",
-          doc: `Создаёт событие в календаре в указанной комнате в указанное время. Формат дат: "YYYY-MM-DDTHH:mm", Например: 2019-08-21T15:00`,
+          doc: `Создаёт событие в календаре в указанной комнате в указанное время. Формат дат: "YYYY-MM-DDTHH:mm", Например: ${new Date()
+            .toISOString()
+            .slice(0, 16)}`,
           json: "{start_time: string, end_time: string, summary: string}"
         },
 
         {
           name: "/montage-event/{room_name}",
           method: "POST",
-          doc: `Создаёт событие на склеку материала в указанной комнате в указанный промежуток времени. Формат даты: "YYYY-MM-DD", Например: 2019-08-21`,
-          json: "{start_time: string, end_time: string, date: string}"
+          doc: `Создаёт событие на склеку материала в указанной комнате в указанный промежуток времени. Формат даты: "YYYY-MM-DD", Например: ${new Date()
+            .toISOString()
+            .slice(0, 10)}`,
+          json:
+            "{start_time: string, end_time: string, date: string, event_name: string}"
         },
         {
           name: "/tracking/{room_name}",
