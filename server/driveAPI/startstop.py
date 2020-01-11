@@ -7,7 +7,7 @@ from threading import RLock, Thread
 import requests
 
 from nvrAPI.models import nvr_db_context, Room
-from driveAPI.driveSettings import upload, create_folder, get_folder_by_date
+from driveAPI.driveSettings import upload, create_folder, get_folders_by_name
 from calendarAPI.calendarSettings import add_attachment
 
 
@@ -92,7 +92,7 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
     date, time = record_name.split('_')[0], record_name.split('_')[1]
     time_folder_url = ''
     date_folder_url = ''
-    folders = get_folder_by_date(date)
+    folders = get_folders_by_name(date)
 
     for folder_id, folder_parent_id in folders.items():
         if folder_parent_id == room_folder_id:
