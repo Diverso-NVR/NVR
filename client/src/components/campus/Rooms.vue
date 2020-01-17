@@ -16,20 +16,7 @@
             <td class="text-xs-center subheading">{{ props.item.name }}</td>
 
             <td class="text-xs-center">
-              <v-btn-toggle mandatory v-model="props.item.chosen_sound">
-                <v-btn
-                  depressed
-                  value="enc"
-                  :disabled="!props.item.free"
-                  @click="soundSwitch(props.item, 'enc')"
-                >Кодер</v-btn>
-                <v-btn
-                  depressed
-                  value="cam"
-                  :disabled="!props.item.free"
-                  @click="soundSwitch(props.item, 'cam')"
-                >Камера</v-btn>
-              </v-btn-toggle>
+              <app-add-event :room="props.item"></app-add-event>
             </td>
 
             <td class="text-xs-center">
@@ -38,23 +25,6 @@
                 :class="props.item.tracking_state === true ? 'error': 'success'"
                 @click="trackingSwitch(props.item)"
               >{{props.item.tracking_state === true ? 'Выкл': 'Вкл'}}</v-btn>
-            </td>
-
-            <td class="text-xs-center">
-              <app-add-event :room="props.item"></app-add-event>
-            </td>
-
-            <td
-              class="text-xs-center body-2"
-              :class="background[props.item.status]"
-              v-switch="props.item.status"
-            >
-              <span class="green--text text--darken-4" v-case="'free'">Свободна</span>
-              <span class="red--text text--darken-4" v-case="'busy'">Идёт запись</span>
-            </td>
-
-            <td class="text-xs-center">
-              <div v-if="props.item.status === 'busy'">{{getTsString(props.item.timestamp)}}</div>
             </td>
 
             <td class="text-xs-center">
@@ -81,23 +51,8 @@
                   class="flex-item subheading key-elems"
                   data-label="Аудитория"
                 >{{ props.item.name }}</li>
-                <li class="flex-item subheading" data-label="Источник звука">
-                  <v-btn-toggle mandatory v-model="props.item.chosen_sound">
-                    <v-btn
-                      flat
-                      value="enc"
-                      :disabled="!props.item.free"
-                      @click="soundSwitch(props.item, 'enc')"
-                    >Кодер</v-btn>
-                    <v-btn
-                      flat
-                      value="cam"
-                      :disabled="!props.item.free"
-                      @click="soundSwitch(props.item, 'cam')"
-                    >Камера</v-btn>
-                  </v-btn-toggle>
-                </li>
-                <li class="flex-item subheading" data-label="Запись">
+
+                <li class="flex-item subheading" data-label="Монтаж">
                   <app-add-event :room="props.item"></app-add-event>
                 </li>
 
@@ -109,14 +64,6 @@
                   >{{props.item.tracking_state === true ? 'Выкл': 'Вкл'}}</v-btn>
                 </li>
 
-                <li class="flex-item subheading" data-label="Статус" v-switch="props.item.status">
-                  <span class="green--text text--darken-4" v-case="'free'">Свободна</span>
-                  <span class="red--text text--darken-4" v-case="'busy'">Идёт запись</span>
-                </li>
-                <li class="flex-item subheading" data-label="Время записи">
-                  <div v-if="props.item.status === 'busy'">{{getTsString(props.item.timestamp)}}</div>
-                  <div v-else>00:00:00</div>
-                </li>
                 <li class="flex-item subheading" data-label="Календарь">
                   <v-btn icon target="_blank" href="https://calendar.google.com/calendar/r">
                     <v-icon medium>calendar_today</v-icon>
@@ -172,21 +119,8 @@ export default {
           sortable: true,
           value: "name"
         },
-        {
-          text: "Источник звука",
-          value: "chosen_sound",
-          sortable: false,
-          align: "center"
-        },
+        { text: "Монтаж", value: "montage", sortable: true, align: "center" },
         { text: "Трекинг", value: "tracking", sortable: true, align: "center" },
-        { text: "Запись", value: "record", sortable: true, align: "center" },
-        { text: "Статус", value: "free", sortable: true, align: "center" },
-        {
-          text: "Время записи",
-          value: "timestamp",
-          sortable: true,
-          align: "center"
-        },
         {
           text: "Календарь",
           value: "calendar",
@@ -218,27 +152,11 @@ export default {
     onResize() {
       this.isMobile = window.innerWidth < 769;
     },
-    getTsString(seconds) {
-      let h = Math.floor(seconds / 60 / 60);
-      seconds -= h * 60 * 60;
-      let m = Math.floor(seconds / 60);
-      seconds -= m * 60;
-      return `${h} ч. ${m} м. ${seconds} с.`;
-    },
-    soundSwitch(room, sound) {
-      this.$store.dispatch("emitSoundChange", { room, sound });
-    },
     trackingSwitch(room) {
       this.$store.dispatch("emitTrackingStateChange", {
         room,
         tracking_state: !room.tracking_state
       });
-    },
-    startRec(room) {
-      this.$store.dispatch("emitStartRec", { room });
-    },
-    stopRec(room) {
-      this.$store.dispatch("emitStopRec", { room });
     },
     del(room) {
       confirm("Вы уверены, что хотите удалить эту аудиторию?") &&

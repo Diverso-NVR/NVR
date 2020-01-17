@@ -159,23 +159,6 @@ export default {
             "{room_name: string, main_cam: bool, name: string,  sound: string, tracking: bool}"
         },
         {
-          name: "/start-record/{room_name}",
-          method: "POST",
-          doc: "Запускает запись в комнате с переданным room_name"
-        },
-        {
-          name: "/stop-record/{room_name}",
-          method: "POST",
-          doc: "Останавливает запись в комнате с переданным room_name"
-        },
-        {
-          name: "/sound-change/{room_name}",
-          method: "POST",
-          doc: `Изменяет источник звука для комнаты. 
-            sound принимает одно из значений: "enc" -- кодер, "cam" -- камера`,
-          json: `{sound: string}`
-        },
-        {
           name: "/gcalendar-event/{room_name}",
           method: "POST",
           doc: `Создаёт событие в календаре в указанной комнате в указанное время. Формат дат: "YYYY-MM-DDTHH:mm", Например: ${new Date()

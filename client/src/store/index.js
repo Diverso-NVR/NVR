@@ -22,39 +22,6 @@ const state = {
   users: []
 };
 const mutations = {
-  START_REC(state, message) {
-    let room = state.rooms.find(room => {
-      return room.id === message.id;
-    });
-
-    room.timestamp =
-      room.timestamp == 0
-        ? 0
-        : Math.round(new Date().getTime() / 1000) - timestamp;
-
-    room.timer = setInterval(() => {
-      room.timestamp++;
-    }, 1000);
-    room.free = false;
-    room.status = "busy";
-  },
-  STOP_REC(state, message) {
-    let room = state.rooms.find(room => {
-      return room.id === message.id;
-    });
-
-    room.timestamp = 0;
-    clearInterval(room.timer);
-    room.free = true;
-    room.status = "free";
-  },
-  SOUND_CHANGE(state, message) {
-    let room = state.rooms.find(room => {
-      return room.id === message.id;
-    });
-
-    room.chosen_sound = message.sound;
-  },
   TRACKING_CHANGE(state, message) {
     let room = state.rooms.find(room => {
       return room.id === message.id;
@@ -80,7 +47,7 @@ const mutations = {
     let room = state.rooms.find(room => {
       return room.id === message.id;
     });
-    room.sources = message.sources;
+    room = message;
   },
   DELETE_USER(state, message) {
     let i;
@@ -118,53 +85,12 @@ const mutations = {
   },
   setRooms(state, payload) {
     state.rooms = payload;
-    state.rooms.forEach(room => {
-      room.status = room.free ? "free" : "busy";
-      room.timestamp = room.free
-        ? 0
-        : Math.round(new Date().getTime() / 1000) - room.timestamp;
-      room.timer = room.free
-        ? null
-        : setInterval(() => {
-            room.timestamp++;
-          }, 1000);
-    });
   },
   setUsers(state, payload) {
     state.users = payload;
   }
 };
 const actions = {
-  async emitStartRec({}, { room }) {
-    await this._vm.$socket.client.emit("start_rec", { id: room.id });
-  },
-  async socket_startRec({ commit }, message) {
-    try {
-      await commit("START_REC", message);
-    } catch (error) {
-      console.error(error);
-    }
-  },
-  async emitStopRec({}, { room }) {
-    await this._vm.$socket.client.emit("stop_rec", { id: room.id });
-  },
-  async socket_stopRec({ commit }, message) {
-    try {
-      await commit("STOP_REC", message);
-    } catch (error) {
-      console.error(error);
-    }
-  },
-  async emitSoundChange({}, { room, sound }) {
-    await this._vm.$socket.client.emit("sound_change", { id: room.id, sound });
-  },
-  async socket_soundChange({ commit }, message) {
-    try {
-      await commit("SOUND_CHANGE", message);
-    } catch (error) {
-      console.error(error);
-    }
-  },
   async emitTrackingStateChange({}, { room, tracking_state }) {
     await this._vm.$socket.client.emit("tracking_state_change", {
       id: room.id,
@@ -201,8 +127,8 @@ const actions = {
       console.error(error);
     }
   },
-  async emitEditRoom({ commit }, { id, sources }) {
-    await this._vm.$socket.client.emit("edit_room", { id, sources });
+  async emitEditRoom({ commit }, payload) {
+    await this._vm.$socket.client.emit("edit_room", payload);
     commit("setMessage", "Изменения сохранены");
   },
   socket_editRoom({ commit }, message) {
@@ -263,7 +189,6 @@ const actions = {
       commit("switchLoading");
     }
   },
-
   async setDataFromToken({ commit, state }) {
     try {
       commit("switchLoading");
@@ -280,7 +205,6 @@ const actions = {
       commit("switchLoading");
     }
   },
-
   async login({ commit, state }, userData) {
     try {
       commit("switchLoading");
@@ -313,7 +237,6 @@ const actions = {
   logout({ commit }) {
     commit("clearUserData");
   },
-
   async createKey({ commit, state }) {
     try {
       commit("switchLoading");

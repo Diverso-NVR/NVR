@@ -13,7 +13,7 @@ from .models import db, Room, Source, User, nvr_db_context
 from .email import send_verify_email, send_access_request_email
 from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions, create_event_
 from driveAPI.startstop import start, stop, upload_file
-from driveAPI.driveSettings import create_folder, move_file
+from driveAPI.driveSettings import create_folder, get_dates_between_timestamps
 
 api = Blueprint('api', __name__)
 
@@ -340,6 +340,7 @@ def delete_room(current_user, room_name):
     return jsonify({"message": "Room deleted"}), 200
 
 
+# TODO
 @api.route("/rooms/<room_name>", methods=['PUT'])
 @auth_required
 @json_data_required
@@ -440,7 +441,7 @@ def manage_source(current_user, ip):
 
         return jsonify({'message': 'Updated'}), 200
 
-
+# TODO
 @api.route('/montage-event/<room_name>', methods=['POST'])
 @auth_required
 @json_data_required
@@ -470,86 +471,28 @@ def create_montage_event(current_user, room_name):
     start_timestamp = int(date_time_start.timestamp())
     end_timestamp = int(date_time_end.timestamp())
 
+    if start_timestamp >= end_timestamp:
+        return jsonify({"error": "Неверный промежуток времени"}), 400
+
+    dates = get_dates_between_timestamps(start_timestamp, end_timestamp)
+    main_source = room.main_source.split('.')[-1].split('/')[0]
+    screen_source = room.screen_source.split('.')[-1].split('/')[0]
+
+    result = {}
+    result['camera'] = [date.strftime(
+        f'%Y-%m-%d_%H:%M_{room.name}_{main_source}.mp4') for date in dates]
+    result['screen'] = [date.strftime(
+        f'%Y-%m-%d_%H:%M_{room.name}_{screen_source}.mp4') for date in dates]
+
+    from pprint import pprint
+    pprint(result)
+    print(event_name)
+    print(date_time_start, date_time_end)
+
+    res = requests.post('http://172.18.130.40:8080/merge/new', json=result)
+    print(res.text)
+
     return jsonify({"message": "Record event created"}), 201
-
-
-@api.route('/start-record/<room_name>', methods=['POST'])
-@auth_required
-def start_rec(current_user, room_name):
-    room = Room.query.filter_by(name=str(room_name)).first()
-    if not room:
-        return jsonify({"error": "No room found with given room_name"}), 404
-
-    if not room.free:
-        return jsonify({"message": "Already recording"}), 409
-
-    room.free = False
-    room.timestamp = int(time.time())
-    db.session.commit()
-
-    Thread(
-        target=start,
-        args=(current_app._get_current_object(), room.id)
-    ).start()
-
-    emit_event('start_rec', {'id': room.id})
-
-    return jsonify({"message": f"Record started in '{room.name}'"}), 200
-
-
-@api.route('/stop-record/<room_name>', methods=["POST"])
-@auth_required
-def stop_rec(current_user, room_name):
-    room = Room.query.filter_by(name=str(room_name)).first()
-    if not room:
-        return jsonify({"error": "No room found with given room_name"}), 404
-
-    post_data = request.get_json()
-
-    if post_data:
-        calendar_id = post_data.get('calendar_id')
-        event_id = post_data.get('event_id')
-    else:
-        calendar_id, event_id = None, None
-
-    if room.free:
-        return jsonify({"message": "Already stopped"}), 409
-
-    Thread(target=stop,
-           args=(current_app._get_current_object(),
-                 room.id, calendar_id, event_id)).start()
-
-    room = Room.query.get(room.id)
-    room.free = True
-    room.timestamp = 0
-    db.session.commit()
-
-    emit_event('stop_rec', {'id': room.id})
-
-    return jsonify({"message": f"Record stopped in '{room.name}'"}), 200
-
-
-@api.route('/sound-change/<room_name>', methods=['POST'])
-@auth_required
-@json_data_required
-def sound_change(current_user, room_name):
-    post_data = request.get_json()
-    sound_type = post_data.get('sound')
-
-    if not sound_type:
-        return jsonify({"error": "Sound type required"}), 400
-
-    room = Room.query.filter_by(name=str(room_name)).first()
-    if not room:
-        return jsonify({"error": "No room found with given room_name"}), 404
-
-    room.chosen_sound = sound_type
-    db.session.commit()
-
-    emit_event('sound_change', {'id': room.id,
-                                'sound': sound_type})
-
-    return jsonify({"message": "Sound source changed"}), 200
 
 
 @api.route('/tracking/<room_name>', methods=['POST'])
@@ -573,18 +516,14 @@ def tracking_manage(current_user, room_name):
     if not room:
         return jsonify({"error": "No room found with given room_name"}), 404
 
-    tracking_cam_ip = get_tracking_cam(
-        [s.to_dict() for s in room.sources])
-
-    if not tracking_cam_ip:
+    if not room.tracking_source:
         return jsonify({"error": "No tracking cam selected in requested room"}), 405
 
     command = command.lower()
-
     try:
         if command == 'start':
             res = requests.post(f'{TRACKING_URL}/track', json={
-                                'ip': tracking_cam_ip}, timeout=5)
+                                'ip': room.tracking_source}, timeout=5)
         else:
             res = requests.delete(f'{TRACKING_URL}/track')
 
@@ -597,12 +536,6 @@ def tracking_manage(current_user, room_name):
         return jsonify(res.json()), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 417
-
-
-def get_tracking_cam(sources):
-    for source in sources:
-        if source['tracking']:
-            return source['ip'].split('@')[-1]
 
 
 @api.route('/upload-merged', methods=["POST"])

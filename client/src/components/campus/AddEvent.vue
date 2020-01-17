@@ -6,7 +6,7 @@
         <v-form ref="form" validation v-model="valid">
           <v-layout wrap>
             <v-flex xs12 sm6 md8>
-              <v-text-field v-model="eventName" label="Название" prepend-icon="label" v-on="on"></v-text-field>
+              <v-text-field v-model="eventName" label="Название" prepend-icon="label"></v-text-field>
               <v-menu
                 v-model="dateMenu"
                 :close-on-content-click="false"
@@ -131,6 +131,7 @@ export default {
   methods: {
     async addEvent() {
       this.modal = false;
+
       await this.$store.dispatch("createMontageEvent", {
         room_name: this.room.name,
         event_name: this.eventName,

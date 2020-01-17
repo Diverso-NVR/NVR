@@ -7,11 +7,8 @@ import os
 
 from .models import db, Room, Source, User, nvr_db_context
 from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions
-from driveAPI.startstop import start, stop
 from driveAPI.driveSettings import create_folder
 
-
-from .api import get_tracking_cam
 
 CAMPUS = os.environ.get('CAMPUS')
 TRACKING_URL = os.environ.get('TRACKING_URL')
@@ -21,26 +18,13 @@ class NvrNamespace(Namespace):
     def emit_error(self, err):
         emit("error", {"error": err})
 
-    def on_sound_change(self, msg_json):
-        room_id = msg_json['id']
-        sound_type = msg_json['sound']
-
-        room = Room.query.get(room_id)
-        room.chosen_sound = sound_type
-        db.session.commit()
-
-        emit('sound_change', {'id': room.id,
-                              'sound': sound_type}, broadcast=True)
-
     def on_tracking_state_change(self, msg_json):
         room_id = msg_json['id']
         new_tracking_state = msg_json['tracking_state']
 
         room = Room.query.get(room_id)
 
-        tracking_cam_ip = get_tracking_cam([s.to_dict() for s in room.sources])
-
-        if not tracking_cam_ip:
+        if not room.tracking_source:
             self.emit_error(
                 "Камера для трекинга не выбрана в настройках комнаты")
             return
@@ -48,7 +32,7 @@ class NvrNamespace(Namespace):
         try:
             if new_tracking_state:
                 res = requests.post(f'{TRACKING_URL}/track', json={
-                    'ip': tracking_cam_ip}, timeout=3)
+                    'ip': room.tracking_source}, timeout=3)
             else:
                 res = requests.delete(f'{TRACKING_URL}/track', timeout=3)
         except:
@@ -61,44 +45,6 @@ class NvrNamespace(Namespace):
         emit('tracking_state_change', {
              'id': room.id, 'tracking_state': room.tracking_state, 'room_name': room.name},
              broadcast=True)
-
-    def on_start_rec(self, msg_json):
-        room_id = msg_json['id']
-        room = Room.query.get(room_id)
-
-        if not room.free:
-            return
-
-        room.free = False
-        room.timestamp = int(time.time())
-        db.session.commit()
-
-        Thread(
-            target=start,
-            args=(current_app._get_current_object(), room_id)
-        ).start()
-
-        emit('start_rec', {'id': room.id}, broadcast=True)
-
-    def on_stop_rec(self, msg_json):
-        room_id = msg_json['id']
-
-        calendar_id = msg_json.get('calendar_id')
-        event_id = msg_json.get('event_id')
-
-        room = Room.query.get(room_id)
-
-        if room.free:
-            return
-
-        Thread(target=stop, args=(current_app._get_current_object(),
-                                  room_id, calendar_id, event_id)).start()
-
-        room.free = True
-        room.timestamp = 0
-        db.session.commit()
-
-        emit('stop_rec', {'id': room.id}, broadcast=True)
 
     def on_delete_room(self, msg_json):
         room_id = msg_json['id']
@@ -144,6 +90,11 @@ class NvrNamespace(Namespace):
         room_id = msg_json['id']
         room = Room.query.get(room_id)
 
+        room.main_source = msg_json['main_source']
+        room.screen_source = msg_json['screen_source']
+        room.tracking_source = msg_json['tracking_source']
+        room.sound_source = msg_json['sound_source']
+
         for s in room.sources:
             db.session.delete(s)
 
@@ -154,8 +105,7 @@ class NvrNamespace(Namespace):
 
         db.session.commit()
 
-        emit('edit_room', {'id': room.id, 'sources': [
-             s.to_dict() for s in room.sources]}, broadcast=True)
+        emit('edit_room', {room.to_dict()}, broadcast=True)
 
     def on_delete_user(self, msg_json):
         user = User.query.get(msg_json['id'])
