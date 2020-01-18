@@ -7,7 +7,6 @@ from google.auth.transport.requests import Request
 from googleapiclient.http import MediaFileUpload
 from googleapiclient.http import MediaIoBaseDownload
 import io
-from datetime import datetime
 
 
 from threading import RLock
@@ -112,56 +111,3 @@ def get_folders_by_name(name):
                 break
 
         return {folder['id']: folder.get('parents', [''])[0] for folder in response['files']}
-
-
-# Нужно вынести в сервис склейки
-def download_video(video_id: str, video_name: str) -> None:
-    request = drive_service.files().get_media(fileId=video_id)
-    fh = io.FileIO(video_name, mode='w')
-    downloader = MediaIoBaseDownload(fh, request)
-    done = False
-    while done is False:
-        status, done = downloader.next_chunk()
-
-
-def get_video_by_name(name: str) -> str:
-    page_token = None
-
-    while True:
-        response = drive_service.files().list(q=f"mimeType='video/mp4'"
-                                                f"and name='{name}'",
-                                                spaces='drive',
-                                                fields='nextPageToken, files(name, id)',
-                                                pageToken=page_token).execute()
-        page_token = response.get('nextPageToken', None)
-
-        if page_token is None:
-            break
-
-    return response['files'][0]['id']
-
-
-def get_dates_between_timestamps(start_timestamp: int, stop_timestamp: int) -> list:
-
-    start_timestamp = start_timestamp // 1800 * 1800
-    stop_timestamp = (stop_timestamp // 1800 + 1) * 1800 if int(
-        stop_timestamp) % 1800 != 0 else (stop_timestamp // 1800) * 1800
-
-    dates = []
-    for timestamp in range(start_timestamp, stop_timestamp, 1800):
-        dates.append(datetime.fromtimestamp(timestamp))
-
-    return dates
-
-# Example
-# d = get_dates_between_timestamps(1578764926, 1578764926 + 2700)
-
-# room_name = 'Зал'
-# source_name = '54'
-
-# d = [i.strftime(f'%Y-%m-%d_%H:%M_{room_name}_{source_name}.mp4') for i in d]
-# print(d)
-
-# for i in d:
-#     g = get_video_by_name(i)
-#     download_video(g, i)

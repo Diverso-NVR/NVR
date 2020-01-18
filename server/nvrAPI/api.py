@@ -12,8 +12,7 @@ import time
 from .models import db, Room, Source, User, nvr_db_context
 from .email import send_verify_email, send_access_request_email
 from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions, create_event_
-from driveAPI.startstop import start, stop, upload_file
-from driveAPI.driveSettings import create_folder, get_dates_between_timestamps
+from driveAPI.driveSettings import create_folder
 
 api = Blueprint('api', __name__)
 
@@ -441,7 +440,20 @@ def manage_source(current_user, ip):
 
         return jsonify({'message': 'Updated'}), 200
 
-# TODO
+
+def get_dates_between_timestamps(start_timestamp: int, stop_timestamp: int) -> list:
+
+    start_timestamp = start_timestamp // 1800 * 1800
+    stop_timestamp = (stop_timestamp // 1800 + 1) * 1800 if int(
+        stop_timestamp) % 1800 != 0 else (stop_timestamp // 1800) * 1800
+
+    dates = []
+    for timestamp in range(start_timestamp, stop_timestamp, 1800):
+        dates.append(datetime.fromtimestamp(timestamp))
+
+    return dates
+
+
 @api.route('/montage-event/<room_name>', methods=['POST'])
 @auth_required
 @json_data_required
@@ -479,9 +491,9 @@ def create_montage_event(current_user, room_name):
     screen_source = room.screen_source.split('.')[-1].split('/')[0]
 
     result = {}
-    result['camera'] = [date.strftime(
+    result['cameras'] = [date.strftime(
         f'%Y-%m-%d_%H:%M_{room.name}_{main_source}.mp4') for date in dates]
-    result['screen'] = [date.strftime(
+    result['screens'] = [date.strftime(
         f'%Y-%m-%d_%H:%M_{room.name}_{screen_source}.mp4') for date in dates]
 
     from pprint import pprint
@@ -489,7 +501,9 @@ def create_montage_event(current_user, room_name):
     print(event_name)
     print(date_time_start, date_time_end)
 
-    res = requests.post('http://172.18.130.40:8080/merge/new', json=result)
+    res = requests.post('http://172.18.130.40:8080/merge',
+                        json={**result, 'start_time': start_time, 'end_time': end_time,
+                              'folder_id': room.drive.split('/')[-1]})
     print(res.text)
 
     return jsonify({"message": "Record event created"}), 201
@@ -536,28 +550,3 @@ def tracking_manage(current_user, room_name):
         return jsonify(res.json()), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 417
-
-
-@api.route('/upload-merged', methods=["POST"])
-@auth_required
-@json_data_required
-def upload_merged(current_user):
-    post_data = request.get_json(force=True)
-
-    room_id = post_data.get("room_id")
-    if not room_id:
-        return jsonify({"error": "Room id required"}), 400
-
-    room = Room.query.get(room_id)
-
-    Thread(target=upload_file,
-           args=(
-               post_data["file_name"],
-               post_data["folder_id"],
-               post_data.get('calendar_id'),
-               post_data.get('event_id')
-           ),
-           daemon=True
-           ).start()
-
-    return jsonify({"message": "Video uploading"}), 200

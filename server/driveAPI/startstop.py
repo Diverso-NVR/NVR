@@ -103,29 +103,6 @@ def stop(room_id: int, calendar_id: str = None, event_id: str = None) -> None:
         time_folder_url = create_folder(
             time, date_folder_url.split('/')[-1])
 
-    try:
-        screen_num = record_names[room_id] + \
-            rooms[room_id]['sound']['enc'][0].split('/')[0].split('.')[-1]
-        cam_num = record_names[room_id] + \
-            rooms[room_id]['main_cam'].split('/')[0].split('.')[-1]
-
-        res = requests.post(MERGE_SERVER_URL,
-                            json={
-                                'url': NVR_API_URL,
-                                "screen_num": screen_num,
-                                "cam_num": cam_num,
-                                "record_name": record_name,
-                                "room_id": room_id,
-                                "folder_id": date_folder_url.split('/')[-1],
-                                "calendar_id": calendar_id,
-                                "event_id": event_id
-                            },
-                            headers={'content-type': 'application/json'},
-                            timeout=2)
-        print(res.json())
-    except Exception as e:
-        print(e)
-
     Thread(target=sync_and_upload, args=(
         room_id, record_name, rooms[room_id]['vid'], time_folder_url.split('/')[-1])).start()
 
@@ -163,17 +140,3 @@ def add_sound(record_name: str, source_id: str) -> None:
                                  ".mp4", "-y", "-shortest", "-c", "copy",
                                  home + "/vids/" + record_name + source_id + ".mp4"], shell=False)
         proc.wait()
-
-
-def upload_file(file_name: str, folder_id: str, calendar_id: str, event_id: str) -> None:
-    try:
-        file_id = upload(home + "/vids/" + file_name,
-                         folder_id)
-    except Exception as e:
-        print(e)
-
-    if calendar_id:
-        try:
-            add_attachment(calendar_id, event_id, file_id)
-        except Exception as e:
-            print(e)
