@@ -339,7 +339,6 @@ def delete_room(current_user, room_name):
     return jsonify({"message": "Room deleted"}), 200
 
 
-# TODO
 @api.route("/rooms/<room_name>", methods=['PUT'])
 @auth_required
 @json_data_required
@@ -374,6 +373,34 @@ def edit_room(current_user, room_name):
         s.to_dict() for s in room.sources]})
 
     return jsonify({"message": "Room edited"}), 200
+
+# TODO doc and socket
+@api.route('/set-source/<room_name>/<source_type>/<path:ip>', methods=['POST'])
+@auth_required
+def room_settings(current_user, room_name, source_type, ip):
+    room = Room.query.filter_by(name=str(room_name)).first()
+    if not room:
+        return jsonify({"error": "No room found with provided room_name"}), 400
+
+    source_type = source_type.lower()
+    if source_type not in ['main', 'screen', 'track', 'sound']:
+        return jsonify({"error": f"Incorrect source type: {source_type}"}), 400
+
+    if ip not in [s.ip for s in room.sources]:
+        return jsonify({"error": f"Source with provided ip not in room`s sources list"}), 400
+
+    if source_type == 'main':
+        room.main_source = ip
+    elif source_type == 'screen':
+        room.screen_source = ip
+    elif source_type == 'sound':
+        room.sound_source = ip
+    else:
+        room.tracking_source = ip
+
+    db.session.commit()
+
+    return jsonify({"message": "Source set"}), 200
 
 
 @api.route("/sources/", methods=['GET'])
@@ -441,19 +468,6 @@ def manage_source(current_user, ip):
         return jsonify({'message': 'Updated'}), 200
 
 
-def get_dates_between_timestamps(start_timestamp: int, stop_timestamp: int) -> list:
-
-    start_timestamp = start_timestamp // 1800 * 1800
-    stop_timestamp = (stop_timestamp // 1800 + 1) * 1800 if int(
-        stop_timestamp) % 1800 != 0 else (stop_timestamp // 1800) * 1800
-
-    dates = []
-    for timestamp in range(start_timestamp, stop_timestamp, 1800):
-        dates.append(datetime.fromtimestamp(timestamp))
-
-    return dates
-
-
 @api.route('/montage-event/<room_name>', methods=['POST'])
 @auth_required
 @json_data_required
@@ -496,17 +510,27 @@ def create_montage_event(current_user, room_name):
     result['screens'] = [date.strftime(
         f'%Y-%m-%d_%H:%M_{room.name}_{screen_source}.mp4') for date in dates]
 
-    from pprint import pprint
-    pprint(result)
-    print(event_name)
-    print(date_time_start, date_time_end)
-
-    res = requests.post('http://172.18.130.40:8080/merge',
-                        json={**result, 'start_time': start_time, 'end_time': end_time,
+    res = requests.post('http://172.18.130.40:8080/merge-new',
+                        json={**result,
+                              'start_time': start_time,
+                              'end_time': end_time,
                               'folder_id': room.drive.split('/')[-1]})
     print(res.text)
 
     return jsonify({"message": "Record event created"}), 201
+
+
+def get_dates_between_timestamps(start_timestamp: int, stop_timestamp: int) -> list:
+
+    start_timestamp = start_timestamp // 1800 * 1800
+    stop_timestamp = (stop_timestamp // 1800 + 1) * 1800 if int(
+        stop_timestamp) % 1800 != 0 else (stop_timestamp // 1800) * 1800
+
+    dates = []
+    for timestamp in range(start_timestamp, stop_timestamp, 1800):
+        dates.append(datetime.fromtimestamp(timestamp))
+
+    return dates
 
 
 @api.route('/tracking/<room_name>', methods=['POST'])
