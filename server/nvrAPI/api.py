@@ -369,12 +369,11 @@ def edit_room(current_user, room_name):
 
     db.session.commit()
 
-    emit_event('edit_room', {'id': room.id, 'sources': [
-        s.to_dict() for s in room.sources]})
+    emit('edit_room', {room.to_dict()}, broadcast=True)
 
     return jsonify({"message": "Room edited"}), 200
 
-# TODO doc and socket
+
 @api.route('/set-source/<room_name>/<source_type>/<path:ip>', methods=['POST'])
 @auth_required
 def room_settings(current_user, room_name, source_type, ip):
@@ -399,6 +398,8 @@ def room_settings(current_user, room_name, source_type, ip):
         room.tracking_source = ip
 
     db.session.commit()
+
+    emit('edit_room', {room.to_dict()}, broadcast=True)
 
     return jsonify({"message": "Source set"}), 200
 

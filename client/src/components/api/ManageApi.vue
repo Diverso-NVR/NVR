@@ -159,6 +159,12 @@ export default {
             "{room_name: string, main_cam: bool, name: string,  sound: string, tracking: bool}"
         },
         {
+          name: "/set-source/{room_name}/{source_type}/{ip}",
+          method: "POST",
+          doc:
+            "Меняет источник ответственный за source_type: [main - главная камера, screen - экран, sound - звук, track - трекинг]"
+        },
+        {
           name: "/gcalendar-event/{room_name}",
           method: "POST",
           doc: `Создаёт событие в календаре в указанной комнате в указанное время. Формат дат: "YYYY-MM-DDTHH:mm", Например: ${new Date()
