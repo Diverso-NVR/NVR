@@ -62,39 +62,6 @@ def create_folder(folder_name: str, folder_parent_id: str = '') -> str:
         return "https://drive.google.com/drive/u/1/folders/" + folder['id']
 
 
-def delete_folder(folder_id: str) -> None:
-    """
-    Deletes folder with 'folder_id' id
-    """
-    with lock:
-        drive_service.files().delete(fileId=folder_id).execute()
-
-
-def move_file(file_id: str, folder_id: str):
-    file = drive_service.files().get(fileId=file_id,
-                                     fields='parents').execute()
-    previous_parents = ",".join(file.get('parents'))
-    file = drive_service.files().update(fileId=file_id,
-                                        addParents=folder_id,
-                                        removeParents=previous_parents,
-                                        fields='id, parents').execute()
-
-
-def upload(filename: str, folder_id: str) -> str:
-    """
-    Upload file "filename" on drive folder 'folder_id'
-    """
-    with lock:
-        media = MediaFileUpload(filename, mimetype="video/mp4", resumable=True)
-        file_data = {
-            "name": filename.split('/')[4],
-            "parents": [folder_id]
-        }
-        file = drive_service.files().create(
-            body=file_data, media_body=media).execute()
-        return file.get('id')
-
-
 def get_folders_by_name(name):
     with lock:
         page_token = None
