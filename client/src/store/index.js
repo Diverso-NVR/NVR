@@ -156,6 +156,12 @@ const actions = {
   socket_grantAccess({ commit }, message) {
     commit("GRANT_ACCESS", message);
   },
+  async emitStreamingStart({}, payload) {
+    await this._vm.$socket.client.emit("streaming_start", payload);
+  },
+  async emitStreamingStop({}, payload) {
+    await this._vm.$socket.client.emit("streaming_stop", payload);
+  },
   socket_error({ commit }, message) {
     commit("setErrorFromText", message);
   },

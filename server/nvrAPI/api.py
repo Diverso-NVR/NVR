@@ -574,3 +574,10 @@ def tracking_manage(current_user, room_name):
         return jsonify(res.json()), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 417
+
+
+@api.route('/streaming', methods=['POST', 'GET'])
+@auth_required
+@json_data_required
+def manage_streaming(current_user):
+    pass
