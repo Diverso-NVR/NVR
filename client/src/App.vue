@@ -112,10 +112,7 @@ export default {
     links() {
       let links = [];
       if (this.isUserLoggedIn) {
-        links = [
-          { title: "Запись", icon: "view_list", url: "/rooms" },
-          { title: "Стриминг", icon: "view_list", url: "/streaming" }
-        ];
+        links = [{ title: "Аудитории", icon: "view_list", url: "/rooms" }];
         if (/^\w*admin$/.test(this.user.role)) {
           links = [
             ...links,

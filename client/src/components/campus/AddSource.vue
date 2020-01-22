@@ -12,21 +12,6 @@
             <v-flex xs12 sm6 md8>
               <v-text-field label="IP" :rules="fieldsRules" v-model="newSource.ip"></v-text-field>
             </v-flex>
-
-            <v-flex xs12 sm6 md8>
-              <v-select
-                :items="['enc', 'cam', false]"
-                label="Источник звука"
-                required
-                v-model="newSource.sound"
-              ></v-select>
-            </v-flex>
-            <v-flex xs12 sm6 md8>
-              <v-checkbox v-model="newSource.tracking" :label="`Трекинг`"></v-checkbox>
-            </v-flex>
-            <v-flex xs12 sm6 md8>
-              <v-checkbox v-model="newSource.main_сam" :label="`Главная камера`"></v-checkbox>
-            </v-flex>
           </v-layout>
         </v-form>
       </v-card-text>
@@ -46,11 +31,7 @@ export default {
     return {
       modal: false,
       valid: false,
-      newSource: {
-        tracking: false,
-        main_сam: false,
-        sound: false
-      },
+      newSource: {},
       fieldsRules: [v => !!v || "Обязательное поле"]
     };
   },
@@ -63,11 +44,7 @@ export default {
     addSource() {
       this.modal = false;
       this.room.sources.push(this.newSource);
-      this.newSource = {
-        tracking: false,
-        main_сam: false,
-        sound: false
-      };
+      this.newSource = {};
     }
   }
 };

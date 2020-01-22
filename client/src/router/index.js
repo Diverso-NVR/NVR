@@ -4,7 +4,6 @@ import { adminOnly, authRequired } from "./authGuard";
 
 import ManageApi from "@/components/api/ManageApi";
 import Rooms from "@/components/campus/Rooms";
-import Streaming from "@/components/campus/Streaming";
 import Login from "@/components/auth/Login";
 import Register from "@/components/auth/Register";
 import AccessRequests from "@/components/users/AccessRequests";
@@ -29,11 +28,6 @@ export default new Router({
     {
       path: "/rooms",
       component: Rooms,
-      beforeEnter: authRequired
-    },
-    {
-      path: "/streaming",
-      component: Streaming,
       beforeEnter: authRequired
     },
     {
