@@ -12,7 +12,7 @@ import time
 from .models import db, Room, Source, User, nvr_db_context
 from .email import send_verify_email, send_access_request_email
 from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions, create_event_
-from driveAPI.driveSettings import create_folder
+from driveAPI.driveSettings import create_folder, get_folders_by_name
 
 api = Blueprint('api', __name__)
 
@@ -511,11 +511,20 @@ def create_montage_event(current_user, room_name):
     result['screens'] = [date.strftime(
         f'%Y-%m-%d_%H:%M_{room.name}_{screen_source}.mp4') for date in dates]
 
+    date_folder_id = ''
+    folders = get_folders_by_name(date)
+
+    for folder_id, folder_parent_id in folders.items():
+        if folder_parent_id == room.drive.split('/')[-1]:
+            break
+    else:
+        folder_id = room.drive.split('/')[-1]
+
     res = requests.post('http://172.18.130.40:8080/merge-new',
                         json={**result,
                               'start_time': start_time,
                               'end_time': end_time,
-                              'folder_id': room.drive.split('/')[-1]})
+                              'folder_id': folder_id})
     print(res.text)
 
     return jsonify({"message": "Record event created"}), 201
