@@ -46,18 +46,27 @@
               <td class="text-xs-center">
                 <v-text-field class="body-1" v-model.trim="props.item.ip"></v-text-field>
               </td>
-              <td class="text-xs-center">
-                <v-btn-toggle v-model="props.item.sound">
-                  <v-btn value="enc" class="body-1" flat>Кодер</v-btn>
-                  <v-btn value="cam" class="body-1" flat>Камера</v-btn>
-                </v-btn-toggle>
+              <td>
+                <v-radio-group class="v-c" v-model="soundSource">
+                  <v-radio :value="props.item.ip"></v-radio>
+                </v-radio-group>
               </td>
-              <td class="text-xs-center">
-                <v-checkbox class="v-c" v-model="props.item.tracking"></v-checkbox>
+              <td>
+                <v-radio-group class="v-c" v-model="trackingSource">
+                  <v-radio :value="props.item.ip"></v-radio>
+                </v-radio-group>
               </td>
-              <td class="text-xs-center">
-                <v-checkbox class="v-c" v-model="props.item.main_cam"></v-checkbox>
+              <td>
+                <v-radio-group class="v-c" v-model="mainSource">
+                  <v-radio :value="props.item.ip"></v-radio>
+                </v-radio-group>
               </td>
+              <td>
+                <v-radio-group class="v-c" v-model="screenSource">
+                  <v-radio :value="props.item.ip"></v-radio>
+                </v-radio-group>
+              </td>
+
               <td class="text-xs-center">
                 <v-btn icon @click="del(props.item)">
                   <v-icon>delete</v-icon>
@@ -73,17 +82,26 @@
                   <li class="flex-item key-elems subheading" data-label="IP">
                     <v-text-field class="body-1" v-model.trim="props.item.ip"></v-text-field>
                   </li>
-                  <li class="flex-item subheading" data-label="Источник звука">
-                    <v-btn-toggle v-model="props.item.sound">
-                      <v-btn value="enc" class="body-1" flat>Кодер</v-btn>
-                      <v-btn value="cam" class="body-1" flat>Камера</v-btn>
-                    </v-btn-toggle>
+
+                  <li class="flex-item subheading" data-label="Звук">
+                    <v-radio-group class="v-c" v-model="soundSource">
+                      <v-radio :value="props.item.ip"></v-radio>
+                    </v-radio-group>
                   </li>
                   <li class="flex-item subheading" data-label="Трекинг">
-                    <v-checkbox class="v-c" v-model="props.item.tracking"></v-checkbox>
+                    <v-radio-group class="v-c" v-model="trackingSource">
+                      <v-radio :value="props.item.ip"></v-radio>
+                    </v-radio-group>
                   </li>
                   <li class="flex-item subheading" data-label="Главная камера">
-                    <v-checkbox class="v-c" v-model="props.item.main_cam"></v-checkbox>
+                    <v-radio-group class="v-c" v-model="mainSource">
+                      <v-radio :value="props.item.ip"></v-radio>
+                    </v-radio-group>
+                  </li>
+                  <li class="flex-item subheading" data-label="Экран">
+                    <v-radio-group class="v-c" v-model="screenSource">
+                      <v-radio :value="props.item.ip"></v-radio>
+                    </v-radio-group>
                   </li>
                   <li class="flex-item subheading" data-label="Удалить">
                     <v-btn icon @click="del(props.item)">
@@ -121,6 +139,10 @@ export default {
       modal: false,
       search: "",
       isMobile: "",
+      soundSource: this.room.sound_source,
+      trackingSource: this.room.tracking_source,
+      mainSource: this.room.main_source,
+      screenSource: this.room.screen_source,
       headers: [
         {
           text: "Название",
@@ -135,7 +157,7 @@ export default {
           align: "center"
         },
         {
-          text: "Источник звука",
+          text: "Звук",
           value: "sound",
           sortable: true,
           align: "center"
@@ -144,6 +166,12 @@ export default {
         {
           text: "Главная камера",
           value: "main_cam",
+          sortable: true,
+          align: "center"
+        },
+        {
+          text: "Экран",
+          value: "screen",
           sortable: true,
           align: "center"
         },
@@ -170,9 +198,16 @@ export default {
       confirm("Вы уверены, что хотите удалить этот источник записи?") &&
         this.roomCopy.sources.splice(i, 1);
     },
-    saveChanges(room) {
+    saveChanges(roomCopy) {
       this.$store
-        .dispatch("emitEditRoom", { id: room.id, sources: room.sources })
+        .dispatch("emitEditRoom", {
+          id: roomCopy.id,
+          sources: roomCopy.sources,
+          sound_source: this.soundSource,
+          tracking_source: this.trackingSource,
+          main_source: this.mainSource,
+          screen_source: this.screenSource
+        })
         .then(() => {
           this.modal = false;
         });
@@ -180,6 +215,10 @@ export default {
   },
   created() {
     this.roomCopy = { ...this.room };
+    this.soundSource = this.room.sound_source;
+    this.trackingSource = this.room.tracking_source;
+    this.mainSource = this.room.main_source;
+    this.screenSource = this.room.screen_source;
   }
 };
 </script>

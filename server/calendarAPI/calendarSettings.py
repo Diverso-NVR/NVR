@@ -37,23 +37,6 @@ if not creds or not creds.valid:
 calendar_service = build('calendar', 'v3', credentials=creds)
 
 
-def add_attachment(calendar_id: str, event_id: str, file_id: str) -> None:
-    """
-    Adds url of drive file 'file_id' to calendar event 'event_id'
-    """
-    with lock:
-        event = calendar_service.events().get(
-            calendarId=calendar_id, eventId=event_id).execute()
-        description = event.get('description', '') + \
-            f"\nhttps://drive.google.com/a/auditory.ru/file/d/{file_id}/view?usp=drive_web"
-        changes = {
-            'description': description
-        }
-        calendar_service.events().patch(calendarId=calendar_id, eventId=event_id,
-                                        body=changes,
-                                        supportsAttachments=True).execute()
-
-
 @nvr_db_context
 def create_event_(room_name: str, start_time: str, end_time: str, summary: str) -> str:
     """

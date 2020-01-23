@@ -115,7 +115,7 @@ export default {
         links = [{ title: "Аудитории", icon: "view_list", url: "/rooms" }];
         if (/^\w*admin$/.test(this.user.role)) {
           links = [
-            links[0],
+            ...links,
             {
               title: "Пользователи",
               icon: "supervised_user_circle",
