@@ -576,8 +576,48 @@ def tracking_manage(current_user, room_name):
         return jsonify({"error": str(e)}), 417
 
 
-@api.route('/streaming', methods=['POST', 'GET'])
+@api.route('/streaming-start', methods=['POST'])
 @auth_required
 @json_data_required
-def manage_streaming(current_user):
-    pass
+def streaming_start(current_user):
+    data = request.get_json()
+
+    sound_ip = data['sound_ip']
+    camera_ip = data['camera_ip']
+    yt_url = data['yt_url']
+
+    response = requests.post(f'{STEAMING_URL}/start', json={
+        "image_addr": camera_ip,
+        "sound_addr": sound_ip,
+        "yt_addr": yt_url
+    })
+
+    if response.status_code != 200:
+        return jsonify({"error": "Unable to start stream"}), 500
+
+    response_json = response.json()
+
+    stream = Stream(url=response_json['yt_addr'], pid=response_json['pid'])
+    db.session.add(stream)
+    db.session.commit()
+
+    return jsonify({"message": "Streaming started"}), 200
+
+
+@api.route('/streaming-stop', methods=['POST'])
+@auth_required
+@json_data_required
+def streaming_start(current_user):
+    data = request.get_json()
+
+    stream_url = data['yt_url']
+    room_name = data['room_name']
+
+    stream = Stream.query.get(url=stream_url)
+
+    requests.post(f'{STEAMING_URL}/stop/{stream.pid}')
+
+    db.session.delete(stream)
+    db.session.commit()
+
+    return jsonify({"message": "Streaming stopped"}), 200
