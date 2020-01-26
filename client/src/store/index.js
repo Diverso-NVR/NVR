@@ -159,8 +159,14 @@ const actions = {
   async emitStreamingStart({}, payload) {
     await this._vm.$socket.client.emit("streaming_start", payload);
   },
+  socket_streamingStart({ commit }, message) {
+    commit("setMessage", `Начат стрим в ${message.name}`);
+  },
   async emitStreamingStop({}, payload) {
     await this._vm.$socket.client.emit("streaming_stop", payload);
+  },
+  socket_streamingStop({ commit }, message) {
+    commit("setMessage", `Остановлен стрим в ${message.name}`);
   },
   socket_error({ commit }, message) {
     commit("setErrorFromText", message);
