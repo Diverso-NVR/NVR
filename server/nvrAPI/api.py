@@ -19,6 +19,7 @@ api = Blueprint('api', __name__)
 CAMPUS = os.environ.get('CAMPUS')
 TRACKING_URL = os.environ.get('TRACKING_URL')
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
+STEAMING_URL = 'http://172.16.87.10:14088'
 
 socketio = SocketIO(message_queue='redis://',
                     cors_allowed_origins=NVR_CLIENT_URL)
@@ -586,6 +587,13 @@ def streaming_start(current_user):
     camera_ip = data['camera_ip']
     yt_url = data['yt_url']
 
+    if not sound_ip:
+        return jsonify({"error": "Sound source ip not provided"}), 400
+    if not camera_ip:
+        return jsonify({"error": "Camera ip not provided"}), 400
+    if not yt_url:
+        return jsonify({"error": "Stream url not provided"}), 400
+
     response = requests.post(f'{STEAMING_URL}/start', json={
         "image_addr": camera_ip,
         "sound_addr": sound_ip,
@@ -611,7 +619,9 @@ def streaming_start(current_user):
     data = request.get_json()
 
     stream_url = data['yt_url']
-    room_name = data['room_name']
+
+    if not stream_url:
+        return jsonify({"error": "Stream url not provided"}), 400
 
     stream = Stream.query.get(url=stream_url)
 
