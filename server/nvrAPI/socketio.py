@@ -12,7 +12,7 @@ from driveAPI.driveSettings import create_folder
 
 CAMPUS = os.environ.get('CAMPUS')
 TRACKING_URL = os.environ.get('TRACKING_URL')
-STEAMING_URL = os.environ.get('NVR_CLIENT_URL')
+STEAMING_URL = os.environ.get('STREAMING_URL')
 
 
 class NvrNamespace(Namespace):

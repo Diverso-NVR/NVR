@@ -19,7 +19,7 @@ api = Blueprint('api', __name__)
 CAMPUS = os.environ.get('CAMPUS')
 TRACKING_URL = os.environ.get('TRACKING_URL')
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
-STEAMING_URL = os.environ.get('NVR_CLIENT_URL')
+STEAMING_URL = os.environ.get('STREAMING_URL')
 
 socketio = SocketIO(message_queue='redis://',
                     cors_allowed_origins=NVR_CLIENT_URL)
