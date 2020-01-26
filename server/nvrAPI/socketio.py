@@ -12,7 +12,7 @@ from driveAPI.driveSettings import create_folder
 
 CAMPUS = os.environ.get('CAMPUS')
 TRACKING_URL = os.environ.get('TRACKING_URL')
-STEAMING_URL = 'http://172.16.87.10:14088'
+STEAMING_URL = os.environ.get('NVR_CLIENT_URL')
 
 
 class NvrNamespace(Namespace):
@@ -140,7 +140,7 @@ class NvrNamespace(Namespace):
         yt_url = msg_json['ytUrl']
         room_name = msg_json['roomName']
 
-        response = requests.post(f'{STEAMING_URL}/start', json={
+        response = requests.post(f'{STEAMING_URL}/start', timeout=2, json={
             "image_addr": camera_ip,
             "sound_addr": sound_ip,
             "yt_addr": yt_url
@@ -164,7 +164,7 @@ class NvrNamespace(Namespace):
 
         stream = Stream.query.get(url=stream_url)
 
-        requests.post(f'{STEAMING_URL}/stop/{stream.pid}')
+        requests.post(f'{STEAMING_URL}/stop/{stream.pid}', timeout=2)
 
         db.session.delete(stream)
         db.session.commit()

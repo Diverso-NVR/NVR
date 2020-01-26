@@ -19,7 +19,7 @@ api = Blueprint('api', __name__)
 CAMPUS = os.environ.get('CAMPUS')
 TRACKING_URL = os.environ.get('TRACKING_URL')
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
-STEAMING_URL = 'http://172.16.87.10:14088'
+STEAMING_URL = os.environ.get('NVR_CLIENT_URL')
 
 socketio = SocketIO(message_queue='redis://',
                     cors_allowed_origins=NVR_CLIENT_URL)
@@ -583,9 +583,9 @@ def tracking_manage(current_user, room_name):
 def streaming_start(current_user):
     data = request.get_json()
 
-    sound_ip = data['sound_ip']
-    camera_ip = data['camera_ip']
-    yt_url = data['yt_url']
+    sound_ip = data.get('sound_ip')
+    camera_ip = data.get('camera_ip')
+    yt_url = data.get('yt_url')
 
     if not sound_ip:
         return jsonify({"error": "Sound source ip not provided"}), 400
@@ -594,7 +594,7 @@ def streaming_start(current_user):
     if not yt_url:
         return jsonify({"error": "Stream url not provided"}), 400
 
-    response = requests.post(f'{STEAMING_URL}/start', json={
+    response = requests.post(f'{STEAMING_URL}/start', timeout=2, json={
         "image_addr": camera_ip,
         "sound_addr": sound_ip,
         "yt_addr": yt_url
@@ -618,7 +618,7 @@ def streaming_start(current_user):
 def streaming_start(current_user):
     data = request.get_json()
 
-    stream_url = data['yt_url']
+    stream_url = data.get('yt_url')
 
     if not stream_url:
         return jsonify({"error": "Stream url not provided"}), 400
@@ -628,7 +628,7 @@ def streaming_start(current_user):
     if not stream:
         return jsonify({"error": "No stream found with given url"}), 404
 
-    requests.post(f'{STEAMING_URL}/stop/{stream.pid}')
+    requests.post(f'{STEAMING_URL}/stop/{stream.pid}', timeout=2)
 
     db.session.delete(stream)
     db.session.commit()
