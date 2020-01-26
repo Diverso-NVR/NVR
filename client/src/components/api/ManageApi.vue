@@ -159,6 +159,18 @@ export default {
             "{room_name: string, main_cam: bool, name: string,  sound: string, tracking: bool}"
         },
         {
+          name: "/streaming-start",
+          method: "POST",
+          doc: `Запускает стрим по ссылке yt_url`,
+          json: "{sound_ip: string, camera_ip: string, yt_url: string}"
+        },
+        {
+          name: "/streaming-stop",
+          method: "POST",
+          doc: `Останавливает стрим по ссылке yt_url`,
+          json: "{yt_url: string}"
+        },
+        {
           name: "/gcalendar-event/{room_name}",
           method: "POST",
           doc: `Создаёт событие в календаре в указанной комнате в указанное время. Формат дат: "YYYY-MM-DDTHH:mm", Например: ${new Date()
@@ -166,7 +178,6 @@ export default {
             .slice(0, 16)}`,
           json: "{start_time: string, end_time: string, summary: string}"
         },
-
         {
           name: "/montage-event/{room_name}",
           method: "POST",
