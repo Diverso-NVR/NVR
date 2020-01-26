@@ -625,6 +625,9 @@ def streaming_start(current_user):
 
     stream = Stream.query.get(url=stream_url)
 
+    if not stream:
+        return jsonify({"error": "No stream found with given url"}), 404
+
     requests.post(f'{STEAMING_URL}/stop/{stream.pid}')
 
     db.session.delete(stream)
