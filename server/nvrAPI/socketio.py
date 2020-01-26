@@ -164,7 +164,7 @@ class NvrNamespace(Namespace):
 
         stream = Stream.query.get(url=stream_url)
 
-        res = requests.post(f'{STEAMING_URL}/stop/{stream.pid}')
+        requests.post(f'{STEAMING_URL}/stop/{stream.pid}')
 
         db.session.delete(stream)
         db.session.commit()
