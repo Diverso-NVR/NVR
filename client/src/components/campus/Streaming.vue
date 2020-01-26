@@ -16,21 +16,6 @@
             <td class="text-xs-center subheading">{{ props.item.name }}</td>
 
             <td class="text-xs-center">
-              <v-btn-toggle mandatory v-model="props.item.status">
-                <v-btn flat color="green" value="free" @click="startStream(props.item)">Старт</v-btn>
-                <v-btn flat color="error" value="busy" @click="stopStream(props.item)">Стоп</v-btn>
-              </v-btn-toggle>
-            </td>
-
-            <td
-              class="text-xs-center body-2"
-              :class="background[props.item.status]"
-              v-switch="props.item.status"
-            >
-              <span class="green--text text--darken-4" v-case="'free'">Свободна</span>
-              <span class="red--text text--darken-4" v-case="'busy'">Идёт стрим</span>
-            </td>
-            <td class="text-xs-center">
               <v-select dense class="caption" :items="props.item.ips" v-model="props.item.defCod"></v-select>
             </td>
 
@@ -41,6 +26,13 @@
             <td class="text-xs-center url">
               <v-text-field class="caption" v-model="props.item.url"></v-text-field>
             </td>
+
+            <td class="text-xs-center">
+              <div>
+                <v-btn color="green" @click="startStream(props.item)">Старт</v-btn>
+                <v-btn color="error" @click="stopStream(props.item)">Стоп</v-btn>
+              </div>
+            </td>
           </tr>
           <tr v-else>
             <td>
@@ -50,31 +42,7 @@
                   data-label="Аудитория"
                 >{{ props.item.name }}</li>
 
-                <li class="flex-item subheading" data-label="Стрим">
-                  <v-btn-toggle mandatory v-model="props.item.status">
-                    <v-btn
-                      flat
-                      color="green"
-                      value="free"
-                      @click="startStream(props.item)"
-                      :disabled="!props.item.free"
-                    >Старт</v-btn>
-                    <v-btn
-                      flat
-                      color="error"
-                      value="busy"
-                      @click="stopStream(props.item)"
-                      :disabled="props.item.free"
-                    >Стоп</v-btn>
-                  </v-btn-toggle>
-                </li>
-
-                <li class="flex-item subheading" data-label="Статус" v-switch="props.item.status">
-                  <span class="green--text text--darken-4" v-case="'free'">Свободна</span>
-                  <span class="red--text text--darken-4" v-case="'busy'">Идёт стрим</span>
-                </li>
-
-                <li class="flex-item subheading" data-label="Источник звука">
+                <li class="flex-item subheading key-elems" data-label="Источник звука">
                   <v-select
                     dense
                     class="caption"
@@ -82,7 +50,7 @@
                     v-model="props.item.defCod"
                   ></v-select>
                 </li>
-                <li class="flex-item subheading" data-label="Камера">
+                <li class="flex-item subheading key-elems" data-label="Камера">
                   <v-select
                     dense
                     class="caption"
@@ -90,8 +58,16 @@
                     v-model="props.item.defCam"
                   ></v-select>
                 </li>
+
                 <li class="flex-item subheading key-elems" data-label="Ссылка">
                   <v-text-field class="caption" v-model="props.item.url"></v-text-field>
+                </li>
+
+                <li class="flex-item subheading key-elems" data-label="Стрим">
+                  <div>
+                    <v-btn color="green" @click="startStream(props.item)">Старт</v-btn>
+                    <v-btn color="error" @click="stopStream(props.item)">Стоп</v-btn>
+                  </div>
                 </li>
               </ul>
             </td>
@@ -117,8 +93,6 @@ export default {
           sortable: true,
           value: "name"
         },
-        { text: "Стрим", value: "record", sortable: true, align: "center" },
-        { text: "Статус", value: "free", sortable: true, align: "center" },
         {
           text: "Источник звука",
           value: "chosen_sound",
@@ -126,7 +100,8 @@ export default {
           align: "center"
         },
         { text: "Камера", value: "tracking", sortable: true, align: "center" },
-        { text: "Ссылка", value: "record", sortable: true, align: "center" }
+        { text: "Ссылка", value: "record", sortable: true, align: "center" },
+        { text: "Стрим", value: "record", sortable: true, align: "center" }
       ],
       newRoom: "",
       background: {
@@ -147,28 +122,36 @@ export default {
     onResize() {
       this.isMobile = window.innerWidth < 769;
     },
-    stopStream(room) {
-      this.$store.dispatch("emitStreamingStop", {
-        pid: room.url
-      });
-    },
     startStream(room) {
       this.$store.dispatch("emitStreamingStart", {
         soundIp: room.defCod,
         cameraIp: room.defCam,
-        ytUrl: room.url
+        ytUrl: room.url,
+        roomName: room.name
+      });
+    },
+    stopStream(room) {
+      this.$store.dispatch("emitStreamingStop", {
+        ytUrl: room.url,
+        roomName: room.name
+      });
+    },
+    config() {
+      this.rooms.forEach(element => {
+        element.ips = element.sources.map(el => {
+          return el.ip;
+        });
+        element.defCod = element.sound_source;
+        element.defCam = element.main_source;
+        element.url = "";
       });
     }
   },
-  beforeMount() {
-    this.rooms.forEach(element => {
-      element.ips = element.sources.map(el => {
-        return el.ip;
-      });
-      element.defCod = element.sound_source;
-      element.defCam = element.main_source;
-      element.url = "";
-    });
+  beforeUpdate() {
+    this.config();
+  },
+  created() {
+    this.config();
   }
 };
 </script>
