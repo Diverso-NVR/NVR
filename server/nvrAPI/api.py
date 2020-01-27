@@ -9,7 +9,7 @@ import jwt
 import requests
 import time
 
-from .models import db, Room, Source, User, nvr_db_context
+from .models import db, Room, Source, User, Stream, nvr_db_context
 from .email import send_verify_email, send_access_request_email
 from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions, create_event_
 from driveAPI.driveSettings import create_folder, get_folders_by_name
@@ -19,6 +19,7 @@ api = Blueprint('api', __name__)
 CAMPUS = os.environ.get('CAMPUS')
 TRACKING_URL = os.environ.get('TRACKING_URL')
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
+STEAMING_URL = os.environ.get('STREAMING_URL')
 
 socketio = SocketIO(message_queue='redis://',
                     cors_allowed_origins=NVR_CLIENT_URL)
@@ -584,3 +585,62 @@ def tracking_manage(current_user, room_name):
         return jsonify(res.json()), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 417
+
+
+@api.route('/streaming-start', methods=['POST'])
+@auth_required
+@json_data_required
+def streaming_start(current_user):
+    data = request.get_json()
+
+    sound_ip = data.get('sound_ip')
+    camera_ip = data.get('camera_ip')
+    yt_url = data.get('yt_url')
+
+    if not sound_ip:
+        return jsonify({"error": "Sound source ip not provided"}), 400
+    if not camera_ip:
+        return jsonify({"error": "Camera ip not provided"}), 400
+    if not yt_url:
+        return jsonify({"error": "Stream url not provided"}), 400
+
+    response = requests.post(f'{STEAMING_URL}/start', timeout=2, json={
+        "image_addr": camera_ip,
+        "sound_addr": sound_ip,
+        "yt_addr": yt_url
+    })
+
+    if response.status_code != 200:
+        return jsonify({"error": "Unable to start stream"}), 500
+
+    response_json = response.json()
+
+    stream = Stream(url=response_json['yt_addr'], pid=response_json['pid'])
+    db.session.add(stream)
+    db.session.commit()
+
+    return jsonify({"message": "Streaming started"}), 200
+
+
+@api.route('/streaming-stop', methods=['POST'])
+@auth_required
+@json_data_required
+def streaming_stop(current_user):
+    data = request.get_json()
+
+    stream_url = data.get('yt_url')
+
+    if not stream_url:
+        return jsonify({"error": "Stream url not provided"}), 400
+
+    stream = Stream.query.get(url=stream_url)
+
+    if not stream:
+        return jsonify({"error": "No stream found with given url"}), 404
+
+    requests.post(f'{STEAMING_URL}/stop/{stream.pid}', timeout=2)
+
+    db.session.delete(stream)
+    db.session.commit()
+
+    return jsonify({"message": "Streaming stopped"}), 200

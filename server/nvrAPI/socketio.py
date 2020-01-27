@@ -5,13 +5,14 @@ import requests
 import time
 import os
 
-from .models import db, Room, Source, User, nvr_db_context
+from .models import db, Room, Source, User, Stream, nvr_db_context
 from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions
 from driveAPI.driveSettings import create_folder
 
 
 CAMPUS = os.environ.get('CAMPUS')
 TRACKING_URL = os.environ.get('TRACKING_URL')
+STREAMING_URL = os.environ.get('STREAMING_URL')
 
 
 class NvrNamespace(Namespace):
@@ -132,3 +133,41 @@ class NvrNamespace(Namespace):
                daemon=True).start()
 
         emit('grant_access', {'id': user.id}, broadcast=True)
+
+    def on_streaming_start(self, msg_json):
+        sound_ip = msg_json['soundIp']
+        camera_ip = msg_json['cameraIp']
+        yt_url = msg_json['ytUrl']
+        room_name = msg_json['roomName']
+
+        response = requests.post(f'{STREAMING_URL}/start', timeout=2, json={
+            "image_addr": camera_ip,
+            "sound_addr": sound_ip,
+            "yt_addr": yt_url
+        })
+
+        if response.status_code != 200:
+            self.emit_error("Ошибка при запуске трансляции")
+            return
+
+        response_json = response.json()
+
+        stream = Stream(
+            url=response_json['yt_addr'], pid=response_json['pid'])
+        db.session.add(stream)
+        db.session.commit()
+
+        emit('streaming_start', {'name': room_name}, broadcast=True)
+
+    def on_streaming_stop(self, msg_json):
+        stream_url = msg_json['ytUrl']
+        room_name = msg_json['roomName']
+
+        stream = Stream.query.filter_by(url=stream_url).first()
+
+        requests.post(f'{STREAMING_URL}/stop/{stream.pid}', timeout=2)
+
+        db.session.delete(stream)
+        db.session.commit()
+
+        emit('streaming_stop', {'name': room_name}, broadcast=True)

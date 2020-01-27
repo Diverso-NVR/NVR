@@ -150,3 +150,9 @@ class Source(db.Model):
                     ip=self.ip,
                     name=self.name,
                     room_id=self.room_id)
+
+class Stream(db.Model):
+    __tablename__ = 'streams'
+
+    url = db.Column(db.String(250), primary_key=True)
+    pid = db.Column(db.Integer, unique=True, nullable=False)
