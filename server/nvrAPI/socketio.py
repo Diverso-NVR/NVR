@@ -12,7 +12,7 @@ from driveAPI.driveSettings import create_folder
 
 CAMPUS = os.environ.get('CAMPUS')
 TRACKING_URL = os.environ.get('TRACKING_URL')
-STEAMING_URL = os.environ.get('STREAMING_URL')
+STREAMING_URL = os.environ.get('STREAMING_URL')
 
 
 class NvrNamespace(Namespace):
@@ -140,7 +140,7 @@ class NvrNamespace(Namespace):
         yt_url = msg_json['ytUrl']
         room_name = msg_json['roomName']
 
-        response = requests.post(f'{STEAMING_URL}/start', timeout=2, json={
+        response = requests.post(f'{STREAMING_URL}/start', timeout=2, json={
             "image_addr": camera_ip,
             "sound_addr": sound_ip,
             "yt_addr": yt_url
@@ -152,21 +152,25 @@ class NvrNamespace(Namespace):
 
         response_json = response.json()
 
-        stream = Stream(url=response_json['yt_addr'], pid=response_json['pid'])
+        stream = Stream(
+            url=response_json['yt_addr'], pid=response_json['pid'])
         db.session.add(stream)
         db.session.commit()
 
         emit('streaming_start', {'name': room_name}, broadcast=True)
 
     def on_streaming_stop(self, msg_json):
-        stream_url = msg_json['ytUrl']
-        room_name = msg_json['roomName']
+        try:
+            stream_url = msg_json['ytUrl']
+            room_name = msg_json['roomName']
 
-        stream = Stream.query.get(url=stream_url)
+            stream = Stream.query.filter_by(url=stream_url).first()
 
-        requests.post(f'{STEAMING_URL}/stop/{stream.pid}', timeout=2)
+            requests.post(f'{STREAMING_URL}/stop/{stream.pid}', timeout=2)
 
-        db.session.delete(stream)
-        db.session.commit()
+            db.session.delete(stream)
+            db.session.commit()
 
-        emit('streaming_stop', {'name': room_name}, broadcast=True)
+            emit('streaming_stop', {'name': room_name}, broadcast=True)
+        except Exception as e:
+            print(e)
