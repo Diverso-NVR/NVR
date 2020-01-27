@@ -159,6 +159,7 @@ export default {
             "{room_name: string, main_cam: bool, name: string,  sound: string, tracking: bool}"
         },
         {
+
           name: "/streaming-start",
           method: "POST",
           doc: `Запускает стрим по ссылке yt_url`,
@@ -169,6 +170,12 @@ export default {
           method: "POST",
           doc: `Останавливает стрим по ссылке yt_url`,
           json: "{yt_url: string}"
+        },
+        {
+          name: "/set-source/{room_name}/{source_type}/{ip}",
+          method: "POST",
+          doc:
+            "Меняет источник ответственный за source_type: [main - главная камера, screen - экран, sound - звук, track - трекинг]"
         },
         {
           name: "/gcalendar-event/{room_name}",

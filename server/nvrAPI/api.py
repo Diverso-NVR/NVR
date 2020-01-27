@@ -12,7 +12,7 @@ import time
 from .models import db, Room, Source, User, Stream, nvr_db_context
 from .email import send_verify_email, send_access_request_email
 from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions, create_event_
-from driveAPI.driveSettings import create_folder
+from driveAPI.driveSettings import create_folder, get_folders_by_name
 
 api = Blueprint('api', __name__)
 
@@ -370,12 +370,11 @@ def edit_room(current_user, room_name):
 
     db.session.commit()
 
-    emit_event('edit_room', {'id': room.id, 'sources': [
-        s.to_dict() for s in room.sources]})
+    emit('edit_room', {room.to_dict()}, broadcast=True)
 
     return jsonify({"message": "Room edited"}), 200
 
-# TODO doc and socket
+
 @api.route('/set-source/<room_name>/<source_type>/<path:ip>', methods=['POST'])
 @auth_required
 def room_settings(current_user, room_name, source_type, ip):
@@ -400,6 +399,8 @@ def room_settings(current_user, room_name, source_type, ip):
         room.tracking_source = ip
 
     db.session.commit()
+
+    emit('edit_room', {room.to_dict()}, broadcast=True)
 
     return jsonify({"message": "Source set"}), 200
 
@@ -511,11 +512,20 @@ def create_montage_event(current_user, room_name):
     result['screens'] = [date.strftime(
         f'%Y-%m-%d_%H:%M_{room.name}_{screen_source}.mp4') for date in dates]
 
+    date_folder_id = ''
+    folders = get_folders_by_name(date)
+
+    for folder_id, folder_parent_id in folders.items():
+        if folder_parent_id == room.drive.split('/')[-1]:
+            break
+    else:
+        folder_id = room.drive.split('/')[-1]
+
     res = requests.post('http://172.18.130.40:8080/merge-new',
                         json={**result,
                               'start_time': start_time,
                               'end_time': end_time,
-                              'folder_id': room.drive.split('/')[-1]})
+                              'folder_id': folder_id})
     print(res.text)
 
     return jsonify({"message": "Record event created"}), 201
