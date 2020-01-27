@@ -160,17 +160,14 @@ class NvrNamespace(Namespace):
         emit('streaming_start', {'name': room_name}, broadcast=True)
 
     def on_streaming_stop(self, msg_json):
-        try:
-            stream_url = msg_json['ytUrl']
-            room_name = msg_json['roomName']
+        stream_url = msg_json['ytUrl']
+        room_name = msg_json['roomName']
 
-            stream = Stream.query.filter_by(url=stream_url).first()
+        stream = Stream.query.filter_by(url=stream_url).first()
 
-            requests.post(f'{STREAMING_URL}/stop/{stream.pid}', timeout=2)
+        requests.post(f'{STREAMING_URL}/stop/{stream.pid}', timeout=2)
 
-            db.session.delete(stream)
-            db.session.commit()
+        db.session.delete(stream)
+        db.session.commit()
 
-            emit('streaming_stop', {'name': room_name}, broadcast=True)
-        except Exception as e:
-            print(e)
+        emit('streaming_stop', {'name': room_name}, broadcast=True)
