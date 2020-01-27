@@ -615,7 +615,7 @@ def streaming_start(current_user):
 @api.route('/streaming-stop', methods=['POST'])
 @auth_required
 @json_data_required
-def streaming_start(current_user):
+def streaming_stop(current_user):
     data = request.get_json()
 
     stream_url = data.get('yt_url')
