@@ -1,9 +1,7 @@
-from flask_mail import Mail, Message
-from threading import Thread
-from flask import render_template, current_app
 import os
-import time
 
+from flask import render_template, current_app
+from flask_mail import Mail, Message
 
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
 mail = Mail()

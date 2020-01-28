@@ -2,12 +2,13 @@
 - Data classes for application
 """
 
-from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import generate_password_hash, check_password_hash
+import uuid
+from time import time, sleep
+
 import jwt
 from flask import current_app
-from time import time, sleep
-import uuid
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
 
@@ -16,9 +17,11 @@ def nvr_db_context(func):
     """
     Decorator to provide functions access to db
     """
+
     def wrapper(app, *args, **kwargs):
         with app.app_context():
             return func(*args, **kwargs)
+
     return wrapper
 
 
@@ -150,6 +153,7 @@ class Source(db.Model):
                     ip=self.ip,
                     name=self.name,
                     room_id=self.room_id)
+
 
 class Stream(db.Model):
     __tablename__ = 'streams'

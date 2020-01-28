@@ -1,18 +1,18 @@
-from flask import Blueprint, jsonify, request, current_app
-from flask_socketio import SocketIO
+import os
+import uuid
 from datetime import datetime, timedelta
 from functools import wraps
 from threading import Thread
-import os
-import uuid
+
 import jwt
 import requests
-import time
+from flask import Blueprint, jsonify, request, current_app
+from flask_socketio import SocketIO
 
-from .models import db, Room, Source, User, Stream, nvr_db_context
-from .email import send_verify_email, send_access_request_email
 from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions, create_event_
 from driveAPI.driveSettings import create_folder, get_folders_by_name
+from .email import send_verify_email, send_access_request_email
+from .models import db, Room, Source, User, Stream, nvr_db_context
 
 api = Blueprint('api', __name__)
 
@@ -37,6 +37,7 @@ def auth_required(f):
     """
     Verification wrapper to make sure that user is logged in
     """
+
     @wraps(f)
     def _verify(*args, **kwargs):
         auth_headers = request.headers.get('Authorization', '').split()
@@ -88,7 +89,9 @@ def json_data_required(f):
         if not post_data:
             return jsonify({"error": "json data required"}), 400
         return f(*args, **kwargs)
+
     return wrapper
+
 
 # AUTHENTICATE
 @api.route('/register', methods=['POST'])
@@ -273,6 +276,7 @@ def create_calendar_event(current_user, room_name):
 
     return jsonify({'message': f"Successfully created event: {event_link}"}), 201
 
+
 # ROOMS
 @api.route('/rooms/<room_name>', methods=['POST'])
 @auth_required
@@ -370,7 +374,7 @@ def edit_room(current_user, room_name):
 
     db.session.commit()
 
-    emit('edit_room', {room.to_dict()}, broadcast=True)
+    emit_event('edit_room', {room.to_dict()})
 
     return jsonify({"message": "Room edited"}), 200
 
@@ -400,7 +404,7 @@ def room_settings(current_user, room_name, source_type, ip):
 
     db.session.commit()
 
-    emit('edit_room', {room.to_dict()}, broadcast=True)
+    emit_event('edit_room', {room.to_dict()})
 
     return jsonify({"message": "Source set"}), 200
 
@@ -506,13 +510,13 @@ def create_montage_event(current_user, room_name):
     main_source = room.main_source.split('.')[-1].split('/')[0]
     screen_source = room.screen_source.split('.')[-1].split('/')[0]
 
-    result = {}
-    result['cameras'] = [date.strftime(
-        f'%Y-%m-%d_%H:%M_{room.name}_{main_source}.mp4') for date in dates]
-    result['screens'] = [date.strftime(
-        f'%Y-%m-%d_%H:%M_{room.name}_{screen_source}.mp4') for date in dates]
+    result = {
+        'cameras': [date.strftime(
+            f'%Y-%m-%d_%H:%M_{room.name}_{main_source}.mp4') for date in dates],
+        'screens': [date.strftime(
+            f'%Y-%m-%d_%H:%M_{room.name}_{screen_source}.mp4') for date in dates]
+    }
 
-    date_folder_id = ''
     folders = get_folders_by_name(date)
 
     for folder_id, folder_parent_id in folders.items():
@@ -532,7 +536,6 @@ def create_montage_event(current_user, room_name):
 
 
 def get_dates_between_timestamps(start_timestamp: int, stop_timestamp: int) -> list:
-
     start_timestamp = start_timestamp // 1800 * 1800
     stop_timestamp = (stop_timestamp // 1800 + 1) * 1800 if int(
         stop_timestamp) % 1800 != 0 else (stop_timestamp // 1800) * 1800
@@ -572,7 +575,7 @@ def tracking_manage(current_user, room_name):
     try:
         if command == 'start':
             res = requests.post(f'{TRACKING_URL}/track', json={
-                                'ip': room.tracking_source}, timeout=5)
+                'ip': room.tracking_source}, timeout=5)
         else:
             res = requests.delete(f'{TRACKING_URL}/track')
 

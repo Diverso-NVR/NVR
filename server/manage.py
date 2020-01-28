@@ -3,8 +3,8 @@
   application to perform interactive debugging and setup
 """
 
-from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
+from flask_script import Manager
 
 from nvrAPI.application import create_app
 from nvrAPI.models import db, Room, Source, Stream
@@ -16,6 +16,7 @@ manager = Manager(app)
 
 # provide a migration utility command
 manager.add_command('db', MigrateCommand)
+
 
 # enable python shell with application context
 @manager.shell

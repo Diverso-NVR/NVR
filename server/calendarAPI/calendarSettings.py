@@ -1,16 +1,17 @@
 from __future__ import print_function
+
 import datetime
-import pickle
 import os.path
-from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
-import json
+import pickle
 from datetime import datetime, timedelta
+from threading import RLock
+
+from google.auth.transport.requests import Request
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
 
 from nvrAPI.models import nvr_db_context, Room
 
-from threading import RLock
 lock = RLock()
 
 SCOPES = 'https://www.googleapis.com/auth/calendar'

@@ -1,14 +1,13 @@
-from flask_socketio import emit, Namespace
-from threading import Thread
-from flask import current_app
-import requests
-import time
 import os
+from threading import Thread
 
-from .models import db, Room, Source, User, Stream, nvr_db_context
+import requests
+from flask import current_app
+from flask_socketio import emit, Namespace
+
 from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions
 from driveAPI.driveSettings import create_folder
-
+from .models import db, Room, Source, User, Stream, nvr_db_context
 
 CAMPUS = os.environ.get('CAMPUS')
 TRACKING_URL = os.environ.get('TRACKING_URL')
@@ -32,10 +31,10 @@ class NvrNamespace(Namespace):
 
         try:
             if new_tracking_state:
-                res = requests.post(f'{TRACKING_URL}/track', json={
+                requests.post(f'{TRACKING_URL}/track', json={
                     'ip': room.tracking_source}, timeout=3)
             else:
-                res = requests.delete(f'{TRACKING_URL}/track', timeout=3)
+                requests.delete(f'{TRACKING_URL}/track', timeout=3)
         except:
             self.emit_error("Ошибка при запуске трекинга")
             return
@@ -44,7 +43,7 @@ class NvrNamespace(Namespace):
         db.session.commit()
 
         emit('tracking_state_change', {
-             'id': room.id, 'tracking_state': room.tracking_state, 'room_name': room.name},
+            'id': room.id, 'tracking_state': room.tracking_state, 'room_name': room.name},
              broadcast=True)
 
     def on_delete_room(self, msg_json):
@@ -152,8 +151,7 @@ class NvrNamespace(Namespace):
 
         response_json = response.json()
 
-        stream = Stream(
-            url=response_json['yt_addr'], pid=response_json['pid'])
+        stream = Stream(url=response_json['yt_addr'], pid=response_json['pid'])
         db.session.add(stream)
         db.session.commit()
 

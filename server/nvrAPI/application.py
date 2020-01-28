@@ -2,6 +2,7 @@
 - creates a Flask app instance and registers the database object
 """
 from gevent import monkey
+
 monkey.patch_all()
 
 from flask import Flask, request
@@ -10,7 +11,6 @@ from flask_socketio import SocketIO
 import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
-
 
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
 
