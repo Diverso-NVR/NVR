@@ -107,7 +107,7 @@ def give_permissions(mail: str) -> None:
 #     # calendar_service.acl().delete(calendarId='primary', ruleId='ruleId').execute()
 
 
-def create_calendar(building: str, room: str) -> None:
+def create_calendar(building: str, room: str) -> str:
     """
     Creates calendar with name: 'building'-'room'
     and grant access to all users from same campus
