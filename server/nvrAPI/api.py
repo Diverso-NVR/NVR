@@ -484,6 +484,9 @@ def create_montage_event(current_user, room_name):
     start_time = data.get('start_time')
     end_time = data.get('end_time')
 
+    event_id = data.get('event_id')
+    calendar_id = data.get('calendar_id')
+
     room = Room.query.filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": "No room found with given room_name"}), 400
@@ -514,7 +517,8 @@ def create_montage_event(current_user, room_name):
         'cameras': [date.strftime(
             f'%Y-%m-%d_%H:%M_{room.name}_{main_source}.mp4') for date in dates],
         'screens': [date.strftime(
-            f'%Y-%m-%d_%H:%M_{room.name}_{screen_source}.mp4') for date in dates]
+            f'%Y-%m-%d_%H:%M_{room.name}_{screen_source}.mp4') for date in dates],
+        # TODO backup cameras will be added
     }
 
     folders = get_folders_by_name(date)
