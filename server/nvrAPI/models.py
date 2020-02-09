@@ -108,7 +108,7 @@ class Room(db.Model):
     __tablename__ = 'rooms'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), nullable=False, unique=True)
     free = db.Column(db.Boolean, default=True)
     tracking_state = db.Column(db.Boolean, default=False)
 
@@ -120,6 +120,8 @@ class Room(db.Model):
     sources = db.relationship('Source', backref='room', lazy=False)
     drive = db.Column(db.String(200))
     calendar = db.Column(db.String(200))
+
+    auto_control = db.Column(db.Boolean, nullable=False, default=True)
 
     def to_dict(self):
         return dict(id=self.id,

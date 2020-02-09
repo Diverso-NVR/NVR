@@ -166,7 +166,7 @@ export default {
       if (this.newRoom === "") {
         return;
       }
-      this.$store.dispatch("emitAddRoom", { name: this.newRoom });
+      await this.$store.dispatch("emitAddRoom", { name: this.newRoom });
       this.newRoom = "";
     }
   },

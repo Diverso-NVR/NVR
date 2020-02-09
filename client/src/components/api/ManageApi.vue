@@ -159,6 +159,12 @@ export default {
             "{room_name: string, main_cam: bool, name: string,  sound: string, tracking: bool}"
         },
         {
+          name: "/auto-control/{room_name}",
+          method: "POST",
+          doc: "Включает или отключает автоматический контроль камер в указанной комнате",
+          json: "{set_auto_control: bool}"
+        },
+        {
 
           name: "/streaming-start",
           method: "POST",
