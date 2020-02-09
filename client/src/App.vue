@@ -30,7 +30,7 @@
           flat
           class="subheading font-weight-bold"
           large
-          href="http://nvr.auditory.ru"
+          href="https://nvr.miem.hse.ru"
           target="_blank"
         >Сетевой видеорекордер</v-btn>
       </v-toolbar-title>
