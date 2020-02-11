@@ -11,7 +11,10 @@
                   <v-spacer></v-spacer>
                 </v-layout>
                 <div class="subheading">
-                  <p>Ключ API позволит программно взаимодействовать к функциям NVR, такими как:</p>
+                  <p>
+                    Ключ API позволит программно взаимодействовать к функциям
+                    NVR, такими как:
+                  </p>
                   <ul>
                     <li>Создать или удалить комнату</li>
                     <li>Изменить список камер/кодеров комнаты</li>
@@ -28,7 +31,8 @@
               depressed
               block
               color="info"
-            >Создать ключ API</v-btn>
+              >Создать ключ API</v-btn
+            >
           </template>
 
           <template v-else>
@@ -42,14 +46,28 @@
 
               <v-card-text>
                 <div class="subheading">
-                  <div>API url: {{API_URL}}</div>
-                  <div>Добавьте в headers вашего запроса: {"key": "{{api_key}}"}</div>
+                  <div>API url: {{ API_URL }}</div>
+                  <div>
+                    Добавьте в headers вашего запроса: {"key": "{{ api_key }}"}
+                  </div>
                 </div>
               </v-card-text>
 
               <v-card-actions>
-                <v-btn depressed color="warning" :loading="loader" @click="updateKey">Обновить</v-btn>
-                <v-btn depressed color="error" :loading="loader" @click="deleteKey">Удалить</v-btn>
+                <v-btn
+                  depressed
+                  color="warning"
+                  :loading="loader"
+                  @click="updateKey"
+                  >Обновить</v-btn
+                >
+                <v-btn
+                  depressed
+                  color="error"
+                  :loading="loader"
+                  @click="deleteKey"
+                  >Удалить</v-btn
+                >
               </v-card-actions>
             </v-card>
 
@@ -59,19 +77,21 @@
               </v-btn>
             </div>
             <v-expansion-panel expand v-model="panel">
-              <v-expansion-panel-content v-for="(route,i) in routes" :key="i">
+              <v-expansion-panel-content v-for="(route, i) in routes" :key="i">
                 <template v-slot:header>
                   <div>
-                    <b>{{route.method}}</b>
-                    {{route.name}}
+                    <b>{{ route.method }}</b>
+                    {{ route.name }}
                   </div>
                 </template>
 
                 <template>
-                  <v-card :color="isDarkMode ? 'grey darken-4' : 'grey lighten-3'">
+                  <v-card
+                    :color="isDarkMode ? 'grey darken-4' : 'grey lighten-3'"
+                  >
                     <v-card-text>
                       <div class="subheading font-weight-bold">Описание</div>
-                      <div class="subheading">{{route.doc}}</div>
+                      <div class="subheading">{{ route.doc }}</div>
                     </v-card-text>
                   </v-card>
                   <v-card
@@ -79,10 +99,19 @@
                     :color="isDarkMode ? 'grey darken-4' : 'grey lighten-3'"
                   >
                     <v-card-text>
-                      <div class="subheading font-weight-bold">Параметры json</div>
-                      <div class="subheading">{{route.json}}</div>
+                      <div class="subheading font-weight-bold">
+                        Параметры json
+                      </div>
+                      <div class="subheading">{{ route.json }}</div>
                     </v-card-text>
                   </v-card>
+                  <div v-highlight>
+                    <pre class="language-javascript">
+                      <code max-width>
+                        {{ route.response }}
+                      </code>
+                    </pre>
+                  </div>
                 </template>
               </v-expansion-panel-content>
             </v-expansion-panel>
@@ -105,12 +134,46 @@ export default {
         {
           name: "/rooms/",
           method: "GET",
-          doc: "Возвращает массив словарей данных о комнатах"
+          doc: "Возвращает массив словарей данных о комнатах",
+          response: `
+  [
+    {
+      "calendar": "auditory.ru_rgc7bjcechrr0f2hnmacnmer58@group.calendar.google.com",
+      "drive": "https://drive.google.com/drive/u/1/folders/1zAPs-2GP_SQj6tHLWwgohjuwCS_7o3yu",
+      "free": True,
+      "id": 1,
+      "main_source": "172.18.191.24/0",
+      "name": "504",
+      "screen_source": "172.18.191.21/0",
+      "sound_source": "172.18.191.21/0",
+      "sources": [
+        { "id": 110, "ip": "172.18.191.21/0", "name": "Трибуна", "room_id": 1 }
+      ],
+      "tracking_source": "admin:Supervisor@172.18.191.23",
+      "tracking_state": False
+    }
+  ]`
         },
         {
           name: "/rooms/{room_name}",
           method: "GET",
-          doc: "Возвращает комнату с указанным room_name"
+          doc: "Возвращает комнату с указанным room_name",
+          response: `
+    {
+      "calendar": "auditory.ru_rgc7bjcechrr0f2hnmacnmer58@group.calendar.google.com",
+      "drive": "https://drive.google.com/drive/u/1/folders/1zAPs-2GP_SQj6tHLWwgohjuwCS_7o3yu",
+      "free": True,
+      "id": 1,
+      "main_source": "172.18.191.24/0",
+      "name": "504",
+      "screen_source": "172.18.191.21/0",
+      "sound_source": "172.18.191.21/0",
+      "sources": [
+        { "id": 110, "ip": "172.18.191.21/0", "name": "Трибуна", "room_id": 1 }
+      ],
+      "tracking_source": "admin:Supervisor@172.18.191.23",
+      "tracking_state": False
+    }`
         },
         {
           name: "/rooms/{room_name}",
@@ -131,12 +194,34 @@ export default {
         {
           name: "/sources/",
           method: "GET",
-          doc: "Возвращает массив словарей данных об источниках"
+          doc: "Возвращает массив словарей данных об источниках",
+          response: `
+  [
+    {
+      "id": 2,
+      "ip": "admin:Supervisor@172.18.199.30",
+      "name": "у доски слева на зал",
+      "room_id": 1
+    },
+    {
+      "id": 5,
+      "ip": "admin:Supervisor@172.18.199.42",
+      "name": "на доску",
+      "room_id": 1
+    }
+  ]`
         },
         {
           name: "/sources/{ip}",
           method: "GET",
-          doc: "Возвращает источник с указанным ip"
+          doc: "Возвращает источник с указанным ip",
+          response: `
+    {
+      "id": 2,
+      "ip": "admin:Supervisor@172.18.199.30",
+      "name": "у доски слева на зал",
+      "room_id": 1
+    }`
         },
         {
           name: "/sources/{ip}",
@@ -159,7 +244,6 @@ export default {
             "{room_name: string, main_cam: bool, name: string,  sound: string, tracking: bool}"
         },
         {
-
           name: "/streaming-start",
           method: "POST",
           doc: `Запускает стрим по ссылке yt_url`,
@@ -268,5 +352,4 @@ export default {
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>
