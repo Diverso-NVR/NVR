@@ -25,15 +25,9 @@
 
     <v-toolbar dark color="black" fixed>
       <v-toolbar-side-icon @click.prevent="drawer = !drawer" class="hidden-md-and-up"></v-toolbar-side-icon>
-      <v-toolbar-title>
-        <v-btn
-          flat
-          class="subheading font-weight-bold"
-          large
-          href="http://nvr.auditory.ru"
-          target="_blank"
-        >Сетевой видеорекордер</v-btn>
-      </v-toolbar-title>
+      <v-toolbar-side-icon class="ml-5" disabled>
+        <v-img src="../static/logo.png" min-height="30" min-width="77"></v-img>
+      </v-toolbar-side-icon>
       <v-spacer></v-spacer>
       <v-toolbar-items class="hidden-sm-and-down">
         <v-btn flat v-for="link of links" :key="link.title" :to="link.url">

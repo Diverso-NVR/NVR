@@ -29,8 +29,8 @@
 
             <td class="text-xs-center">
               <div>
-                <v-btn color="green" @click="startStream(props.item)">Старт</v-btn>
-                <v-btn color="error" @click="stopStream(props.item)">Стоп</v-btn>
+                <v-btn depressed color="success" @click="startStream(props.item)">Старт</v-btn>
+                <v-btn depressed color="error" @click="stopStream(props.item)">Стоп</v-btn>
               </div>
             </td>
           </tr>
