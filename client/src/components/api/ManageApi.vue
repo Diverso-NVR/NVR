@@ -86,32 +86,35 @@
                 </template>
 
                 <template>
-                  <v-card
-                    :color="isDarkMode ? 'grey darken-4' : 'grey lighten-3'"
-                  >
+                  <v-card :color="isDarkMode ? '#2d2d2d' : '#F5F5F5'">
                     <v-card-text>
-                      <div class="subheading font-weight-bold">Описание</div>
                       <div class="subheading">{{ route.doc }}</div>
                     </v-card-text>
                   </v-card>
                   <v-card
-                    v-if="route.json"
-                    :color="isDarkMode ? 'grey darken-4' : 'grey lighten-3'"
+                    v-if="route.request"
+                    :color="isDarkMode ? '#2d2d2d' : '#F5F5F5'"
                   >
                     <v-card-text>
                       <div class="subheading font-weight-bold">
-                        Параметры json
+                        request
                       </div>
-                      <div class="subheading">{{ route.json }}</div>
+                      <pre>{{ route.request }}</pre>
                     </v-card-text>
                   </v-card>
-                  <div v-highlight>
-                    <pre class="language-javascript">
-                      <code max-width>
-                        {{ route.response }}
-                      </code>
-                    </pre>
-                  </div>
+                  <v-card
+                    v-if="route.response"
+                    :color="isDarkMode ? '#2d2d2d' : '#F5F5F5'"
+                  >
+                    <v-card-text>
+                      <div class="subheading font-weight-bold">
+                        response
+                      </div>
+                      <pre>
+                            {{ route.response }}
+                      </pre>
+                    </v-card-text>
+                  </v-card>
                 </template>
               </v-expansion-panel-content>
             </v-expansion-panel>
@@ -159,21 +162,21 @@ export default {
           method: "GET",
           doc: "Возвращает комнату с указанным room_name",
           response: `
-    {
-      "calendar": "auditory.ru_rgc7bjcechrr0f2hnmacnmer58@group.calendar.google.com",
-      "drive": "https://drive.google.com/drive/u/1/folders/1zAPs-2GP_SQj6tHLWwgohjuwCS_7o3yu",
-      "free": True,
-      "id": 1,
-      "main_source": "172.18.191.24/0",
-      "name": "504",
-      "screen_source": "172.18.191.21/0",
-      "sound_source": "172.18.191.21/0",
-      "sources": [
-        { "id": 110, "ip": "172.18.191.21/0", "name": "Трибуна", "room_id": 1 }
-      ],
-      "tracking_source": "admin:Supervisor@172.18.191.23",
-      "tracking_state": False
-    }`
+  {
+    "calendar": "auditory.ru_rgc7bjcechrr0f2hnmacnmer58@group.calendar.google.com",
+    "drive": "https://drive.google.com/drive/u/1/folders/1zAPs-2GP_SQj6tHLWwgohjuwCS_7o3yu",
+    "free": True,
+    "id": 1,
+    "main_source": "172.18.191.24/0",
+    "name": "504",
+    "screen_source": "172.18.191.21/0",
+    "sound_source": "172.18.191.21/0",
+    "sources": [
+      { "id": 110, "ip": "172.18.191.21/0", "name": "Трибуна", "room_id": 1 }
+    ],
+    "tracking_source": "admin:Supervisor@172.18.191.23",
+    "tracking_state": False
+  }`
         },
         {
           name: "/rooms/{room_name}",
@@ -189,7 +192,10 @@ export default {
           name: "/rooms/{room_name}",
           method: "PUT",
           doc: "Изменяет данные об источниках в комнате с room_name",
-          json: "{sources: array}"
+          request: `
+  {
+    sources: array
+  }`
         },
         {
           name: "/sources/",
@@ -216,19 +222,25 @@ export default {
           method: "GET",
           doc: "Возвращает источник с указанным ip",
           response: `
-    {
-      "id": 2,
-      "ip": "admin:Supervisor@172.18.199.30",
-      "name": "у доски слева на зал",
-      "room_id": 1
-    }`
+  {
+    "id": 2,
+    "ip": "admin:Supervisor@172.18.199.30",
+    "name": "у доски слева на зал",
+    "room_id": 1
+  }`
         },
         {
           name: "/sources/{ip}",
           method: "POST",
           doc: "Создаёт источник с указанным ip. room_name - обязательное поле",
-          json:
-            "{room_name: string, main_cam: bool, name: string,  sound: string, tracking: bool}"
+          request: `
+  {
+    room_name: string,
+    main_cam: bool,
+    name: string,
+    sound: string,
+    tracking: bool
+  }`
         },
         {
           name: "/sources/{ip}",
@@ -240,20 +252,39 @@ export default {
           method: "PUT",
           doc:
             "Обновляет данные в источнике с указанным ip. room_name используется для соотношения источника к комнате",
-          json:
-            "{room_name: string, main_cam: bool, name: string,  sound: string, tracking: bool}"
+          request: `
+  {
+    room_name: string, 
+    main_cam: bool, 
+    name: string,  
+    sound: string, 
+    tracking: bool
+  }`
         },
         {
           name: "/streaming-start",
           method: "POST",
           doc: `Запускает стрим по ссылке yt_url`,
-          json: "{sound_ip: string, camera_ip: string, yt_url: string}"
+          request: `
+  {
+    sound_ip: string, 
+    camera_ip: string, 
+    yt_url: string
+  }`,
+          response: `
+  {
+    "message": "Streaming started"
+  }
+        `
         },
         {
           name: "/streaming-stop",
           method: "POST",
           doc: `Останавливает стрим по ссылке yt_url`,
-          json: "{yt_url: string}"
+          request: `
+  {
+    yt_url: string
+  }`
         },
         {
           name: "/set-source/{room_name}/{source_type}/{ip}",
@@ -267,7 +298,12 @@ export default {
           doc: `Создаёт событие в календаре в указанной комнате в указанное время. Формат дат: "YYYY-MM-DDTHH:mm", Например: ${new Date()
             .toISOString()
             .slice(0, 16)}`,
-          json: "{start_time: string, end_time: string, summary: string}"
+          request: `
+  {
+    start_time: string, 
+    end_time: string, 
+    summary: string
+  }`
         },
         {
           name: "/montage-event/{room_name}",
@@ -275,20 +311,32 @@ export default {
           doc: `Создаёт событие на склеку материала в указанной комнате в указанный промежуток времени. Формат даты: "YYYY-MM-DD", Например: ${new Date()
             .toISOString()
             .slice(0, 10)}`,
-          json:
-            "{start_time: string, end_time: string, date: string, event_name: string}"
+          request: `
+  {
+    start_time: string, 
+    end_time: string, 
+    date: string, 
+    event_name: string
+  }`
         },
         {
           name: "/tracking/{room_name}",
           method: "POST",
           doc: `Взаимодействие с трекингом в указанной комнате. command принимает значения "start", "stop", "status"`,
-          json: `{command: string}`
+          request: `
+  {
+    command: string
+  }`
         },
         {
           name: "/login",
           method: "POST",
           doc: `Авторизация через NVR`,
-          json: `{email: string, password: string}`
+          request: `
+  {
+    email: string, 
+    password: string
+  }`
         },
         {
           name: "/api-key/{email}",
