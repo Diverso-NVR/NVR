@@ -7,6 +7,7 @@ from threading import RLock
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
+from googleapiclient.http import MediaFileUpload
 
 lock = RLock()
 
@@ -75,3 +76,18 @@ def get_folders_by_name(name):
                 break
 
         return {folder['id']: folder.get('parents', [''])[0] for folder in response['files']}
+
+
+def upload(filename: str, folder_id: str) -> str:
+    """
+    Upload file "filename" on drive folder 'folder_id'
+    """
+    with lock:
+        media = MediaFileUpload(filename, mimetype="video/mp4", resumable=True)
+        file_data = {
+            "name": filename.split('/')[-1],
+            "parents": [folder_id]
+        }
+        file = drive_service.files().create(
+            body=file_data, media_body=media).execute()
+        return file.get('id')
