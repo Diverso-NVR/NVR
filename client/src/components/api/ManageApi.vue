@@ -100,7 +100,6 @@ export default {
       panel: [],
       api_key: "",
       API_URL: "",
-      date: new Date().toISOString(),
       routes: [
         {
           name: "/rooms/",
@@ -159,7 +158,6 @@ export default {
             "{room_name: string, main_cam: bool, name: string,  sound: string, tracking: bool}"
         },
         {
-
           name: "/streaming-start",
           method: "POST",
           doc: `Запускает стрим по ссылке yt_url`,
@@ -184,6 +182,11 @@ export default {
             .toISOString()
             .slice(0, 16)}`,
           json: "{start_time: string, end_time: string, summary: string}"
+        },
+        {
+          name: "/gdrive-upload/{room_name}",
+          method: "POST",
+          doc: `Загружает переданный в запросе видео-файл в папку комнаты. Важно чтобы файл был в формате YYYY-MM-DD_HH:mm`
         },
         {
           name: "/montage-event/{room_name}",

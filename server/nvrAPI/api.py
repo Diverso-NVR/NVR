@@ -3,14 +3,18 @@ import uuid
 from datetime import datetime, timedelta
 from functools import wraps
 from threading import Thread
+from pathlib import Path
+
 
 import jwt
 import requests
 from flask import Blueprint, jsonify, request, current_app
 from flask_socketio import SocketIO
+from werkzeug.utils import secure_filename
+
 
 from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions, create_event_
-from driveAPI.driveSettings import create_folder, get_folders_by_name
+from driveAPI.driveSettings import create_folder, get_folders_by_name, upload
 from .email import send_verify_email, send_access_request_email
 from .models import db, Room, Source, User, Stream, nvr_db_context
 
@@ -20,6 +24,7 @@ CAMPUS = os.environ.get('CAMPUS')
 TRACKING_URL = os.environ.get('TRACKING_URL')
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
 STEAMING_URL = os.environ.get('STREAMING_URL')
+VIDS_PATH = str(Path.home()) + '/vids/'
 
 socketio = SocketIO(message_queue='redis://',
                     cors_allowed_origins=NVR_CLIENT_URL)
@@ -275,6 +280,44 @@ def create_calendar_event(current_user, room_name):
         return jsonify({'error': f"No room found with name '{room_name}'"}), 404
 
     return jsonify({'message': f"Successfully created event: {event_link}"}), 201
+
+
+@api.route('/gdrive-upload/<room_name>', methods=['POST'])
+@auth_required
+def upload_video_to_drive(room_name):
+    if not request.files:
+        return {"error": "No file provided"}, 400
+
+    room = Room.query.filter_by(name=str(room_name)).first()
+    if not room:
+        return jsonify({"error": f"Room '{room_name}' not found"}), 400
+
+    file = request.files['file']
+    file_name = secure_filename(file.filename)
+    file.save(VIDS_PATH + file_name)
+
+    try:
+        date, time = file_name.split('_')[0], file_name.split('_')[1]
+    except:
+        return {"error": "Incorrect file name"}, 400
+
+    folder = ''
+
+    # TODO можно наверно через mimetype в функции но мне так лень и времени нет хочу сдохнуть
+    date_folders = get_folders_by_name(date)
+    time_folders = get_folders_by_name(time)
+    for folder_id, folder_parent_id in date_folders.items():
+        if folder_parent_id == room.drive.split('/')[-1]:
+            for f_id, fp_id in time_folders.items():
+                if fp_id == folder_id:
+                    folder = f_id
+    if not folder:
+        folder = room.drive.split('/')[-1]
+
+    Thread(target=upload, args=(VIDS_PATH + file_name,
+                                folder)).start()
+
+    return {"message": "Upload to disk started"}, 200
 
 
 # ROOMS
