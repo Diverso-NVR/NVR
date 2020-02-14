@@ -421,6 +421,23 @@ export default {
           ]
         },
         {
+          name: "/gdrive-upload/{room_name}",
+          method: "POST",
+          doc: `Загружает переданный в запросе видео-файл в папку комнаты. Важно чтобы файл был в формате YYYY-MM-DD_HH:mm`,
+          responses: [
+            {
+              code: 201,
+              body: `
+  {"message": "Upload to disk started"}`
+            },
+            {
+              code: 400,
+              body: `
+  Bad request`
+            }
+          ]
+        },
+        {
           name: "/montage-event/{room_name}",
           method: "POST",
           doc: `Создаёт событие на склеку материала в указанной комнате в указанный промежуток времени. Формат даты: "YYYY-MM-DD", Например: ${new Date()
