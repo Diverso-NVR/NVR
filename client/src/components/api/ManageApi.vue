@@ -31,8 +31,7 @@
               depressed
               block
               color="info"
-              >Создать ключ API</v-btn
-            >
+            >Создать ключ API</v-btn>
           </template>
 
           <template v-else>
@@ -47,27 +46,13 @@
               <v-card-text>
                 <div class="subheading">
                   <div>API url: {{ API_URL }}</div>
-                  <div>
-                    Добавьте в headers вашего запроса: {"key": "{{ api_key }}"}
-                  </div>
+                  <div>Добавьте в headers вашего запроса: {"key": "{{ api_key }}"}</div>
                 </div>
               </v-card-text>
 
               <v-card-actions>
-                <v-btn
-                  depressed
-                  color="warning"
-                  :loading="loader"
-                  @click="updateKey"
-                  >Обновить</v-btn
-                >
-                <v-btn
-                  depressed
-                  color="error"
-                  :loading="loader"
-                  @click="deleteKey"
-                  >Удалить</v-btn
-                >
+                <v-btn depressed color="warning" :loading="loader" @click="updateKey">Обновить</v-btn>
+                <v-btn depressed color="error" :loading="loader" @click="deleteKey">Удалить</v-btn>
               </v-card-actions>
             </v-card>
 
@@ -91,28 +76,23 @@
                       <div class="subheading">{{ route.doc }}</div>
                     </v-card-text>
                   </v-card>
-                  <v-card
-                    v-if="route.request"
-                    :color="isDarkMode ? '#2d2d2d' : '#F5F5F5'"
-                  >
+                  <v-card v-if="route.request" :color="isDarkMode ? '#2d2d2d' : '#F5F5F5'">
                     <v-card-text>
-                      <div class="subheading font-weight-bold">
-                        request
-                      </div>
+                      <div class="font-weight-bold">Request</div>
                       <pre>{{ route.request }}</pre>
                     </v-card-text>
                   </v-card>
-                  <v-card
-                    v-if="route.response"
-                    :color="isDarkMode ? '#2d2d2d' : '#F5F5F5'"
-                  >
-                    <v-card-text>
-                      <div class="subheading font-weight-bold">
-                        response
-                      </div>
+                  <v-card v-if="route.responses" :color="isDarkMode ? '#2d2d2d' : '#F5F5F5'">
+                    <div class="font-weight-bold ml-3">Responses</div>
+                    <v-card-text v-for="(response, i) in route.responses" :key="i">
+                      <b>{{ response.code }}</b>
                       <pre>
-                            {{ route.response }}
+                            {{ response.body }}
                       </pre>
+                    </v-card-text>
+                    <v-card-text v-if="route.name !== '/login'">
+                      <b>401</b>
+                      <pre><br />  {"error": "Access error"} <br /> </pre>
                     </v-card-text>
                   </v-card>
                 </template>
@@ -130,20 +110,21 @@ export default {
   data() {
     return {
       panel: [],
-      api_key: "",
-      API_URL: "",
-      date: new Date().toISOString(),
+      api_key: this.$store.getters.user.api_key,
+      API_URL: process.env.NVR_URL + "/api",
       routes: [
         {
           name: "/rooms/",
           method: "GET",
           doc: "Возвращает массив словарей данных о комнатах",
-          response: `
+          responses: [
+            {
+              code: 200,
+              body: `
   [
     {
       "calendar": "auditory.ru_rgc7bjcechrr0f2hnmacnmer58@group.calendar.google.com",
       "drive": "https://drive.google.com/drive/u/1/folders/1zAPs-2GP_SQj6tHLWwgohjuwCS_7o3yu",
-      "free": True,
       "id": 1,
       "main_source": "172.18.191.24/0",
       "name": "504",
@@ -153,19 +134,23 @@ export default {
         { "id": 110, "ip": "172.18.191.21/0", "name": "Трибуна", "room_id": 1 }
       ],
       "tracking_source": "admin:Supervisor@172.18.191.23",
-      "tracking_state": False
+      "tracking_state": false
     }
   ]`
+            }
+          ]
         },
         {
           name: "/rooms/{room_name}",
           method: "GET",
           doc: "Возвращает комнату с указанным room_name",
-          response: `
+          responses: [
+            {
+              code: 200,
+              body: `
   {
     "calendar": "auditory.ru_rgc7bjcechrr0f2hnmacnmer58@group.calendar.google.com",
     "drive": "https://drive.google.com/drive/u/1/folders/1zAPs-2GP_SQj6tHLWwgohjuwCS_7o3yu",
-    "free": True,
     "id": 1,
     "main_source": "172.18.191.24/0",
     "name": "504",
@@ -175,18 +160,54 @@ export default {
       { "id": 110, "ip": "172.18.191.21/0", "name": "Трибуна", "room_id": 1 }
     ],
     "tracking_source": "admin:Supervisor@172.18.191.23",
-    "tracking_state": False
+    "tracking_state": false
   }`
+            },
+            {
+              code: 400,
+              body: `
+  Bad request`
+            }
+          ]
         },
         {
           name: "/rooms/{room_name}",
           method: "POST",
-          doc: "Создаёт комнату с указанным room_name"
+          doc: "Создаёт комнату с указанным room_name",
+          responses: [
+            {
+              code: 201,
+              body: `
+  {"message": "Started creating '{room_name}'"}`
+            },
+            {
+              code: 400,
+              body: `
+  Bad request`
+            },
+            {
+              code: 409,
+              body: `
+  {"error": "Room '{room_name}' already exist"}`
+            }
+          ]
         },
         {
           name: "/rooms/{room_name}",
           method: "DELETE",
-          doc: "Удаляет комнату с указанным room_name"
+          doc: "Удаляет комнату с указанным room_name",
+          responses: [
+            {
+              code: 200,
+              body: `
+  {"message": "Room deleted"}`
+            },
+            {
+              code: 400,
+              body: `
+  Bad request`
+            }
+          ]
         },
         {
           name: "/rooms/{room_name}",
@@ -194,14 +215,24 @@ export default {
           doc: "Изменяет данные об источниках в комнате с room_name",
           request: `
   {
-    sources: array
-  }`
+    "sources": []
+  }`,
+          responses: [
+            {
+              code: 200,
+              body: `
+  {"message": "Room edited"}`
+            }
+          ]
         },
         {
           name: "/sources/",
           method: "GET",
           doc: "Возвращает массив словарей данных об источниках",
-          response: `
+          responses: [
+            {
+              code: 200,
+              body: `
   [
     {
       "id": 2,
@@ -216,18 +247,25 @@ export default {
       "room_id": 1
     }
   ]`
+            }
+          ]
         },
         {
           name: "/sources/{ip}",
           method: "GET",
           doc: "Возвращает источник с указанным ip",
-          response: `
+          responses: [
+            {
+              code: 200,
+              body: `
   {
     "id": 2,
     "ip": "admin:Supervisor@172.18.199.30",
     "name": "у доски слева на зал",
     "room_id": 1
   }`
+            }
+          ]
         },
         {
           name: "/sources/{ip}",
@@ -235,17 +273,41 @@ export default {
           doc: "Создаёт источник с указанным ip. room_name - обязательное поле",
           request: `
   {
-    room_name: string,
+    "room_name": "string",
     main_cam: bool,
-    name: string,
-    sound: string,
-    tracking: bool
-  }`
+    "name": "string",
+    "sound": "string",
+    "tracking": bool
+  }`,
+          responses: [
+            {
+              code: 200,
+              body: `
+  {"message": "Added"}`
+            },
+            {
+              code: 400,
+              body: `
+  Bad request`
+            }
+          ]
         },
         {
           name: "/sources/{ip}",
           method: "DELETE",
-          doc: "Удаляет источник с указанным ip"
+          doc: "Удаляет источник с указанным ip",
+          responses: [
+            {
+              code: 200,
+              body: `
+  {"message": "Deleted"}`
+            },
+            {
+              code: 400,
+              body: `
+  Bad request`
+            }
+          ]
         },
         {
           name: "/sources/{ip}",
@@ -254,12 +316,24 @@ export default {
             "Обновляет данные в источнике с указанным ip. room_name используется для соотношения источника к комнате",
           request: `
   {
-    room_name: string, 
-    main_cam: bool, 
-    name: string,  
-    sound: string, 
-    tracking: bool
-  }`
+    "room_name": "string", 
+    "main_cam": bool, 
+    "name": "string",  
+    "sound": "string", 
+    "tracking": bool
+  }`,
+          responses: [
+            {
+              code: 200,
+              body: `
+  {"message": "Updated"}`
+            },
+            {
+              code: 400,
+              body: `
+  Bad request`
+            }
+          ]
         },
         {
           name: "/streaming-start",
@@ -267,15 +341,25 @@ export default {
           doc: `Запускает стрим по ссылке yt_url`,
           request: `
   {
-    sound_ip: string, 
-    camera_ip: string, 
-    yt_url: string
+    "sound_ip": "string", 
+    "camera_ip": "string", 
+    "yt_url": "string"
   }`,
-          response: `
+          responses: [
+            {
+              code: 200,
+              body: `
   {
     "message": "Streaming started"
   }
         `
+            },
+            {
+              code: 500,
+              body: `
+  {"error": "Unable to start stream"}`
+            }
+          ]
         },
         {
           name: "/streaming-stop",
@@ -283,14 +367,33 @@ export default {
           doc: `Останавливает стрим по ссылке yt_url`,
           request: `
   {
-    yt_url: string
-  }`
+    "yt_url": "string"
+  }`,
+          responses: [
+            {
+              code: 200,
+              body: `
+  {"message": "Streaming stopped"}`
+            }
+          ]
         },
         {
           name: "/set-source/{room_name}/{source_type}/{ip}",
           method: "POST",
           doc:
-            "Меняет источник ответственный за source_type: [main - главная камера, screen - экран, sound - звук, track - трекинг]"
+            "Меняет источник ответственный за source_type: [main - главная камера, screen - экран, sound - звук, track - трекинг]",
+          responses: [
+            {
+              code: 200,
+              body: `
+  {"message": "Source set"}`
+            },
+            {
+              code: 400,
+              body: `
+  Bad request`
+            }
+          ]
         },
         {
           name: "/gcalendar-event/{room_name}",
@@ -300,10 +403,22 @@ export default {
             .slice(0, 16)}`,
           request: `
   {
-    start_time: string, 
-    end_time: string, 
-    summary: string
-  }`
+    "start_time": "string", 
+    "end_time": "string", 
+    "summary": "string"
+  }`,
+          responses: [
+            {
+              code: 201,
+              body: `
+  {"message": "Successfully created event: {event_link}"}`
+            },
+            {
+              code: 400,
+              body: `
+  Bad request`
+            }
+          ]
         },
         {
           name: "/montage-event/{room_name}",
@@ -313,11 +428,23 @@ export default {
             .slice(0, 10)}`,
           request: `
   {
-    start_time: string, 
-    end_time: string, 
-    date: string, 
-    event_name: string
-  }`
+    "start_time": "string", 
+    "end_time": "string", 
+    "date": "string", 
+    "event_name": "string"
+  }`,
+          responses: [
+            {
+              code: 201,
+              body: `
+  {"message": "Record event created"}`
+            },
+            {
+              code: 400,
+              body: `
+  Bad request`
+            }
+          ]
         },
         {
           name: "/tracking/{room_name}",
@@ -325,8 +452,25 @@ export default {
           doc: `Взаимодействие с трекингом в указанной комнате. command принимает значения "start", "stop", "status"`,
           request: `
   {
-    command: string
-  }`
+    "command": "string"
+  }`,
+          responses: [
+            {
+              code: 200,
+              body: `
+  {}`
+            },
+            {
+              code: 400,
+              body: `
+  Bad request`
+            },
+            {
+              code: 500,
+              body: `
+  {"error": "string"}`
+            }
+          ]
         },
         {
           name: "/login",
@@ -334,29 +478,82 @@ export default {
           doc: `Авторизация через NVR`,
           request: `
   {
-    email: string, 
-    password: string
+    "email": "string", 
+    "password": "string"
+  }`,
+          responses: [
+            {
+              code: 202,
+              body: `
+  {"token": "string"}`
+            },
+            {
+              code: 401,
+              body: `
+  {"error": "Неверные данные", "authenticated": false}`
+            },
+            {
+              code: 401,
+              body: `
+  {"error": "Почта не подтверждена", "authenticated": false}`
+            },
+            {
+              code: 401,
+              body: `
+  {
+    "error": "Администратор ещё не открыл доступ для этого аккаунта",
+    "authenticated": false
   }`
+            }
+          ]
         },
         {
           name: "/api-key/{email}",
           method: "POST",
-          doc: `Создаёт ключ API`
+          doc: `Создаёт ключ API`,
+          responses: [
+            {
+              code: 201,
+              body: `
+  {"api_key": "string"}`
+            }
+          ]
         },
         {
           name: "/api-key/{email}",
           method: "GET",
-          doc: `Возвращает ключ API`
+          doc: `Возвращает ключ API`,
+          responses: [
+            {
+              code: 200,
+              body: `
+  {"api_key": "string"}`
+            }
+          ]
         },
         {
           name: "/api-key/{email}",
           method: "PUT",
-          doc: `Обновляет ключ API`
+          doc: `Обновляет ключ API`,
+          responses: [
+            {
+              code: 202,
+              body: `
+  {"api_key": "string"}`
+            }
+          ]
         },
         {
           name: "/api-key/{email}",
           method: "DELETE",
-          doc: `Удаляет ключ API`
+          doc: `Удаляет ключ API`,
+          responses: [
+            {
+              code: 200,
+              body: `
+  {'message': "API key deleted"}`
+            }
+          ]
         }
       ]
     };
@@ -392,10 +589,6 @@ export default {
           ? [...Array(this.routes.length).keys()].map(_ => true)
           : [];
     }
-  },
-  created() {
-    this.api_key = this.$store.getters.user.api_key;
-    this.API_URL = process.env.NVR_URL + "/api";
   }
 };
 </script>

@@ -247,7 +247,7 @@ def manage_api_key(current_user, email):
         user.api_key = None
         db.session.commit()
 
-        return jsonify({'api_key': user.api_key}), 202
+        return jsonify({'message': "API key deleted"}), 200
 
 
 # GOOGLE API
@@ -272,7 +272,7 @@ def create_calendar_event(current_user, room_name):
     except ValueError:
         return jsonify({'error': 'Format error: date format should be YYYY-MM-DDTHH:mm'}), 400
     except NameError:
-        return jsonify({'error': f"No room found with name '{room_name}'"}), 404
+        return jsonify({'error': f"No room found with name '{room_name}'"}), 400
 
     return jsonify({'message': f"Successfully created event: {event_link}"}), 201
 
@@ -321,7 +321,10 @@ def get_rooms(current_user):
 @api.route('/rooms/<room_name>', methods=['GET'])
 @auth_required
 def get_room(current_user, room_name):
-    return jsonify(Room.query.filter_by(name=str(room_name)).first().to_dict()), 200
+    room = Room.query.filter_by(name=str(room_name)).first()
+    if not room:
+        return jsonify({"error": "No room found with given room_name"}), 400
+    return jsonify(room.to_dict()), 200
 
 
 @api.route('/rooms/<room_name>', methods=['DELETE'])
@@ -332,7 +335,7 @@ def delete_room(current_user, room_name):
 
     room = Room.query.filter_by(name=str(room_name)).first()
     if not room:
-        return jsonify({"error": "No room found with given room_name"}), 404
+        return jsonify({"error": "No room found with given room_name"}), 400
 
     Thread(target=delete_calendar, args=(room.calendar,)).start()
 
@@ -355,7 +358,7 @@ def edit_room(current_user, room_name):
 
     room = Room.query.filter_by(name=str(room_name)).first()
     if not room:
-        return jsonify({"error": "No room found with given 'room_name'"}), 404
+        return jsonify({"error": "No room found with given 'room_name'"}), 400
     if not post_data.get('sources'):
         return jsonify({"error": "Sources array required"}), 400
 
@@ -570,10 +573,10 @@ def tracking_manage(current_user, room_name):
 
     room = Room.query.filter_by(name=str(room_name)).first()
     if not room:
-        return jsonify({"error": "No room found with given room_name"}), 404
+        return jsonify({"error": "No room found with given room_name"}), 400
 
     if not room.tracking_source:
-        return jsonify({"error": "No tracking cam selected in requested room"}), 405
+        return jsonify({"error": "No tracking cam selected in requested room"}), 400
 
     command = command.lower()
     try:
@@ -591,7 +594,7 @@ def tracking_manage(current_user, room_name):
 
         return jsonify(res.json()), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 417
+        return jsonify({"error": str(e)}), 500
 
 
 @api.route('/streaming-start', methods=['POST'])
@@ -643,7 +646,7 @@ def streaming_stop(current_user):
     stream = Stream.query.get(url=stream_url)
 
     if not stream:
-        return jsonify({"error": "No stream found with given url"}), 404
+        return jsonify({"error": "No stream found with given url"}), 400
 
     requests.post(f'{STEAMING_URL}/stop/{stream.pid}', timeout=2)
 
