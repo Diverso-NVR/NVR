@@ -2,13 +2,12 @@
   <v-dialog
     :dark="isDarkMode"
     v-model="modal"
-    :disabled="!room.free"
     fullscreen
     hide-overlay
     transition="dialog-bottom-transition"
     scrollable
   >
-    <v-btn icon slot="activator" :disabled="!room.free">
+    <v-btn icon slot="activator">
       <v-icon medium>edit</v-icon>
     </v-btn>
 
