@@ -39,7 +39,7 @@
             </td>
             <td class="text-xs-center" v-if="/^\w*admin$/.test(user.role)">
               <app-edit-room :room="props.item"></app-edit-room>
-              <v-btn icon @click="del(props.item)" :disabled="!props.item.free">
+              <v-btn icon @click="del(props.item)">
                 <v-icon>delete</v-icon>
               </v-btn>
             </td>
