@@ -108,8 +108,7 @@ class Room(db.Model):
     __tablename__ = 'rooms'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False, unique=True)
-    free = db.Column(db.Boolean, default=True)
+    name = db.Column(db.String(100), nullable=False)
     tracking_state = db.Column(db.Boolean, default=False)
 
     sound_source = db.Column(db.String(100), default='0')
@@ -126,7 +125,6 @@ class Room(db.Model):
     def to_dict(self):
         return dict(id=self.id,
                     name=self.name,
-                    free=self.free,
                     tracking_state=self.tracking_state,
                     sound_source=self.sound_source,
                     main_source=self.main_source,

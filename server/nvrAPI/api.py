@@ -3,14 +3,18 @@ import uuid
 from datetime import datetime, timedelta
 from functools import wraps
 from threading import Thread
+from pathlib import Path
+
 
 import jwt
 import requests
 from flask import Blueprint, jsonify, request, current_app
 from flask_socketio import SocketIO
+from werkzeug.utils import secure_filename
+
 
 from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions, create_event_
-from driveAPI.driveSettings import create_folder, get_folders_by_name
+from driveAPI.driveSettings import create_folder, get_folders_by_name, upload
 from .email import send_verify_email, send_access_request_email
 from .models import db, Room, Source, User, Stream, nvr_db_context
 
@@ -20,6 +24,7 @@ CAMPUS = os.environ.get('CAMPUS')
 TRACKING_URL = os.environ.get('TRACKING_URL')
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
 STEAMING_URL = os.environ.get('STREAMING_URL')
+VIDS_PATH = str(Path.home()) + '/vids/'
 
 socketio = SocketIO(message_queue='redis://',
                     cors_allowed_origins=NVR_CLIENT_URL)
@@ -247,7 +252,7 @@ def manage_api_key(current_user, email):
         user.api_key = None
         db.session.commit()
 
-        return jsonify({'api_key': user.api_key}), 202
+        return jsonify({'message': "API key deleted"}), 200
 
 
 # GOOGLE API
@@ -272,9 +277,47 @@ def create_calendar_event(current_user, room_name):
     except ValueError:
         return jsonify({'error': 'Format error: date format should be YYYY-MM-DDTHH:mm'}), 400
     except NameError:
-        return jsonify({'error': f"No room found with name '{room_name}'"}), 404
+        return jsonify({'error': f"No room found with name '{room_name}'"}), 400
 
     return jsonify({'message': f"Successfully created event: {event_link}"}), 201
+
+
+@api.route('/gdrive-upload/<room_name>', methods=['POST'])
+@auth_required
+def upload_video_to_drive(room_name):
+    if not request.files:
+        return {"error": "No file provided"}, 400
+
+    room = Room.query.filter_by(name=str(room_name)).first()
+    if not room:
+        return jsonify({"error": f"Room '{room_name}' not found"}), 400
+
+    file = request.files['file']
+    file_name = secure_filename(file.filename)
+    file.save(VIDS_PATH + file_name)
+
+    try:
+        date, time = file_name.split('_')[0], file_name.split('_')[1]
+    except:
+        return {"error": "Incorrect file name"}, 400
+
+    folder = ''
+
+    # TODO можно наверно через mimetype в функции но мне так лень и времени нет хочу сдохнуть
+    date_folders = get_folders_by_name(date)
+    time_folders = get_folders_by_name(time)
+    for folder_id, folder_parent_id in date_folders.items():
+        if folder_parent_id == room.drive.split('/')[-1]:
+            for f_id, fp_id in time_folders.items():
+                if fp_id == folder_id:
+                    folder = f_id
+    if not folder:
+        folder = room.drive.split('/')[-1]
+
+    Thread(target=upload, args=(VIDS_PATH + file_name,
+                                folder)).start()
+
+    return jsonify({"message": "Upload to disk started"}), 200
 
 
 # ROOMS
@@ -321,7 +364,10 @@ def get_rooms(current_user):
 @api.route('/rooms/<room_name>', methods=['GET'])
 @auth_required
 def get_room(current_user, room_name):
-    return jsonify(Room.query.filter_by(name=str(room_name)).first().to_dict()), 200
+    room = Room.query.filter_by(name=str(room_name)).first()
+    if not room:
+        return jsonify({"error": "No room found with given room_name"}), 400
+    return jsonify(room.to_dict()), 200
 
 
 @api.route('/rooms/<room_name>', methods=['DELETE'])
@@ -332,7 +378,7 @@ def delete_room(current_user, room_name):
 
     room = Room.query.filter_by(name=str(room_name)).first()
     if not room:
-        return jsonify({"error": "No room found with given room_name"}), 404
+        return jsonify({"error": "No room found with given room_name"}), 400
 
     Thread(target=delete_calendar, args=(room.calendar,)).start()
 
@@ -355,7 +401,7 @@ def edit_room(current_user, room_name):
 
     room = Room.query.filter_by(name=str(room_name)).first()
     if not room:
-        return jsonify({"error": "No room found with given 'room_name'"}), 404
+        return jsonify({"error": "No room found with given 'room_name'"}), 400
     if not post_data.get('sources'):
         return jsonify({"error": "Sources array required"}), 400
 
@@ -484,6 +530,9 @@ def create_montage_event(current_user, room_name):
     start_time = data.get('start_time')
     end_time = data.get('end_time')
 
+    event_id = data.get('event_id')
+    calendar_id = data.get('calendar_id')
+
     room = Room.query.filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": "No room found with given room_name"}), 400
@@ -514,7 +563,8 @@ def create_montage_event(current_user, room_name):
         'cameras': [date.strftime(
             f'%Y-%m-%d_%H:%M_{room.name}_{main_source}.mp4') for date in dates],
         'screens': [date.strftime(
-            f'%Y-%m-%d_%H:%M_{room.name}_{screen_source}.mp4') for date in dates]
+            f'%Y-%m-%d_%H:%M_{room.name}_{screen_source}.mp4') for date in dates],
+        # TODO backup cameras will be added
     }
 
     folders = get_folders_by_name(date)
@@ -566,10 +616,10 @@ def tracking_manage(current_user, room_name):
 
     room = Room.query.filter_by(name=str(room_name)).first()
     if not room:
-        return jsonify({"error": "No room found with given room_name"}), 404
+        return jsonify({"error": "No room found with given room_name"}), 400
 
     if not room.tracking_source:
-        return jsonify({"error": "No tracking cam selected in requested room"}), 405
+        return jsonify({"error": "No tracking cam selected in requested room"}), 400
 
     command = command.lower()
     try:
@@ -587,7 +637,7 @@ def tracking_manage(current_user, room_name):
 
         return jsonify(res.json()), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 417
+        return jsonify({"error": str(e)}), 500
 
 
 @api.route('/streaming-start', methods=['POST'])
@@ -639,7 +689,7 @@ def streaming_stop(current_user):
     stream = Stream.query.get(url=stream_url)
 
     if not stream:
-        return jsonify({"error": "No stream found with given url"}), 404
+        return jsonify({"error": "No stream found with given url"}), 400
 
     requests.post(f'{STEAMING_URL}/stop/{stream.pid}', timeout=2)
 
