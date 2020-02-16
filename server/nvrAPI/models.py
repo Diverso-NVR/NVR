@@ -120,7 +120,7 @@ class Room(db.Model):
     drive = db.Column(db.String(200))
     calendar = db.Column(db.String(200))
 
-    auto_control = db.Column(db.Boolean, nullable=False, default=True)
+    auto_control = db.Column(db.Boolean, default=True)
 
     def to_dict(self):
         return dict(id=self.id,
@@ -132,7 +132,8 @@ class Room(db.Model):
                     screen_source=self.screen_source,
                     sources=[source.to_dict() for source in self.sources],
                     drive=self.drive,
-                    calendar=self.calendar)
+                    calendar=self.calendar,
+                    auto_control=self.auto_control)
 
 
 class Source(db.Model):
@@ -140,17 +141,20 @@ class Source(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     ip = db.Column(db.String(200), default='0')
+    onvif_ip = db.Column(db.String(200), default='0')
     name = db.Column(db.String(100), default='источник')
     room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
 
     def __init__(self, **kwargs):
         self.ip = kwargs.get('ip')
+        self.onvif_ip = kwargs.get('onvif_ip')
         self.name = kwargs.get('name')
         self.room_id = kwargs.get('room_id')
 
     def to_dict(self):
         return dict(id=self.id,
                     ip=self.ip,
+                    onvif_ip=self.onvif_ip,
                     name=self.name,
                     room_id=self.room_id)
 

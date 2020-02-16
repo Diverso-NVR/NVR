@@ -12,6 +12,9 @@
             <v-flex xs12 sm6 md8>
               <v-text-field label="IP" :rules="fieldsRules" v-model="newSource.ip"></v-text-field>
             </v-flex>
+            <v-flex xs12 sm6 md8>
+              <v-text-field label="Onvif IP" :rules="fieldsRules" v-model="newSource.onvif_ip"></v-text-field>
+            </v-flex>
           </v-layout>
         </v-form>
       </v-card-text>

@@ -339,10 +339,27 @@ export default {
           name: "/auto-control/{room_name}",
           method: "POST",
           doc: "Включает или отключает автоматический контроль камер в указанной комнате",
-          json: "{set_auto_control: bool}"
+          request: `
+  {"set_auto_control": bool}`,
+          responses: [
+            {
+              code: 200,
+              body: `
+  {"message": "Automatic control within room {room_name} has been set to {set_auto_control}"}`
+            },
+            {
+              code: 400,
+              body: `
+  {"error": "Boolean value not provided"}`
+            },
+            {
+              code: 404,
+              body: `
+  {"error": "Room {room_name} not found"}`
+            }
+          ]
         },
         {
-
           name: "/streaming-start",
           method: "POST",
           doc: `Запускает стрим по ссылке yt_url`,
@@ -358,8 +375,7 @@ export default {
               body: `
   {
     "message": "Streaming started"
-  }
-        `
+  }`
             },
             {
               code: 500,

@@ -46,6 +46,18 @@ class NvrNamespace(Namespace):
             'id': room.id, 'tracking_state': room.tracking_state, 'room_name': room.name},
              broadcast=True)
 
+    def on_auto_control(self, msg_json):
+        room_id = msg_json['id']
+        auto_control_enabled = msg_json['auto_control']
+
+        room = Room.query.get(room_id)
+        room.auto_control = auto_control_enabled
+        db.session.commit()
+
+        emit('auto_control_change', {
+            'id': room.id, 'auto_control': room.auto_control, 'room_name': room.name},
+             broadcast=True)
+
     def on_delete_room(self, msg_json):
         room_id = msg_json['id']
 
@@ -169,14 +181,3 @@ class NvrNamespace(Namespace):
         db.session.commit()
 
         emit('streaming_stop', {'name': room_name}, broadcast=True)
-
-    def on_auto_control(self, msg_json):
-        room_id = msg_json['id']
-        auto_control_enabled = msg_json['auto_control']
-
-        room = Room.query.get(room_id)
-        room.auto_control = auto_control_enabled
-        db.session.commit()
-
-        emit('auto_control', {'name': room.name,
-                              'auto_control': room.auto_control}, broadcast=True)

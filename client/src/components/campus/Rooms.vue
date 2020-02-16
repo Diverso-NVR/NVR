@@ -28,6 +28,14 @@
             </td>
 
             <td class="text-xs-center">
+              <v-btn
+                flat
+                :class="props.item.auto_control === true ? 'error': 'success'"
+                @click="autoControlSwitch(props.item)"
+              >{{props.item.auto_control === true ? 'Выкл': 'Вкл'}}</v-btn>
+            </td>
+
+            <td class="text-xs-center">
               <v-btn icon target="_blank" href="https://calendar.google.com/calendar/r">
                 <v-icon>calendar_today</v-icon>
               </v-btn>
@@ -62,6 +70,14 @@
                     :class="props.item.tracking_state === true ? 'error': 'success'"
                     @click="trackingSwitch(props.item)"
                   >{{props.item.tracking_state === true ? 'Выкл': 'Вкл'}}</v-btn>
+                </li>
+
+                <li class="flex-item subheading" data-label="Автоматическое управление">
+                  <v-btn
+                    flat
+                    :class="props.item.auto_control === true ? 'error': 'success'"
+                    @click="autoControlSwitch(props.item)"
+                  >{{props.item.auto_control === true ? 'Выкл': 'Вкл'}}</v-btn>
                 </li>
 
                 <li class="flex-item subheading" data-label="Календарь">
@@ -119,15 +135,34 @@ export default {
           sortable: true,
           value: "name"
         },
-        { text: "Монтаж", value: "montage", sortable: true, align: "center" },
-        { text: "Трекинг", value: "tracking", sortable: true, align: "center" },
+        {
+          text: "Монтаж",
+          value: "montage",
+          sortable: true,
+          align: "center"
+        },
+        {
+          text: "Трекинг",
+          value: "tracking",
+          sortable: true,
+          align: "center" },
+        {
+          text: "Автоматическое управление",
+          value: "auto_control",
+          sortable: true,
+          align: "center"},
         {
           text: "Календарь",
           value: "calendar",
           sortable: false,
           align: "center"
         },
-        { text: "Диск", value: "drive", sortable: false, align: "center" }
+        {
+          text: "Диск",
+          value: "drive",
+          sortable: false,
+          align: "center"
+        }
       ],
       newRoom: "",
       background: {
@@ -156,6 +191,12 @@ export default {
       this.$store.dispatch("emitTrackingStateChange", {
         room,
         tracking_state: !room.tracking_state
+      });
+    },
+    autoControlSwitch(room) {
+      this.$store.dispatch("emitAutoControlChange", {
+        room,
+        auto_control: !room.auto_control
       });
     },
     del(room) {
