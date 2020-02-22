@@ -320,6 +320,14 @@ def upload_video_to_drive(room_name):
     return jsonify({"message": "Upload to disk started"}), 200
 
 
+@api.route('/gconfigure/<string:room_name>', methods=['POST'])
+@auth_required
+def create_drive_and_calendar(current_user, room_name):
+    drive = create_folder(f'{CAMPUS}-{room_name}')
+    calendar = create_calendar(CAMPUS, room_name)
+    return jsonify({"drive": drive, "calendar": calendar}), 201
+
+
 # ROOMS
 @api.route('/rooms/<room_name>', methods=['POST'])
 @auth_required

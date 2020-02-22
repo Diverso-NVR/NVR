@@ -110,12 +110,6 @@ class Room(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     tracking_state = db.Column(db.Boolean, default=False)
-
-    sound_source = db.Column(db.String(100), default='0')
-    main_source = db.Column(db.String(100), default='0')
-    tracking_source = db.Column(db.String(100), default='0')
-    screen_source = db.Column(db.String(100), default='0')
-
     sources = db.relationship('Source', backref='room', lazy=False)
     drive = db.Column(db.String(200))
     calendar = db.Column(db.String(200))
@@ -124,10 +118,6 @@ class Room(db.Model):
         return dict(id=self.id,
                     name=self.name,
                     tracking_state=self.tracking_state,
-                    sound_source=self.sound_source,
-                    main_source=self.main_source,
-                    tracking_source=self.tracking_source,
-                    screen_source=self.screen_source,
                     sources=[source.to_dict() for source in self.sources],
                     drive=self.drive,
                     calendar=self.calendar)
@@ -137,19 +127,34 @@ class Source(db.Model):
     __tablename__ = 'sources'
 
     id = db.Column(db.Integer, primary_key=True)
-    ip = db.Column(db.String(200), default='0')
     name = db.Column(db.String(100), default='источник')
+    ip = db.Column(db.String(200))
+    port = db.Column(db.String(200))
+    rtsp = db.Column(db.String(200), default='no')
+    audio = db.Column(db.String(200))
+    merge = db.Column(db.String(200))
+    tracking = db.Column(db.String(200))
     room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
 
     def __init__(self, **kwargs):
-        self.ip = kwargs.get('ip')
         self.name = kwargs.get('name')
+        self.ip = kwargs.get('ip')
+        self.port = kwargs.get('port')
+        self.rtsp = kwargs.get('rtsp')
+        self.audio = kwargs.get('audio')
+        self.merge = kwargs.get('merge')
+        self.tracking = kwargs.get('tracking')
         self.room_id = kwargs.get('room_id')
 
     def to_dict(self):
         return dict(id=self.id,
-                    ip=self.ip,
                     name=self.name,
+                    ip=self.ip,
+                    port=self.port,
+                    rtsp=self.rtsp,
+                    audio=self.audio,
+                    merge=self.audio,
+                    tracking=self.tracking,
                     room_id=self.room_id)
 
 
