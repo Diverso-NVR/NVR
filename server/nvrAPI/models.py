@@ -114,13 +114,22 @@ class Room(db.Model):
     drive = db.Column(db.String(200))
     calendar = db.Column(db.String(200))
 
+    sound_source = db.Column(db.String(100))
+    main_source = db.Column(db.String(100))
+    tracking_source = db.Column(db.String(100))
+    screen_source = db.Column(db.String(100))
+
     def to_dict(self):
         return dict(id=self.id,
                     name=self.name,
                     tracking_state=self.tracking_state,
                     sources=[source.to_dict() for source in self.sources],
                     drive=self.drive,
-                    calendar=self.calendar)
+                    calendar=self.calendar,
+                    sound_source=self.sound_source,
+                    main_source=self.main_source,
+                    tracking_source=self.tracking_source,
+                    screen_source=self.screen_source)
 
 
 class Source(db.Model):
