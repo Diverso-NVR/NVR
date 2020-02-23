@@ -45,9 +45,6 @@
               <td class="text-xs-center">
                 <v-text-field class="body-1" v-model.trim="props.item.ip"></v-text-field>
               </td>
-              <td class="text-xs-center">
-                <v-text-field class="body-1" v-model.trim="props.item.onvif_ip"></v-text-field>
-              </td>
               <td>
                 <v-radio-group class="v-c" v-model="soundSource">
                   <v-radio :value="props.item.ip"></v-radio>
@@ -83,9 +80,6 @@
                   </li>
                   <li class="flex-item key-elems subheading" data-label="IP">
                     <v-text-field class="body-1" v-model.trim="props.item.ip"></v-text-field>
-                  </li>
-                  <li class="flex-item key-elems subheading" data-label="Onvif IP">
-                    <v-text-field class="body-1" v-model.trim="props.item.onvif_ip"></v-text-field>
                   </li>
 
                   <li class="flex-item subheading" data-label="Звук">
@@ -158,12 +152,6 @@ export default {
         {
           text: "IP",
           value: "ip",
-          sortable: true,
-          align: "center"
-        },
-        {
-          text: "Onvif IP",
-          value: "onvif_ip",
           sortable: true,
           align: "center"
         },
