@@ -85,6 +85,7 @@
                     <v-icon medium>calendar_today</v-icon>
                   </v-btn>
                 </li>
+
                 <li class="flex-item subheading" data-label="Диск">
                   <v-btn icon :href="props.item.drive" target="_blank">
                     <v-icon medium>folder</v-icon>
@@ -145,12 +146,14 @@ export default {
           text: "Трекинг",
           value: "tracking",
           sortable: true,
-          align: "center" },
+          align: "center"
+        },
         {
           text: "Автоматическое управление",
           value: "auto_control",
           sortable: true,
-          align: "center"},
+          align: "center"
+        },
         {
           text: "Календарь",
           value: "calendar",
