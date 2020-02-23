@@ -14,6 +14,7 @@ from nvrAPI.models import nvr_db_context, Room
 
 lock = RLock()
 
+CAMPUS = os.environ.get('CAMPUS')
 SCOPES = 'https://www.googleapis.com/auth/calendar'
 """
 Setting up calendar
@@ -107,21 +108,23 @@ def give_permissions(mail: str) -> None:
 #     # calendar_service.acl().delete(calendarId='primary', ruleId='ruleId').execute()
 
 
-def create_calendar(building: str, room: str) -> str:
+# TODO фикс присваивания ролей
+def create_calendar(room: str) -> str:
     """
-    Creates calendar with name: 'building'-'room'
+    Creates calendar with name: 'room'
     and grant access to all users from same campus
     """
     with lock:
         calendar_metadata = {
-            'summary': f'{building}-{room}',
-            'timeZone': 'Europe/Moscow'
+            'summary': room,
+            'timeZone': 'Europe/Moscow',
+            'location': CAMPUS
         }
 
         calendars = calendar_service.calendarList().list(pageToken=None).execute()
         copy_perm = ""
         for item in calendars['items']:
-            if item['summary'].split('-')[0] == building:
+            if item.get('location') == CAMPUS:
                 copy_perm = item['id']
                 break
 

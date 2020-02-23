@@ -316,10 +316,10 @@ export default {
             "Обновляет данные в источнике с указанным ip. room_name используется для соотношения источника к комнате",
           request: `
   {
-    "room_name": "string", 
-    "main_cam": bool, 
-    "name": "string",  
-    "sound": "string", 
+    "room_name": "string",
+    "main_cam": bool,
+    "name": "string",
+    "sound": "string",
     "tracking": bool
   }`,
           responses: [
@@ -336,13 +336,37 @@ export default {
           ]
         },
         {
+          name: "/auto-control/{room_name}",
+          method: "POST",
+          doc: "Включает или отключает автоматический контроль камер в указанной комнате",
+          request: `
+  {"set_auto_control": bool}`,
+          responses: [
+            {
+              code: 200,
+              body: `
+  {"message": "Automatic control within room {room_name} has been set to {set_auto_control}"}`
+            },
+            {
+              code: 400,
+              body: `
+  {"error": "Boolean value not provided"}`
+            },
+            {
+              code: 404,
+              body: `
+  {"error": "Room {room_name} not found"}`
+            }
+          ]
+        },
+        {
           name: "/streaming-start",
           method: "POST",
           doc: `Запускает стрим по ссылке yt_url`,
           request: `
   {
-    "sound_ip": "string", 
-    "camera_ip": "string", 
+    "sound_ip": "string",
+    "camera_ip": "string",
     "yt_url": "string"
   }`,
           responses: [
@@ -351,8 +375,7 @@ export default {
               body: `
   {
     "message": "Streaming started"
-  }
-        `
+  }`
             },
             {
               code: 500,
@@ -403,8 +426,8 @@ export default {
             .slice(0, 16)}`,
           request: `
   {
-    "start_time": "string", 
-    "end_time": "string", 
+    "start_time": "string",
+    "end_time": "string",
     "summary": "string"
   }`,
           responses: [
@@ -445,9 +468,9 @@ export default {
             .slice(0, 10)}`,
           request: `
   {
-    "start_time": "string", 
-    "end_time": "string", 
-    "date": "string", 
+    "start_time": "string",
+    "end_time": "string",
+    "date": "string",
     "event_name": "string"
   }`,
           responses: [
@@ -495,7 +518,7 @@ export default {
           doc: `Авторизация через NVR`,
           request: `
   {
-    "email": "string", 
+    "email": "string",
     "password": "string"
   }`,
           responses: [

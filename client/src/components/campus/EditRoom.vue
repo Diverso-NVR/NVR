@@ -161,7 +161,12 @@ export default {
           sortable: true,
           align: "center"
         },
-        { text: "Трекинг", value: "tracking", sortable: true, align: "center" },
+        {
+          text: "Трекинг",
+          value: "tracking",
+          sortable: true,
+          align: "center"
+        },
         {
           text: "Главная камера",
           value: "main_cam",

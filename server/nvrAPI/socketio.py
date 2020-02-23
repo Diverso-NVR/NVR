@@ -9,7 +9,6 @@ from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_
 from driveAPI.driveSettings import create_folder
 from .models import db, Room, Source, User, Stream, nvr_db_context
 
-CAMPUS = os.environ.get('CAMPUS')
 TRACKING_URL = os.environ.get('TRACKING_URL')
 STREAMING_URL = os.environ.get('STREAMING_URL')
 
@@ -44,6 +43,18 @@ class NvrNamespace(Namespace):
 
         emit('tracking_state_change', {
             'id': room.id, 'tracking_state': room.tracking_state, 'room_name': room.name},
+            broadcast=True)
+
+    def on_auto_control(self, msg_json):
+        room_id = msg_json['id']
+        auto_control_enabled = msg_json['auto_control']
+
+        room = Room.query.get(room_id)
+        room.auto_control = auto_control_enabled
+        db.session.commit()
+
+        emit('auto_control_change', {
+            'id': room.id, 'auto_control': room.auto_control, 'room_name': room.name},
              broadcast=True)
 
     def on_delete_room(self, msg_json):
@@ -60,30 +71,30 @@ class NvrNamespace(Namespace):
         emit('delete_room', {'id': room.id, 'name': room.name}, broadcast=True)
 
     def on_add_room(self, msg_json):
-        name = msg_json['name']
+        room_name = msg_json['name']
 
-        room = Room.query.filter_by(name=name).first()
+        room = Room.query.filter_by(name=room_name).first()
         if room:
-            self.emit_error(f"Комната {name} уже существует")
+            self.emit_error(f"Комната {room_name} уже существует")
             return
 
-        room = Room(name=name)
-        room.drive = create_folder(f'{CAMPUS}-{name}')
+        room = Room(name=room_name)
+        room.drive = create_folder(room_name)
         room.sources = []
         db.session.add(room)
         db.session.commit()
 
         Thread(target=NvrNamespace.make_calendar, args=(
-            current_app._get_current_object(), name), daemon=True).start()
+            current_app._get_current_object(), room_name), daemon=True).start()
 
         emit('add_room', {'room': room.to_dict()},
              broadcast=True)
 
     @staticmethod
     @nvr_db_context
-    def make_calendar(name):
-        room = Room.query.filter_by(name=name).first()
-        room.calendar = create_calendar(CAMPUS, name)
+    def make_calendar(room_name):
+        room = Room.query.filter_by(name=room_name).first()
+        room.calendar = create_calendar(room_name)
         db.session.commit()
 
     def on_edit_room(self, msg_json):
