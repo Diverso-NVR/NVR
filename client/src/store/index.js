@@ -29,6 +29,13 @@ const mutations = {
 
     room.tracking_state = message.tracking_state;
   },
+  AUTO_CONTROL_CHANGE(state, message) {
+    let room = state.rooms.find(room => {
+      return room.id === message.id;
+    });
+
+    room.auto_control = message.auto_control;
+  },
   DELETE_ROOM(state, message) {
     let i;
     state.rooms.forEach((room, index) => {
@@ -102,6 +109,22 @@ const actions = {
       await commit("TRACKING_CHANGE", message);
       let msg = `Трекинг комнаты ${message.room_name}`;
       msg += message.tracking_state ? " включён" : " отключён";
+      commit("setMessage", msg);
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  async emitAutoControlChange({}, { room, auto_control }) {
+    await this._vm.$socket.client.emit("auto_control_change", {
+      id: room.id,
+      auto_control
+    });
+  },
+  async socket_autoControlChange({ commit }, message) {
+    try {
+      await commit("AUTO_CONTROL_CHANGE", message);
+      let msg = `Автоматический контроль камер комнаты ${message.room_name}`;
+      msg += message.auto_control ? " включён" : " отключён";
       commit("setMessage", msg);
     } catch (error) {
       console.error(error);

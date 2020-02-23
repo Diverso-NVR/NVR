@@ -119,6 +119,8 @@ class Room(db.Model):
     tracking_source = db.Column(db.String(100))
     screen_source = db.Column(db.String(100))
 
+    auto_control = db.Column(db.Boolean, default=True)
+
     def to_dict(self):
         return dict(id=self.id,
                     name=self.name,
@@ -129,7 +131,8 @@ class Room(db.Model):
                     sound_source=self.sound_source,
                     main_source=self.main_source,
                     tracking_source=self.tracking_source,
-                    screen_source=self.screen_source)
+                    screen_source=self.screen_source,
+                    auto_control=self.auto_control)
 
 
 class Source(db.Model):

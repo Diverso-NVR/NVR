@@ -660,7 +660,7 @@ def streaming_start(current_user):
     if not yt_url:
         return jsonify({"error": "Stream url not provided"}), 400
 
-    response = requests.post(f'{STEAMING_URL}/start', timeout=2, json={
+    response = requests.post(f"{STEAMING_URL}/start", timeout=2, json={
         "image_addr": camera_ip,
         "sound_addr": sound_ip,
         "yt_addr": yt_url
@@ -700,3 +700,26 @@ def streaming_stop(current_user):
     db.session.commit()
 
     return jsonify({"message": "Streaming stopped"}), 200
+
+
+@api.route('/auto-control/<room_name>', methods=['POST'])
+@auth_required
+@json_data_required
+def auto_control(current_user, room_name):
+    data = request.get_json()
+
+    set_auto_control = data.get('set_auto_control')
+
+    if not set_auto_control:
+        return jsonify({"error": "Boolean value not provided"}), 400
+
+    room = Room.query.get(name=room_name)
+
+    if not room:
+        return jsonify({"error": f"Room {room_name} not found"}), 404
+
+    room.auto_control = set_auto_control
+    db.session.commit()
+
+    return jsonify({"message": f"Automatic control within room {room_name} \
+                    has been set to {set_auto_control}"}), 200
