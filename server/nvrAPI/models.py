@@ -155,6 +155,16 @@ class Source(db.Model):
         self.tracking = kwargs.get('tracking')
         self.room_id = kwargs.get('room_id')
 
+    def update(self, **kwargs):
+        self.name = kwargs.get('name')
+        self.ip = kwargs.get('ip')
+        self.port = kwargs.get('port')
+        self.rtsp = kwargs.get('rtsp')
+        self.audio = kwargs.get('audio')
+        self.merge = kwargs.get('merge')
+        self.tracking = kwargs.get('tracking')
+        self.room_id = kwargs.get('room_id')
+
     def to_dict(self):
         return dict(id=self.id,
                     name=self.name,

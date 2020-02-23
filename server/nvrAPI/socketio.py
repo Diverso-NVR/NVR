@@ -94,13 +94,9 @@ class NvrNamespace(Namespace):
         room.tracking_source = msg_json['tracking_source']
         room.sound_source = msg_json['sound_source']
 
-        for s in room.sources:
-            db.session.delete(s)
-
         for s in msg_json['sources']:
-            source = Source(**s)
-            source.room_id = room.id
-            db.session.add(source)
+            source = Source.query.get(s['id'])
+            source.update(**s)
 
         db.session.commit()
 
