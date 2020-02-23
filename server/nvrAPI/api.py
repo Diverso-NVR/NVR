@@ -20,7 +20,6 @@ from .models import db, Room, Source, User, Stream, nvr_db_context
 
 api = Blueprint('api', __name__)
 
-CAMPUS = os.environ.get('CAMPUS')
 TRACKING_URL = os.environ.get('TRACKING_URL')
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
 STEAMING_URL = os.environ.get('STREAMING_URL')
@@ -320,6 +319,14 @@ def upload_video_to_drive(room_name):
     return jsonify({"message": "Upload to disk started"}), 200
 
 
+@api.route('/gconfigure/<string:room_name>', methods=['POST'])
+@auth_required
+def create_drive_and_calendar(current_user, room_name):
+    drive = create_folder(room_name)
+    calendar = create_calendar(room_name)
+    return jsonify({"drive": drive, "calendar": calendar}), 201
+
+
 # ROOMS
 @api.route('/rooms/<room_name>', methods=['POST'])
 @auth_required
@@ -345,10 +352,10 @@ def create_room(current_user, room_name):
 
 
 @nvr_db_context
-def config_room(name):
-    room = Room.query.filter_by(name=name).first()
-    room.drive = create_folder(f'{CAMPUS}-{name}')
-    room.calendar = create_calendar(CAMPUS, name)
+def config_room(room_name):
+    room = Room.query.filter_by(name=room_name).first()
+    room.drive = create_folder(room_name)
+    room.calendar = create_calendar(room_name)
     room.sources = []
     db.session.commit()
 
