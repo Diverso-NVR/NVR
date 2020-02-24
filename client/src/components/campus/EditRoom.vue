@@ -45,6 +45,9 @@
               <td class="text-xs-center">
                 <v-text-field class="body-1" v-model.trim="props.item.ip"></v-text-field>
               </td>
+              <td class="text-xs-center">
+                <v-text-field class="body-1" v-model.trim="props.item.rtsp"></v-text-field>
+              </td>
               <td>
                 <v-radio-group class="v-c" v-model="soundSource">
                   <v-radio :value="props.item.ip"></v-radio>
@@ -81,7 +84,9 @@
                   <li class="flex-item key-elems subheading" data-label="IP">
                     <v-text-field class="body-1" v-model.trim="props.item.ip"></v-text-field>
                   </li>
-
+                  <li class="flex-item key-elems subheading" data-label="RTSP">
+                    <v-text-field class="body-1" v-model.trim="props.item.rtsp"></v-text-field>
+                  </li>
                   <li class="flex-item subheading" data-label="Звук">
                     <v-radio-group class="v-c" v-model="soundSource">
                       <v-radio :value="props.item.ip"></v-radio>
@@ -152,6 +157,12 @@ export default {
         {
           text: "IP",
           value: "ip",
+          sortable: true,
+          align: "center"
+        },
+        {
+          text: "RTSP",
+          value: "rtsp",
           sortable: true,
           align: "center"
         },

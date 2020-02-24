@@ -415,11 +415,7 @@ def edit_room(current_user, room_name):
     for s in post_data['sources']:
         if s.get('id'):
             source = Source.query.get(s['id'])
-            source_dict = source.to_dict()
-            updated_source_dict = {**source_dict, **s}
-            db.session.delete(source)
-            source = Source(**updated_source_dict)
-            db.session.add(source)
+            source.update(**s)
         else:
             source = Source(**s)
             source.room_id = room.id
