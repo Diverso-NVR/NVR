@@ -106,10 +106,6 @@ class NvrNamespace(Namespace):
         room.tracking_source = msg_json['tracking_source']
         room.sound_source = msg_json['sound_source']
 
-        for s in Source.query.all():
-            if s.ip not in msg_json['sources']:
-                db.session.delete(s)
-
         for s in msg_json['sources']:
             source = Source.query.get(s['id'])
             source.update(**s)
