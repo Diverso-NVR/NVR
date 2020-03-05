@@ -12,6 +12,8 @@ import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
 
+from calendarAPI.calendarSettings import calendar_watcher
+
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
 
 
@@ -21,6 +23,7 @@ def create_app(app_name="NVR_API"):
     """
     app = Flask(app_name)
     app.config.from_object('nvrAPI.config.BaseConfig')
+    calendar_watcher()
 
     cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
@@ -46,6 +49,12 @@ def create_app(app_name="NVR_API"):
     def default_error_handler(e):
         print(request.event["message"])
         print(request.event["args"])
+
+    @app.route('/calendar-notifications', methods=['POST'])
+    def calendar_webhook():
+        from pprint import pprint
+        pprint(request.get_json())
+        return "", 200
 
     # logging
     if not app.debug:
