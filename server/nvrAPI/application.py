@@ -12,7 +12,7 @@ import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
 
-from calendarAPI.calendarSettings import calendar_watcher
+from calendarAPI.calendarSettings import event_watcher
 
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
 
@@ -23,7 +23,7 @@ def create_app(app_name="NVR_API"):
     """
     app = Flask(app_name)
     app.config.from_object('nvrAPI.config.BaseConfig')
-    calendar_watcher()
+    #event_watcher()
 
     cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
