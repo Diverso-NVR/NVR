@@ -283,7 +283,7 @@ def create_calendar_event(current_user, room_name):
 
 @api.route('/gdrive-upload/<room_name>', methods=['POST'])
 @auth_required
-def upload_video_to_drive(room_name):
+def upload_video_to_drive(current_user, room_name):
     if not request.files:
         return {"error": "No file provided"}, 400
 
