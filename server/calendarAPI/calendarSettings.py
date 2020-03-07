@@ -152,3 +152,13 @@ def delete_calendar(calendar_id: str) -> None:
             calendar_service.calendars().delete(calendarId=calendar_id).execute()
         except Exception as e:
             print(e)
+
+
+def event_watcher():
+    eventcollect = {
+        'id': str(uuid.uuid4().hex),
+        'type': "web_hook",
+        'address': 'https://nvr.miem.hse.ru/calendar-notifications'
+    }
+
+    calendar_service.events().watch(calendarId='primary', body=eventcollect).execute()
