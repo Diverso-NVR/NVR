@@ -12,7 +12,6 @@ import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
 
-
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
 
 
