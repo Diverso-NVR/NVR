@@ -329,8 +329,8 @@ def create_drive_and_calendar(current_user, room_name):
 
 @api.route('/calendar-notifications/', methods=['POST'])
 def calendar_webhook():
-    from pprint import pprint
-    pprint(request.get_json())
+    calendar_id = request.headers['X-Goog-Resource-Uri'].split('/')[6]
+    print(calendar_id)
     return "", 200
 
 # ROOMS
