@@ -154,11 +154,11 @@ def delete_calendar(calendar_id: str) -> None:
             print(e)
 
 
-def event_watcher():
+def event_watcher(calendar_id):
     eventcollect = {
         'id': str(uuid.uuid4().hex),
         'type': "web_hook",
-        'address': 'https://nvr.miem.hse.ru/calendar-notifications'
+        'address': 'https://nvr.miem.hse.ru/api/calendar-notifications/'
     }
 
-    calendar_service.events().watch(calendarId='primary', body=eventcollect).execute()
+    calendar_service.events().watch(calendarId=calendar_id, body=eventcollect).execute()

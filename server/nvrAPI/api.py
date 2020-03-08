@@ -327,6 +327,12 @@ def create_drive_and_calendar(current_user, room_name):
     return jsonify({"drive": drive, "calendar": calendar}), 201
 
 
+@api.route('/calendar-notifications/', methods=['POST'])
+def calendar_webhook():
+    from pprint import pprint
+    pprint(request.get_json())
+    return "", 200
+
 # ROOMS
 @api.route('/rooms/<room_name>', methods=['POST'])
 @auth_required
