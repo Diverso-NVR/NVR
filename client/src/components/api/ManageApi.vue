@@ -338,7 +338,8 @@ export default {
         {
           name: "/auto-control/{room_name}",
           method: "POST",
-          doc: "Включает или отключает автоматический контроль камер в указанной комнате",
+          doc:
+            "Включает или отключает автоматический контроль камер в указанной комнате",
           request: `
   {"set_auto_control": bool}`,
           responses: [
@@ -555,7 +556,7 @@ export default {
             {
               code: 201,
               body: `
-  {"api_key": "string"}`
+  {"key": "string"}`
             }
           ]
         },
@@ -567,7 +568,7 @@ export default {
             {
               code: 200,
               body: `
-  {"api_key": "string"}`
+  {"key": "string"}`
             }
           ]
         },
@@ -579,7 +580,7 @@ export default {
             {
               code: 202,
               body: `
-  {"api_key": "string"}`
+  {"key": "string"}`
             }
           ]
         },
