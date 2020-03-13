@@ -222,7 +222,7 @@ def delete_user(current_user, user_id):
     return jsonify({"message": "User deleted"}), 200
 
 
-@api.route('/api-key/<email>', methods=['POST', 'PUT', 'DELETE'])
+@api.route('/api-key/<email>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 @auth_required
 def manage_api_key(current_user, email):
     user = User.query.filter_by(email=email).first()
@@ -236,16 +236,16 @@ def manage_api_key(current_user, email):
         user.api_key = uuid.uuid4().hex
         db.session.commit()
 
-        return jsonify({'api_key': user.api_key}), 201
+        return jsonify({'key': user.api_key}), 201
 
     if request.method == 'GET':
-        return jsonify({"api_key": user.api_key}), 200
+        return jsonify({"key": user.api_key}), 200
 
     if request.method == 'PUT':
         user.api_key = uuid.uuid4().hex
         db.session.commit()
 
-        return jsonify({'api_key': user.api_key}), 202
+        return jsonify({'key': user.api_key}), 202
 
     if request.method == 'DELETE':
         user.api_key = None
