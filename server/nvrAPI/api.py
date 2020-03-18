@@ -223,7 +223,7 @@ def delete_user(current_user, user_id):
     return jsonify({"message": "User deleted"}), 200
 
 
-@api.route('/api-key/<email>', methods=['POST', 'PUT', 'DELETE'])
+@api.route('/api-key/<email>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 @auth_required
 def manage_api_key(current_user, email):
     user = User.query.filter_by(email=email).first()
@@ -237,16 +237,16 @@ def manage_api_key(current_user, email):
         user.api_key = uuid.uuid4().hex
         db.session.commit()
 
-        return jsonify({'api_key': user.api_key}), 201
+        return jsonify({'key': user.api_key}), 201
 
     if request.method == 'GET':
-        return jsonify({"api_key": user.api_key}), 200
+        return jsonify({"key": user.api_key}), 200
 
     if request.method == 'PUT':
         user.api_key = uuid.uuid4().hex
         db.session.commit()
 
-        return jsonify({'api_key': user.api_key}), 202
+        return jsonify({'key': user.api_key}), 202
 
     if request.method == 'DELETE':
         user.api_key = None
@@ -330,8 +330,9 @@ def create_drive_and_calendar(current_user, room_name):
 
 @api.route('/calendar-notifications/', methods=['POST'])
 def calendar_webhook():
-    from pprint import pprint
-    pprint(request.get_json())
+    calendar_id = request.headers['X-Goog-Resource-Uri'].split('/')[6]
+    res = requests.post(f'{MERGE_URL}/gcalendar-webhook',
+                        json={'calendar_id': calendar_id})
     return "", 200
 
 # ROOMS

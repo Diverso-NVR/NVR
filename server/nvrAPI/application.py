@@ -30,12 +30,6 @@ def create_app(app_name="NVR_API"):
     from nvrAPI.models import db
     db.init_app(app)
 
-    from nvrAPI.models import Room
-    from calendarAPI.calendarSettings import event_watcher
-    with app.app_context():
-        for room in Room.query.all():
-            event_watcher(room.calendar)
-
     from nvrAPI.email import mail
     mail.init_app(app)
 
