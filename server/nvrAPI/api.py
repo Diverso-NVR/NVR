@@ -23,6 +23,7 @@ api = Blueprint('api', __name__)
 TRACKING_URL = os.environ.get('TRACKING_URL')
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
 STEAMING_URL = os.environ.get('STREAMING_URL')
+MERGE_URL = os.environ.get('MERGE_URL', 'http://172.18.130.40:8080')
 VIDS_PATH = str(Path.home()) + '/vids/'
 
 socketio = SocketIO(message_queue='redis://',
@@ -584,7 +585,7 @@ def create_montage_event(current_user, room_name):
     else:
         folder_id = room.drive.split('/')[-1]
 
-    res = requests.post('http://172.18.130.40:8080/merge-new',
+    res = requests.post(f'{MERGE_URL}/merge-new',
                         json={**result,
                               'start_time': start_time,
                               'end_time': end_time,
