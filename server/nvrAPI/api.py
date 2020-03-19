@@ -536,13 +536,10 @@ def manage_source(current_user, ip):
 @json_data_required
 def create_montage_event(current_user, room_name):
     data = request.get_json()
-    event_name = data.get('event_name')  # TODO: send to /merge-new
+    event_name = data.get('event_name')
     date = data.get('date')
     start_time = data.get('start_time')
     end_time = data.get('end_time')
-
-    event_id = data.get('event_id')
-    calendar_id = data.get('calendar_id')
 
     room = Room.query.filter_by(name=str(room_name)).first()
     if not room:
@@ -566,18 +563,6 @@ def create_montage_event(current_user, room_name):
     if start_timestamp >= end_timestamp:
         return jsonify({"error": "Неверный промежуток времени"}), 400
 
-    dates = get_dates_between_timestamps(start_timestamp, end_timestamp)
-    main_source = room.main_source.split('.')[-1].split('/')[0]
-    screen_source = room.screen_source.split('.')[-1].split('/')[0]
-
-    result = {
-        'cameras': [date.strftime(
-            f'%Y-%m-%d_%H:%M_{room.name}_{main_source}.mp4') for date in dates],
-        'screens': [date.strftime(
-            f'%Y-%m-%d_%H:%M_{room.name}_{screen_source}.mp4') for date in dates],
-        # TODO backup cameras will be added
-    }
-
     folders = get_folders_by_name(date)
 
     for folder_id, folder_parent_id in folders.items():
@@ -586,26 +571,18 @@ def create_montage_event(current_user, room_name):
     else:
         folder_id = room.drive.split('/')[-1]
 
-    res = requests.post(f'{MERGE_URL}/merge-new',
-                        json={**result,
+    res = requests.post(f'{MERGE_URL}/merge',
+                        json={'event_name': event_name,
+                              'room_name': room.name,
+                              'date': date,
                               'start_time': start_time,
                               'end_time': end_time,
                               'folder_id': folder_id})
-    print(res.text)
 
-    return jsonify({"message": "Record event created"}), 201
-
-
-def get_dates_between_timestamps(start_timestamp: int, stop_timestamp: int) -> list:
-    start_timestamp = start_timestamp // 1800 * 1800
-    stop_timestamp = (stop_timestamp // 1800 + 1) * 1800 if int(
-        stop_timestamp) % 1800 != 0 else (stop_timestamp // 1800) * 1800
-
-    dates = []
-    for timestamp in range(start_timestamp, stop_timestamp, 1800):
-        dates.append(datetime.fromtimestamp(timestamp))
-
-    return dates
+    if res.status_code == 200:
+        return jsonify({"message": "Record event created"}), 201
+    else:
+        return jsonify({"message": f"Server error: {res.text}"}), 500
 
 
 @api.route('/tracking/<room_name>', methods=['POST'])
