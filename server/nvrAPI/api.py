@@ -563,21 +563,12 @@ def create_montage_event(current_user, room_name):
     if start_timestamp >= end_timestamp:
         return jsonify({"error": "Неверный промежуток времени"}), 400
 
-    folders = get_folders_by_name(date)
-
-    for folder_id, folder_parent_id in folders.items():
-        if folder_parent_id == room.drive.split('/')[-1]:
-            break
-    else:
-        folder_id = room.drive.split('/')[-1]
-
     res = requests.post(f'{MERGE_URL}/merge',
                         json={'event_name': event_name,
                               'room_name': room.name,
                               'date': date,
                               'start_time': start_time,
-                              'end_time': end_time,
-                              'folder_id': folder_id})
+                              'end_time': end_time})
 
     if res.status_code == 200:
         return jsonify({"message": "Record event created"}), 201
