@@ -568,7 +568,8 @@ def create_montage_event(current_user, room_name):
                               'room_name': room.name,
                               'date': date,
                               'start_time': start_time,
-                              'end_time': end_time})
+                              'end_time': end_time,
+                              'user_email': current_user.email})
 
     if res.status_code == 200:
         return jsonify({"message": "Record event created"}), 201
