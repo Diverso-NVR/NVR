@@ -523,7 +523,7 @@ def manage_source(current_user, ip):
         return jsonify({'message': 'Updated'}), 200
 
 # MERGER
-@app.route('/calendar-notifications/', methods=["POST"])
+@api.route('/calendar-notifications/', methods=["POST"])
 def gcalendar_webhook():
     calendar_id = request.headers['X-Goog-Resource-Uri'].split('/')[6]
 
@@ -571,7 +571,7 @@ def gcalendar_webhook():
     return jsonify({"message": f"Room {room.name}: calendar events patched"}), 200
 
 
-@app.route('/montage-event/<room_name>', methods=["POST"])
+@api.route('/montage-event/<room_name>', methods=["POST"])
 @auth_required
 def create_montage_event(current_user, room_name):
     json = request.get_json()
