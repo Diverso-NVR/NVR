@@ -566,7 +566,7 @@ def gcalendar_webhook():
     db.session.commit()
     db.session.close()
 
-    return jsonify({"message": f"Room {room.name}: calendar events patched"}), 200
+    return jsonify({"message": "Room calendar events patched"}), 200
 
 
 @api.route('/montage-event/<room_name>', methods=["POST"])
