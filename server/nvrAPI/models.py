@@ -49,7 +49,7 @@ class Record(db.Model):
     user_email = db.Column(db.String(200), nullable=False)
     room_name = db.Column(db.String(200), nullable=False)
 
-    # done = db.Column(db.Boolean, nullable=False, default=False)
+    done = db.Column(db.Boolean, nullable=False, default=False)
     # drive_file_url = db.Column(db.String(300))
 
     # room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
