@@ -472,7 +472,7 @@ def manage_source(current_user, ip):
         room_name = data.get('room_name')
         if not room_name:
             return jsonify({"error": "room_name required"}), 400
-        room = Room.query.filter_by(name=str(room_name))
+        room = Room.query.filter_by(name=str(room_name)).first()
         if not room:
             return jsonify({"error": "No room found with provided room_name"}), 400
 
@@ -529,7 +529,7 @@ def gcalendar_webhook():
 
     events = get_events(calendar_id)
 
-    room = Room.query.filter_by(calendar == calendar_id).first()
+    room = Room.query.filter_by(calendar=calendar_id).first()
     records = Record.query.filter(
         Record.room_name == room.name, Record.event_id != None).all()
     calendar_events = set(events.keys())
@@ -540,8 +540,7 @@ def gcalendar_webhook():
     events_to_check = calendar_events & db_events
 
     for event_id in deleted_events:
-        record = Record.query.filter(
-            event_id == event_id).first()
+        record = Record.query.filter_by(event_id=event_id).first()
         db.session.delete(record)
 
     for event_id in new_events:
@@ -561,8 +560,7 @@ def gcalendar_webhook():
         if date.today().isoformat() != event['updated'].split('T')[0]:
             continue
 
-        record = Record.query.filter(
-            event_id == event_id).first()
+        record = Record.query.filter_by(event_id=event_id).first()
         record.update_from_calendar(**event, room_name=room.name)
 
     db.session.commit()
