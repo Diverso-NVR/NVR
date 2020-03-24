@@ -603,7 +603,7 @@ def create_montage_event(current_user, room_name):
     if start_timestamp >= end_timestamp:
         return jsonify({"error": "Неверный промежуток времени"}), 400
 
-    record = Record(event_name=event_name, room_name=room_name, date=date,
+    record = Record(event_name=event_name, room_name=room.name, date=date,
                     start_time=start_time, end_time=end_time, user_email=current_user.email)
 
     db.session.add(record)

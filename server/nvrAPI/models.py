@@ -25,25 +25,36 @@ def nvr_db_context(func):
     return wrapper
 
 
-class UserRecords(db.Model):
+class UserRecord(db.Model):
     __tablename__ = 'user_records'
 
-    id = db.Column(db.Integer, primary_key=True)
-    drive_file_url = db.Column(db.String(300), nullable=False)
-    user_email = db.Column(db.String(100), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    record_id = db.Column(db.Integer, db.ForeignKey('records.id'))
+
+    # user = db.relationship("User", back_populates="records")
+    # record = db.relationship("Record", back_populates="users")
 
 
 class Record(db.Model):
     __tablename__ = 'records'
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    event_name = db.Column(db.String(200))
-    room_name = db.Column(db.String(200), nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.String(100), nullable=False)
     start_time = db.Column(db.String(100), nullable=False)
     end_time = db.Column(db.String(100), nullable=False)
-    user_email = db.Column(db.String(100), nullable=False)
+    event_name = db.Column(db.String(200))
     event_id = db.Column(db.String(200))
+
+    # Will be deleted later
+    user_email = db.Column(db.String(200), nullable=False)
+    room_name = db.Column(db.String(200), nullable=False)
+
+    # done = db.Column(db.Boolean, nullable=False, default=False)
+    # drive_file_url = db.Column(db.String(300))
+
+    # room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
+    # room = db.relationship("Room", back_populates='records')
+    # users = db.relationship("UserRecord", back_populates="record")
 
     def update_from_calendar(self, **kwargs):
         self.event_id = kwargs.get('id')
@@ -72,8 +83,9 @@ class User(db.Model):
     role = db.Column(db.String(50), default='user')
     email_verified = db.Column(db.Boolean, default=False)
     access = db.Column(db.Boolean, default=False)
-
     api_key = db.Column(db.String(255), unique=True)
+
+    # records = db.relationship("UserRecord", back_populates="user")
 
     def __init__(self, email, password):
         self.email = email
@@ -148,6 +160,8 @@ class Room(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     tracking_state = db.Column(db.Boolean, default=False)
+
+    # records = db.relationship('Record', back_populates='room')
     sources = db.relationship('Source', backref='room', lazy=False)
     channel = db.relationship("Channel", backref="room", uselist=False)
 
@@ -187,16 +201,6 @@ class Source(db.Model):
     merge = db.Column(db.String(200))
     tracking = db.Column(db.String(200))
     room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
-
-    def __init__(self, **kwargs):
-        self.name = kwargs.get('name')
-        self.ip = kwargs.get('ip')
-        self.port = kwargs.get('port')
-        self.rtsp = kwargs.get('rtsp')
-        self.audio = kwargs.get('audio')
-        self.merge = kwargs.get('merge')
-        self.tracking = kwargs.get('tracking')
-        self.room_id = kwargs.get('room_id')
 
     def update(self, **kwargs):
         self.name = kwargs.get('name')
