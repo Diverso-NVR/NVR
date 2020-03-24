@@ -25,14 +25,14 @@ def nvr_db_context(func):
     return wrapper
 
 
-class UserRecord(db.Model):
-    __tablename__ = 'user_records'
-
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    record_id = db.Column(db.Integer, db.ForeignKey('records.id'))
-
-    # user = db.relationship("User", back_populates="records")
-    # record = db.relationship("Record", back_populates="users")
+#class UserRecord(db.Model):
+#    __tablename__ = 'user_records'
+#
+#    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+#    record_id = db.Column(db.Integer, db.ForeignKey('records.id'))
+#
+#    user = db.relationship("User", back_populates="records")
+#    record = db.relationship("Record", back_populates="users")
 
 
 class Record(db.Model):
