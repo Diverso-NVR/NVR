@@ -205,9 +205,9 @@ const actions = {
       commit("switchLoading");
     }
   },
-  async createMontageEvent({ commit }, payload) {
+  createMontageEvent({ commit }, payload) {
     try {
-      await createMontageEvent(payload, state.jwt.token);
+      createMontageEvent(payload, state.jwt.token);
       commit("setMessage", "Событие создано");
     } catch (error) {
       commit("setError", error);

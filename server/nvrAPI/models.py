@@ -25,6 +25,44 @@ def nvr_db_context(func):
     return wrapper
 
 
+class UserRecords(db.Model):
+    __tablename__ = 'user_records'
+
+    id = db.Column(db.Integer, primary_key=True)
+    drive_file_url = db.Column(db.String(300), nullable=False)
+    user_email = db.Column(db.String(100), nullable=False)
+
+
+class Record(db.Model):
+    __tablename__ = 'records'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    event_name = db.Column(db.String(200))
+    room_name = db.Column(db.String(200), nullable=False)
+    date = db.Column(db.String(100), nullable=False)
+    start_time = db.Column(db.String(100), nullable=False)
+    end_time = db.Column(db.String(100), nullable=False)
+    user_email = db.Column(db.String(100), nullable=False)
+    event_id = db.Column(db.String(200))
+
+    def update_from_calendar(self, **kwargs):
+        self.event_id = kwargs.get('id')
+        self.event_name = kwargs.get('summary')
+        self.date = kwargs['start']['dateTime'].split('T')[0]
+        self.start_time = kwargs['start']['dateTime'].split('T')[1][:5]
+        self.end_time = kwargs['end']['dateTime'].split('T')[1][:5]
+        self.room_name = kwargs['room_name']
+        self.user_email = kwargs['creator']['email']
+
+
+class Channel(db.Model):
+    __tablename__ = 'channels'
+
+    id = db.Column(db.String(100), primary_key=True)
+    resource_id = db.Column(db.String(100))
+    room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
+
+
 class User(db.Model):
     __tablename__ = 'users'
 
@@ -111,6 +149,8 @@ class Room(db.Model):
     name = db.Column(db.String(100), nullable=False)
     tracking_state = db.Column(db.Boolean, default=False)
     sources = db.relationship('Source', backref='room', lazy=False)
+    channel = db.relationship("Channel", backref="room", uselist=False)
+
     drive = db.Column(db.String(200))
     calendar = db.Column(db.String(200))
 
@@ -178,10 +218,3 @@ class Source(db.Model):
                     merge=self.audio,
                     tracking=self.tracking,
                     room_id=self.room_id)
-
-
-class Stream(db.Model):
-    __tablename__ = 'streams'
-
-    url = db.Column(db.String(250), primary_key=True)
-    pid = db.Column(db.Integer, unique=True, nullable=False)

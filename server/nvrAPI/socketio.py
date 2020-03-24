@@ -7,7 +7,7 @@ from flask_socketio import emit, Namespace
 
 from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions
 from driveAPI.driveSettings import create_folder
-from .models import db, Room, Source, User, Stream, nvr_db_context
+from .models import db, Room, Source, User, nvr_db_context
 
 TRACKING_URL = os.environ.get('TRACKING_URL')
 STREAMING_URL = os.environ.get('STREAMING_URL')
@@ -156,23 +156,12 @@ class NvrNamespace(Namespace):
             self.emit_error("Ошибка при запуске трансляции")
             return
 
-        response_json = response.json()
-
-        stream = Stream(url=response_json['yt_addr'], pid=response_json['pid'])
-        db.session.add(stream)
-        db.session.commit()
-
         emit('streaming_start', {'name': room_name}, broadcast=True)
 
     def on_streaming_stop(self, msg_json):
         stream_url = msg_json['ytUrl']
         room_name = msg_json['roomName']
 
-        stream = Stream.query.filter_by(url=stream_url).first()
-
-        requests.post(f'{STREAMING_URL}/stop/{stream.pid}', timeout=2)
-
-        db.session.delete(stream)
-        db.session.commit()
+        requests.post(f'{STREAMING_URL}/stop/{stream_url}', timeout=2)
 
         emit('streaming_stop', {'name': room_name}, broadcast=True)

@@ -1,6 +1,6 @@
 import os
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from functools import wraps
 from threading import Thread
 from pathlib import Path
@@ -13,17 +13,16 @@ from flask_socketio import SocketIO
 from werkzeug.utils import secure_filename
 
 
-from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions, create_event_
+from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions, create_event_, get_events
 from driveAPI.driveSettings import create_folder, get_folders_by_name, upload
 from .email import send_verify_email, send_access_request_email
-from .models import db, Room, Source, User, Stream, nvr_db_context
+from .models import db, Room, Source, User, Record, nvr_db_context
 
 api = Blueprint('api', __name__)
 
 TRACKING_URL = os.environ.get('TRACKING_URL')
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
 STEAMING_URL = os.environ.get('STREAMING_URL')
-MERGE_URL = os.environ.get('MERGE_URL', 'http://172.18.130.40:8080')
 VIDS_PATH = str(Path.home()) + '/vids/'
 
 socketio = SocketIO(message_queue='redis://',
@@ -328,13 +327,6 @@ def create_drive_and_calendar(current_user, room_name):
     return jsonify({"drive": drive, "calendar": calendar}), 201
 
 
-@api.route('/calendar-notifications/', methods=['POST'])
-def calendar_webhook():
-    calendar_id = request.headers['X-Goog-Resource-Uri'].split('/')[6]
-    res = requests.post(f'{MERGE_URL}/gcalendar-webhook',
-                        json={'calendar_id': calendar_id})
-    return "", 200
-
 # ROOMS
 @api.route('/rooms/<room_name>', methods=['POST'])
 @auth_required
@@ -530,27 +522,75 @@ def manage_source(current_user, ip):
 
         return jsonify({'message': 'Updated'}), 200
 
+# MERGER
+@app.route('/calendar-notifications/', methods=["POST"])
+def gcalendar_webhook():
+    calendar_id = request.headers['X-Goog-Resource-Uri'].split('/')[6]
 
-@api.route('/montage-event/<room_name>', methods=['POST'])
+    events = get_events(calendar_id)
+
+    room = Room.query.filter_by(calendar == calendar_id).first()
+    records = Record.query.filter(
+        Record.room_name == room.name, Record.event_id != None).all()
+    calendar_events = set(events.keys())
+    db_events = {record.event_id for record in records}
+
+    new_events = calendar_events - db_events
+    deleted_events = db_events - calendar_events
+    events_to_check = calendar_events & db_events
+
+    for event_id in deleted_events:
+        record = Record.query.filter(
+            event_id == event_id).first()
+        db.session.delete(record)
+
+    for event_id in new_events:
+        event = events[event_id]
+        start_date = event['start']['dateTime'].split('T')[0]
+        end_date = event['end']['dateTime'].split('T')[0]
+
+        if start_date != end_date:
+            continue
+
+        new_record = Record()
+        new_record.update_from_calendar(**event, room_name=room.name)
+        db.session.add(new_record)
+
+    for event_id in events_to_check:
+        event = events[event_id]
+        if date.today().isoformat() != event['updated'].split('T')[0]:
+            continue
+
+        record = Record.query.filter(
+            event_id == event_id).first()
+        record.update_from_calendar(**event, room_name=room.name)
+
+    db.session.commit()
+    db.session.close()
+
+    return jsonify({"message": f"Room {room.name}: calendar events patched"}), 200
+
+
+@app.route('/montage-event/<room_name>', methods=["POST"])
 @auth_required
-@json_data_required
 def create_montage_event(current_user, room_name):
-    data = request.get_json()
-    event_name = data.get('event_name')
-    date = data.get('date')
-    start_time = data.get('start_time')
-    end_time = data.get('end_time')
+    json = request.get_json()
+
+    event_name = json.get("event_name")
+    date = json.get("date")
+    start_time = json.get("start_time")
+    end_time = json.get("end_time")
 
     room = Room.query.filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": "No room found with given room_name"}), 400
 
     if not date:
-        return jsonify({"error": "date required"}), 400
+        return jsonify({"error": "'date' required"}), 400
     if not start_time:
-        return jsonify({"error": "start_time required"}), 400
+        return jsonify({"error": "'start_time' required"}), 400
     if not end_time:
-        return jsonify({"error": "end_time required"}), 400
+        return jsonify({"error": "'end_time' required"}), 400
 
     date_time_start = datetime.strptime(
         f'{date} {start_time}', '%Y-%m-%d %H:%M')
@@ -563,18 +603,14 @@ def create_montage_event(current_user, room_name):
     if start_timestamp >= end_timestamp:
         return jsonify({"error": "Неверный промежуток времени"}), 400
 
-    res = requests.post(f'{MERGE_URL}/merge',
-                        json={'event_name': event_name,
-                              'room_name': room.name,
-                              'date': date,
-                              'start_time': start_time,
-                              'end_time': end_time,
-                              'user_email': current_user.email})
+    record = Record(event_name=event_name, room_name=room_name, date=date,
+                    start_time=start_time, end_time=end_time, user_email=current_user.email)
 
-    if res.status_code == 200:
-        return jsonify({"message": "Record event created"}), 201
-    else:
-        return jsonify({"message": f"Server error: {res.text}"}), 500
+    db.session.add(record)
+    db.session.commit()
+    db.session.close()
+
+    return jsonify({'message': f"Merge event '{event_name}' added to queue"}), 201
 
 
 @api.route('/tracking/<room_name>', methods=['POST'])
@@ -646,12 +682,6 @@ def streaming_start(current_user):
     if response.status_code != 200:
         return jsonify({"error": "Unable to start stream"}), 500
 
-    response_json = response.json()
-
-    stream = Stream(url=response_json['yt_addr'], pid=response_json['pid'])
-    db.session.add(stream)
-    db.session.commit()
-
     return jsonify({"message": "Streaming started"}), 200
 
 
@@ -666,15 +696,10 @@ def streaming_stop(current_user):
     if not stream_url:
         return jsonify({"error": "Stream url not provided"}), 400
 
-    stream = Stream.query.get(url=stream_url)
+    response = requests.post(f'{STEAMING_URL}/stop/{stream_url}', timeout=2)
 
-    if not stream:
-        return jsonify({"error": "No stream found with given url"}), 400
-
-    requests.post(f'{STEAMING_URL}/stop/{stream.pid}', timeout=2)
-
-    db.session.delete(stream)
-    db.session.commit()
+    if response.status_code != 200:
+        return jsonify({"error": "Ошибка при остановке трансляции"}), 500
 
     return jsonify({"message": "Streaming stopped"}), 200
 
