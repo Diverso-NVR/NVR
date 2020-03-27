@@ -531,7 +531,9 @@ def gcalendar_webhook():
 
     room = Room.query.filter_by(calendar=calendar_id).first()
     records = Record.query.filter(
-        Record.room_name == room.name, Record.event_id != None).all()
+        Record.room_name == room.name, 
+        Record.event_id != None, 
+        Record.done == False).all()
     calendar_events = set(events.keys())
     db_events = {record.event_id for record in records}
 
