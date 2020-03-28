@@ -7,6 +7,8 @@ monkey.patch_all()
 from flask import Flask, request
 from flask_cors import CORS
 from flask_socketio import SocketIO
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
@@ -20,6 +22,16 @@ def create_app(app_name="NVR_API"):
     """
     app = Flask(app_name)
     app.config.from_object('nvrAPI.config.BaseConfig')
+
+    limiter = Limiter(
+        app,
+        key_func=get_remote_address,
+        default_limits=["100/minute", "10/second"]
+    )
+
+    @limiter.request_filter
+    def header_whitelist():
+        return request.headers.get("X-Goog-Resource-Uri") is not None
 
     cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 

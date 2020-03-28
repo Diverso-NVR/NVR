@@ -3,7 +3,7 @@
     <v-container fluid>
       <v-layout align-center justify-center>
         <v-flex xs12 sm12 md10>
-          <template v-if="!api_key">
+          <template v-if="!user.api_key">
             <v-card>
               <v-card-text>
                 <v-layout align-center mb-3>
@@ -39,14 +39,14 @@
               <v-card-title primary-title>
                 <h3 class="title mb-0">
                   Ваш ключ API:
-                  <b class="subheading">{{ api_key }}</b>
+                  <b class="subheading">{{ user.api_key }}</b>
                 </h3>
               </v-card-title>
 
               <v-card-text>
                 <div class="subheading">
                   <div>API url: {{ API_URL }}</div>
-                  <div>Добавьте в headers вашего запроса: {"key": "{{ api_key }}"}</div>
+                  <div>Добавьте в headers вашего запроса: {"key": "{{ user.api_key }}"}</div>
                 </div>
               </v-card-text>
 
@@ -110,7 +110,6 @@ export default {
   data() {
     return {
       panel: [],
-      api_key: this.$store.getters.user.api_key,
       API_URL: process.env.NVR_URL + "/api",
       routes: [
         {
@@ -606,23 +605,23 @@ export default {
     },
     loader() {
       return this.$store.getters.loading;
+    },
+    user() {
+      return this.$store.getters.user;
     }
   },
   methods: {
-    async createKey() {
-      let res = await this.$store.dispatch("createKey");
-      this.api_key = res.data.api_key;
+    createKey() {
+      this.$store.dispatch("createKey");
     },
-    async updateKey() {
+    updateKey() {
       if (confirm("Вы уверены, что хотите обновить ключ API?")) {
-        let res = await this.$store.dispatch("updateKey");
-        this.api_key = res.data.api_key;
+        this.$store.dispatch("updateKey");
       }
     },
-    async deleteKey() {
+    deleteKey() {
       if (confirm("Вы уверены, что хотите удалить ключ API?")) {
-        await this.$store.dispatch("deleteKey");
-        this.api_key = "";
+        this.$store.dispatch("deleteKey");
       }
     },
     all() {
@@ -631,6 +630,9 @@ export default {
           ? [...Array(this.routes.length).keys()].map(_ => true)
           : [];
     }
+  },
+  beforeCreate() {
+    this.$store.dispatch("getKey");
   }
 };
 </script>

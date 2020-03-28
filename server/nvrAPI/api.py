@@ -156,7 +156,7 @@ def login():
                         'authenticated': False}), 401
 
     token = jwt.encode({
-        'sub': {'email': user.email, 'role': user.role, 'api_key': user.api_key},
+        'sub': {'email': user.email, 'role': user.role},
         'iat': datetime.utcnow(),
         'exp': datetime.utcnow() + timedelta(weeks=12)},
         current_app.config['SECRET_KEY'])

@@ -8,6 +8,7 @@ import {
   createAPIKey,
   updateAPIKey,
   deleteAPIKey,
+  getAPIKey,
   getRooms,
   createMontageEvent
 } from "@/api";
@@ -88,7 +89,7 @@ const mutations = {
     localStorage.token = "";
   },
   setKey(state, payload) {
-    state.user.api_key = payload.api_key;
+    state.user.api_key = payload.key;
   },
   setRooms(state, payload) {
     state.rooms = payload;
@@ -231,7 +232,6 @@ const actions = {
       const body = JSON.parse(atob(tokenParts[1]));
       state.user.email = body.sub.email;
       state.user.role = body.sub.role;
-      state.user.api_key = body.sub.api_key;
       return body.sub.role;
     } catch (error) {
       commit("setError", error);
@@ -249,7 +249,6 @@ const actions = {
       const body = JSON.parse(atob(tokenParts[1]));
       state.user.email = body.sub.email;
       state.user.role = body.sub.role;
-      state.user.api_key = body.sub.api_key;
       return body.sub.role;
     } catch (error) {
       commit("setError", error);
@@ -276,8 +275,7 @@ const actions = {
     try {
       commit("switchLoading");
       let res = await createAPIKey(state.user.email, state.jwt.token);
-      commit("setKey", res.data);
-      return res;
+      await commit("setKey", res.data);
     } catch (error) {
       commit("setError", error);
     } finally {
@@ -288,8 +286,7 @@ const actions = {
     try {
       commit("switchLoading");
       let res = await updateAPIKey(state.user.email, state.jwt.token);
-      commit("setKey", res.data);
-      return res;
+      await commit("setKey", res.data);
     } catch (error) {
       commit("setError", error);
     } finally {
@@ -300,11 +297,19 @@ const actions = {
     try {
       commit("switchLoading");
       let res = await deleteAPIKey(state.user.email, state.jwt.token);
-      commit("setKey", res.data);
+      await commit("setKey", { key: null });
     } catch (error) {
       commit("setError", error);
     } finally {
       commit("switchLoading");
+    }
+  },
+  async getKey({ commit, state }) {
+    try {
+      let res = await getAPIKey(state.user.email, state.jwt.token);
+      await commit("setKey", res.data);
+    } catch (error) {
+      commit("setError", error);
     }
   }
 };

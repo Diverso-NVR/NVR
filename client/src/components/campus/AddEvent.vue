@@ -6,7 +6,12 @@
         <v-form ref="form" validation v-model="valid">
           <v-layout wrap>
             <v-flex xs12 sm6 md8>
-              <v-text-field v-model="eventName" label="Название" prepend-icon="label"></v-text-field>
+              <v-text-field
+                v-model="eventName"
+                label="Название"
+                :rules="nameRules"
+                prepend-icon="label"
+              ></v-text-field>
               <v-menu
                 v-model="dateMenu"
                 :close-on-content-click="false"
@@ -114,6 +119,11 @@ export default {
       modal: false,
       valid: false,
       fieldsRules: [v => !!v || "Обязательное поле"],
+      nameRules: [
+        v =>
+          /^[^_\\\/!@#$%^&*]([a-zA-Z0-9 А-Яа-я()\-])*$/.test(v) ||
+          "Некорректное название"
+      ],
       eventName: "",
       date: new Date().toISOString().substr(0, 10),
       dateMenu: false,

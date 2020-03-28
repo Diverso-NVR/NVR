@@ -43,6 +43,12 @@ export function deleteAPIKey(email, token) {
   });
 }
 
+export function getAPIKey(email, token) {
+  return axios.get(`${API_URL}/api-key/${email}`, {
+    headers: { Token: token }
+  });
+}
+
 //rooms
 export function getRooms(token) {
   return axios.get(`${API_URL}/rooms/`, {
