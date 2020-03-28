@@ -472,7 +472,8 @@ export default {
     "start_time": "string",
     "end_time": "string",
     "date": "string",
-    "event_name": "string"
+    "event_name": "string",
+    "user_email": "string"
   }`,
           responses: [
             {

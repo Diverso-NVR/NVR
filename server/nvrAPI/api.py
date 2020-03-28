@@ -576,6 +576,7 @@ def gcalendar_webhook():
 
 @api.route('/montage-event/<room_name>', methods=["POST"])
 @auth_required
+@json_data_required
 def create_montage_event(current_user, room_name):
     json = request.get_json()
 
@@ -583,6 +584,7 @@ def create_montage_event(current_user, room_name):
     date = json.get("date")
     start_time = json.get("start_time")
     end_time = json.get("end_time")
+    user_email = json.get("user_email", current_user.email)
 
     room = Room.query.filter_by(name=str(room_name)).first()
     if not room:
@@ -607,7 +609,7 @@ def create_montage_event(current_user, room_name):
         return jsonify({"error": "Неверный промежуток времени"}), 400
 
     record = Record(event_name=event_name, room_name=room.name, date=date,
-                    start_time=start_time, end_time=end_time, user_email=current_user.email)
+                    start_time=start_time, end_time=end_time, user_email=user_email)
 
     db.session.add(record)
     db.session.commit()
