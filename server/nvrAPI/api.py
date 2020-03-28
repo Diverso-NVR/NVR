@@ -44,7 +44,7 @@ def auth_required(f):
 
     @wraps(f)
     def _verify(*args, **kwargs):
-        auth_headers = request.headers.get('Authorization', '').split()
+        token = request.headers.get('Token', '')
         api_key = request.headers.get('key', '')
 
         invalid_msg = {
@@ -56,9 +56,8 @@ def auth_required(f):
             'autheticated': False
         }
 
-        if len(auth_headers) == 2:
+        if token:
             try:
-                token = auth_headers[1]
                 data = jwt.decode(token, current_app.config['SECRET_KEY'])
                 user = User.query.filter_by(email=data['sub']['email']).first()
                 if not user:
@@ -531,8 +530,8 @@ def gcalendar_webhook():
 
     room = Room.query.filter_by(calendar=calendar_id).first()
     records = Record.query.filter(
-        Record.room_name == room.name, 
-        Record.event_id != None, 
+        Record.room_name == room.name,
+        Record.event_id != None,
         Record.done == False).all()
     calendar_events = set(events.keys())
     db_events = {record.event_id for record in records}
