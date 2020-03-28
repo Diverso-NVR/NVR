@@ -50,6 +50,7 @@ class Record(db.Model):
     room_name = db.Column(db.String(200), nullable=False)
 
     done = db.Column(db.Boolean, default=False)
+    processing = db.Column(db.Boolean, default=False)
     # drive_file_url = db.Column(db.String(300))
 
     # room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))

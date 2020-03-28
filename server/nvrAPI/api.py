@@ -5,13 +5,11 @@ from functools import wraps
 from threading import Thread
 from pathlib import Path
 
-
 import jwt
 import requests
 from flask import Blueprint, jsonify, request, current_app
 from flask_socketio import SocketIO
 from werkzeug.utils import secure_filename
-
 
 from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions, create_event_, get_events
 from driveAPI.driveSettings import create_folder, get_folders_by_name, upload
@@ -65,7 +63,7 @@ def auth_required(f):
                 return f(user, *args, **kwargs)
             except jwt.ExpiredSignatureError:
                 return jsonify(expired_msg), 401
-            except (jwt.InvalidTokenError):
+            except jwt.InvalidTokenError:
                 return jsonify(invalid_msg), 401
             except Exception as e:
                 print(e)
@@ -521,6 +519,7 @@ def manage_source(current_user, ip):
 
         return jsonify({'message': 'Updated'}), 200
 
+
 # MERGER
 @api.route('/calendar-notifications/', methods=["POST"])
 def gcalendar_webhook():
@@ -531,8 +530,7 @@ def gcalendar_webhook():
     room = Room.query.filter_by(calendar=calendar_id).first()
     records = Record.query.filter(
         Record.room_name == room.name,
-        Record.event_id != None,
-        Record.done == False).all()
+        Record.event_id != None).all()
     calendar_events = set(events.keys())
     db_events = {record.event_id for record in records}
 
@@ -542,6 +540,9 @@ def gcalendar_webhook():
 
     for event_id in deleted_events:
         record = Record.query.filter_by(event_id=event_id).first()
+        if record.done or record.processing:
+            continue
+
         db.session.delete(record)
 
     for event_id in new_events:
@@ -562,6 +563,9 @@ def gcalendar_webhook():
             continue
 
         record = Record.query.filter_by(event_id=event_id).first()
+        if record.done or record.processing:
+            continue
+
         record.update_from_calendar(**event, room_name=room.name)
 
     db.session.commit()

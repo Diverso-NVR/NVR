@@ -2,7 +2,6 @@
 - creates a Flask app instance and registers the database object
 """
 from gevent import monkey
-
 monkey.patch_all()
 
 from flask import Flask, request

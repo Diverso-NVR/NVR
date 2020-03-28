@@ -25,7 +25,7 @@ def shell_ctx():
                 db=db,
                 Room=Room,
                 Source=Source,
-                Stream=Stream,
+                Record=Record,
                )
 
 
