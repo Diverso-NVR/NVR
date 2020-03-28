@@ -15,16 +15,16 @@
           <tr v-if="!isMobile">
             <td class="text-xs-center subheading">{{ props.item.name }}</td>
 
-            <td class="text-xs-center">
-              <v-select dense class="caption" :items="props.item.ips" v-model="props.item.defCod"></v-select>
+            <td class="text-xs-center ip">
+              <v-select dense class="body-1" :items="props.item.ips" v-model="props.item.defCod"></v-select>
             </td>
 
-            <td class="text-xs-center">
-              <v-select dense class="caption" :items="props.item.ips" v-model="props.item.defCam"></v-select>
+            <td class="text-xs-center ip">
+              <v-select dense class="body-1" :items="props.item.ips" v-model="props.item.defCam"></v-select>
             </td>
 
             <td class="text-xs-center url">
-              <v-text-field class="caption" v-model="props.item.url"></v-text-field>
+              <v-text-field class="body-1" v-model="props.item.url"></v-text-field>
             </td>
 
             <td class="text-xs-center">
@@ -45,7 +45,7 @@
                 <li class="flex-item subheading key-elems" data-label="Источник звука">
                   <v-select
                     dense
-                    class="caption"
+                    class="body-1 ml-8"
                     :items="props.item.ips"
                     v-model="props.item.defCod"
                   ></v-select>
@@ -53,14 +53,14 @@
                 <li class="flex-item subheading key-elems" data-label="Камера">
                   <v-select
                     dense
-                    class="caption"
+                    class="body-1 ml-8"
                     :items="props.item.ips"
                     v-model="props.item.defCam"
                   ></v-select>
                 </li>
 
                 <li class="flex-item subheading key-elems" data-label="Ссылка">
-                  <v-text-field class="caption" v-model="props.item.url"></v-text-field>
+                  <v-text-field class="body-1" v-model="props.item.url"></v-text-field>
                 </li>
 
                 <li class="flex-item subheading key-elems" data-label="Стрим">
@@ -159,7 +159,10 @@ export default {
 
 <style>
 .url {
-  width: 120%;
+  width: 30%;
+}
+.ip {
+  width: 20%;
 }
 .v-datatable thead th.column.sortable {
   padding-left: 8px;
@@ -201,6 +204,9 @@ export default {
   .mobile .theme--light.v-table tbody tr:hover:not(.v-datatable__expand-row) {
     background: transparent;
   }
+  .v-select__selection.v-select__selection--comma {
+    margin-left: 30px;
+  }
 }
 .flex-content {
   padding: 0;
@@ -220,5 +226,9 @@ export default {
 }
 .key-elems {
   width: 100%;
+}
+.v-select__selection {
+  width: 100%;
+  justify-content: center;
 }
 </style>

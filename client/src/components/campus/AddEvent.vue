@@ -1,6 +1,6 @@
 <template>
   <v-dialog v-model="modal" max-width="600px" :dark="isDarkMode">
-    <v-btn depressed color="primary" slot="activator">Создать</v-btn>
+    <v-btn depressed color="primary" slot="activator">Запросить</v-btn>
     <v-card>
       <v-card-text>
         <v-form ref="form" validation v-model="valid">
