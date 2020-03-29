@@ -16,10 +16,15 @@
                     NVR, такими как:
                   </p>
                   <ul>
+                    <li>Авторизовываться через NVR</li>
                     <li>Создать или удалить комнату</li>
-                    <li>Изменить список камер/кодеров комнаты</li>
-                    <li>Начать или остановить запись</li>
-                    <li>Выбрать источник звука для комнаты</li>
+                    <li>Получить данные комнат</li>
+                    <li>Конфигурировать настройки комнаты</li>
+                    <li>Запросить запись</li>
+                    <li>Включить/Отключить трекинг</li>
+                    <li>Включить/Отключить автовозрат камер на default позиции</li>
+                    <li>Запускать/Останавливать стриминг в YouTube</li>
+                    <li>Управлять своим API-ключом</li>
                   </ul>
                 </div>
               </v-card-text>
@@ -112,6 +117,41 @@ export default {
       panel: [],
       API_URL: process.env.NVR_URL + "/api",
       routes: [
+        {
+          name: "/login",
+          method: "POST",
+          doc: `Авторизация через NVR`,
+          request: `
+  {
+    "email": "string",
+    "password": "string"
+  }`,
+          responses: [
+            {
+              code: 202,
+              body: `
+  {"token": "string"}`
+            },
+            {
+              code: 401,
+              body: `
+  {"error": "Неверные данные", "authenticated": false}`
+            },
+            {
+              code: 401,
+              body: `
+  {"error": "Почта не подтверждена", "authenticated": false}`
+            },
+            {
+              code: 401,
+              body: `
+  {
+    "error": "Администратор ещё не открыл доступ для этого аккаунта",
+    "authenticated": false
+  }`
+            }
+          ]
+        },
         {
           name: "/rooms/",
           method: "GET",
@@ -360,14 +400,13 @@ export default {
           ]
         },
         {
-          name: "/streaming-start",
+          name: "/streaming-start/{room_name}",
           method: "POST",
-          doc: `Запускает стрим по ссылке yt_url`,
+          doc: `Запускает стрим`,
           request: `
   {
     "sound_ip": "string",
-    "camera_ip": "string",
-    "yt_url": "string"
+    "camera_ip": "string"
   }`,
           responses: [
             {
@@ -385,13 +424,9 @@ export default {
           ]
         },
         {
-          name: "/streaming-stop",
+          name: "/streaming-stop/{room_name}",
           method: "POST",
-          doc: `Останавливает стрим по ссылке yt_url`,
-          request: `
-  {
-    "yt_url": "string"
-  }`,
+          doc: `Останавливает стрим`,
           responses: [
             {
               code: 200,
@@ -510,41 +545,6 @@ export default {
               code: 500,
               body: `
   {"error": "string"}`
-            }
-          ]
-        },
-        {
-          name: "/login",
-          method: "POST",
-          doc: `Авторизация через NVR`,
-          request: `
-  {
-    "email": "string",
-    "password": "string"
-  }`,
-          responses: [
-            {
-              code: 202,
-              body: `
-  {"token": "string"}`
-            },
-            {
-              code: 401,
-              body: `
-  {"error": "Неверные данные", "authenticated": false}`
-            },
-            {
-              code: 401,
-              body: `
-  {"error": "Почта не подтверждена", "authenticated": false}`
-            },
-            {
-              code: 401,
-              body: `
-  {
-    "error": "Администратор ещё не открыл доступ для этого аккаунта",
-    "authenticated": false
-  }`
             }
           ]
         },
