@@ -143,25 +143,41 @@ class NvrNamespace(Namespace):
     def on_streaming_start(self, msg_json):
         sound_ip = msg_json['soundIp']
         camera_ip = msg_json['cameraIp']
-        yt_url = msg_json['ytUrl']
         room_name = msg_json['roomName']
 
-        response = requests.post(f'{STREAMING_URL}/start', timeout=2, json={
-            "image_addr": camera_ip,
-            "sound_addr": sound_ip,
-            "yt_addr": yt_url
-        })
+        room = Room.query.get(name=room_name)
+        sound_source = Source.query.get(ip=sound_ip)
+        camera_source = Source.query.get(ip=camera_ip)
 
-        if response.status_code != 200:
-            self.emit_error("Ошибка при запуске трансляции")
+        try:
+            response = requests.post(f"{STREAMING_URL}/start/{room_name}", timeout=2, json={
+                "image_addr": sound_source.rtsp,
+                "sound_addr": camera_source.rtsp
+            })
+            url = response.json()['url']
+            room.stream_url = url
+            db.session.commit()
+        except:
+            self.emit_error(f"Ошибка при запуске стрима")
             return
 
-        emit('streaming_start', {'name': room_name}, broadcast=True)
+        emit('streaming_start', {
+             'name': room_name, 'stream_url': url}, broadcast=True)
 
     def on_streaming_stop(self, msg_json):
-        stream_url = msg_json['ytUrl']
         room_name = msg_json['roomName']
 
-        requests.post(f'{STREAMING_URL}/stop/{stream_url}', timeout=2)
+        room = Room.query.get(name=room_name)
 
-        emit('streaming_stop', {'name': room_name}, broadcast=True)
+        try:
+            response = requests.post(
+                f'{STREAMING_URL}/stop/{room_name}', timeout=2)
+        except:
+            self.emit_error(f"Ошибка при остановке стрима")
+            return
+        finally:
+            room.stream_url = None
+            db.session.commit()
+
+        emit('streaming_stop', {'name': room_name,
+                                'stream_url': None}, broadcast=True)

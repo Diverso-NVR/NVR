@@ -15,22 +15,28 @@
           <tr v-if="!isMobile">
             <td class="text-xs-center subheading">{{ props.item.name }}</td>
 
-            <td class="text-xs-center ip">
+            <td class="text-xs-center">
               <v-select dense class="body-1" :items="props.item.ips" v-model="props.item.defCod"></v-select>
             </td>
 
-            <td class="text-xs-center ip">
+            <td class="text-xs-center">
               <v-select dense class="body-1" :items="props.item.ips" v-model="props.item.defCam"></v-select>
-            </td>
-
-            <td class="text-xs-center url">
-              <v-text-field class="body-1" v-model="props.item.url"></v-text-field>
             </td>
 
             <td class="text-xs-center">
               <div>
-                <v-btn depressed color="success" @click="startStream(props.item)">Старт</v-btn>
-                <v-btn depressed color="error" @click="stopStream(props.item)">Стоп</v-btn>
+                <v-btn
+                  depressed
+                  color="success"
+                  :disabled="props.item.stream_url !== null"
+                  @click="startStream(props.item)"
+                >Старт</v-btn>
+                <v-btn
+                  depressed
+                  color="error"
+                  :disabled="!props.item.stream_url"
+                  @click="stopStream(props.item)"
+                >Стоп</v-btn>
               </div>
             </td>
           </tr>
@@ -57,10 +63,6 @@
                     :items="props.item.ips"
                     v-model="props.item.defCam"
                   ></v-select>
-                </li>
-
-                <li class="flex-item subheading key-elems" data-label="Ссылка">
-                  <v-text-field class="body-1" v-model="props.item.url"></v-text-field>
                 </li>
 
                 <li class="flex-item subheading key-elems" data-label="Стрим">
@@ -100,10 +102,8 @@ export default {
           align: "center"
         },
         { text: "Камера", value: "tracking", sortable: true, align: "center" },
-        { text: "Ссылка", value: "record", sortable: true, align: "center" },
         { text: "Стрим", value: "record", sortable: true, align: "center" }
       ],
-      newRoom: "",
       background: {
         free: "green lighten-3",
         busy: "red lighten-3"
@@ -126,13 +126,11 @@ export default {
       this.$store.dispatch("emitStreamingStart", {
         soundIp: room.defCod,
         cameraIp: room.defCam,
-        ytUrl: room.url,
         roomName: room.name
       });
     },
     stopStream(room) {
       this.$store.dispatch("emitStreamingStop", {
-        ytUrl: room.url,
         roomName: room.name
       });
     },
@@ -143,13 +141,11 @@ export default {
         });
         element.defCod = element.sound_source;
         element.defCam = element.main_source;
-        element.url = "";
       });
     }
   },
   beforeUpdate() {
     this.config();
-    console.log(this.rooms);
   },
   created() {
     this.config();
@@ -158,12 +154,6 @@ export default {
 </script>
 
 <style>
-.url {
-  width: 30%;
-}
-.ip {
-  width: 20%;
-}
 .v-datatable thead th.column.sortable {
   padding-left: 8px;
 }
