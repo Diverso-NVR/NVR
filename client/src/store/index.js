@@ -37,6 +37,13 @@ const mutations = {
 
     room.auto_control = message.auto_control;
   },
+  SET_STREAM_URL(state, message) {
+    let room = state.rooms.find(room => {
+      return room.name === message.name;
+    });
+
+    room.stream_url = message.stream_url;
+  },
   DELETE_ROOM(state, message) {
     let i;
     state.rooms.forEach((room, index) => {
@@ -185,12 +192,14 @@ const actions = {
   },
   socket_streamingStart({ commit }, message) {
     commit("setMessage", `Начат стрим в ${message.name}`);
+    commit("SET_STREAM_URL", message);
   },
   async emitStreamingStop({}, payload) {
     await this._vm.$socket.client.emit("streaming_stop", payload);
   },
   socket_streamingStop({ commit }, message) {
     commit("setMessage", `Остановлен стрим в ${message.name}`);
+    commit("SET_STREAM_URL", message);
   },
   socket_error({ commit }, message) {
     commit("setErrorFromText", message);

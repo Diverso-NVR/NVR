@@ -15,23 +15,40 @@
           <tr v-if="!isMobile">
             <td class="text-xs-center subheading">{{ props.item.name }}</td>
 
-            <td class="text-xs-center ip">
+            <td class="text-xs-center">
               <v-select dense class="body-1" :items="props.item.ips" v-model="props.item.defCod"></v-select>
             </td>
 
-            <td class="text-xs-center ip">
+            <td class="text-xs-center">
               <v-select dense class="body-1" :items="props.item.ips" v-model="props.item.defCam"></v-select>
-            </td>
-
-            <td class="text-xs-center url">
-              <v-text-field class="body-1" v-model="props.item.url"></v-text-field>
             </td>
 
             <td class="text-xs-center">
               <div>
-                <v-btn depressed color="success" @click="startStream(props.item)">Старт</v-btn>
-                <v-btn depressed color="error" @click="stopStream(props.item)">Стоп</v-btn>
+                <v-btn
+                  depressed
+                  color="success"
+                  :disabled="props.item.stream_url !== null"
+                  @click="startStream(props.item)"
+                >Старт</v-btn>
+                <v-btn
+                  depressed
+                  color="error"
+                  :disabled="!props.item.stream_url"
+                  @click="stopStream(props.item)"
+                >Стоп</v-btn>
               </div>
+            </td>
+
+            <td class="text-xs-center">
+              <v-btn
+                icon
+                target="_blank"
+                :disabled="!props.item.stream_url"
+                :href="props.item.stream_url"
+              >
+                <v-icon>link</v-icon>
+              </v-btn>
             </td>
           </tr>
           <tr v-else>
@@ -50,6 +67,7 @@
                     v-model="props.item.defCod"
                   ></v-select>
                 </li>
+
                 <li class="flex-item subheading key-elems" data-label="Камера">
                   <v-select
                     dense
@@ -59,15 +77,32 @@
                   ></v-select>
                 </li>
 
-                <li class="flex-item subheading key-elems" data-label="Ссылка">
-                  <v-text-field class="body-1" v-model="props.item.url"></v-text-field>
-                </li>
-
                 <li class="flex-item subheading key-elems" data-label="Стрим">
                   <div>
-                    <v-btn color="green" @click="startStream(props.item)">Старт</v-btn>
-                    <v-btn color="error" @click="stopStream(props.item)">Стоп</v-btn>
+                    <v-btn
+                      depressed
+                      color="success"
+                      :disabled="props.item.stream_url !== null"
+                      @click="startStream(props.item)"
+                    >Старт</v-btn>
+                    <v-btn
+                      depressed
+                      color="error"
+                      :disabled="!props.item.stream_url"
+                      @click="stopStream(props.item)"
+                    >Стоп</v-btn>
                   </div>
+                </li>
+
+                <li class="flex-item subheading key-elems" data-label="Ссылка">
+                  <v-btn
+                    icon
+                    target="_blank"
+                    :disabled="!props.item.stream_url"
+                    :href="props.item.stream_url"
+                  >
+                    <v-icon>link</v-icon>
+                  </v-btn>
                 </li>
               </ul>
             </td>
@@ -100,10 +135,9 @@ export default {
           align: "center"
         },
         { text: "Камера", value: "tracking", sortable: true, align: "center" },
-        { text: "Ссылка", value: "record", sortable: true, align: "center" },
-        { text: "Стрим", value: "record", sortable: true, align: "center" }
+        { text: "Стрим", value: "record", sortable: true, align: "center" },
+        { text: "Ссылка", value: "url", sortable: true, align: "center" }
       ],
-      newRoom: "",
       background: {
         free: "green lighten-3",
         busy: "red lighten-3"
@@ -126,13 +160,11 @@ export default {
       this.$store.dispatch("emitStreamingStart", {
         soundIp: room.defCod,
         cameraIp: room.defCam,
-        ytUrl: room.url,
         roomName: room.name
       });
     },
     stopStream(room) {
       this.$store.dispatch("emitStreamingStop", {
-        ytUrl: room.url,
         roomName: room.name
       });
     },
@@ -143,13 +175,11 @@ export default {
         });
         element.defCod = element.sound_source;
         element.defCam = element.main_source;
-        element.url = "";
       });
     }
   },
   beforeUpdate() {
     this.config();
-    console.log(this.rooms);
   },
   created() {
     this.config();
@@ -158,12 +188,6 @@ export default {
 </script>
 
 <style>
-.url {
-  width: 30%;
-}
-.ip {
-  width: 20%;
-}
 .v-datatable thead th.column.sortable {
   padding-left: 8px;
 }
