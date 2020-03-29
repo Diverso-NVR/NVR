@@ -39,6 +39,17 @@
                 >Стоп</v-btn>
               </div>
             </td>
+
+            <td class="text-xs-center">
+              <v-btn
+                icon
+                target="_blank"
+                :disabled="!props.item.stream_url"
+                :href="props.item.stream_url"
+              >
+                <v-icon>link</v-icon>
+              </v-btn>
+            </td>
           </tr>
           <tr v-else>
             <td>
@@ -56,6 +67,7 @@
                     v-model="props.item.defCod"
                   ></v-select>
                 </li>
+
                 <li class="flex-item subheading key-elems" data-label="Камера">
                   <v-select
                     dense
@@ -80,6 +92,17 @@
                       @click="stopStream(props.item)"
                     >Стоп</v-btn>
                   </div>
+                </li>
+
+                <li class="flex-item subheading key-elems" data-label="Ссылка">
+                  <v-btn
+                    icon
+                    target="_blank"
+                    :disabled="!props.item.stream_url"
+                    :href="props.item.stream_url"
+                  >
+                    <v-icon>link</v-icon>
+                  </v-btn>
                 </li>
               </ul>
             </td>
@@ -112,7 +135,8 @@ export default {
           align: "center"
         },
         { text: "Камера", value: "tracking", sortable: true, align: "center" },
-        { text: "Стрим", value: "record", sortable: true, align: "center" }
+        { text: "Стрим", value: "record", sortable: true, align: "center" },
+        { text: "Ссылка", value: "url", sortable: true, align: "center" }
       ],
       background: {
         free: "green lighten-3",
