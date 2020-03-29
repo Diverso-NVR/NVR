@@ -145,39 +145,36 @@ class NvrNamespace(Namespace):
         camera_ip = msg_json['cameraIp']
         room_name = msg_json['roomName']
 
-        room = Room.query.get(name=room_name)
-        sound_source = Source.query.get(ip=sound_ip)
-        camera_source = Source.query.get(ip=camera_ip)
+        room = Room.query.filter_by(name=str(room_name)).first()
+        sound_source = Source.query.filter_by(ip=sound_ip).first()
+        camera_source = Source.query.filter_by(ip=camera_ip).first()
 
         try:
             response = requests.post(f"{STREAMING_URL}/start/{room_name}", timeout=2, json={
                 "image_addr": sound_source.rtsp,
                 "sound_addr": camera_source.rtsp
             })
-            url = response.json()['url']
-            room.stream_url = url
+            room.stream_url = response.json()['url']
             db.session.commit()
         except:
             self.emit_error(f"Ошибка при запуске стрима")
             return
 
         emit('streaming_start', {
-             'name': room_name, 'stream_url': url}, broadcast=True)
+             'name': room_name, 'stream_url': room.stream_url}, broadcast=True)
 
     def on_streaming_stop(self, msg_json):
         room_name = msg_json['roomName']
 
-        room = Room.query.get(name=room_name)
+        room = Room.query.filter_by(name=str(room_name)).first()
 
         try:
             response = requests.post(
                 f'{STREAMING_URL}/stop/{room_name}', timeout=2)
         except:
-            self.emit_error(f"Ошибка при остановке стрима")
-            return
+            pass
         finally:
             room.stream_url = None
             db.session.commit()
-
-        emit('streaming_stop', {'name': room_name,
-                                'stream_url': None}, broadcast=True)
+            emit('streaming_stop', {'name': room_name,
+                                    'stream_url': None}, broadcast=True)

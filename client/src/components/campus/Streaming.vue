@@ -67,8 +67,18 @@
 
                 <li class="flex-item subheading key-elems" data-label="Стрим">
                   <div>
-                    <v-btn color="green" @click="startStream(props.item)">Старт</v-btn>
-                    <v-btn color="error" @click="stopStream(props.item)">Стоп</v-btn>
+                    <v-btn
+                      depressed
+                      color="success"
+                      :disabled="props.item.stream_url !== null"
+                      @click="startStream(props.item)"
+                    >Старт</v-btn>
+                    <v-btn
+                      depressed
+                      color="error"
+                      :disabled="!props.item.stream_url"
+                      @click="stopStream(props.item)"
+                    >Стоп</v-btn>
                   </div>
                 </li>
               </ul>

@@ -670,7 +670,7 @@ def streaming_start(current_user, room_name):
     sound_ip = data.get('sound_ip')
     camera_ip = data.get('camera_ip')
 
-    room = Room.query.get(name=room_name)
+    room = Room.query.filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": f"Room {room_name} not found"}), 404
     if room.stream_url:
@@ -681,8 +681,8 @@ def streaming_start(current_user, room_name):
     if not camera_ip:
         return jsonify({"error": "Camera ip not provided"}), 400
 
-    sound_source = Source.query.get(ip=sound_ip)
-    camera_source = Source.query.get(ip=camera_ip)
+    sound_source = Source.query.filter_by(ip=sound_ip).first()
+    camera_source = Source.query.filter_by(ip=camera_ip).first()
 
     try:
         response = requests.post(f"{STREAMING_URL}/start/{room_name}", timeout=2, json={
@@ -704,7 +704,7 @@ def streaming_start(current_user, room_name):
 def streaming_stop(current_user, room_name):
     data = request.get_json()
 
-    room = Room.query.get(name=room_name)
+    room = Room.query.filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": f"Room {room_name} not found"}), 404
     if not room.stream_url:
@@ -733,8 +733,7 @@ def auto_control(current_user, room_name):
     if not set_auto_control:
         return jsonify({"error": "Boolean value not provided"}), 400
 
-    room = Room.query.get(name=room_name)
-
+    room = Room.query.filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": f"Room {room_name} not found"}), 404
 
