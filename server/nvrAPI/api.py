@@ -20,7 +20,7 @@ api = Blueprint('api', __name__)
 
 TRACKING_URL = os.environ.get('TRACKING_URL')
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
-STEAMING_URL = os.environ.get('STREAMING_URL')
+STREAMING_URL = os.environ.get('STREAMING_URL')
 VIDS_PATH = str(Path.home()) + '/vids/'
 
 socketio = SocketIO(message_queue='redis://',
@@ -661,50 +661,63 @@ def tracking_manage(current_user, room_name):
         return jsonify({"error": str(e)}), 500
 
 
-@api.route('/streaming-start', methods=['POST'])
+@api.route('/streaming-start/<room_name>', methods=['POST'])
 @auth_required
 @json_data_required
-def streaming_start(current_user):
+def streaming_start(current_user, room_name):
     data = request.get_json()
 
     sound_ip = data.get('sound_ip')
     camera_ip = data.get('camera_ip')
-    yt_url = data.get('yt_url')
+
+    room = Room.query.filter_by(name=str(room_name)).first()
+    if not room:
+        return jsonify({"error": f"Room {room_name} not found"}), 404
+    if room.stream_url:
+        return jsonify({"error": f"Stream is already running on {room.stream_url}"}), 409
 
     if not sound_ip:
         return jsonify({"error": "Sound source ip not provided"}), 400
     if not camera_ip:
         return jsonify({"error": "Camera ip not provided"}), 400
-    if not yt_url:
-        return jsonify({"error": "Stream url not provided"}), 400
 
-    response = requests.post(f"{STEAMING_URL}/start", timeout=2, json={
-        "image_addr": camera_ip,
-        "sound_addr": sound_ip,
-        "yt_addr": yt_url
-    })
+    sound_source = Source.query.filter_by(ip=sound_ip).first()
+    camera_source = Source.query.filter_by(ip=camera_ip).first()
 
-    if response.status_code != 200:
+    try:
+        response = requests.post(f"{STREAMING_URL}/start/{room_name}", timeout=2, json={
+            "image_addr": sound_source.rtsp,
+            "sound_addr": camera_source.rtsp
+        })
+        url = response.json()['url']
+        room.stream_url = url
+        db.session.commit()
+    except:
         return jsonify({"error": "Unable to start stream"}), 500
 
-    return jsonify({"message": "Streaming started"}), 200
+    return jsonify({"message": "Streaming started", 'url': url}), 200
 
 
-@api.route('/streaming-stop', methods=['POST'])
+@api.route('/streaming-stop/<room_name>', methods=['POST'])
 @auth_required
 @json_data_required
-def streaming_stop(current_user):
+def streaming_stop(current_user, room_name):
     data = request.get_json()
 
-    stream_url = data.get('yt_url')
+    room = Room.query.filter_by(name=str(room_name)).first()
+    if not room:
+        return jsonify({"error": f"Room {room_name} not found"}), 404
+    if not room.stream_url:
+        return jsonify({"error": f"Stream is not running"}), 400
 
-    if not stream_url:
-        return jsonify({"error": "Stream url not provided"}), 400
-
-    response = requests.post(f'{STEAMING_URL}/stop/{stream_url}', timeout=2)
-
-    if response.status_code != 200:
-        return jsonify({"error": "Ошибка при остановке трансляции"}), 500
+    try:
+        response = requests.post(
+            f'{STREAMING_URL}/stop/{room_name}', timeout=2)
+    except:
+        return jsonify({"error": "Unable to stop stream"}), 500
+    finally:
+        room.stream_url = None
+        db.session.commit()
 
     return jsonify({"message": "Streaming stopped"}), 200
 
@@ -720,8 +733,7 @@ def auto_control(current_user, room_name):
     if not set_auto_control:
         return jsonify({"error": "Boolean value not provided"}), 400
 
-    room = Room.query.get(name=room_name)
-
+    room = Room.query.filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": f"Room {room_name} not found"}), 404
 
