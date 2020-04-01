@@ -149,7 +149,6 @@ export default {
   },
   beforeUpdate() {
     this.config();
-    console.log(this.rooms);
   },
   created() {
     this.config();
