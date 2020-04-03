@@ -25,7 +25,7 @@ def nvr_db_context(func):
     return wrapper
 
 
-#class UserRecord(db.Model):
+# class UserRecord(db.Model):
 #    __tablename__ = 'user_records'
 #
 #    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -159,7 +159,7 @@ class Room(db.Model):
     __tablename__ = 'rooms'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), nullable=False, unique=True)
     tracking_state = db.Column(db.Boolean, default=False)
 
     # records = db.relationship('Record', back_populates='room')
@@ -168,6 +168,7 @@ class Room(db.Model):
 
     drive = db.Column(db.String(200))
     calendar = db.Column(db.String(200))
+    stream_url = db.Column(db.String(300))
 
     sound_source = db.Column(db.String(100))
     main_source = db.Column(db.String(100))
@@ -183,6 +184,7 @@ class Room(db.Model):
                     sources=[source.to_dict() for source in self.sources],
                     drive=self.drive,
                     calendar=self.calendar,
+                    stream_url=self.stream_url,
                     sound_source=self.sound_source,
                     main_source=self.main_source,
                     tracking_source=self.tracking_source,
