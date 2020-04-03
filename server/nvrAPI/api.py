@@ -9,7 +9,6 @@ import jwt
 import requests
 from flask import Blueprint, jsonify, request, current_app
 from flask_socketio import SocketIO
-from werkzeug.utils import secure_filename
 
 from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions, create_event_, get_events
 from driveAPI.driveSettings import create_folder, get_folders_by_name, upload
@@ -289,11 +288,12 @@ def upload_video_to_drive(current_user, room_name):
         return jsonify({"error": f"Room '{room_name}' not found"}), 400
 
     file = request.files['file']
-    file_name = secure_filename(file.filename)
+    file_name = file.filename
     file.save(VIDS_PATH + file_name)
 
     try:
-        date, time = file_name.split('_')[0], file_name.split('_')[1]
+        date = file_name.split('_')[0]
+        time = file_name.split('_')[1].split('.')[0]
     except:
         return {"error": "Incorrect file name"}, 400
 
