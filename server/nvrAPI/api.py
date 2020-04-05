@@ -669,6 +669,7 @@ def streaming_start(current_user, room_name):
 
     sound_ip = data.get('sound_ip')
     camera_ip = data.get('camera_ip')
+    title = data.get('title')
 
     room = Room.query.filter_by(name=str(room_name)).first()
     if not room:
@@ -687,7 +688,8 @@ def streaming_start(current_user, room_name):
     try:
         response = requests.post(f"{STREAMING_URL}/start/{room_name}", timeout=2, json={
             "image_addr": sound_source.rtsp,
-            "sound_addr": camera_source.rtsp
+            "sound_addr": camera_source.rtsp,
+            'title': title
         })
         url = response.json()['url']
         room.stream_url = url

@@ -123,14 +123,14 @@ export default {
           doc: `Авторизация через NVR`,
           request: `
   {
-    "email": "string",
-    "password": "string"
+    "email": string,
+    "password": string
   }`,
           responses: [
             {
               code: 202,
               body: `
-  {"token": "string"}`
+  {"token": string}`
             },
             {
               code: 401,
@@ -312,10 +312,10 @@ export default {
           doc: "Создаёт источник с указанным ip. room_name - обязательное поле",
           request: `
   {
-    "room_name": "string",
+    "room_name": string,
     main_cam: bool,
-    "name": "string",
-    "sound": "string",
+    "name": string,
+    "sound": string,
     "tracking": bool
   }`,
           responses: [
@@ -355,10 +355,10 @@ export default {
             "Обновляет данные в источнике с указанным ip. room_name используется для соотношения источника к комнате",
           request: `
   {
-    "room_name": "string",
+    "room_name": string,
     "main_cam": bool,
-    "name": "string",
-    "sound": "string",
+    "name": string,
+    "sound": string,
     "tracking": bool
   }`,
           responses: [
@@ -405,8 +405,9 @@ export default {
           doc: `Запускает стрим`,
           request: `
   {
-    "sound_ip": "string",
-    "camera_ip": "string"
+    "sound_ip": string,
+    "camera_ip": string,
+    "title": string
   }`,
           responses: [
             {
@@ -461,9 +462,9 @@ export default {
             .slice(0, 16)}`,
           request: `
   {
-    "start_time": "string",
-    "end_time": "string",
-    "summary": "string"
+    "start_time": string,
+    "end_time": string,
+    "summary": string
   }`,
           responses: [
             {
@@ -503,11 +504,11 @@ export default {
             .slice(0, 10)}`,
           request: `
   {
-    "start_time": "string",
-    "end_time": "string",
-    "date": "string",
-    "event_name": "string",
-    "user_email": "string"
+    "start_time": string,
+    "end_time": string,
+    "date": string,
+    "event_name": string,
+    "user_email": string
   }`,
           responses: [
             {
@@ -528,7 +529,7 @@ export default {
           doc: `Взаимодействие с трекингом в указанной комнате. command принимает значения "start", "stop", "status"`,
           request: `
   {
-    "command": "string"
+    "command": string
   }`,
           responses: [
             {
@@ -544,7 +545,7 @@ export default {
             {
               code: 500,
               body: `
-  {"error": "string"}`
+  {"error": string}`
             }
           ]
         },
@@ -556,7 +557,7 @@ export default {
             {
               code: 201,
               body: `
-  {"key": "string"}`
+  {"key": string}`
             }
           ]
         },
@@ -568,7 +569,7 @@ export default {
             {
               code: 200,
               body: `
-  {"key": "string"}`
+  {"key": string}`
             }
           ]
         },
@@ -580,7 +581,7 @@ export default {
             {
               code: 202,
               body: `
-  {"key": "string"}`
+  {"key": string}`
             }
           ]
         },

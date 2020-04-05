@@ -144,6 +144,7 @@ class NvrNamespace(Namespace):
         sound_ip = msg_json['soundIp']
         camera_ip = msg_json['cameraIp']
         room_name = msg_json['roomName']
+        title = msg_json['streamName']
 
         room = Room.query.filter_by(name=str(room_name)).first()
         sound_source = Source.query.filter_by(ip=sound_ip).first()
@@ -152,7 +153,8 @@ class NvrNamespace(Namespace):
         try:
             response = requests.post(f"{STREAMING_URL}/start/{room_name}", timeout=2, json={
                 "image_addr": sound_source.rtsp,
-                "sound_addr": camera_source.rtsp
+                "sound_addr": camera_source.rtsp,
+                'title': title
             })
             room.stream_url = response.json()['url']
             db.session.commit()
