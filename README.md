@@ -1,4 +1,5 @@
 # NVR  
+![NVR logo](client/static/logo.png)
 
 Основа NVR. API и frontend.
 Подробная информация на каждую часть в папках client/server соответсвенно.
@@ -8,7 +9,7 @@
 
 ## Для админов
 * [Подключение Google API](https://git.miem.hse.ru/nvr/nvr-core/-/wikis/Google-API)
-* [Развертывание на сервере](https://git.miem.hse.ru/nvr/nvr-core/-/wikis/deploy)
+* [Деплой на сервере](https://git.miem.hse.ru/nvr/nvr-core/-/wikis/deploy)
 
 ## Авторы
 
