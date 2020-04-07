@@ -1,21 +1,29 @@
-# frontend
-
-> nvr client side
-
-## Build Setup
+# NVR frontend
+## Запуск
 
 ``` bash
-# install dependencies
+# Установка зависимостей
 npm install
 
-# serve with hot reload at localhost:8080
+# dev сервер на localhost:8080
 npm run dev
 
-# build for production with minification
+# prod build
 npm run build
 
-# build for production and view the bundle analyzer report
-npm run build --report
 ```
 
-For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+## Структура
+
+* **build/** - папка с конфигурациями webpack.
+* **config/** - папка с конфигурацией билдов.
+* **src/** - основная папка компонентов и vue
+    * **api/index.js** - функции вызова API NVR
+    * **components/** - папка компонентов
+    * **router/** - модуль vue router, роутинг по страницам приложения
+    * **store/** - модуль vuex, хранит данные состояния приложения
+    * **utils/** - папка утилит
+    * **App.vue** - основное окно приложения
+    * **main.js** - точка входа приложения, инициализация модулей
+* **static/** - папка с логотипами и т.п.
+* **package.json** - файл зависимостей и конфигураций.
