@@ -1,5 +1,4 @@
 # NVR  
-![NVR logo](client/static/logo.png)
 
 Основа NVR. API и frontend.
 Подробная информация на каждую часть в папках client/server соответсвенно.
