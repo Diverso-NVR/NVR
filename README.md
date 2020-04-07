@@ -7,8 +7,8 @@
 * [API](https://nvr.miem.hse.ru/manage-api/)
 
 ## Для админов
-[Подключение Google API]
-[Развертывание на сервере]
+* [Подключение Google API](https://git.miem.hse.ru/nvr/nvr-core/-/wikis/Google-API)
+* [Развертывание на сервере](https://git.miem.hse.ru/nvr/nvr-core/-/wikis/deploy)
 
 ## Авторы
 
