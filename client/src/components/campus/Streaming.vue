@@ -23,6 +23,10 @@
               <v-select dense class="body-1" :items="props.item.ips" v-model="props.item.defCam"></v-select>
             </td>
 
+            <td>
+              <v-text-field v-model.trim="props.item.streamName"></v-text-field>
+            </td>
+
             <td class="text-xs-center">
               <div>
                 <v-btn
@@ -75,6 +79,10 @@
                     :items="props.item.ips"
                     v-model="props.item.defCam"
                   ></v-select>
+                </li>
+
+                <li class="flex-item subheading key-elems" data-label="Название стрима">
+                  <v-text-field v-model.trim="props.item.streamName"></v-text-field>
                 </li>
 
                 <li class="flex-item subheading key-elems" data-label="Стрим">
@@ -135,6 +143,12 @@ export default {
           align: "center"
         },
         { text: "Камера", value: "tracking", sortable: true, align: "center" },
+        {
+          text: "Название стрима",
+          value: "streamName",
+          sortable: true,
+          align: "center"
+        },
         { text: "Стрим", value: "record", sortable: true, align: "center" },
         { text: "Ссылка", value: "url", sortable: true, align: "center" }
       ],
@@ -160,7 +174,8 @@ export default {
       this.$store.dispatch("emitStreamingStart", {
         soundIp: room.defCod,
         cameraIp: room.defCam,
-        roomName: room.name
+        roomName: room.name,
+        title: room.streamName
       });
     },
     stopStream(room) {
@@ -252,7 +267,6 @@ export default {
   width: 100%;
 }
 .v-select__selection {
-  width: 100%;
-  justify-content: center;
+  padding-left: 30%;
 }
 </style>
