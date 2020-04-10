@@ -686,7 +686,7 @@ def streaming_start(current_user, room_name):
     camera_source = Source.query.filter_by(ip=camera_ip).first()
 
     try:
-        response = requests.post(f"{STREAMING_URL}/start/{room_name}", timeout=2, json={
+        response = requests.post(f"{STREAMING_URL}/start/{room_name}", json={
             "image_addr": sound_source.rtsp,
             "sound_addr": camera_source.rtsp,
             'title': title
@@ -714,7 +714,7 @@ def streaming_stop(current_user, room_name):
 
     try:
         response = requests.post(
-            f'{STREAMING_URL}/stop/{room_name}', timeout=2)
+            f'{STREAMING_URL}/stop/{room_name}')
     except:
         return jsonify({"error": "Unable to stop stream"}), 500
     finally:
