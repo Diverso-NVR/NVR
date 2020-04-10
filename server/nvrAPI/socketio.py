@@ -151,7 +151,7 @@ class NvrNamespace(Namespace):
         camera_source = Source.query.filter_by(ip=camera_ip).first()
 
         try:
-            response = requests.post(f"{STREAMING_URL}/start/{room_name}", timeout=2, json={
+            response = requests.post(f"{STREAMING_URL}/start/{room_name}", json={
                 "image_addr": camera_source.rtsp,
                 "sound_addr": sound_source.rtsp,
                 'title': title
@@ -172,7 +172,7 @@ class NvrNamespace(Namespace):
 
         try:
             response = requests.post(
-                f'{STREAMING_URL}/stop/{room_name}', timeout=2)
+                f'{STREAMING_URL}/stop/{room_name}')
         except:
             pass
         finally:
