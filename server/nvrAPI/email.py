@@ -3,6 +3,9 @@ import os
 from flask import render_template, current_app
 from flask_mail import Mail, Message
 
+from premailer import transform
+
+
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
 mail = Mail()
 
@@ -20,7 +23,7 @@ def send_email(subject: str, sender: str, recipients: list, html_body) -> None:
     Creates message
     """
     msg = Message(subject, sender=sender, recipients=recipients)
-    msg.html = html_body
+    msg.html = transform(html_body)
     send_async_email(current_app._get_current_object(), msg)
 
 

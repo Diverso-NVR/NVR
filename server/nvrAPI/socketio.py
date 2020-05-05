@@ -114,6 +114,7 @@ class NvrNamespace(Namespace):
 
         emit('edit_room', {room.to_dict()}, broadcast=True)
 
+    # TODO: add email send
     def on_delete_user(self, msg_json):
         user = User.query.get(msg_json['id'])
         db.session.delete(user)
@@ -128,6 +129,7 @@ class NvrNamespace(Namespace):
 
         emit('change_role', {'id': user.id, 'role': user.role}, broadcast=True)
 
+    # TODO: add email send
     def on_grant_access(self, msg_json):
         user = User.query.get(msg_json['id'])
         user.access = True

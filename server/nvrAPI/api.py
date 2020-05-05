@@ -5,6 +5,8 @@ from functools import wraps
 from threading import Thread
 from pathlib import Path
 
+import traceback
+
 import jwt
 import requests
 from flask import Blueprint, jsonify, request, current_app
@@ -65,7 +67,7 @@ def auth_required(f):
             except jwt.InvalidTokenError:
                 return jsonify(invalid_msg), 401
             except Exception as e:
-                print(e)
+                traceback.print_exc()
                 return jsonify({'error': str(e)}), 400
         elif api_key:
             try:
@@ -74,7 +76,7 @@ def auth_required(f):
                     raise RuntimeError('Неверный ключ API')
                 return f(user, *args, **kwargs)
             except Exception as e:
-                print(e)
+                traceback.print_exc()
                 return jsonify({'error': str(e)}), 500
 
         return jsonify(invalid_msg), 401
@@ -112,7 +114,7 @@ def register():
         Thread(target=user.delete_user_after_token_expiration,
                args=(current_app._get_current_object(), token_expiration)).start()
     except Exception as e:
-        print(e)
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
     return jsonify(user.to_dict()), 202

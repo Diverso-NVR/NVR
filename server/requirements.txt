@@ -49,7 +49,7 @@ pyasn1==0.4.5
 pyasn1-modules==0.2.5
 pycodestyle==2.5.0
 PyJWT==1.7.1
-psycopg2
+# psycopg2
 python-dateutil==2.8.0
 python-editor==1.0.4
 python-engineio==3.10.0
@@ -65,3 +65,5 @@ uritemplate==3.0.0
 urllib3==1.25.3
 uWSGI==2.0.18
 Werkzeug==0.16.0
+
+pymysql
