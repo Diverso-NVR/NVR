@@ -8,6 +8,7 @@ import {
   createAPIKey,
   updateAPIKey,
   deleteAPIKey,
+  getAPIKey,
   getRooms,
   createMontageEvent
 } from "@/api";
@@ -35,6 +36,13 @@ const mutations = {
     });
 
     room.auto_control = message.auto_control;
+  },
+  SET_STREAM_URL(state, message) {
+    let room = state.rooms.find(room => {
+      return room.name === message.name;
+    });
+
+    room.stream_url = message.stream_url;
   },
   DELETE_ROOM(state, message) {
     let i;
@@ -88,7 +96,7 @@ const mutations = {
     localStorage.token = "";
   },
   setKey(state, payload) {
-    state.user.api_key = payload.api_key;
+    state.user.api_key = payload.key;
   },
   setRooms(state, payload) {
     state.rooms = payload;
@@ -184,12 +192,14 @@ const actions = {
   },
   socket_streamingStart({ commit }, message) {
     commit("setMessage", `Начат стрим в ${message.name}`);
+    commit("SET_STREAM_URL", message);
   },
   async emitStreamingStop({}, payload) {
     await this._vm.$socket.client.emit("streaming_stop", payload);
   },
   socket_streamingStop({ commit }, message) {
     commit("setMessage", `Остановлен стрим в ${message.name}`);
+    commit("SET_STREAM_URL", message);
   },
   socket_error({ commit }, message) {
     commit("setErrorFromText", message);
@@ -205,9 +215,9 @@ const actions = {
       commit("switchLoading");
     }
   },
-  async createMontageEvent({ commit }, payload) {
+  createMontageEvent({ commit }, payload) {
     try {
-      await createMontageEvent(payload, state.jwt.token);
+      createMontageEvent(payload, state.jwt.token);
       commit("setMessage", "Событие создано");
     } catch (error) {
       commit("setError", error);
@@ -231,7 +241,6 @@ const actions = {
       const body = JSON.parse(atob(tokenParts[1]));
       state.user.email = body.sub.email;
       state.user.role = body.sub.role;
-      state.user.api_key = body.sub.api_key;
       return body.sub.role;
     } catch (error) {
       commit("setError", error);
@@ -249,7 +258,6 @@ const actions = {
       const body = JSON.parse(atob(tokenParts[1]));
       state.user.email = body.sub.email;
       state.user.role = body.sub.role;
-      state.user.api_key = body.sub.api_key;
       return body.sub.role;
     } catch (error) {
       commit("setError", error);
@@ -276,8 +284,7 @@ const actions = {
     try {
       commit("switchLoading");
       let res = await createAPIKey(state.user.email, state.jwt.token);
-      commit("setKey", res.data);
-      return res;
+      await commit("setKey", res.data);
     } catch (error) {
       commit("setError", error);
     } finally {
@@ -288,8 +295,7 @@ const actions = {
     try {
       commit("switchLoading");
       let res = await updateAPIKey(state.user.email, state.jwt.token);
-      commit("setKey", res.data);
-      return res;
+      await commit("setKey", res.data);
     } catch (error) {
       commit("setError", error);
     } finally {
@@ -300,11 +306,19 @@ const actions = {
     try {
       commit("switchLoading");
       let res = await deleteAPIKey(state.user.email, state.jwt.token);
-      commit("setKey", res.data);
+      await commit("setKey", { key: null });
     } catch (error) {
       commit("setError", error);
     } finally {
       commit("switchLoading");
+    }
+  },
+  async getKey({ commit, state }) {
+    try {
+      let res = await getAPIKey(state.user.email, state.jwt.token);
+      await commit("setKey", res.data);
+    } catch (error) {
+      commit("setError", error);
     }
   }
 };

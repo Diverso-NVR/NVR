@@ -7,7 +7,7 @@ from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager
 
 from nvrAPI.application import create_app
-from nvrAPI.models import db, Room, Source, Stream, User
+from nvrAPI.models import db, Room, Source, Record
 
 app, _ = create_app()
 
@@ -25,8 +25,8 @@ def shell_ctx():
                 db=db,
                 Room=Room,
                 Source=Source,
-                Stream=Stream,
-                User=User)
+                Record=Record,
+               )
 
 
 if __name__ == "__main__":

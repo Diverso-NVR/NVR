@@ -7,7 +7,7 @@ export default {
     isDarkMode: false
   },
   mutations: {
-    switchLoading(state, payload) {
+    switchLoading(state) {
       state.loading = !state.loading;
     },
     setError(state, payload) {

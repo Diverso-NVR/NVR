@@ -5,7 +5,7 @@ import os.path
 import pickle
 from datetime import datetime, timedelta
 from threading import RLock
-
+import uuid
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
@@ -152,3 +152,19 @@ def delete_calendar(calendar_id: str) -> None:
             calendar_service.calendars().delete(calendarId=calendar_id).execute()
         except Exception as e:
             print(e)
+
+
+def get_events(calendar_id: str) -> dict:
+    with lock:
+        now = datetime.utcnow()
+        time_min = now - timedelta(days=30)
+        time_max = now + timedelta(days=30)
+        events_result = calendar_service.events().list(calendarId=calendar_id,
+                                                       timeMin=time_min.isoformat() + 'Z',
+                                                       timeMax=time_max.isoformat() + 'Z',
+                                                       singleEvents=True,
+                                                       orderBy='startTime').execute()
+        events = events_result['items']
+        events = {event['id']: event for event in events}
+
+        return events

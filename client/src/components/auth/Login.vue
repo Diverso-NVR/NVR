@@ -80,9 +80,12 @@ export default {
           password: this.password
         });
         if (res) {
-          this.$router.push("/rooms");
           await this.$store.dispatch("loadRooms");
-          if (/^\w*admin$/.test(res)) await this.$store.dispatch("getUsers");
+          this.$router.push("/rooms");
+          if (/^\w*admin$/.test(res)) {
+            await this.$store.dispatch("getUsers");
+            await this.$store.dispatch("getKey");
+          }
         }
       }
     }

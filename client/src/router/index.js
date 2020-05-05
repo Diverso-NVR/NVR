@@ -12,7 +12,7 @@ import Users from "@/components/users/Users";
 
 Vue.use(Router);
 
-export default new Router({
+const router = new Router({
   routes: [
     {
       path: "/",
@@ -20,36 +20,43 @@ export default new Router({
     },
     {
       path: "/login",
-      component: Login
+      component: Login,
+      meta: { title: "Вход" }
     },
     {
       path: "/register",
-      component: Register
+      component: Register,
+      meta: { title: "Регистрация" }
     },
     {
       path: "/rooms",
       component: Rooms,
-      beforeEnter: authRequired
+      beforeEnter: authRequired,
+      meta: { title: "Аудитории" }
     },
     {
       path: "/streaming",
       component: Streaming,
-      beforeEnter: authRequired
+      beforeEnter: authRequired,
+      meta: { title: "Стриминг" }
     },
     {
       path: "/access-requests",
       component: AccessRequests,
-      beforeEnter: adminOnly
+      beforeEnter: adminOnly,
+      meta: { title: "Запросы на доступ" }
     },
     {
       path: "/users",
       component: Users,
-      beforeEnter: adminOnly
+      beforeEnter: adminOnly,
+      meta: { title: "Пользователи" }
     },
     {
       path: "/manage-api",
       component: ManageApi,
-      beforeEnter: adminOnly
+      beforeEnter: adminOnly,
+      meta: { title: "API" }
     },
     {
       path: "/*",
@@ -58,3 +65,10 @@ export default new Router({
   ],
   mode: "history"
 });
+
+router.beforeEach((to, from, next) => {
+  document.title = to.meta.title;
+  next();
+});
+
+export default router;

@@ -1,28 +1,25 @@
 import os
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from functools import wraps
 from threading import Thread
 from pathlib import Path
-
 
 import jwt
 import requests
 from flask import Blueprint, jsonify, request, current_app
 from flask_socketio import SocketIO
-from werkzeug.utils import secure_filename
 
-
-from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions, create_event_
+from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions, create_event_, get_events
 from driveAPI.driveSettings import create_folder, get_folders_by_name, upload
 from .email import send_verify_email, send_access_request_email
-from .models import db, Room, Source, User, Stream, nvr_db_context
+from .models import db, Room, Source, User, Record, nvr_db_context
 
 api = Blueprint('api', __name__)
 
 TRACKING_URL = os.environ.get('TRACKING_URL')
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
-STEAMING_URL = os.environ.get('STREAMING_URL')
+STREAMING_URL = os.environ.get('STREAMING_URL')
 VIDS_PATH = str(Path.home()) + '/vids/'
 
 socketio = SocketIO(message_queue='redis://',
@@ -44,7 +41,7 @@ def auth_required(f):
 
     @wraps(f)
     def _verify(*args, **kwargs):
-        auth_headers = request.headers.get('Authorization', '').split()
+        token = request.headers.get('Token', '')
         api_key = request.headers.get('key', '')
 
         invalid_msg = {
@@ -56,9 +53,8 @@ def auth_required(f):
             'autheticated': False
         }
 
-        if len(auth_headers) == 2:
+        if token:
             try:
-                token = auth_headers[1]
                 data = jwt.decode(token, current_app.config['SECRET_KEY'])
                 user = User.query.filter_by(email=data['sub']['email']).first()
                 if not user:
@@ -66,7 +62,7 @@ def auth_required(f):
                 return f(user, *args, **kwargs)
             except jwt.ExpiredSignatureError:
                 return jsonify(expired_msg), 401
-            except (jwt.InvalidTokenError):
+            except jwt.InvalidTokenError:
                 return jsonify(invalid_msg), 401
             except Exception as e:
                 print(e)
@@ -159,7 +155,7 @@ def login():
                         'authenticated': False}), 401
 
     token = jwt.encode({
-        'sub': {'email': user.email, 'role': user.role, 'api_key': user.api_key},
+        'sub': {'email': user.email, 'role': user.role},
         'iat': datetime.utcnow(),
         'exp': datetime.utcnow() + timedelta(weeks=12)},
         current_app.config['SECRET_KEY'])
@@ -222,7 +218,7 @@ def delete_user(current_user, user_id):
     return jsonify({"message": "User deleted"}), 200
 
 
-@api.route('/api-key/<email>', methods=['POST', 'PUT', 'DELETE'])
+@api.route('/api-key/<email>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 @auth_required
 def manage_api_key(current_user, email):
     user = User.query.filter_by(email=email).first()
@@ -236,16 +232,16 @@ def manage_api_key(current_user, email):
         user.api_key = uuid.uuid4().hex
         db.session.commit()
 
-        return jsonify({'api_key': user.api_key}), 201
+        return jsonify({'key': user.api_key}), 201
 
     if request.method == 'GET':
-        return jsonify({"api_key": user.api_key}), 200
+        return jsonify({"key": user.api_key}), 200
 
     if request.method == 'PUT':
         user.api_key = uuid.uuid4().hex
         db.session.commit()
 
-        return jsonify({'api_key': user.api_key}), 202
+        return jsonify({'key': user.api_key}), 202
 
     if request.method == 'DELETE':
         user.api_key = None
@@ -283,7 +279,7 @@ def create_calendar_event(current_user, room_name):
 
 @api.route('/gdrive-upload/<room_name>', methods=['POST'])
 @auth_required
-def upload_video_to_drive(room_name):
+def upload_video_to_drive(current_user, room_name):
     if not request.files:
         return {"error": "No file provided"}, 400
 
@@ -292,11 +288,12 @@ def upload_video_to_drive(room_name):
         return jsonify({"error": f"Room '{room_name}' not found"}), 400
 
     file = request.files['file']
-    file_name = secure_filename(file.filename)
+    file_name = file.filename
     file.save(VIDS_PATH + file_name)
 
     try:
-        date, time = file_name.split('_')[0], file_name.split('_')[1]
+        date = file_name.split('_')[0]
+        time = file_name.split('_')[1].split('.')[0]
     except:
         return {"error": "Incorrect file name"}, 400
 
@@ -472,7 +469,7 @@ def manage_source(current_user, ip):
         room_name = data.get('room_name')
         if not room_name:
             return jsonify({"error": "room_name required"}), 400
-        room = Room.query.filter_by(name=str(room_name))
+        room = Room.query.filter_by(name=str(room_name)).first()
         if not room:
             return jsonify({"error": "No room found with provided room_name"}), 400
 
@@ -523,29 +520,82 @@ def manage_source(current_user, ip):
         return jsonify({'message': 'Updated'}), 200
 
 
-@api.route('/montage-event/<room_name>', methods=['POST'])
+# MERGER
+@api.route('/calendar-notifications/', methods=["POST"])
+def gcalendar_webhook():
+    calendar_id = request.headers['X-Goog-Resource-Uri'].split('/')[6]
+
+    events = get_events(calendar_id)
+
+    room = Room.query.filter_by(calendar=calendar_id).first()
+    records = Record.query.filter(
+        Record.room_name == room.name,
+        Record.event_id != None).all()
+    calendar_events = set(events.keys())
+    db_events = {record.event_id for record in records}
+
+    new_events = calendar_events - db_events
+    deleted_events = db_events - calendar_events
+    events_to_check = calendar_events & db_events
+
+    for event_id in deleted_events:
+        record = Record.query.filter_by(event_id=event_id).first()
+        if record.done or record.processing:
+            continue
+
+        db.session.delete(record)
+
+    for event_id in new_events:
+        event = events[event_id]
+        start_date = event['start']['dateTime'].split('T')[0]
+        end_date = event['end']['dateTime'].split('T')[0]
+
+        if start_date != end_date:
+            continue
+
+        new_record = Record()
+        new_record.update_from_calendar(**event, room_name=room.name)
+        db.session.add(new_record)
+
+    for event_id in events_to_check:
+        event = events[event_id]
+        if date.today().isoformat() != event['updated'].split('T')[0]:
+            continue
+
+        record = Record.query.filter_by(event_id=event_id).first()
+        if record.done or record.processing:
+            continue
+
+        record.update_from_calendar(**event, room_name=room.name)
+
+    db.session.commit()
+    db.session.close()
+
+    return jsonify({"message": "Room calendar events patched"}), 200
+
+
+@api.route('/montage-event/<room_name>', methods=["POST"])
 @auth_required
 @json_data_required
 def create_montage_event(current_user, room_name):
-    data = request.get_json()
-    event_name = data.get('event_name')  # TODO: send to /merge-new
-    date = data.get('date')
-    start_time = data.get('start_time')
-    end_time = data.get('end_time')
+    json = request.get_json()
 
-    event_id = data.get('event_id')
-    calendar_id = data.get('calendar_id')
+    event_name = json.get("event_name")
+    date = json.get("date")
+    start_time = json.get("start_time")
+    end_time = json.get("end_time")
+    user_email = json.get("user_email", current_user.email)
 
     room = Room.query.filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": "No room found with given room_name"}), 400
 
     if not date:
-        return jsonify({"error": "date required"}), 400
+        return jsonify({"error": "'date' required"}), 400
     if not start_time:
-        return jsonify({"error": "start_time required"}), 400
+        return jsonify({"error": "'start_time' required"}), 400
     if not end_time:
-        return jsonify({"error": "end_time required"}), 400
+        return jsonify({"error": "'end_time' required"}), 400
 
     date_time_start = datetime.strptime(
         f'{date} {start_time}', '%Y-%m-%d %H:%M')
@@ -558,46 +608,14 @@ def create_montage_event(current_user, room_name):
     if start_timestamp >= end_timestamp:
         return jsonify({"error": "Неверный промежуток времени"}), 400
 
-    dates = get_dates_between_timestamps(start_timestamp, end_timestamp)
-    main_source = room.main_source.split('.')[-1].split('/')[0]
-    screen_source = room.screen_source.split('.')[-1].split('/')[0]
+    record = Record(event_name=event_name, room_name=room.name, date=date,
+                    start_time=start_time, end_time=end_time, user_email=user_email)
 
-    result = {
-        'cameras': [date.strftime(
-            f'%Y-%m-%d_%H:%M_{room.name}_{main_source}.mp4') for date in dates],
-        'screens': [date.strftime(
-            f'%Y-%m-%d_%H:%M_{room.name}_{screen_source}.mp4') for date in dates],
-        # TODO backup cameras will be added
-    }
+    db.session.add(record)
+    db.session.commit()
+    db.session.close()
 
-    folders = get_folders_by_name(date)
-
-    for folder_id, folder_parent_id in folders.items():
-        if folder_parent_id == room.drive.split('/')[-1]:
-            break
-    else:
-        folder_id = room.drive.split('/')[-1]
-
-    res = requests.post('http://172.18.130.40:8080/merge-new',
-                        json={**result,
-                              'start_time': start_time,
-                              'end_time': end_time,
-                              'folder_id': folder_id})
-    print(res.text)
-
-    return jsonify({"message": "Record event created"}), 201
-
-
-def get_dates_between_timestamps(start_timestamp: int, stop_timestamp: int) -> list:
-    start_timestamp = start_timestamp // 1800 * 1800
-    stop_timestamp = (stop_timestamp // 1800 + 1) * 1800 if int(
-        stop_timestamp) % 1800 != 0 else (stop_timestamp // 1800) * 1800
-
-    dates = []
-    for timestamp in range(start_timestamp, stop_timestamp, 1800):
-        dates.append(datetime.fromtimestamp(timestamp))
-
-    return dates
+    return jsonify({'message': f"Merge event '{event_name}' added to queue"}), 201
 
 
 @api.route('/tracking/<room_name>', methods=['POST'])
@@ -643,61 +661,65 @@ def tracking_manage(current_user, room_name):
         return jsonify({"error": str(e)}), 500
 
 
-@api.route('/streaming-start', methods=['POST'])
+@api.route('/streaming-start/<room_name>', methods=['POST'])
 @auth_required
 @json_data_required
-def streaming_start(current_user):
+def streaming_start(current_user, room_name):
     data = request.get_json()
 
     sound_ip = data.get('sound_ip')
     camera_ip = data.get('camera_ip')
-    yt_url = data.get('yt_url')
+    title = data.get('title')
+
+    room = Room.query.filter_by(name=str(room_name)).first()
+    if not room:
+        return jsonify({"error": f"Room {room_name} not found"}), 404
+    if room.stream_url:
+        return jsonify({"error": f"Stream is already running on {room.stream_url}"}), 409
 
     if not sound_ip:
         return jsonify({"error": "Sound source ip not provided"}), 400
     if not camera_ip:
         return jsonify({"error": "Camera ip not provided"}), 400
-    if not yt_url:
-        return jsonify({"error": "Stream url not provided"}), 400
 
-    response = requests.post(f"{STEAMING_URL}/start", timeout=2, json={
-        "image_addr": camera_ip,
-        "sound_addr": sound_ip,
-        "yt_addr": yt_url
-    })
+    sound_source = Source.query.filter_by(ip=sound_ip).first()
+    camera_source = Source.query.filter_by(ip=camera_ip).first()
 
-    if response.status_code != 200:
+    try:
+        response = requests.post(f"{STREAMING_URL}/start/{room_name}", json={
+            "image_addr": sound_source.rtsp,
+            "sound_addr": camera_source.rtsp,
+            'title': title
+        })
+        url = response.json()['url']
+        room.stream_url = url
+        db.session.commit()
+    except:
         return jsonify({"error": "Unable to start stream"}), 500
 
-    response_json = response.json()
-
-    stream = Stream(url=response_json['yt_addr'], pid=response_json['pid'])
-    db.session.add(stream)
-    db.session.commit()
-
-    return jsonify({"message": "Streaming started"}), 200
+    return jsonify({"message": "Streaming started", 'url': url}), 200
 
 
-@api.route('/streaming-stop', methods=['POST'])
+@api.route('/streaming-stop/<room_name>', methods=['POST'])
 @auth_required
 @json_data_required
-def streaming_stop(current_user):
+def streaming_stop(current_user, room_name):
     data = request.get_json()
 
-    stream_url = data.get('yt_url')
+    room = Room.query.filter_by(name=str(room_name)).first()
+    if not room:
+        return jsonify({"error": f"Room {room_name} not found"}), 404
+    if not room.stream_url:
+        return jsonify({"error": f"Stream is not running"}), 400
 
-    if not stream_url:
-        return jsonify({"error": "Stream url not provided"}), 400
-
-    stream = Stream.query.get(url=stream_url)
-
-    if not stream:
-        return jsonify({"error": "No stream found with given url"}), 400
-
-    requests.post(f'{STEAMING_URL}/stop/{stream.pid}', timeout=2)
-
-    db.session.delete(stream)
-    db.session.commit()
+    try:
+        response = requests.post(
+            f'{STREAMING_URL}/stop/{room_name}')
+    except:
+        return jsonify({"error": "Unable to stop stream"}), 500
+    finally:
+        room.stream_url = None
+        db.session.commit()
 
     return jsonify({"message": "Streaming stopped"}), 200
 
@@ -713,8 +735,7 @@ def auto_control(current_user, room_name):
     if not set_auto_control:
         return jsonify({"error": "Boolean value not provided"}), 400
 
-    room = Room.query.get(name=room_name)
-
+    room = Room.query.filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": f"Room {room_name} not found"}), 404
 

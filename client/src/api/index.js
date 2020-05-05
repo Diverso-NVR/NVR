@@ -13,7 +13,7 @@ export function register(userData) {
 
 export function getUsers(token) {
   return axios.get(`${API_URL}/users`, {
-    headers: { Authorization: `Bearer: ${token}` }
+    headers: { Token: token }
   });
 }
 
@@ -22,7 +22,7 @@ export function createAPIKey(email, token) {
     `${API_URL}/api-key/${email}`,
     {},
     {
-      headers: { Authorization: `Bearer: ${token}` }
+      headers: { Token: token }
     }
   );
 }
@@ -32,21 +32,27 @@ export function updateAPIKey(email, token) {
     `${API_URL}/api-key/${email}`,
     {},
     {
-      headers: { Authorization: `Bearer: ${token}` }
+      headers: { Token: token }
     }
   );
 }
 
 export function deleteAPIKey(email, token) {
   return axios.delete(`${API_URL}/api-key/${email}`, {
-    headers: { Authorization: `Bearer: ${token}` }
+    headers: { Token: token }
+  });
+}
+
+export function getAPIKey(email, token) {
+  return axios.get(`${API_URL}/api-key/${email}`, {
+    headers: { Token: token }
   });
 }
 
 //rooms
 export function getRooms(token) {
   return axios.get(`${API_URL}/rooms/`, {
-    headers: { Authorization: `Bearer: ${token}` }
+    headers: { Token: token }
   });
 }
 
@@ -58,7 +64,7 @@ export function createMontageEvent(
     `${API_URL}/montage-event/${room_name}`,
     { event_name, date, start_time, end_time },
     {
-      headers: { Authorization: `Bearer: ${token}` }
+      headers: { Token: token }
     }
   );
 }

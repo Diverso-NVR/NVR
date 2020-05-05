@@ -3,7 +3,7 @@
     <v-container fluid>
       <v-layout align-center justify-center>
         <v-flex xs12 sm12 md10>
-          <template v-if="!api_key">
+          <template v-if="!user.api_key">
             <v-card>
               <v-card-text>
                 <v-layout align-center mb-3>
@@ -16,10 +16,15 @@
                     NVR, такими как:
                   </p>
                   <ul>
+                    <li>Авторизовываться через NVR</li>
                     <li>Создать или удалить комнату</li>
-                    <li>Изменить список камер/кодеров комнаты</li>
-                    <li>Начать или остановить запись</li>
-                    <li>Выбрать источник звука для комнаты</li>
+                    <li>Получить данные комнат</li>
+                    <li>Конфигурировать настройки комнаты</li>
+                    <li>Запросить запись</li>
+                    <li>Включить/Отключить трекинг</li>
+                    <li>Включить/Отключить автовозрат камер на default позиции</li>
+                    <li>Запускать/Останавливать стриминг в YouTube</li>
+                    <li>Управлять своим API-ключом</li>
                   </ul>
                 </div>
               </v-card-text>
@@ -39,14 +44,14 @@
               <v-card-title primary-title>
                 <h3 class="title mb-0">
                   Ваш ключ API:
-                  <b class="subheading">{{ api_key }}</b>
+                  <b class="subheading">{{ user.api_key }}</b>
                 </h3>
               </v-card-title>
 
               <v-card-text>
                 <div class="subheading">
                   <div>API url: {{ API_URL }}</div>
-                  <div>Добавьте в headers вашего запроса: {"key": "{{ api_key }}"}</div>
+                  <div>Добавьте в headers вашего запроса: {"key": "{{ user.api_key }}"}</div>
                 </div>
               </v-card-text>
 
@@ -110,9 +115,43 @@ export default {
   data() {
     return {
       panel: [],
-      api_key: this.$store.getters.user.api_key,
       API_URL: process.env.NVR_URL + "/api",
       routes: [
+        {
+          name: "/login",
+          method: "POST",
+          doc: `Авторизация через NVR`,
+          request: `
+  {
+    "email": string,
+    "password": string
+  }`,
+          responses: [
+            {
+              code: 202,
+              body: `
+  {"token": string}`
+            },
+            {
+              code: 401,
+              body: `
+  {"error": "Неверные данные", "authenticated": false}`
+            },
+            {
+              code: 401,
+              body: `
+  {"error": "Почта не подтверждена", "authenticated": false}`
+            },
+            {
+              code: 401,
+              body: `
+  {
+    "error": "Администратор ещё не открыл доступ для этого аккаунта",
+    "authenticated": false
+  }`
+            }
+          ]
+        },
         {
           name: "/rooms/",
           method: "GET",
@@ -273,10 +312,10 @@ export default {
           doc: "Создаёт источник с указанным ip. room_name - обязательное поле",
           request: `
   {
-    "room_name": "string",
+    "room_name": string,
     main_cam: bool,
-    "name": "string",
-    "sound": "string",
+    "name": string,
+    "sound": string,
     "tracking": bool
   }`,
           responses: [
@@ -316,10 +355,10 @@ export default {
             "Обновляет данные в источнике с указанным ip. room_name используется для соотношения источника к комнате",
           request: `
   {
-    "room_name": "string",
+    "room_name": string,
     "main_cam": bool,
-    "name": "string",
-    "sound": "string",
+    "name": string,
+    "sound": string,
     "tracking": bool
   }`,
           responses: [
@@ -338,7 +377,8 @@ export default {
         {
           name: "/auto-control/{room_name}",
           method: "POST",
-          doc: "Включает или отключает автоматический контроль камер в указанной комнате",
+          doc:
+            "Включает или отключает автоматический контроль камер в указанной комнате",
           request: `
   {"set_auto_control": bool}`,
           responses: [
@@ -360,14 +400,14 @@ export default {
           ]
         },
         {
-          name: "/streaming-start",
+          name: "/streaming-start/{room_name}",
           method: "POST",
-          doc: `Запускает стрим по ссылке yt_url`,
+          doc: `Запускает стрим`,
           request: `
   {
-    "sound_ip": "string",
-    "camera_ip": "string",
-    "yt_url": "string"
+    "sound_ip": string,
+    "camera_ip": string,
+    "title": string
   }`,
           responses: [
             {
@@ -385,13 +425,9 @@ export default {
           ]
         },
         {
-          name: "/streaming-stop",
+          name: "/streaming-stop/{room_name}",
           method: "POST",
-          doc: `Останавливает стрим по ссылке yt_url`,
-          request: `
-  {
-    "yt_url": "string"
-  }`,
+          doc: `Останавливает стрим`,
           responses: [
             {
               code: 200,
@@ -426,9 +462,9 @@ export default {
             .slice(0, 16)}`,
           request: `
   {
-    "start_time": "string",
-    "end_time": "string",
-    "summary": "string"
+    "start_time": string,
+    "end_time": string,
+    "summary": string
   }`,
           responses: [
             {
@@ -468,10 +504,11 @@ export default {
             .slice(0, 10)}`,
           request: `
   {
-    "start_time": "string",
-    "end_time": "string",
-    "date": "string",
-    "event_name": "string"
+    "start_time": string,
+    "end_time": string,
+    "date": string,
+    "event_name": string,
+    "user_email": string
   }`,
           responses: [
             {
@@ -492,7 +529,7 @@ export default {
           doc: `Взаимодействие с трекингом в указанной комнате. command принимает значения "start", "stop", "status"`,
           request: `
   {
-    "command": "string"
+    "command": string
   }`,
           responses: [
             {
@@ -508,42 +545,7 @@ export default {
             {
               code: 500,
               body: `
-  {"error": "string"}`
-            }
-          ]
-        },
-        {
-          name: "/login",
-          method: "POST",
-          doc: `Авторизация через NVR`,
-          request: `
-  {
-    "email": "string",
-    "password": "string"
-  }`,
-          responses: [
-            {
-              code: 202,
-              body: `
-  {"token": "string"}`
-            },
-            {
-              code: 401,
-              body: `
-  {"error": "Неверные данные", "authenticated": false}`
-            },
-            {
-              code: 401,
-              body: `
-  {"error": "Почта не подтверждена", "authenticated": false}`
-            },
-            {
-              code: 401,
-              body: `
-  {
-    "error": "Администратор ещё не открыл доступ для этого аккаунта",
-    "authenticated": false
-  }`
+  {"error": string}`
             }
           ]
         },
@@ -555,7 +557,7 @@ export default {
             {
               code: 201,
               body: `
-  {"api_key": "string"}`
+  {"key": string}`
             }
           ]
         },
@@ -567,7 +569,7 @@ export default {
             {
               code: 200,
               body: `
-  {"api_key": "string"}`
+  {"key": string}`
             }
           ]
         },
@@ -579,7 +581,7 @@ export default {
             {
               code: 202,
               body: `
-  {"api_key": "string"}`
+  {"key": string}`
             }
           ]
         },
@@ -604,23 +606,23 @@ export default {
     },
     loader() {
       return this.$store.getters.loading;
+    },
+    user() {
+      return this.$store.getters.user;
     }
   },
   methods: {
-    async createKey() {
-      let res = await this.$store.dispatch("createKey");
-      this.api_key = res.data.api_key;
+    createKey() {
+      this.$store.dispatch("createKey");
     },
-    async updateKey() {
+    updateKey() {
       if (confirm("Вы уверены, что хотите обновить ключ API?")) {
-        let res = await this.$store.dispatch("updateKey");
-        this.api_key = res.data.api_key;
+        this.$store.dispatch("updateKey");
       }
     },
-    async deleteKey() {
+    deleteKey() {
       if (confirm("Вы уверены, что хотите удалить ключ API?")) {
-        await this.$store.dispatch("deleteKey");
-        this.api_key = "";
+        this.$store.dispatch("deleteKey");
       }
     },
     all() {
@@ -629,6 +631,9 @@ export default {
           ? [...Array(this.routes.length).keys()].map(_ => true)
           : [];
     }
+  },
+  beforeCreate() {
+    this.$store.dispatch("getKey");
   }
 };
 </script>

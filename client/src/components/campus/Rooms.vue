@@ -16,23 +16,45 @@
             <td class="text-xs-center subheading">{{ props.item.name }}</td>
 
             <td class="text-xs-center">
+              <v-btn-toggle v-model="props.item.tracking_state" mandatory>
+                <v-btn
+                  flat
+                  color="green"
+                  @click="trackingSwitch(props.item)"
+                  :value="false"
+                  :disabled="props.item.tracking_state"
+                >On</v-btn>
+                <v-btn
+                  flat
+                  color="error"
+                  @click="trackingSwitch(props.item)"
+                  :value="true"
+                  :disabled="!props.item.tracking_state"
+                >Off</v-btn>
+              </v-btn-toggle>
+            </td>
+
+            <td class="text-xs-center">
+              <v-btn-toggle v-model="props.item.auto_control" mandatory>
+                <v-btn
+                  flat
+                  color="green"
+                  @click="autoControlSwitch(props.item)"
+                  :value="false"
+                  :disabled="props.item.auto_control"
+                >On</v-btn>
+                <v-btn
+                  flat
+                  color="error"
+                  @click="autoControlSwitch(props.item)"
+                  :value="true"
+                  :disabled="!props.item.auto_control"
+                >Off</v-btn>
+              </v-btn-toggle>
+            </td>
+
+            <td class="text-xs-center">
               <app-add-event :room="props.item"></app-add-event>
-            </td>
-
-            <td class="text-xs-center">
-              <v-btn
-                flat
-                :class="props.item.tracking_state === true ? 'error': 'success'"
-                @click="trackingSwitch(props.item)"
-              >{{props.item.tracking_state === true ? 'Выкл': 'Вкл'}}</v-btn>
-            </td>
-
-            <td class="text-xs-center">
-              <v-btn
-                flat
-                :class="props.item.auto_control === true ? 'error': 'success'"
-                @click="autoControlSwitch(props.item)"
-              >{{props.item.auto_control === true ? 'Выкл': 'Вкл'}}</v-btn>
             </td>
 
             <td class="text-xs-center">
@@ -60,24 +82,42 @@
                   data-label="Аудитория"
                 >{{ props.item.name }}</li>
 
-                <li class="flex-item subheading" data-label="Монтаж">
-                  <app-add-event :room="props.item"></app-add-event>
-                </li>
-
                 <li class="flex-item subheading" data-label="Трекинг">
-                  <v-btn
-                    flat
-                    :class="props.item.tracking_state === true ? 'error': 'success'"
-                    @click="trackingSwitch(props.item)"
-                  >{{props.item.tracking_state === true ? 'Выкл': 'Вкл'}}</v-btn>
+                  <v-btn-toggle v-model="props.item.tracking_state" mandatory>
+                    <v-btn
+                      flat
+                      color="green"
+                      @click="trackingSwitch(props.item)"
+                      :value="false"
+                      :disabled="props.item.tracking_state"
+                    >On</v-btn>
+                    <v-btn
+                      flat
+                      color="error"
+                      @click="trackingSwitch(props.item)"
+                      :value="true"
+                      :disabled="!props.item.tracking_state"
+                    >Off</v-btn>
+                  </v-btn-toggle>
                 </li>
 
-                <li class="flex-item subheading" data-label="Автоматическое управление">
-                  <v-btn
-                    flat
-                    :class="props.item.auto_control === true ? 'error': 'success'"
-                    @click="autoControlSwitch(props.item)"
-                  >{{props.item.auto_control === true ? 'Выкл': 'Вкл'}}</v-btn>
+                <li class="flex-item subheading" data-label="Автоуправление">
+                  <v-btn-toggle v-model="props.item.auto_control" mandatory>
+                    <v-btn
+                      flat
+                      color="green"
+                      @click="autoControlSwitch(props.item)"
+                      :value="false"
+                      :disabled="props.item.auto_control"
+                    >On</v-btn>
+                    <v-btn
+                      flat
+                      color="error"
+                      @click="autoControlSwitch(props.item)"
+                      :value="true"
+                      :disabled="!props.item.auto_control"
+                    >Off</v-btn>
+                  </v-btn-toggle>
                 </li>
 
                 <li class="flex-item subheading" data-label="Календарь">
@@ -92,13 +132,17 @@
                   </v-btn>
                 </li>
 
+                <li class="flex-item subheading key-elems" data-label="Запись">
+                  <app-add-event :room="props.item"></app-add-event>
+                </li>
+
                 <li
                   class="flex-item subheading key-elems"
                   v-if="/^\w*admin$/.test(user.role)"
                   data-label="Изменить"
                 >
                   <app-edit-room :room="props.item"></app-edit-room>
-                  <v-btn icon @click="del(props.item)" :disabled="!props.item.free">
+                  <v-btn icon @click="del(props.item)">
                     <v-icon medium>delete</v-icon>
                   </v-btn>
                 </li>
@@ -137,19 +181,19 @@ export default {
           value: "name"
         },
         {
-          text: "Монтаж",
+          text: "Трекинг",
           value: "montage",
           sortable: true,
           align: "center"
         },
         {
-          text: "Трекинг",
+          text: "Автоуправление",
           value: "tracking",
           sortable: true,
           align: "center"
         },
         {
-          text: "Автоматическое управление",
+          text: "Запись",
           value: "auto_control",
           sortable: true,
           align: "center"

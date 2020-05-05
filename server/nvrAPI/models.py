@@ -25,6 +25,56 @@ def nvr_db_context(func):
     return wrapper
 
 
+# class UserRecord(db.Model):
+#    __tablename__ = 'user_records'
+#
+#    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+#    record_id = db.Column(db.Integer, db.ForeignKey('records.id'))
+#
+#    user = db.relationship("User", back_populates="records")
+#    record = db.relationship("Record", back_populates="users")
+
+
+class Record(db.Model):
+    __tablename__ = 'records'
+
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.String(100), nullable=False)
+    start_time = db.Column(db.String(100), nullable=False)
+    end_time = db.Column(db.String(100), nullable=False)
+    event_name = db.Column(db.String(200))
+    event_id = db.Column(db.String(200))
+
+    # Will be deleted later
+    user_email = db.Column(db.String(200), nullable=False)
+    room_name = db.Column(db.String(200), nullable=False)
+
+    done = db.Column(db.Boolean, default=False)
+    processing = db.Column(db.Boolean, default=False)
+    # drive_file_url = db.Column(db.String(300))
+
+    # room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
+    # room = db.relationship("Room", back_populates='records')
+    # users = db.relationship("UserRecord", back_populates="record")
+
+    def update_from_calendar(self, **kwargs):
+        self.event_id = kwargs.get('id')
+        self.event_name = kwargs.get('summary')
+        self.date = kwargs['start']['dateTime'].split('T')[0]
+        self.start_time = kwargs['start']['dateTime'].split('T')[1][:5]
+        self.end_time = kwargs['end']['dateTime'].split('T')[1][:5]
+        self.room_name = kwargs['room_name']
+        self.user_email = kwargs['creator']['email']
+
+
+class Channel(db.Model):
+    __tablename__ = 'channels'
+
+    id = db.Column(db.String(100), primary_key=True)
+    resource_id = db.Column(db.String(100))
+    room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
+
+
 class User(db.Model):
     __tablename__ = 'users'
 
@@ -34,8 +84,9 @@ class User(db.Model):
     role = db.Column(db.String(50), default='user')
     email_verified = db.Column(db.Boolean, default=False)
     access = db.Column(db.Boolean, default=False)
-
     api_key = db.Column(db.String(255), unique=True)
+
+    # records = db.relationship("UserRecord", back_populates="user")
 
     def __init__(self, email, password):
         self.email = email
@@ -108,11 +159,16 @@ class Room(db.Model):
     __tablename__ = 'rooms'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), nullable=False, unique=True)
     tracking_state = db.Column(db.Boolean, default=False)
+
+    # records = db.relationship('Record', back_populates='room')
     sources = db.relationship('Source', backref='room', lazy=False)
+    channel = db.relationship("Channel", backref="room", uselist=False)
+
     drive = db.Column(db.String(200))
     calendar = db.Column(db.String(200))
+    stream_url = db.Column(db.String(300))
 
     sound_source = db.Column(db.String(100))
     main_source = db.Column(db.String(100))
@@ -128,6 +184,7 @@ class Room(db.Model):
                     sources=[source.to_dict() for source in self.sources],
                     drive=self.drive,
                     calendar=self.calendar,
+                    stream_url=self.stream_url,
                     sound_source=self.sound_source,
                     main_source=self.main_source,
                     tracking_source=self.tracking_source,
@@ -147,16 +204,6 @@ class Source(db.Model):
     merge = db.Column(db.String(200))
     tracking = db.Column(db.String(200))
     room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
-
-    def __init__(self, **kwargs):
-        self.name = kwargs.get('name')
-        self.ip = kwargs.get('ip')
-        self.port = kwargs.get('port')
-        self.rtsp = kwargs.get('rtsp')
-        self.audio = kwargs.get('audio')
-        self.merge = kwargs.get('merge')
-        self.tracking = kwargs.get('tracking')
-        self.room_id = kwargs.get('room_id')
 
     def update(self, **kwargs):
         self.name = kwargs.get('name')
@@ -178,10 +225,3 @@ class Source(db.Model):
                     merge=self.audio,
                     tracking=self.tracking,
                     room_id=self.room_id)
-
-
-class Stream(db.Model):
-    __tablename__ = 'streams'
-
-    url = db.Column(db.String(250), primary_key=True)
-    pid = db.Column(db.Integer, unique=True, nullable=False)

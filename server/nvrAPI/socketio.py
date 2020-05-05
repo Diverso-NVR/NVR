@@ -7,7 +7,7 @@ from flask_socketio import emit, Namespace
 
 from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions
 from driveAPI.driveSettings import create_folder
-from .models import db, Room, Source, User, Stream, nvr_db_context
+from .models import db, Room, Source, User, nvr_db_context
 
 TRACKING_URL = os.environ.get('TRACKING_URL')
 STREAMING_URL = os.environ.get('STREAMING_URL')
@@ -143,36 +143,40 @@ class NvrNamespace(Namespace):
     def on_streaming_start(self, msg_json):
         sound_ip = msg_json['soundIp']
         camera_ip = msg_json['cameraIp']
-        yt_url = msg_json['ytUrl']
         room_name = msg_json['roomName']
+        title = msg_json['title']
 
-        response = requests.post(f'{STREAMING_URL}/start', timeout=2, json={
-            "image_addr": camera_ip,
-            "sound_addr": sound_ip,
-            "yt_addr": yt_url
-        })
+        room = Room.query.filter_by(name=str(room_name)).first()
+        sound_source = Source.query.filter_by(ip=sound_ip).first()
+        camera_source = Source.query.filter_by(ip=camera_ip).first()
 
-        if response.status_code != 200:
-            self.emit_error("Ошибка при запуске трансляции")
+        try:
+            response = requests.post(f"{STREAMING_URL}/start/{room_name}", json={
+                "image_addr": camera_source.rtsp,
+                "sound_addr": sound_source.rtsp,
+                'title': title
+            })
+            room.stream_url = response.json()['url']
+            db.session.commit()
+        except:
+            self.emit_error(f"Ошибка при запуске стрима")
             return
 
-        response_json = response.json()
-
-        stream = Stream(url=response_json['yt_addr'], pid=response_json['pid'])
-        db.session.add(stream)
-        db.session.commit()
-
-        emit('streaming_start', {'name': room_name}, broadcast=True)
+        emit('streaming_start', {
+             'name': room_name, 'stream_url': room.stream_url}, broadcast=True)
 
     def on_streaming_stop(self, msg_json):
-        stream_url = msg_json['ytUrl']
         room_name = msg_json['roomName']
 
-        stream = Stream.query.filter_by(url=stream_url).first()
+        room = Room.query.filter_by(name=str(room_name)).first()
 
-        requests.post(f'{STREAMING_URL}/stop/{stream.pid}', timeout=2)
-
-        db.session.delete(stream)
-        db.session.commit()
-
-        emit('streaming_stop', {'name': room_name}, broadcast=True)
+        try:
+            response = requests.post(
+                f'{STREAMING_URL}/stop/{room_name}')
+        except:
+            pass
+        finally:
+            room.stream_url = None
+            db.session.commit()
+            emit('streaming_stop', {'name': room_name,
+                                    'stream_url': None}, broadcast=True)
