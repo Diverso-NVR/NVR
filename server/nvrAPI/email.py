@@ -3,6 +3,9 @@ import os
 from flask import render_template, current_app
 from flask_mail import Mail, Message
 
+from premailer import transform
+
+
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
 mail = Mail()
 
@@ -20,7 +23,7 @@ def send_email(subject: str, sender: str, recipients: list, html_body) -> None:
     Creates message
     """
     msg = Message(subject, sender=sender, recipients=recipients)
-    msg.html = html_body
+    msg.html = transform(html_body)
     send_async_email(current_app._get_current_object(), msg)
 
 
@@ -39,9 +42,9 @@ def send_verify_email(user, token_expiration: int) -> None:
                )
 
 
-def send_access_request_email(admins: list, user_email: str) -> None:
+def send_access_request_email(admins: list, user) -> None:
     send_email('[NVR] Запрос на доступ',
                sender=current_app.config['ADMINS'][0],
                recipients=admins,
                html_body=render_template('email/access_request.html',
-                                         user_email=user_email, url=NVR_CLIENT_URL))
+                                         user=user, url=NVR_CLIENT_URL))
