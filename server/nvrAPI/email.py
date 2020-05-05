@@ -42,9 +42,9 @@ def send_verify_email(user, token_expiration: int) -> None:
                )
 
 
-def send_access_request_email(admins: list, user_email: str) -> None:
+def send_access_request_email(admins: list, user) -> None:
     send_email('[NVR] Запрос на доступ',
                sender=current_app.config['ADMINS'][0],
                recipients=admins,
                html_body=render_template('email/access_request.html',
-                                         user_email=user_email, url=NVR_CLIENT_URL))
+                                         user=user, url=NVR_CLIENT_URL))

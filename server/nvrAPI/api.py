@@ -134,7 +134,7 @@ def verify_email(token):
 
     try:
         send_access_request_email(
-            [u.email for u in User.query.all() if u.role != 'user'], user.email)
+            [u.email for u in User.query.all() if u.role != 'user'], user)
     except Exception as e:
         return str(e), 500
 
