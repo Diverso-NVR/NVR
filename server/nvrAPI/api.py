@@ -9,7 +9,7 @@ import traceback
 
 import jwt
 import requests
-from flask import Blueprint, jsonify, request, current_app
+from flask import Blueprint, jsonify, request, current_app, render_template
 from flask_socketio import SocketIO
 
 from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions, create_event_, get_events
@@ -124,10 +124,17 @@ def register():
 def verify_email(token):
     user = User.verify_email_token(token)
     if not user:
-        return "Время на подтверждение вышло. Зарегистрируйтесь ещё раз", 404
+        return render_template('msg_template.html',
+                               msg={'title': 'Подтверждение почты',
+                                    'text': "Время на подтверждение вышло. Зарегистрируйтесь ещё раз"},
+                               url=NVR_CLIENT_URL), 404
 
     if user.email_verified:
-        return "Почта уже подтверждена", 200
+        return render_template('msg_template.html',
+                               msg={'title': 'Подтверждение почты',
+                                    'text': "Почта уже подтверждена",
+                                    },
+                               url=NVR_CLIENT_URL), 409
 
     user.email_verified = True
     db.session.commit()
@@ -139,7 +146,10 @@ def verify_email(token):
         traceback.print_exc()
         return "Server error", 500
 
-    return "Подтверждение успешно, ожидайте одобрения администратора", 202
+    return render_template('msg_template.html',
+                           msg={'title': 'Подтверждение почты',
+                                'text': "Подтверждение успешно, ожидайте одобрения администратора"},
+                           url=NVR_CLIENT_URL), 202
 
 
 @api.route('/login', methods=['POST'])

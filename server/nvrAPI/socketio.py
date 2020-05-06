@@ -2,15 +2,17 @@ import os
 from threading import Thread
 
 import requests
-from flask import current_app
+from flask import current_app, render_template
 from flask_socketio import emit, Namespace
 
 from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions
 from driveAPI.driveSettings import create_folder
 from .models import db, Room, Source, User, nvr_db_context
+from .email import send_email
 
 TRACKING_URL = os.environ.get('TRACKING_URL')
 STREAMING_URL = os.environ.get('STREAMING_URL')
+NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
 
 
 class NvrNamespace(Namespace):
@@ -114,13 +116,18 @@ class NvrNamespace(Namespace):
 
         emit('edit_room', {room.to_dict()}, broadcast=True)
 
-    # TODO: add email send
     def on_delete_user(self, msg_json):
         user = User.query.get(msg_json['id'])
+        emit('delete_user', {'id': user.id}, broadcast=True)
+
+        if user.access == False:
+            send_email('[NVR] Отказано в доступе',
+                       sender=current_app.config['ADMINS'][0],
+                       recipients=[user.email],
+                       html_body=render_template('email/access_deny.html',
+                                                 user=user))
         db.session.delete(user)
         db.session.commit()
-
-        emit('delete_user', {'id': user.id}, broadcast=True)
 
     def on_change_role(self, msg_json):
         user = User.query.get(msg_json['id'])
@@ -129,18 +136,23 @@ class NvrNamespace(Namespace):
 
         emit('change_role', {'id': user.id, 'role': user.role}, broadcast=True)
 
-    # TODO: add email send
     def on_grant_access(self, msg_json):
         user = User.query.get(msg_json['id'])
         user.access = True
         db.session.commit()
 
+        emit('grant_access', {'id': user.id}, broadcast=True)
+
+        send_email('[NVR] Доступ открыт',
+                   sender=current_app.config['ADMINS'][0],
+                   recipients=[user.email],
+                   html_body=render_template('email/access_approve.html',
+                                             user=user, url=NVR_CLIENT_URL))
+
         Thread(target=give_permissions,
                args=(
                    current_app._get_current_object(), user.email),
                daemon=True).start()
-
-        emit('grant_access', {'id': user.id}, broadcast=True)
 
     def on_streaming_start(self, msg_json):
         sound_ip = msg_json['soundIp']

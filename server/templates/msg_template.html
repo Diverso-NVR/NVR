@@ -1,0 +1,22 @@
+{% extends 'main.html' %} {% block body %}
+<div class="card mx-auto mt-4" style="max-width: 540px;">
+  <div class="row no-gutters">
+    <div class="col-md-4 my-auto px-3">
+      <a href="{{ url }}">
+        <img
+          class="card-img"
+          src="https://hkl.stripocdnplugin.email/content/d7b6d2ba18fb4bc0abf8a55b4bdfb791/lib/pluginId_d7b6d2ba18fb4bc0abf8a55b4bdfb791_68586/39341582691814223.png"
+          width="100"
+      /></a>
+    </div>
+    <div class="col-md-8">
+      <div class="card-body">
+        <h5 class="card-title">{{ msg['title'] }}</h5>
+        <p class="card-text">
+          {{ msg['text'] }}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
