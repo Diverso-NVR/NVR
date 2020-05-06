@@ -9,5 +9,5 @@
 
 ## Vendor Conventions ##
 
-# Templates
-- (^|/)templates/
+# .html
+- ^.html$
