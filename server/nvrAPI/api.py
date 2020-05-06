@@ -60,26 +60,26 @@ def auth_required(f):
                 data = jwt.decode(token, current_app.config['SECRET_KEY'])
                 user = User.query.filter_by(email=data['sub']['email']).first()
                 if not user:
-                    raise RuntimeError('Пользователь не найден')
+                    return jsonify({'error': "User not found"}), 404
                 return f(user, *args, **kwargs)
             except jwt.ExpiredSignatureError:
-                return jsonify(expired_msg), 401
+                return jsonify(expired_msg), 403
             except jwt.InvalidTokenError:
-                return jsonify(invalid_msg), 401
+                return jsonify(invalid_msg), 403
             except Exception as e:
                 traceback.print_exc()
-                return jsonify({'error': str(e)}), 400
+                return jsonify({'error': "Server error"}), 500
         elif api_key:
             try:
                 user = User.query.filter_by(api_key=api_key).first()
                 if not user:
-                    raise RuntimeError('Неверный ключ API')
+                    return jsonify({'error': "Wrong API key"}), 400
                 return f(user, *args, **kwargs)
             except Exception as e:
                 traceback.print_exc()
-                return jsonify({'error': str(e)}), 500
+                return jsonify({'error': "Server error"}), 500
 
-        return jsonify(invalid_msg), 401
+        return jsonify(invalid_msg), 403
 
     return _verify
 
@@ -115,7 +115,7 @@ def register():
                args=(current_app._get_current_object(), token_expiration)).start()
     except Exception as e:
         traceback.print_exc()
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": "Server error"}), 500
 
     return jsonify(user.to_dict()), 202
 
@@ -136,7 +136,8 @@ def verify_email(token):
         send_access_request_email(
             [u.email for u in User.query.all() if u.role != 'user'], user)
     except Exception as e:
-        return str(e), 500
+        traceback.print_exc()
+        return "Server error", 500
 
     return "Подтверждение успешно, ожидайте одобрения администратора", 202
 
