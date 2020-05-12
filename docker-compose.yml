@@ -1,0 +1,45 @@
+version: '3'
+
+services:
+  redis:
+    image: redis
+    container_name: nvr-redis
+    restart: always
+    expose:
+      - '6379'
+
+  frontend:
+    build: ./frontend
+    container_name: nvr-frontend
+    restart: always
+    volumes:
+      - ./frontend/dist:/frontend/dist
+
+  backend:
+    depends_on:
+      - redis
+    build: ./backend
+    container_name: nvr-backend
+    restart: always
+    env_file:
+      - .env_nvr
+    volumes:
+      - ./backend:/backend
+    expose:
+      - '5000'
+      - '5001'
+      - '5002'
+#    network_mode: "host"
+
+  nginx:
+    build: ./nginx
+    depends_on:
+      - backend
+      - frontend
+    container_name: nvr-nginx
+    restart: always
+    volumes:
+      - ./frontend/dist:/frontend/dist
+      - ./backend:/backend
+    ports:
+      - '8080:80'
