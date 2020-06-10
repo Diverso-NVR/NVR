@@ -38,8 +38,18 @@ def create_app(app_name="NVR_API"):
     from nvrAPI.api import api
     app.register_blueprint(api, url_prefix="/api")
 
-    from nvrAPI.models import db
+    from nvrAPI.models import db, User
     db.init_app(app)
+    # Create admin user if no in db
+    with app.app_context():
+        if User.query.all() == []:
+            user = User(email='admin@admin.com', password='nvr_admin')
+            user.access = True
+            user.email_verified = True
+            user.role = 'admin'
+
+            db.session.add(user)
+            db.session.commit()
 
     from nvrAPI.email import mail
     mail.init_app(app)
@@ -86,8 +96,6 @@ def create_app(app_name="NVR_API"):
         file_handler.setFormatter(logging.Formatter(
             '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
         file_handler.setLevel(logging.INFO)
-        file_handler.setLevel(logging.ERROR)
-        file_handler.setLevel(logging.WARNING)
 
         app.logger.addHandler(file_handler)
         app.logger.setLevel(logging.INFO)
