@@ -862,9 +862,8 @@
                                               align="center"
                                             >
                                               <p>
-                                                Чтобы восстановить пароль
-                                                используйте код, представленный
-                                                ниже
+                                                Вы запросили сброс пароля. 
+                                                Если это сделали не вы, просто проигнорируйте это сообщение
                                               </p>
                                             </td>
                                           </tr>
@@ -873,14 +872,34 @@
                                               align="center"
                                               class="esd-block-text"
                                             >
-                                              <p
+                                              <span
+                                                class="es-button-border"
                                                 style="
-                                                  font-size: 22px;
-                                                  color: #242424;
+                                                  border-width: 0px;
+                                                  border-radius: 5px;
+                                                  background: rgb(36, 36, 36);
+                                                  border-color: rgb(
+                                                    44,
+                                                    181,
+                                                    67
+                                                  );
                                                 "
+                                                ><a
+                                                  href="{{ url }}"
+                                                  class="es-button"
+                                                  target="_blank"
+                                                  style="
+                                                    border-radius: 5px;
+                                                    background: rgb(36, 36, 36);
+                                                    border-color: rgb(
+                                                      36,
+                                                      36,
+                                                      36
+                                                    );
+                                                  "
+                                                  >Сбросить пароль</a
+                                                ></span
                                               >
-                                                <b>{{code}}</b>
-                                              </p>
                                             </td>
                                           </tr>
                                         </tbody>

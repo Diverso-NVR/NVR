@@ -92,6 +92,9 @@ class User(db.Model):
         self.email = email
         self.password = generate_password_hash(password, method='sha256')
 
+    def update_pass(self, password):
+        self.password = generate_password_hash(password, method='sha256')
+
     @classmethod
     def authenticate(cls, **kwargs):
         email = kwargs.get('email')
@@ -112,12 +115,12 @@ class User(db.Model):
             return
         return uuid.uuid4().hex
 
-    def get_verify_token(self, token_expiration: int):
+    def get_token(self, token_expiration: int, key: str):
         """
         Creates verification token
         """
         return jwt.encode(
-            {'verify_user': self.id,
+            {key: self.id,
              'exp': time() + token_expiration},
             current_app.config['SECRET_KEY'],
             algorithm='HS256').decode('utf-8')
@@ -126,6 +129,7 @@ class User(db.Model):
         """
         Deletes user if token is expired
         """
+        # TODO looks weird
         sleep(token_expiration)
         with app.app_context():
             user = User.query.get(self.id)
@@ -134,14 +138,14 @@ class User(db.Model):
                 db.session.commit()
 
     @staticmethod
-    def verify_email_token(token: str):
+    def verify_token(token: str, key: str):
         """
         Check if token is valid
         """
         try:
             id = jwt.decode(token,
                             current_app.config['SECRET_KEY'],
-                            algorithms=['HS256'])['verify_user']
+                            algorithms=['HS256'])[key]
         except:
             return
         return User.query.get(id)

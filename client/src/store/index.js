@@ -4,6 +4,8 @@ import shared from "./shared";
 import {
   authenticate,
   register,
+  sendResetEmail,
+  resetPass,
   getUsers,
   createAPIKey,
   updateAPIKey,
@@ -271,6 +273,28 @@ const actions = {
       commit("switchLoading");
       await register(userData);
       commit("setMessage", "Письмо с подтверждением выслано на почту");
+    } catch (error) {
+      commit("setError", error);
+    } finally {
+      commit("switchLoading");
+    }
+  },
+  async sendResetEmail({ commit }, email) {
+    try {
+      commit("switchLoading");
+      await sendResetEmail(email);
+      commit("setMessage", "Письмо с инструкцией выслано на почту");
+    } catch (error) {
+      commit("setError", error);
+    } finally {
+      commit("switchLoading");
+    }
+  },
+  async resetPass({ commit }, data) {
+    try {
+      commit("switchLoading");
+      await resetPass(data);
+      commit("setMessage", "Пароль обновлён");
     } catch (error) {
       commit("setError", error);
     } finally {

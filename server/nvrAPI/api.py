@@ -14,7 +14,7 @@ from flask_socketio import SocketIO
 
 from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions, create_event_, get_events
 from driveAPI.driveSettings import create_folder, get_folders_by_name, upload
-from .email import send_verify_email, send_access_request_email
+from .email import send_verify_email, send_access_request_email, send_reset_pass_email
 from .models import db, Room, Source, User, Record, nvr_db_context
 
 api = Blueprint('api', __name__)
@@ -108,7 +108,6 @@ def register():
         return jsonify({"error": 'Пользователь с данной почтой существует'}), 409
 
     token_expiration = 600
-
     try:
         send_verify_email(user, token_expiration)
         Thread(target=user.delete_user_after_token_expiration,
@@ -122,7 +121,7 @@ def register():
 
 @api.route('/verify-email/<token>', methods=['POST', 'GET'])
 def verify_email(token):
-    user = User.verify_email_token(token)
+    user = User.verify_token(token, 'verify_email')
     if not user:
         return render_template('msg_template.html',
                                msg={'title': 'Подтверждение почты',
@@ -176,6 +175,43 @@ def login():
     return jsonify({'token': token.decode('UTF-8')}), 202
 
 
+# RESET PASS
+@api.route('/reset-pass/<email>', methods=['POST'])
+def send_reset_pass(email):
+    user = User.query.filter_by(email=str(email)).first()
+    if not user:
+        return jsonify({"error": "User doesn`t exist"}), 404
+
+    token_expiration = 300
+    try:
+        send_reset_pass_email(user, token_expiration)
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"error": "Server error"}), 500
+
+    return jsonify({"message": "Reset pass token generated"}), 200
+
+
+@api.route('/reset-pass/<token>', methods=['PUT'])
+@json_data_required
+def reset_pass(token):
+    data = request.get_json()
+
+    new_pass = data.get('new_pass')
+    if not new_pass:
+        return jsonify({"error": "New password required"}), 400
+
+    user = User.verify_token(token, 'reset_pass')
+    if not user:
+        return {"error": "Invalid token"}, 403
+
+    user.update_pass(new_pass)
+    db.session.commit()
+
+    return jsonify({"message": "Password updated"}), 200
+
+
+# USERS
 @api.route('/users', methods=['GET'])
 @auth_required
 def get_users(current_user):

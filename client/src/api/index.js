@@ -11,6 +11,15 @@ export function register(userData) {
   return axios.post(`${API_URL}/register`, userData);
 }
 
+export function sendResetEmail(email) {
+  return axios.post(`${API_URL}/reset-pass/${email}`, {});
+}
+
+export function resetPass({ new_pass, token }) {
+  console.log("kek");
+  return axios.put(`${API_URL}/reset-pass/${token}`, { new_pass });
+}
+
 export function getUsers(token) {
   return axios.get(`${API_URL}/users`, {
     headers: { Token: token }

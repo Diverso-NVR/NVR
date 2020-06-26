@@ -31,13 +31,28 @@ def send_verify_email(user, token_expiration: int) -> None:
     """
     Creates token, and email body
     """
-    token = user.get_verify_token(token_expiration)
+    token = user.get_token(token_expiration, 'verify_email')
     url = f'{NVR_CLIENT_URL}/api/verify-email/{token}'
 
     send_email('[NVR] Подтверждение аккаунта',
                sender=current_app.config['ADMINS'][0],
                recipients=[user.email],
                html_body=render_template('email/verify_email.html',
+                                         user=user, url=url)
+               )
+
+
+def send_reset_pass_email(user, token_expiration: int) -> None:
+    """
+    Creates token, and email body
+    """
+    token = user.get_token(token_expiration, 'reset_pass')
+    url = f'{NVR_CLIENT_URL}/reset-pass/{token}'
+
+    send_email('[NVR] Сброс пароля',
+               sender=current_app.config['ADMINS'][0],
+               recipients=[user.email],
+               html_body=render_template('email/reset_pass.html',
                                          user=user, url=url)
                )
 

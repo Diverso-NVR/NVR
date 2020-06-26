@@ -2,14 +2,6 @@ import Vue from "vue";
 import Router from "vue-router";
 import { adminOnly, authRequired } from "./authGuard";
 
-import ManageApi from "@/components/api/ManageApi";
-import Rooms from "@/components/campus/Rooms";
-import Streaming from "@/components/campus/Streaming";
-import Login from "@/components/auth/Login";
-import Register from "@/components/auth/Register";
-import AccessRequests from "@/components/users/AccessRequests";
-import Users from "@/components/users/Users";
-
 Vue.use(Router);
 
 const router = new Router({
@@ -20,41 +12,51 @@ const router = new Router({
     },
     {
       path: "/login",
-      component: Login,
+      component: () => import("@/components/auth/Login"),
       meta: { title: "Вход" }
     },
     {
       path: "/register",
-      component: Register,
+      component: () => import("@/components/auth/Register"),
       meta: { title: "Регистрация" }
     },
     {
+      path: "/reset-pass",
+      component: () => import("@/components/auth/GetEmail"),
+      meta: { title: "Сброс пароля" }
+    },
+    {
+      path: "/reset-pass/:token",
+      component: () => import("@/components/auth/ResetPass"),
+      meta: { title: "Сброс пароля" }
+    },
+    {
       path: "/rooms",
-      component: Rooms,
+      component: () => import("@/components/campus/Rooms"),
       beforeEnter: authRequired,
       meta: { title: "Аудитории" }
     },
     {
       path: "/streaming",
-      component: Streaming,
+      component: () => import("@/components/campus/Streaming"),
       beforeEnter: authRequired,
       meta: { title: "Стриминг" }
     },
     {
       path: "/access-requests",
-      component: AccessRequests,
+      component: () => import("@/components/users/AccessRequests"),
       beforeEnter: adminOnly,
       meta: { title: "Запросы на доступ" }
     },
     {
       path: "/users",
-      component: Users,
+      component: () => import("@/components/users/Users"),
       beforeEnter: adminOnly,
       meta: { title: "Пользователи" }
     },
     {
       path: "/manage-api",
-      component: ManageApi,
+      component: () => import("@/components/api/ManageApi"),
       beforeEnter: adminOnly,
       meta: { title: "API" }
     },
