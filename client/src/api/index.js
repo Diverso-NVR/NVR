@@ -16,7 +16,6 @@ export function sendResetEmail(email) {
 }
 
 export function resetPass({ new_pass, token }) {
-  console.log("kek");
   return axios.put(`${API_URL}/reset-pass/${token}`, { new_pass });
 }
 

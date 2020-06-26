@@ -43,7 +43,7 @@
             </v-card-actions>
           </template>
           <template v-else>
-            <v-card-text>kek</v-card-text>
+            <v-card-text>Время на сброс пароля вышло</v-card-text>
           </template>
         </v-card>
       </v-flex>

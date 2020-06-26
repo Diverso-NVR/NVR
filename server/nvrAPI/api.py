@@ -203,7 +203,7 @@ def reset_pass(token):
 
     user = User.verify_token(token, 'reset_pass')
     if not user:
-        return {"error": "Invalid token"}, 403
+        return jsonify({"error": "Invalid token"}), 403
 
     user.update_pass(new_pass)
     db.session.commit()
