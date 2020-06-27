@@ -25,9 +25,7 @@ api = Blueprint('api', __name__)
 TRACKING_URL = os.environ.get('TRACKING_URL')
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
 STREAMING_URL = os.environ.get('STREAMING_URL')
-CLIENT_ID = os.environ.get('CLIENT_ID',
-                           '834955370906-98garoussj4gk8vh93n8la0ehgn3rmnf.apps.googleusercontent.com'
-                           )
+CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
 VIDS_PATH = str(Path.home()) + '/vids/'
 
 socketio = SocketIO(message_queue='redis://',
