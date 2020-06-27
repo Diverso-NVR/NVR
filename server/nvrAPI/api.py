@@ -7,6 +7,9 @@ from pathlib import Path
 
 import traceback
 
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+
 import jwt
 import requests
 from flask import Blueprint, jsonify, request, current_app, render_template
@@ -22,6 +25,9 @@ api = Blueprint('api', __name__)
 TRACKING_URL = os.environ.get('TRACKING_URL')
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
 STREAMING_URL = os.environ.get('STREAMING_URL')
+CLIENT_ID = os.environ.get('CLIENT_ID',
+                           '834955370906-98garoussj4gk8vh93n8la0ehgn3rmnf.apps.googleusercontent.com'
+                           )
 VIDS_PATH = str(Path.home()) + '/vids/'
 
 socketio = SocketIO(message_queue='redis://',
@@ -174,6 +180,44 @@ def login():
 
     return jsonify({'token': token.decode('UTF-8')}), 202
 
+
+@api.route('/google-login', methods=['POST'])
+def glogin():
+    data = request.get_json()
+    token = data.get('token')
+    email = data.get('email')
+    if not token or not email:
+        return jsonify({'error': "Bad request"}), 400
+
+    try:
+        idinfo = id_token.verify_oauth2_token(
+            token, google_requests.Request(), CLIENT_ID)
+
+        if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
+            raise ValueError('Wrong issuer.')
+
+        user_id = idinfo['sub']
+
+    except ValueError:
+        return jsonify({'error': "Bad token"}), 403
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        user = User(email=email)
+        user.google_id = user_id
+        user.access = True
+        user.email_verified = True
+
+        db.session.add(user)
+        db.session.commit()
+
+    token = jwt.encode({
+        'sub': {'email': user.email, 'role': user.role},
+        'iat': datetime.utcnow(),
+        'exp': datetime.utcnow() + timedelta(weeks=12)},
+        current_app.config['SECRET_KEY'])
+
+    return jsonify({'token': token.decode('UTF-8')}), 202
 
 # RESET PASS
 @api.route('/reset-pass/<email>', methods=['POST'])

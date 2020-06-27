@@ -7,6 +7,10 @@ export function authenticate(userData) {
   return axios.post(`${API_URL}/login`, userData);
 }
 
+export function googleLog({ email, token }) {
+  return axios.post(`${API_URL}/google-login`, { email, token });
+}
+
 export function register(userData) {
   return axios.post(`${API_URL}/register`, userData);
 }

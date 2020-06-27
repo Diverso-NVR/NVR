@@ -80,17 +80,19 @@ class User(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(255), nullable=False)
+    password = db.Column(db.String(255), default=None)
     role = db.Column(db.String(50), default='user')
     email_verified = db.Column(db.Boolean, default=False)
     access = db.Column(db.Boolean, default=False)
     api_key = db.Column(db.String(255), unique=True)
+    google_id = db.Column(db.String(255), unique=True)
 
     # records = db.relationship("UserRecord", back_populates="user")
 
-    def __init__(self, email, password):
+    def __init__(self, email, password=None):
         self.email = email
-        self.password = generate_password_hash(password, method='sha256')
+        if password:
+            self.password = generate_password_hash(password, method='sha256')
 
     def update_pass(self, password):
         self.password = generate_password_hash(password, method='sha256')
@@ -104,7 +106,7 @@ class User(db.Model):
             return None
 
         user = cls.query.filter_by(email=email).first()
-        if not user or not check_password_hash(user.password, password):
+        if not user or not user.password or not check_password_hash(user.password, password):
             return None
 
         return user

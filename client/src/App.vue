@@ -77,6 +77,10 @@
         <v-btn dark flat @click="closeMessage">Закрыть</v-btn>
       </v-snackbar>
     </template>
+
+    <!-- fix google localStorage disappear on reload
+    because it must be all the time-->
+    <div v-show="false" id="google-signin-button"></div>
   </v-app>
 </template>
 
@@ -137,24 +141,33 @@ export default {
     }
   },
   methods: {
-    switchColorMode() {
-      this.$store.dispatch("switchColorMode");
+    async switchColorMode() {
+      await this.$store.dispatch("switchColorMode");
     },
-    closeError() {
-      this.$store.dispatch("clearError");
+    async closeError() {
+      await this.$store.dispatch("clearError");
     },
-    closeMessage() {
-      this.$store.dispatch("clearMessage");
+    async closeMessage() {
+      await this.$store.dispatch("clearMessage");
     },
-    onLogout() {
-      this.$store.dispatch("logout").then(() => {
-        this.$store.dispatch("clearTimer");
-        this.$router.push("/login");
-      });
+    async onLogout() {
+      if (localStorage.googleOAuth == "true") {
+        try {
+          // OAuth logout
+          var auth2 = await gapi.auth2.getAuthInstance();
+          await auth2.signOut();
+        } catch (error) {}
+      }
+
+      await this.$store.dispatch("logout");
+      await this.$router.push("/login");
     }
   },
   beforeMount() {
     this.$store.dispatch("setColorMode");
+  },
+  mounted() {
+    gapi.signin2.render("google-signin-button", {});
   }
 };
 </script>

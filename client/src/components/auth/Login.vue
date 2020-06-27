@@ -41,6 +41,11 @@
             >Вход</v-btn>
             <v-btn depressed @click="getEmail">Забыли пароль</v-btn>
           </v-card-actions>
+          <div class="separator">или</div>
+
+          <template class="gsb-outer">
+            <div id="google-signin-button" class="gsb-inner py-2"></div>
+          </template>
         </v-card>
       </v-flex>
     </v-layout>
@@ -73,20 +78,38 @@ export default {
       return this.$store.getters.loading;
     }
   },
+  mounted() {
+    gapi.signin2.render("google-signin-button", {
+      // theme: "dark",
+      onsuccess: this.onSignIn
+    });
+  },
   methods: {
+    async onSignIn(user) {
+      const email = user.getBasicProfile().getEmail();
+      const token = user.getAuthResponse().id_token;
+      let res = await this.$store.dispatch("googleLogin", {
+        email,
+        token
+      });
+      await this.loadData(res);
+    },
     async onSubmit() {
       if (this.$refs.form.validate()) {
         let res = await this.$store.dispatch("login", {
           email: this.email,
           password: this.password
         });
-        if (res) {
-          await this.$store.dispatch("loadRooms");
-          this.$router.push("/rooms");
-          if (/^\w*admin$/.test(res)) {
-            await this.$store.dispatch("getUsers");
-            await this.$store.dispatch("getKey");
-          }
+        await this.loadData(res);
+      }
+    },
+    async loadData(res) {
+      if (res) {
+        await this.$store.dispatch("loadRooms");
+        this.$router.push("/rooms");
+        if (/^\w*admin$/.test(res)) {
+          await this.$store.dispatch("getUsers");
+          await this.$store.dispatch("getKey");
         }
       }
     },
@@ -96,3 +119,30 @@ export default {
   }
 };
 </script>
+
+<style  scoped>
+.separator {
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
+.separator::before,
+.separator::after {
+  content: "";
+  flex: 1;
+  border-bottom: 2px solid #757575;
+}
+.separator::before {
+  margin-right: 0.25em;
+}
+.separator::after {
+  margin-left: 0.25em;
+}
+.gsb-outer {
+  width: 100%;
+}
+.gsb-inner {
+  display: table;
+  margin: 0 auto;
+}
+</style>
