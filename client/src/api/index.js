@@ -7,8 +7,8 @@ export function authenticate(userData) {
   return axios.post(`${API_URL}/login`, userData);
 }
 
-export function googleLog({ email, token }) {
-  return axios.post(`${API_URL}/google-login`, { email, token });
+export function googleLog({ token }) {
+  return axios.post(`${API_URL}/google-login`, { token });
 }
 
 export function register(userData) {

@@ -81,6 +81,7 @@ export default {
   mounted() {
     gapi.signin2.render("google-signin-button", {
       // theme: "dark",
+      scope: "profile email",
       onsuccess: this.onSignIn
     });
   },
@@ -88,10 +89,7 @@ export default {
     async onSignIn(user) {
       const email = user.getBasicProfile().getEmail();
       const token = user.getAuthResponse().id_token;
-      let res = await this.$store.dispatch("googleLogin", {
-        email,
-        token
-      });
+      let res = await this.$store.dispatch("googleLogin", { token });
       await this.loadData(res);
     },
     async onSubmit() {

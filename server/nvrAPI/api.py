@@ -183,8 +183,7 @@ def login():
 def glogin():
     data = request.get_json()
     token = data.get('token')
-    email = data.get('email')
-    if not token or not email:
+    if not token:
         return jsonify({'error': "Bad request"}), 400
 
     try:
@@ -194,7 +193,7 @@ def glogin():
         if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
             raise ValueError('Wrong issuer.')
 
-        user_id = idinfo['sub']
+        email = idinfo['email']
 
     except ValueError:
         return jsonify({'error': "Bad token"}), 403
@@ -202,9 +201,8 @@ def glogin():
     user = User.query.filter_by(email=email).first()
     if not user:
         user = User(email=email)
-        user.google_id = user_id
-        user.access = True
         user.email_verified = True
+        user.access = True
 
         db.session.add(user)
         db.session.commit()
