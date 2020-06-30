@@ -5,8 +5,8 @@ import requests
 from flask import current_app, render_template
 from flask_socketio import emit, Namespace
 
-from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions
-from driveAPI.driveSettings import create_folder
+from apis.calendar_api import create_calendar, delete_calendar, give_permissions
+from apis.drive_api import create_folder
 from .models import db, Room, Source, User, nvr_db_context
 from .email import send_email
 

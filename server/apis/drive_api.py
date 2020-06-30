@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+from pathlib import Path
 import os.path
 import pickle
 from threading import RLock
@@ -11,13 +12,14 @@ from googleapiclient.http import MediaFileUpload
 
 lock = RLock()
 
+HOME = str(Path.home())
 SCOPES = 'https://www.googleapis.com/auth/drive'
 """
 Setting up drive
 """
 creds = None
-token_path = '.creds/tokenDrive.pickle'
-creds_path = '.creds/credentials.json'
+token_path = f'{HOME}/creds/tokenDrive.pickle'
+creds_path = f'{HOME}/creds/credentials.json'
 
 if os.path.exists(token_path):
     with open(token_path, 'rb') as token:

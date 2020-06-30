@@ -15,8 +15,8 @@ import requests
 from flask import Blueprint, jsonify, request, current_app, render_template
 from flask_socketio import SocketIO
 
-from calendarAPI.calendarSettings import create_calendar, delete_calendar, give_permissions, create_event_, get_events
-from driveAPI.driveSettings import create_folder, get_folders_by_name, upload
+from apis.calendar_api import create_calendar, delete_calendar, give_permissions, create_event_, get_events
+from apis.drive_api import create_folder, get_folders_by_name, upload
 from .email import send_verify_email, send_access_request_email, send_reset_pass_email
 from .models import db, Room, Source, User, Record, nvr_db_context
 
