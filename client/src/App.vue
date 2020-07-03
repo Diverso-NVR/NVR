@@ -1,7 +1,7 @@
 <template>
   <v-app :dark="isDarkMode">
-    <v-navigation-drawer app temporary v-model="drawer" dark color="black">
-      <v-list>
+    <v-navigation-drawer v-if="isMobile" v-model="drawer" app absolute v-resize="onResize">
+      <v-list style="margin-top:0px">
         <v-list-tile v-for="link of links" :key="link.title" :to="link.url">
           <v-list-tile-action>
             <v-icon>{{link.icon}}</v-icon>
@@ -23,24 +23,34 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-toolbar dark color="black" fixed>
-      <v-toolbar-side-icon @click.prevent="drawer = !drawer" class="hidden-md-and-up"></v-toolbar-side-icon>
+    <v-navigation-drawer v-else app absolute v-resize="onResize" :mini-variant="!drawer">
+      <v-list style="margin-top:70px">
+        <v-list-tile v-for="link of links" :key="link.title" :to="link.url">
+          <v-list-tile-action>
+            <v-icon>{{link.icon}}</v-icon>
+          </v-list-tile-action>
+
+          <v-list-tile-content>
+            <v-list-tile-title>{{link.title}}</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+      </v-list>
+    </v-navigation-drawer>
+
+    <v-toolbar dark color="black" clipped-left>
+      <v-toolbar-side-icon @click.prevent="switchDrawer()"></v-toolbar-side-icon>
       <v-toolbar-side-icon class="ml-5" disabled>
         <v-img src="../static/logo.png" min-height="30" min-width="77"></v-img>
       </v-toolbar-side-icon>
       <v-spacer></v-spacer>
-      <v-toolbar-items class="hidden-sm-and-down">
-        <v-btn flat v-for="link of links" :key="link.title" :to="link.url">
-          <v-icon left>{{link.icon}}</v-icon>
-          {{link.title}}
-        </v-btn>
-        <v-btn flat @click="onLogout" v-if="isUserLoggedIn">
+      <v-toolbar-items>
+        <v-btn flat @click="onLogout" v-if="isUserLoggedIn && !isMobile">
           <v-icon left>exit_to_app</v-icon>Выход
         </v-btn>
       </v-toolbar-items>
     </v-toolbar>
 
-    <v-content style="margin-top:60px">
+    <v-content>
       <v-container fluid>
         <router-view></router-view>
       </v-container>
@@ -88,7 +98,8 @@
 export default {
   data() {
     return {
-      drawer: false
+      drawer: localStorage.drawer === "true" ? true : false,
+      isMobile: false
     };
   },
   computed: {
@@ -112,7 +123,7 @@ export default {
       if (this.isUserLoggedIn) {
         links = [
           { title: "Аудитории", icon: "view_list", url: "/rooms" },
-          { title: "Стриминг", icon: "view_list", url: "/streaming" }
+          { title: "Стриминг", icon: "stream", url: "/streaming" }
         ];
         if (/^\w*admin$/.test(this.user.role)) {
           links = [
@@ -143,6 +154,13 @@ export default {
   methods: {
     async switchColorMode() {
       await this.$store.dispatch("switchColorMode");
+    },
+    switchDrawer() {
+      this.drawer = !this.drawer;
+      localStorage.drawer = this.drawer;
+    },
+    onResize() {
+      this.isMobile = window.innerWidth < 769;
     },
     async closeError() {
       await this.$store.dispatch("clearError");
