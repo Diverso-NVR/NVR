@@ -7,8 +7,20 @@ export function authenticate(userData) {
   return axios.post(`${API_URL}/login`, userData);
 }
 
+export function googleLog({ token }) {
+  return axios.post(`${API_URL}/google-login`, { token });
+}
+
 export function register(userData) {
   return axios.post(`${API_URL}/register`, userData);
+}
+
+export function sendResetEmail(email) {
+  return axios.post(`${API_URL}/reset-pass/${email}`, {});
+}
+
+export function resetPass({ new_pass, token }) {
+  return axios.put(`${API_URL}/reset-pass/${token}`, { new_pass });
 }
 
 export function getUsers(token) {

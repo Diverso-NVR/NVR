@@ -1,5 +1,5 @@
 from __future__ import print_function
-
+from pathlib import Path
 import datetime
 import os.path
 import pickle
@@ -14,14 +14,14 @@ from nvrAPI.models import nvr_db_context, Room
 
 lock = RLock()
 
-CAMPUS = os.environ.get('CAMPUS')
+HOME = str(Path.home())
 SCOPES = 'https://www.googleapis.com/auth/calendar'
 """
 Setting up calendar
 """
 creds = None
-token_path = '.creds/tokenCalendar.pickle'
-creds_path = '.creds/credentials.json'
+token_path = f'{HOME}/creds/tokenCalendar.pickle'
+creds_path = f'{HOME}/creds/credentials.json'
 
 if os.path.exists(token_path):
     with open(token_path, 'rb') as token:

@@ -3,7 +3,10 @@ import Vuex from "vuex";
 import shared from "./shared";
 import {
   authenticate,
+  googleLog,
   register,
+  sendResetEmail,
+  resetPass,
   getUsers,
   createAPIKey,
   updateAPIKey,
@@ -92,8 +95,10 @@ const mutations = {
     state.jwt = payload.jwt;
   },
   clearUserData(state) {
+    localStorage.removeItem("token");
+    localStorage.removeItem("googleOAuth");
     state.jwt = "";
-    localStorage.token = "";
+    state.user = {};
   },
   setKey(state, payload) {
     state.user.api_key = payload.key;
@@ -258,6 +263,25 @@ const actions = {
       const body = JSON.parse(atob(tokenParts[1]));
       state.user.email = body.sub.email;
       state.user.role = body.sub.role;
+      localStorage.googleOAuth = false;
+      return body.sub.role;
+    } catch (error) {
+      commit("setError", error);
+      return "";
+    } finally {
+      commit("switchLoading");
+    }
+  },
+  async googleLogin({ commit, state }, userData) {
+    try {
+      commit("switchLoading");
+      let res = await googleLog(userData);
+      commit("setJwtToken", { jwt: res.data });
+      const tokenParts = res.data.token.split(".");
+      const body = JSON.parse(atob(tokenParts[1]));
+      state.user.email = body.sub.email;
+      state.user.role = body.sub.role;
+      localStorage.googleOAuth = true;
       return body.sub.role;
     } catch (error) {
       commit("setError", error);
@@ -271,6 +295,28 @@ const actions = {
       commit("switchLoading");
       await register(userData);
       commit("setMessage", "Письмо с подтверждением выслано на почту");
+    } catch (error) {
+      commit("setError", error);
+    } finally {
+      commit("switchLoading");
+    }
+  },
+  async sendResetEmail({ commit }, email) {
+    try {
+      commit("switchLoading");
+      await sendResetEmail(email);
+      commit("setMessage", "Письмо с инструкцией выслано на почту");
+    } catch (error) {
+      commit("setError", error);
+    } finally {
+      commit("switchLoading");
+    }
+  },
+  async resetPass({ commit }, data) {
+    try {
+      commit("switchLoading");
+      await resetPass(data);
+      commit("setMessage", "Пароль обновлён");
     } catch (error) {
       commit("setError", error);
     } finally {
