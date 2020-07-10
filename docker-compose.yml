@@ -8,13 +8,6 @@ services:
     expose:
       - '6379'
 
-  frontend:
-    build: ./frontend
-    container_name: nvr-frontend
-    restart: always
-    volumes:
-      - ./frontend/dist:/frontend/dist
-
   backend:
     depends_on:
       - redis
@@ -29,17 +22,16 @@ services:
       - '5000'
       - '5001'
       - '5002'
-#    network_mode: "host"
 
-  nginx:
-    build: ./nginx
+  frontend:
+    build: ./frontend
     depends_on:
       - backend
-      - frontend
-    container_name: nvr-nginx
+    container_name: nvr-frontend
     restart: always
+    env_file:
+      - .env_nvr
     volumes:
-      - ./frontend/dist:/frontend/dist
       - ./backend:/backend
     ports:
       - '8080:80'
