@@ -1,3 +1,5 @@
+import store from "@/store";
+
 export function isValidToken(token) {
   if (!token || token.split(".").length < 3) {
     return false;
@@ -8,4 +10,23 @@ export function isValidToken(token) {
   const now = new Date();
 
   return now < exp;
+}
+
+export function isAdmin() {
+  if (/^\w*admin$/.test(store.getters.user.role)) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+export function isAdminOrEditor() {
+  if (
+    /^\w*admin$/.test(store.getters.user.role) ||
+    store.getters.user.role === "editor"
+  ) {
+    return true;
+  } else {
+    return false;
+  }
 }

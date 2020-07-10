@@ -58,7 +58,9 @@ export default {
       this.isMobile = window.innerWidth < 769;
     },
     changeRole(user) {
-      user.role = user.role === "user" ? "admin" : "user";
+      if (user.role === "user") user.role = "editor";
+      else if (user.role === "editor") user.role = "admin";
+      else user.role = "user";
       this.$store.dispatch("emitChangeRole", { user });
     },
     deleteUser(user) {

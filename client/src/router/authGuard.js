@@ -1,7 +1,14 @@
 import store from "@/store";
+import { isAdmin, isAdminOrEditor } from "@/utils";
 
 export function adminOnly(to, from, next) {
-  if (/^\w*admin$/.test(store.getters.user.role)) {
+  if (isAdmin()) {
+    next();
+  } else next("/");
+}
+
+export function adminOrEditor(to, from, next) {
+  if (isAdminOrEditor()) {
     next();
   } else next("/");
 }

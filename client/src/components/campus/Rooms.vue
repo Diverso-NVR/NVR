@@ -16,6 +16,20 @@
             <td class="text-xs-center subheading">{{ props.item.name }}</td>
 
             <td class="text-xs-center">
+              <app-add-event :room="props.item"></app-add-event>
+            </td>
+
+            <td class="text-xs-center">
+              <v-btn icon target="_blank" href="https://calendar.google.com/calendar/r">
+                <v-icon>calendar_today</v-icon>
+              </v-btn>
+            </td>
+            <td class="text-xs-center">
+              <v-btn icon :href="props.item.drive" target="_blank">
+                <v-icon>folder</v-icon>
+              </v-btn>
+            </td>
+            <td class="text-xs-center" v-if="isAdminOrEditor">
               <v-btn-toggle v-model="props.item.tracking_state" mandatory>
                 <v-btn
                   flat
@@ -34,7 +48,7 @@
               </v-btn-toggle>
             </td>
 
-            <td class="text-xs-center">
+            <td class="text-xs-center" v-if="isAdminOrEditor">
               <v-btn-toggle v-model="props.item.auto_control" mandatory>
                 <v-btn
                   flat
@@ -52,22 +66,7 @@
                 >Off</v-btn>
               </v-btn-toggle>
             </td>
-
-            <td class="text-xs-center">
-              <app-add-event :room="props.item"></app-add-event>
-            </td>
-
-            <td class="text-xs-center">
-              <v-btn icon target="_blank" href="https://calendar.google.com/calendar/r">
-                <v-icon>calendar_today</v-icon>
-              </v-btn>
-            </td>
-            <td class="text-xs-center">
-              <v-btn icon :href="props.item.drive" target="_blank">
-                <v-icon>folder</v-icon>
-              </v-btn>
-            </td>
-            <td class="text-xs-center" v-if="/^\w*admin$/.test(user.role)">
+            <td class="text-xs-center" v-if="isAdminOrEditor">
               <app-edit-room :room="props.item"></app-edit-room>
               <v-btn icon @click="del(props.item)">
                 <v-icon>delete</v-icon>
@@ -82,7 +81,23 @@
                   data-label="Аудитория"
                 >{{ props.item.name }}</li>
 
-                <li class="flex-item subheading" data-label="Трекинг">
+                <li class="flex-item subheading" data-label="Календарь">
+                  <v-btn icon target="_blank" href="https://calendar.google.com/calendar/r">
+                    <v-icon medium>calendar_today</v-icon>
+                  </v-btn>
+                </li>
+
+                <li class="flex-item subheading" data-label="Диск">
+                  <v-btn icon :href="props.item.drive" target="_blank">
+                    <v-icon medium>folder</v-icon>
+                  </v-btn>
+                </li>
+
+                <li class="flex-item subheading key-elems" data-label="Запись">
+                  <app-add-event :room="props.item"></app-add-event>
+                </li>
+
+                <li class="flex-item subheading" v-if="isAdminOrEditor" data-label="Трекинг">
                   <v-btn-toggle v-model="props.item.tracking_state" mandatory>
                     <v-btn
                       flat
@@ -101,7 +116,7 @@
                   </v-btn-toggle>
                 </li>
 
-                <li class="flex-item subheading" data-label="Автоуправление">
+                <li class="flex-item subheading" v-if="isAdminOrEditor" data-label="Автоуправление">
                   <v-btn-toggle v-model="props.item.auto_control" mandatory>
                     <v-btn
                       flat
@@ -120,25 +135,9 @@
                   </v-btn-toggle>
                 </li>
 
-                <li class="flex-item subheading" data-label="Календарь">
-                  <v-btn icon target="_blank" href="https://calendar.google.com/calendar/r">
-                    <v-icon medium>calendar_today</v-icon>
-                  </v-btn>
-                </li>
-
-                <li class="flex-item subheading" data-label="Диск">
-                  <v-btn icon :href="props.item.drive" target="_blank">
-                    <v-icon medium>folder</v-icon>
-                  </v-btn>
-                </li>
-
-                <li class="flex-item subheading key-elems" data-label="Запись">
-                  <app-add-event :room="props.item"></app-add-event>
-                </li>
-
                 <li
                   class="flex-item subheading key-elems"
-                  v-if="/^\w*admin$/.test(user.role)"
+                  v-if="isAdminOrEditor"
                   data-label="Изменить"
                 >
                   <app-edit-room :room="props.item"></app-edit-room>
@@ -154,7 +153,7 @@
       <template v-if="loader && isMobile">
         <v-progress-linear :indeterminate="true"></v-progress-linear>
       </template>
-      <v-layout row wrap class="addRoom" v-if="user.role !== 'user'">
+      <v-layout row wrap class="addRoom" v-if="isAdminOrEditor">
         <v-flex xs6 sm4 md2>
           <v-text-field v-model.trim="newRoom" label="Новая аудитория"></v-text-field>
         </v-flex>
@@ -166,6 +165,7 @@
 
 <script>
 import { mapState } from "vuex";
+import { isAdmin, isAdminOrEditor } from "@/utils";
 
 import EditRoom from "./EditRoom";
 import AddEvent from "./AddEvent";
@@ -179,18 +179,6 @@ export default {
           align: "center",
           sortable: true,
           value: "name"
-        },
-        {
-          text: "Трекинг",
-          value: "montage",
-          sortable: true,
-          align: "center"
-        },
-        {
-          text: "Автоуправление",
-          value: "tracking",
-          sortable: true,
-          align: "center"
         },
         {
           text: "Запись",
@@ -228,6 +216,12 @@ export default {
     user: state => state.user,
     loader() {
       return this.$store.getters.loading;
+    },
+    isAdmin() {
+      return isAdmin();
+    },
+    isAdminOrEditor() {
+      return isAdminOrEditor();
     }
   }),
   methods: {
@@ -259,13 +253,27 @@ export default {
     }
   },
   beforeMount() {
-    if (this.user.role !== "user")
-      this.headers.push({
-        text: "Изменить",
-        value: "edit",
-        sortable: false,
-        align: "center"
-      });
+    if (this.isAdminOrEditor)
+      this.headers.push(
+        {
+          text: "Трекинг",
+          value: "montage",
+          sortable: true,
+          align: "center"
+        },
+        {
+          text: "Автоуправление",
+          value: "tracking",
+          sortable: true,
+          align: "center"
+        },
+        {
+          text: "Изменить",
+          value: "edit",
+          sortable: false,
+          align: "center"
+        }
+      );
   }
 };
 </script>
