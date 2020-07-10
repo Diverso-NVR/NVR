@@ -1,6 +1,6 @@
 import Vue from "vue";
 import Router from "vue-router";
-import { adminOnly, authRequired } from "./authGuard";
+import { adminOnly, adminOrEditor, authRequired } from "./authGuard";
 
 Vue.use(Router);
 
@@ -57,7 +57,7 @@ const router = new Router({
     {
       path: "/manage-api",
       component: () => import("@/components/api/ManageApi"),
-      beforeEnter: adminOnly,
+      beforeEnter: adminOrEditor,
       meta: { title: "API" }
     },
     {

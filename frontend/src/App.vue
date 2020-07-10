@@ -1,6 +1,6 @@
 <template>
   <v-app :dark="isDarkMode">
-    <v-navigation-drawer v-if="isMobile" v-model="drawer" app absolute v-resize="onResize">
+    <v-navigation-drawer v-if="isMedium" v-model="drawer" app absolute v-resize="onResize">
       <v-list style="margin-top:0px">
         <v-list-tile v-for="link of links" :key="link.title" :to="link.url">
           <v-list-tile-action>
@@ -44,7 +44,7 @@
       </v-toolbar-side-icon>
       <v-spacer></v-spacer>
       <v-toolbar-items>
-        <v-btn flat @click="onLogout" v-if="isUserLoggedIn && !isMobile">
+        <v-btn flat @click="onLogout" v-if="isUserLoggedIn && !isMedium">
           <v-icon left>exit_to_app</v-icon>Выход
         </v-btn>
       </v-toolbar-items>
@@ -95,11 +95,12 @@
 </template>
 
 <script>
+import { isAdmin, isAdminOrEditor } from "@/utils";
 export default {
   data() {
     return {
       drawer: localStorage.drawer === "true" ? true : false,
-      isMobile: false
+      isMedium: false
     };
   },
   computed: {
@@ -111,6 +112,12 @@ export default {
     },
     isUserLoggedIn() {
       return this.$store.getters.isAutheticated;
+    },
+    isAdmin() {
+      return isAdmin();
+    },
+    isAdminOrEditor() {
+      return isAdminOrEditor();
     },
     user() {
       return this.$store.getters.user;
@@ -125,7 +132,7 @@ export default {
           { title: "Аудитории", icon: "view_list", url: "/rooms" },
           { title: "Стриминг", icon: "stream", url: "/streaming" }
         ];
-        if (/^\w*admin$/.test(this.user.role)) {
+        if (this.isAdmin) {
           links = [
             ...links,
             {
@@ -138,6 +145,11 @@ export default {
               icon: "verified_user",
               url: "/access-requests"
             },
+            { title: "API", icon: "code", url: "/manage-api" }
+          ];
+        } else if (this.isAdminOrEditor) {
+          links = [
+            ...links,
             { title: "API", icon: "code", url: "/manage-api" }
           ];
         }
@@ -160,7 +172,7 @@ export default {
       localStorage.drawer = this.drawer;
     },
     onResize() {
-      this.isMobile = window.innerWidth < 769;
+      this.isMedium = window.innerWidth < 1264;
     },
     async closeError() {
       await this.$store.dispatch("clearError");

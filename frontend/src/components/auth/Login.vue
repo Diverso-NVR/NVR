@@ -53,6 +53,8 @@
 </template>
 
 <script>
+import { isAdmin, isAdminOrEditor } from "@/utils";
+
 export default {
   data() {
     return {
@@ -76,6 +78,12 @@ export default {
   computed: {
     loading() {
       return this.$store.getters.loading;
+    },
+    isAdmin() {
+      return isAdmin();
+    },
+    isAdminOrEditor() {
+      return isAdminOrEditor();
     }
   },
   mounted() {
@@ -90,7 +98,7 @@ export default {
       const email = user.getBasicProfile().getEmail();
       const token = user.getAuthResponse().id_token;
       let res = await this.$store.dispatch("googleLogin", { token });
-      await this.loadData(res);
+      if (res) await this.loadData();
     },
     async onSubmit() {
       if (this.$refs.form.validate()) {
@@ -98,17 +106,17 @@ export default {
           email: this.email,
           password: this.password
         });
-        await this.loadData(res);
+        if (res) await this.loadData();
       }
     },
     async loadData(res) {
-      if (res) {
-        await this.$store.dispatch("loadRooms");
-        this.$router.push("/rooms");
-        if (/^\w*admin$/.test(res)) {
-          await this.$store.dispatch("getUsers");
-          await this.$store.dispatch("getKey");
-        }
+      await this.$store.dispatch("loadRooms");
+      this.$router.push("/rooms");
+      if (this.isAdmin) {
+        await this.$store.dispatch("getUsers");
+      }
+      if (this.isAdminOrEditor) {
+        await this.$store.dispatch("getKey");
       }
     },
     getEmail() {

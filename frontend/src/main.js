@@ -6,6 +6,7 @@ import VSwitch from "v-switch-case";
 
 import "vuetify/dist/vuetify.min.css";
 import store from "./store";
+import { isAdmin, isAdminOrEditor } from "@/utils";
 
 import VueSocketIOExt from "vue-socket.io-extended";
 import io from "socket.io-client";
@@ -21,8 +22,10 @@ Vue.config.productionTip = false;
 if (store.getters.isAutheticated) {
   store.dispatch("setDataFromToken").then(userRole => {
     store.dispatch("loadRooms");
-    if (/^\w*admin$/.test(userRole)) {
+    if (isAdmin()) {
       store.dispatch("getUsers");
+    }
+    if (isAdminOrEditor()) {
       store.dispatch("getKey");
     }
   });

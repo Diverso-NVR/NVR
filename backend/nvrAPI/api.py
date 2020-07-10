@@ -25,7 +25,7 @@ api = Blueprint('api', __name__)
 TRACKING_URL = os.environ.get('TRACKING_URL')
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
 STREAMING_URL = os.environ.get('STREAMING_URL')
-CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
 VIDS_PATH = str(Path.home()) + '/vids/'
 
 socketio = SocketIO(message_queue='redis://',
@@ -86,6 +86,26 @@ def auth_required(f):
         return jsonify(invalid_msg), 403
 
     return _verify
+
+
+def admin_only(f):
+    @wraps(f)
+    def wrapper(user, *args, **kwargs):
+        if user.role in ['user', 'editor']:
+            return jsonify({'error': "Access error"}), 401
+        return f(user, *args, **kwargs)
+
+    return wrapper
+
+
+def admin_or_editor_only(f):
+    @wraps(f)
+    def wrapper(user, *args, **kwargs):
+        if user.role == 'user':
+            return jsonify({'error': "Access error"}), 401
+        return f(user, *args, **kwargs)
+
+    return wrapper
 
 
 def json_data_required(f):
@@ -188,7 +208,7 @@ def glogin():
 
     try:
         idinfo = id_token.verify_oauth2_token(
-            token, google_requests.Request(), CLIENT_ID)
+            token, google_requests.Request(), GOOGLE_CLIENT_ID)
 
         if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
             raise ValueError('Wrong issuer.')
@@ -254,6 +274,7 @@ def reset_pass(token):
 # USERS
 @api.route('/users', methods=['GET'])
 @auth_required
+@admin_only
 def get_users(current_user):
     users = [u.to_dict() for u in User.query.all() if u.email_verified]
     return jsonify(users), 200
@@ -261,10 +282,8 @@ def get_users(current_user):
 
 @api.route('/users/<user_id>', methods=['PUT'])
 @auth_required
+@admin_only
 def grant_access(current_user, user_id):
-    if current_user.role == 'user':
-        return jsonify({'error': "Access error"}), 401
-
     user = User.query.get(user_id)
     user.access = True
     db.session.commit()
@@ -279,10 +298,8 @@ def grant_access(current_user, user_id):
 
 @api.route('/users/roles/<user_id>', methods=['PUT'])
 @auth_required
+@admin_only
 def user_role(current_user, user_id):
-    if current_user.role == 'user':
-        return jsonify({'error': "Access error"}), 401
-
     user = User.query.get(user_id)
     user.role = request.get_json()['role']
     db.session.commit()
@@ -294,10 +311,8 @@ def user_role(current_user, user_id):
 
 @api.route('/users/<user_id>', methods=['DELETE'])
 @auth_required
+@admin_only
 def delete_user(current_user, user_id):
-    if current_user.role == 'user':
-        return jsonify({'error': "Access error"}), 401
-
     user = User.query.get(user_id)
     db.session.delete(user)
     db.session.commit()
@@ -342,6 +357,7 @@ def manage_api_key(current_user, email):
 # GOOGLE API
 @api.route('/gcalendar-event/<room_name>', methods=['POST'])
 @auth_required
+@admin_or_editor_only
 @json_data_required
 def create_calendar_event(current_user, room_name):
     data = request.get_json()
@@ -368,6 +384,7 @@ def create_calendar_event(current_user, room_name):
 
 @api.route('/gdrive-upload/<room_name>', methods=['POST'])
 @auth_required
+@admin_or_editor_only
 def upload_video_to_drive(current_user, room_name):
     if not request.files:
         return {"error": "No file provided"}, 400
@@ -407,6 +424,7 @@ def upload_video_to_drive(current_user, room_name):
 
 @api.route('/gconfigure/<string:room_name>', methods=['POST'])
 @auth_required
+@admin_or_editor_only
 def create_drive_and_calendar(current_user, room_name):
     drive = create_folder(room_name)
     calendar = create_calendar(room_name)
@@ -416,10 +434,8 @@ def create_drive_and_calendar(current_user, room_name):
 # ROOMS
 @api.route('/rooms/<room_name>', methods=['POST'])
 @auth_required
+@admin_or_editor_only
 def create_room(current_user, room_name):
-    if current_user.role == 'user':
-        return jsonify({'error': "Access error"}), 401
-
     if not room_name:
         return jsonify({"error": "Room name required"}), 400
 
@@ -465,10 +481,8 @@ def get_room(current_user, room_name):
 
 @api.route('/rooms/<room_name>', methods=['DELETE'])
 @auth_required
+@admin_or_editor_only
 def delete_room(current_user, room_name):
-    if current_user.role == 'user':
-        return jsonify({'error': "Access error"}), 401
-
     room = Room.query.filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": "No room found with given room_name"}), 400
@@ -485,11 +499,9 @@ def delete_room(current_user, room_name):
 
 @api.route("/rooms/<room_name>", methods=['PUT'])
 @auth_required
+@admin_or_editor_only
 @json_data_required
 def edit_room(current_user, room_name):
-    if current_user.role == 'user':
-        return jsonify({'error': "Access error"}), 401
-
     post_data = request.get_json()
 
     room = Room.query.filter_by(name=str(room_name)).first()
@@ -516,6 +528,7 @@ def edit_room(current_user, room_name):
 
 @api.route('/set-source/<room_name>/<source_type>/<path:ip>', methods=['POST'])
 @auth_required
+@admin_or_editor_only
 def room_settings(current_user, room_name, source_type, ip):
     room = Room.query.filter_by(name=str(room_name)).first()
     if not room:
@@ -552,6 +565,7 @@ def get_sources(current_user):
 
 @api.route("/sources/<path:ip>", methods=['POST', 'GET', 'DELETE', 'PUT'])
 @auth_required
+@admin_or_editor_only
 def manage_source(current_user, ip):
     if request.method == 'POST':
         data = request.get_json()
@@ -709,6 +723,7 @@ def create_montage_event(current_user, room_name):
 
 @api.route('/tracking/<room_name>', methods=['POST'])
 @auth_required
+@admin_or_editor_only
 @json_data_required
 def tracking_manage(current_user, room_name):
     post_data = request.get_json()
@@ -815,6 +830,7 @@ def streaming_stop(current_user, room_name):
 
 @api.route('/auto-control/<room_name>', methods=['POST'])
 @auth_required
+@admin_or_editor_only
 @json_data_required
 def auto_control(current_user, room_name):
     data = request.get_json()
