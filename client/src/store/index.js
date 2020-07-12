@@ -127,6 +127,14 @@ const actions = {
       console.error(error);
     }
   },
+  async socket_trackingSwitchError({ commit }, message) {
+    try {
+      await commit("TRACKING_CHANGE", message);
+      await commit("setErrorFromText", message);
+    } catch (error) {
+      console.error(error);
+    }
+  },
   async emitAutoControlChange({}, { room, auto_control }) {
     await this._vm.$socket.client.emit("auto_control_change", {
       id: room.id,

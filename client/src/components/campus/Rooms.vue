@@ -30,42 +30,37 @@
               </v-btn>
             </td>
             <td class="text-xs-center" v-if="isAdminOrEditor">
-              <v-btn-toggle v-model="props.item.tracking_state" mandatory>
-                <v-btn
-                  flat
-                  color="green"
-                  @click="trackingSwitch(props.item)"
-                  :value="false"
-                  :disabled="props.item.tracking_state"
-                >On</v-btn>
-                <v-btn
-                  flat
-                  color="error"
-                  @click="trackingSwitch(props.item)"
-                  :value="true"
-                  :disabled="!props.item.tracking_state"
-                >Off</v-btn>
-              </v-btn-toggle>
+              <v-layout row wrap justify-center>
+                <v-flex xs12 md2>
+                  <div class="text-xs-center">
+                    <v-switch
+                      v-model="props.item.tracking_state"
+                      class="switch-center"
+                      @change="trackingSwitch(props.item)"
+                      color="primary"
+                      hide-details
+                    ></v-switch>
+                  </div>
+                </v-flex>
+              </v-layout>
             </td>
 
             <td class="text-xs-center" v-if="isAdminOrEditor">
-              <v-btn-toggle v-model="props.item.auto_control" mandatory>
-                <v-btn
-                  flat
-                  color="green"
-                  @click="autoControlSwitch(props.item)"
-                  :value="false"
-                  :disabled="props.item.auto_control"
-                >On</v-btn>
-                <v-btn
-                  flat
-                  color="error"
-                  @click="autoControlSwitch(props.item)"
-                  :value="true"
-                  :disabled="!props.item.auto_control"
-                >Off</v-btn>
-              </v-btn-toggle>
+              <v-layout row wrap justify-center>
+                <v-flex xs12 md2>
+                  <div class="text-xs-center">
+                    <v-switch
+                      v-model="props.item.auto_control"
+                      class="switch-center"
+                      @change="autoControlSwitch(props.item)"
+                      color="primary"
+                      hide-details
+                    ></v-switch>
+                  </div>
+                </v-flex>
+              </v-layout>
             </td>
+
             <td class="text-xs-center" v-if="isAdminOrEditor">
               <app-edit-room :room="props.item"></app-edit-room>
               <v-btn icon @click="del(props.item)">
@@ -98,41 +93,35 @@
                 </li>
 
                 <li class="flex-item subheading" v-if="isAdminOrEditor" data-label="Трекинг">
-                  <v-btn-toggle v-model="props.item.tracking_state" mandatory>
-                    <v-btn
-                      flat
-                      color="green"
-                      @click="trackingSwitch(props.item)"
-                      :value="false"
-                      :disabled="props.item.tracking_state"
-                    >On</v-btn>
-                    <v-btn
-                      flat
-                      color="error"
-                      @click="trackingSwitch(props.item)"
-                      :value="true"
-                      :disabled="!props.item.tracking_state"
-                    >Off</v-btn>
-                  </v-btn-toggle>
+                  <v-layout row wrap justify-center>
+                    <v-flex xs12 md2>
+                      <div class="text-xs-center">
+                        <v-switch
+                          v-model="props.item.tracking_state"
+                          class="switch-center"
+                          @change="trackingSwitch(props.item)"
+                          color="primary"
+                          hide-details
+                        ></v-switch>
+                      </div>
+                    </v-flex>
+                  </v-layout>
                 </li>
 
                 <li class="flex-item subheading" v-if="isAdminOrEditor" data-label="Автоуправление">
-                  <v-btn-toggle v-model="props.item.auto_control" mandatory>
-                    <v-btn
-                      flat
-                      color="green"
-                      @click="autoControlSwitch(props.item)"
-                      :value="false"
-                      :disabled="props.item.auto_control"
-                    >On</v-btn>
-                    <v-btn
-                      flat
-                      color="error"
-                      @click="autoControlSwitch(props.item)"
-                      :value="true"
-                      :disabled="!props.item.auto_control"
-                    >Off</v-btn>
-                  </v-btn-toggle>
+                  <v-layout row wrap justify-center>
+                    <v-flex xs12 md2>
+                      <div class="text-xs-center">
+                        <v-switch
+                          v-model="props.item.auto_control"
+                          class="switch-center"
+                          @change="autoControlSwitch(props.item)"
+                          color="primary"
+                          hide-details
+                        ></v-switch>
+                      </div>
+                    </v-flex>
+                  </v-layout>
                 </li>
 
                 <li
@@ -231,13 +220,13 @@ export default {
     trackingSwitch(room) {
       this.$store.dispatch("emitTrackingStateChange", {
         room,
-        tracking_state: !room.tracking_state
+        tracking_state: room.tracking_state
       });
     },
     autoControlSwitch(room) {
       this.$store.dispatch("emitAutoControlChange", {
         room,
-        auto_control: !room.auto_control
+        auto_control: room.auto_control
       });
     },
     del(room) {
@@ -281,6 +270,11 @@ export default {
 <style>
 .addRoom {
   margin-top: 15px;
+}
+
+.switch-center {
+  display: flex;
+  justify-content: center;
 }
 
 .v-datatable thead th.column.sortable {
