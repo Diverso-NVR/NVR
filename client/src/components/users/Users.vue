@@ -10,7 +10,7 @@
             </div>
           </td>
           <td class="text-xs-center">
-            <div v-if="isMobile">
+            <div v-if="isLarge">
               <v-btn icon color="warning" @click="changeRole(props.item)">
                 <v-icon>supervisor_account</v-icon>
               </v-btn>
@@ -37,7 +37,7 @@ import { mapState } from "vuex";
 export default {
   data() {
     return {
-      isMobile: false
+      isLarge: false
     };
   },
   computed: mapState({
@@ -54,7 +54,7 @@ export default {
   }),
   methods: {
     onResize() {
-      this.isMobile = window.innerWidth < 769;
+      this.isLarge = window.innerWidth < 1521;
     },
     changeRole(user) {
       if (user.role === "user") user.role = "editor";

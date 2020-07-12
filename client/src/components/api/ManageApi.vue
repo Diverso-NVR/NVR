@@ -380,7 +380,7 @@ export default {
           doc:
             "Включает или отключает автоматический контроль камер в указанной комнате",
           request: `
-  {"set_auto_control": bool}`,
+  {"auto_control": bool}`,
           responses: [
             {
               code: 200,
