@@ -1,43 +1,40 @@
 <template>
-  <v-layout align-center justify-center>
+  <v-layout align-center justify-center v-resize="onResize">
     <v-flex xs12 sm8 md6>
-      <v-card v-if="!loader">
-        <v-list v-if="users.length > 0" v-resize="onResize">
-          <template v-for="(user,index) in users">
-            <v-list-tile avatar :key="user.id">
-              <v-list-tile-content>
-                <v-list-tile-title v-text="user.email"></v-list-tile-title>
-              </v-list-tile-content>
-              <div v-if="isMobile">
-                <v-btn icon color="success" @click="grantAccess(user)">
-                  <v-icon>verified_user</v-icon>
-                </v-btn>
-                <v-btn icon color="error" @click="deleteUser(user)">
-                  <v-icon>block</v-icon>
-                </v-btn>
-              </div>
-              <div v-else>
-                <v-btn color="success" depressed @click="grantAccess(user)">Подтвердить</v-btn>
-                <v-btn color="error" depressed @click="deleteUser(user)">Отклонить</v-btn>
-              </div>
-            </v-list-tile>
-            <v-divider v-if="index + 1 < users.length" :key="index"></v-divider>
-          </template>
-        </v-list>
-        <v-alert v-else :value="true" color="info" icon="info">Список запросов на доступ пуст</v-alert>
-      </v-card>
-      <template v-else>
-        <v-progress-linear :indeterminate="true"></v-progress-linear>
-      </template>
+      <v-data-table :items="users" class="elevation-4" hide-actions hide-headers :loading="loader">
+        <template v-slot:items="props">
+          <td>
+            <div>
+              <h3 class="subheading">{{props.item.email}}</h3>
+              <div>{{ props.item.role }}</div>
+            </div>
+          </td>
+          <td class="text-xs-center">
+            <div v-if="isMobile">
+              <v-btn icon color="success" @click="grantAccess(props.item)">
+                <v-icon>verified_user</v-icon>
+              </v-btn>
+              <v-btn icon color="error" @click="deleteUser(props.item)">
+                <v-icon>block</v-icon>
+              </v-btn>
+            </div>
+            <div v-else>
+              <v-btn color="success" depressed @click="grantAccess(props.item)">Подтвердить</v-btn>
+              <v-btn color="error" depressed @click="deleteUser(props.item)">Отклонить</v-btn>
+            </div>
+          </td>
+        </template>
+        <template v-slot:no-data>
+          <v-alert :value="true" color="primary" icon="info">Нет новых запросов на доступ</v-alert>
+        </template>
+      </v-data-table>
     </v-flex>
   </v-layout>
 </template>
-      </v-card>
-    </v-flex>
-  </v-layout>
-</template>
+
 <script>
 import { mapState } from "vuex";
+
 export default {
   data() {
     return {

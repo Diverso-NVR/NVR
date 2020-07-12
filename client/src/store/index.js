@@ -67,6 +67,9 @@ const mutations = {
     });
     room = message;
   },
+  ADD_USER(state, message) {
+    state.users.push(message.user);
+  },
   DELETE_USER(state, message) {
     let i;
     state.users.forEach((user, index) => {
@@ -199,6 +202,10 @@ const actions = {
   },
   socket_grantAccess({ commit }, message) {
     commit("GRANT_ACCESS", message);
+  },
+  socket_newUser({ commit }, message) {
+    commit("ADD_USER", message);
+    commit("setMessage", "Новый запрос на доступ");
   },
   async emitStreamingStart({}, payload) {
     await this._vm.$socket.client.emit("streaming_start", payload);
