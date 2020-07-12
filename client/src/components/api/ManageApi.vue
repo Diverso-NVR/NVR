@@ -385,7 +385,7 @@ export default {
             {
               code: 200,
               body: `
-  {"message": "Automatic control within room {room_name} has been set to {set_auto_control}"}`
+  {"message": "Automatic control within room {room_name} has been set to {auto_control}"}`
             },
             {
               code: 400,
