@@ -14,6 +14,7 @@ from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
 
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
+REDIS_HOST = os.environ.get('REDIS_HOST')
 
 
 def create_app(app_name="NVR_API"):
@@ -56,7 +57,7 @@ def create_app(app_name="NVR_API"):
 
     from nvrAPI.socketio import NvrNamespace
     socketio = SocketIO(app,
-                        message_queue='redis://',
+                        message_queue='redis://' + REDIS_HOST,
                         cors_allowed_origins=NVR_CLIENT_URL,
                         async_mode='gevent',
                         # logger=True, engineio_logger=True
