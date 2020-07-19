@@ -1,5 +1,7 @@
 FROM node:latest as build
 
+ARG NVR_CLIENT_URL
+
 WORKDIR /frontend
 
 COPY package.json /frontend

@@ -26,8 +26,10 @@ class NvrNamespace(Namespace):
         room = Room.query.get(room_id)
 
         if not room.tracking_source:
-            self.emit_error(
-                "Камера для трекинга не выбрана в настройках комнаты")
+            emit('tracking_switch_error', {
+                "id": room.id,
+                'tracking_state': room.tracking_state,
+                "error": "Камера для трекинга не выбрана в настройках комнаты"})
             return
 
         try:
@@ -37,7 +39,10 @@ class NvrNamespace(Namespace):
             else:
                 requests.delete(f'{TRACKING_URL}/track', timeout=3)
         except:
-            self.emit_error("Ошибка при запуске трекинга")
+            emit('tracking_switch_error', {
+                "id": room.id,
+                'tracking_state': room.tracking_state,
+                "error": "Ошибка при запуске трекинга"})
             return
 
         room.tracking_state = new_tracking_state

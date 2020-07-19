@@ -67,6 +67,9 @@ const mutations = {
     });
     room = message;
   },
+  ADD_USER(state, message) {
+    state.users.push(message.user);
+  },
   DELETE_USER(state, message) {
     let i;
     state.users.forEach((user, index) => {
@@ -123,6 +126,14 @@ const actions = {
       let msg = `Трекинг комнаты ${message.room_name}`;
       msg += message.tracking_state ? " включён" : " отключён";
       commit("setMessage", msg);
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  async socket_trackingSwitchError({ commit }, message) {
+    try {
+      await commit("TRACKING_CHANGE", message);
+      await commit("setErrorFromText", message);
     } catch (error) {
       console.error(error);
     }
@@ -191,6 +202,10 @@ const actions = {
   },
   socket_grantAccess({ commit }, message) {
     commit("GRANT_ACCESS", message);
+  },
+  socket_newUser({ commit }, message) {
+    commit("ADD_USER", message);
+    commit("setMessage", "Новый запрос на доступ");
   },
   async emitStreamingStart({}, payload) {
     await this._vm.$socket.client.emit("streaming_start", payload);

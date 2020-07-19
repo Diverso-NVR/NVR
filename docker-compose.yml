@@ -7,6 +7,7 @@ services:
     restart: always
     expose:
       - '6379'
+    network_mode: host
 
   backend:
     depends_on:
@@ -18,20 +19,25 @@ services:
       - .env_nvr
     volumes:
       - ./backend:/backend
+      - ~/creds:/creds
     expose:
       - '5000'
       - '5001'
       - '5002'
+    network_mode: host
 
   frontend:
-    build: ./frontend
-    depends_on:
-      - backend
+    build:
+      context: ./frontend
+      # непонел как ещё передать переменную окружения на этап билда
+      args:
+        NVR_CLIENT_URL: http://127.0.0.1
     container_name: nvr-frontend
     restart: always
     env_file:
       - .env_nvr
     volumes:
       - ./backend:/backend
-    ports:
-      - '8080:80'
+    expose:
+      - '80'
+    network_mode: host

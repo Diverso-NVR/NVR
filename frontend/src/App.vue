@@ -11,6 +11,7 @@
             <v-list-tile-title>{{link.title}}</v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
+
         <v-list-tile @click="onLogout" v-if="isUserLoggedIn">
           <v-list-tile-action>
             <v-icon>exit_to_app</v-icon>
@@ -26,13 +27,30 @@
     <v-navigation-drawer v-else app absolute v-resize="onResize" :mini-variant="!drawer">
       <v-list style="margin-top:70px">
         <v-list-tile v-for="link of links" :key="link.title" :to="link.url">
-          <v-list-tile-action>
-            <v-icon>{{link.icon}}</v-icon>
-          </v-list-tile-action>
+          <template v-if="link.url === '/access-requests' && usersRequests !== 0">
+            <v-list-tile-action>
+              <v-badge>
+                <template v-slot:badge>
+                  <span>{{usersRequests}}</span>
+                </template>
+                <v-icon>{{link.icon}}</v-icon>
+              </v-badge>
+            </v-list-tile-action>
 
-          <v-list-tile-content>
-            <v-list-tile-title>{{link.title}}</v-list-tile-title>
-          </v-list-tile-content>
+            <v-list-tile-content>
+              <v-list-tile-title>{{link.title}}</v-list-tile-title>
+            </v-list-tile-content>
+          </template>
+
+          <template v-else>
+            <v-list-tile-action>
+              <v-icon>{{link.icon}}</v-icon>
+            </v-list-tile-action>
+
+            <v-list-tile-content>
+              <v-list-tile-title>{{link.title}}</v-list-tile-title>
+            </v-list-tile-content>
+          </template>
         </v-list-tile>
       </v-list>
     </v-navigation-drawer>
@@ -95,7 +113,9 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
 import { isAdmin, isAdminOrEditor } from "@/utils";
+
 export default {
   data() {
     return {
@@ -103,7 +123,7 @@ export default {
       isMedium: false
     };
   },
-  computed: {
+  computed: mapState({
     error() {
       return this.$store.getters.error;
     },
@@ -125,6 +145,10 @@ export default {
     isDarkMode() {
       return this.$store.getters.isDarkMode;
     },
+    usersRequests: state =>
+      state.users.filter(
+        user => user.email_verified === true && user.access === false
+      ).length,
     links() {
       let links = [];
       if (this.isUserLoggedIn) {
@@ -162,7 +186,7 @@ export default {
 
       return links;
     }
-  },
+  }),
   methods: {
     async switchColorMode() {
       await this.$store.dispatch("switchColorMode");

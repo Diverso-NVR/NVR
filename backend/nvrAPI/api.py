@@ -164,10 +164,12 @@ def verify_email(token):
 
     try:
         send_access_request_email(
-            [u.email for u in User.query.all() if u.role != 'user'], user)
+            [u.email for u in User.query.all() if u.role not in ['user', 'editor']], user)
     except Exception as e:
         traceback.print_exc()
         return "Server error", 500
+
+    emit_event('new_user', {'user': user.to_dict()})
 
     return render_template('msg_template.html',
                            msg={'title': 'Подтверждение почты',
@@ -835,17 +837,20 @@ def streaming_stop(current_user, room_name):
 def auto_control(current_user, room_name):
     data = request.get_json()
 
-    set_auto_control = data.get('set_auto_control')
+    auto_control = data.get('auto_control')
 
-    if not set_auto_control:
+    if auto_control is None:
         return jsonify({"error": "Boolean value not provided"}), 400
 
     room = Room.query.filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": f"Room {room_name} not found"}), 404
 
-    room.auto_control = set_auto_control
+    room.auto_control = auto_control
     db.session.commit()
 
+    emit_event('auto_control_change', {
+        'id': room.id, 'auto_control': room.auto_control, 'room_name': room.name})
+
     return jsonify({"message": f"Automatic control within room {room_name} \
-                    has been set to {set_auto_control}"}), 200
+                    has been set to {auto_control}"}), 200

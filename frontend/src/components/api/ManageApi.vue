@@ -380,12 +380,12 @@ export default {
           doc:
             "Включает или отключает автоматический контроль камер в указанной комнате",
           request: `
-  {"set_auto_control": bool}`,
+  {"auto_control": bool}`,
           responses: [
             {
               code: 200,
               body: `
-  {"message": "Automatic control within room {room_name} has been set to {set_auto_control}"}`
+  {"message": "Automatic control within room {room_name} has been set to {auto_control}"}`
             },
             {
               code: 400,
