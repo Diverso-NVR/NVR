@@ -1,44 +1,46 @@
-# NVR backend
+# NVR Backend
 
-## Запуск dev:
-``` bash
+## Запуск dev
+
+```bash
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 python3 appserver.py
-``` 
+```
 
-## Структура 
+## Структура
 
-* **.creds/** - папка данных авторизация для Google API
+- **.creds/** - папка данных авторизация для Google API
 
-* **driveAPI/driveSettings.py** - содержит  функции для взаимодействия с Google Drive API.
+- **driveAPI/driveSettings.py** - содержит функции для взаимодействия с Google Drive API.
 
-* **calendarAPI/calendarSettings.py** - содержит функции для взаимодействия с Google Calendar API.
+- **calendarAPI/calendarSettings.py** - содержит функции для взаимодействия с Google Calendar API.
 
-* **logs/** - папка логов
+- **logs/** - папка логов
 
-* **migrations/** - папка данных sqlalchemy: версии миграции бд и т.п.
+- **migrations/** - папка данных sqlalchemy: версии миграции бд и т.п.
 
-* **nvrAPI/** - основная папка со всем функционалом:
-    * **api.py** - все методы API NVR
-    * **application.py** - создание приложения
-    * **config.py** - класс переменных конфигурации
-    * **email.py** - функции для email оповещений
-    * **models.py** - модели бд
-    * **socketio.py** - методы приложения для взаимодействия с клиентской частью по сокетам
+- **nvrAPI/** - основная папка со всем функционалом:
 
-* **templates/email/** - шаблоны email сообщений
+  - **api.py** - все методы API NVR
+  - **application.py** - создание приложения
+  - **config.py** - класс переменных конфигурации
+  - **email.py** - функции для email оповещений
+  - **models.py** - модели бд
+  - **socketio.py** - методы приложения для взаимодействия с клиентской частью по сокетам
 
-* **appserver.py** - скрипт запуска dev
+- **templates/email/** - шаблоны email сообщений
 
-* **manage.py** - скрипт управления бд через python-интерпретатор
+- **appserver.py** - скрипт запуска dev
 
-* **nvr.ini** - файл конфигурации uwsgi сервера
+- **manage.py** - скрипт управления бд через python-интерпретатор
 
-* **requirements.txt** - список Python-библиотек, необходимых для работы 
-приложения. Получается при помощи команды `pip freeze > requirements.txt`. 
-Библиотеки устанавливаются в окружение при помощи команды 
-`pip install -r requirements.txt`. 
+- **nvr.ini** - файл конфигурации uwsgi сервера
 
-* **wsgi.py** - скрипт запуска prod
+- **requirements.txt** - список Python-библиотек, необходимых для работы
+  приложения. Получается при помощи команды `pip freeze > requirements.txt`.
+  Библиотеки устанавливаются в окружение при помощи команды
+  `pip install -r requirements.txt`.
+
+- **wsgi.py** - скрипт запуска prod

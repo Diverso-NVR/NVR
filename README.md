@@ -1,17 +1,17 @@
 # NVR  
 
-Основа NVR. API и frontend.
-Подробная информация на каждую часть в папках client/server соответсвенно.
+Веб-приложение проекта NVR (frontend/API).
+README с описанием структуры проекта находятся в директориях frontend и backend.
 
-* [page](https://nvr.miem.hse.ru/)
+* [Page](https://nvr.miem.hse.ru/)
 * [API](https://nvr.miem.hse.ru/manage-api/)
 
-## Для админов
+## Руководства для админов
+
 * [Подключение Google API](https://git.miem.hse.ru/nvr/nvr-core/-/wikis/Google-API)
-* [Деплой на сервере](https://git.miem.hse.ru/nvr/nvr-core/-/wikis/deploy)
+* [Деплой на сервере](https://git.miem.hse.ru/nvr/nvr-core/-/wikis/NVR-Deploy-Guide)
 
 ## Авторы
 
 [Дмитрий Кудрявцев](https://github.com/kuderr),
 [Денис Приходько](https://github.com/Burnouttt)
-
