@@ -160,10 +160,11 @@ def get_events(calendar_id: str) -> dict:
         now = datetime.utcnow()
         time_min = now - timedelta(days=30)
         time_max = now + timedelta(days=30)
+        events_result = []
 
         page_token = None
         while True:
-            events = service.events().list(
+            events = calendar_service.events().list(
                 calendarId=calendar_id, pageToken=page_token,
                 timeMin=time_min.isoformat() + 'Z',
                 timeMax=time_max.isoformat() + 'Z',

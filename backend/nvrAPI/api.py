@@ -629,7 +629,7 @@ def manage_source(current_user, ip):
 @api.route('/calendar-notifications/', methods=["POST"])
 def gcalendar_webhook():
     calendar_id = request.headers['X-Goog-Resource-Uri'].split('/')[6]
-    calendar_id = calendar_id.replace('%2540', '@')
+    calendar_id = calendar_id.replace('%40', '@')
     events = get_events(calendar_id)
 
     room = Room.query.filter_by(calendar=calendar_id).first()
