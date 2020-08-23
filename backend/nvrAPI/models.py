@@ -44,7 +44,7 @@ class Record(db.Model):
     end_time = db.Column(db.String(100), nullable=False)
     event_name = db.Column(db.String(200))
     event_id = db.Column(db.String(200))
-
+    drive_file_url = db.Column(db.String(200))
     # Will be deleted later
     user_email = db.Column(db.String(200), nullable=False)
     room_name = db.Column(db.String(200), nullable=False)
