@@ -861,4 +861,7 @@ def auto_control(current_user, room_name):
 def get_urls(current_user, user_email):
     records = Record.query.filter(
         Record.user_email == user_email).all()
-    return jsonify(records)
+    links = []
+    for record in records:
+        links.append(record.drive_file_url)
+    return jsonify(links)
