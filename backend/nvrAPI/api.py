@@ -854,3 +854,11 @@ def auto_control(current_user, room_name):
 
     return jsonify({"message": f"Automatic control within room {room_name} \
                     has been set to {auto_control}"}), 200
+
+
+@api.route('/records/{<user_email>}', methods=['GET'])
+@auth_required
+def get_urls(current_user, user_email):
+    records = Record.query.filter(
+        Record.user_email == user_email).all()
+    return jsonify(records)
