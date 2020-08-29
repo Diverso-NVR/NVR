@@ -230,3 +230,9 @@ class Source(db.Model):
                     merge=self.audio,
                     tracking=self.tracking,
                     room_id=self.room_id)
+
+
+assoc_table = db.Table('assoc_table',
+                       db.Column('user_id', db.Integer, db.ForeignKey('users.id')),
+                       db.Column('record_id',db.Integer, db.ForeignKey('records.id'))
+                       )
