@@ -166,6 +166,7 @@ class Room(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False, unique=True)
     tracking_state = db.Column(db.Boolean, default=False)
+    ruz_id = db.Column(db.Integer)
 
     # records = db.relationship('Record', back_populates='room')
     sources = db.relationship('Source', backref='room', lazy=False)

@@ -17,6 +17,7 @@ from flask_socketio import SocketIO
 
 from apis.calendar_api import create_calendar, delete_calendar, give_permissions, create_event_, get_events
 from apis.drive_api import create_folder, get_folders_by_name, upload
+from apis.ruz_api import get_room_ruzid
 from .email import send_verify_email, send_access_request_email, send_reset_pass_email
 from .models import db, Room, Source, User, Record, nvr_db_context
 
@@ -446,13 +447,16 @@ def create_room(current_user, room_name):
         return jsonify({"error": f"Room '{room_name}' already exist"}), 409
 
     room = Room(name=room_name)
+    room.sources = []
     db.session.add(room)
     db.session.commit()
+
+    emit_event('add_room', {'room': room.to_dict()})
 
     Thread(target=config_room, args=(
         current_app._get_current_object(), room_name)).start()
 
-    return jsonify({'message': f"Started creating '{room_name}'"}), 201
+    return jsonify({'message': f"Started creating '{room_name}'"}), 204
 
 
 @nvr_db_context
@@ -460,10 +464,8 @@ def config_room(room_name):
     room = Room.query.filter_by(name=room_name).first()
     room.drive = create_folder(room_name)
     room.calendar = create_calendar(room_name)
-    room.sources = []
+    room.ruz_id = get_room_ruzid(room_name)
     db.session.commit()
-
-    emit_event('add_room', {'room': room.to_dict()})
 
 
 @api.route('/rooms/', methods=['GET'])

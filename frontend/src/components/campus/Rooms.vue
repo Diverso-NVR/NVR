@@ -25,7 +25,7 @@
               </v-btn>
             </td>
             <td class="text-xs-center">
-              <v-btn icon :href="props.item.drive" target="_blank">
+              <v-btn icon :href="props.item.drive" target="_blank" :loading="!props.item.drive">
                 <v-icon>folder</v-icon>
               </v-btn>
             </td>
@@ -83,7 +83,7 @@
                 </li>
 
                 <li class="flex-item subheading" data-label="Диск">
-                  <v-btn icon :href="props.item.drive" target="_blank">
+                  <v-btn icon :href="props.item.drive" target="_blank" :loading="!props.item.drive">
                     <v-icon medium>folder</v-icon>
                   </v-btn>
                 </li>
@@ -167,42 +167,42 @@ export default {
           text: "Аудитория",
           align: "center",
           sortable: true,
-          value: "name"
+          value: "name",
         },
         {
           text: "Запись",
           value: "auto_control",
           sortable: true,
-          align: "center"
+          align: "center",
         },
         {
           text: "Календарь",
           value: "calendar",
           sortable: false,
-          align: "center"
+          align: "center",
         },
         {
           text: "Диск",
           value: "drive",
           sortable: false,
-          align: "center"
-        }
+          align: "center",
+        },
       ],
       newRoom: "",
       background: {
         free: "green lighten-3",
-        busy: "red lighten-3"
+        busy: "red lighten-3",
       },
-      isMobile: false
+      isMobile: false,
     };
   },
   components: {
     appEditRoom: EditRoom,
-    appAddEvent: AddEvent
+    appAddEvent: AddEvent,
   },
   computed: mapState({
-    rooms: state => state.rooms,
-    user: state => state.user,
+    rooms: (state) => state.rooms,
+    user: (state) => state.user,
     loader() {
       return this.$store.getters.loading;
     },
@@ -211,7 +211,7 @@ export default {
     },
     isAdminOrEditor() {
       return isAdminOrEditor();
-    }
+    },
   }),
   methods: {
     onResize() {
@@ -220,13 +220,13 @@ export default {
     trackingSwitch(room) {
       this.$store.dispatch("emitTrackingStateChange", {
         room,
-        tracking_state: room.tracking_state
+        tracking_state: room.tracking_state,
       });
     },
     autoControlSwitch(room) {
       this.$store.dispatch("emitAutoControlChange", {
         room,
-        auto_control: room.auto_control
+        auto_control: room.auto_control,
       });
     },
     del(room) {
@@ -239,7 +239,7 @@ export default {
       }
       await this.$store.dispatch("emitAddRoom", { name: this.newRoom });
       this.newRoom = "";
-    }
+    },
   },
   beforeMount() {
     if (this.isAdminOrEditor)
@@ -248,22 +248,22 @@ export default {
           text: "Трекинг",
           value: "montage",
           sortable: true,
-          align: "center"
+          align: "center",
         },
         {
           text: "Автоуправление",
           value: "tracking",
           sortable: true,
-          align: "center"
+          align: "center",
         },
         {
           text: "Изменить",
           value: "edit",
           sortable: false,
-          align: "center"
+          align: "center",
         }
       );
-  }
+  },
 };
 </script>
 
