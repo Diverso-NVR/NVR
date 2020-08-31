@@ -30,7 +30,6 @@ google-cloud-storage==1.16.1
 google-resumable-media==0.3.2
 googleapis-common-protos==1.6.0
 greenlet==0.4.15
-grpcio==1.21.1
 httplib2==0.13.1
 idna==2.8
 itsdangerous==1.1.0
