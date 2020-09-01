@@ -51,7 +51,7 @@ class Record(db.Model):
 
     done = db.Column(db.Boolean, default=False)
     processing = db.Column(db.Boolean, default=False)
-    # drive_file_url = db.Column(db.String(300))
+    error = db.Column(db.Boolean, default=False)
 
     # room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
     # room = db.relationship("Room", back_populates='records')
