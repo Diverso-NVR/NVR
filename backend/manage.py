@@ -3,13 +3,16 @@
   application to perform interactive debugging and setup
 """
 
+from flask import Flask
 from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager
 
 from nvrAPI.application import create_app
 from nvrAPI.models import db, Room, Source, Record
 
-app, _ = create_app()
+app = Flask(__name__)
+app.config.from_object('nvrAPI.config.BaseConfig')
+db.init_app(app)
 
 migrate = Migrate(app, db)
 manager = Manager(app)
