@@ -12,6 +12,7 @@ from .email import send_email
 
 TRACKING_URL = os.environ.get('TRACKING_URL')
 STREAMING_URL = os.environ.get('STREAMING_URL')
+STREAMING_API_KEY = os.environ.get('STREAMING_API_KEY')
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
 
 
@@ -170,11 +171,11 @@ class NvrNamespace(Namespace):
         camera_source = Source.query.filter_by(ip=camera_ip).first()
 
         try:
-            response = requests.post(f"{STREAMING_URL}/start/{room_name}", json={
-                "image_addr": camera_source.rtsp,
-                "sound_addr": sound_source.rtsp,
+            response = requests.post(f"{STREAMING_URL}/streams/{room_name}", json={
+                "camera_ip": camera_source.rtsp,
+                "sound_ip": sound_source.rtsp,
                 'title': title
-            })
+            }, headers={'X-API-KEY': STREAMING_API_KEY})
             room.stream_url = response.json()['url']
             db.session.commit()
         except:
@@ -190,8 +191,9 @@ class NvrNamespace(Namespace):
         room = Room.query.filter_by(name=str(room_name)).first()
 
         try:
-            response = requests.post(
-                f'{STREAMING_URL}/stop/{room_name}')
+            response = requests.delete(
+                f'{STREAMING_URL}/streams/{room_name}',
+                headers={'X-API-KEY': STREAMING_API_KEY})
         except:
             pass
         finally:
