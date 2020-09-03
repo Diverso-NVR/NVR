@@ -25,14 +25,14 @@ def nvr_db_context(func):
     return wrapper
 
 
-# class UserRecord(db.Model):
-#    __tablename__ = 'user_records'
-#
-#    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-#    record_id = db.Column(db.Integer, db.ForeignKey('records.id'))
-#
-#    user = db.relationship("User", back_populates="records")
-#    record = db.relationship("Record", back_populates="users")
+ class UserRecord(db.Model):
+    __tablename__ = 'user_records'
+
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    record_id = db.Column(db.Integer, db.ForeignKey('records.id'))
+
+    user = db.relationship("User", backref=db.backref("user_records", cascade="all, delete-orphan"))
+    record = db.relationship("Record", backref=db.backref("user_records", cascade="all, delete-orphan"))
 
 
 class Record(db.Model):
@@ -55,7 +55,7 @@ class Record(db.Model):
 
     # room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
     # room = db.relationship("Room", back_populates='records')
-    # users = db.relationship("UserRecord", back_populates="record")
+    users = db.relationship("User", secondary="user_records")
 
     def update_from_calendar(self, **kwargs):
         self.event_id = kwargs.get('id')
@@ -86,7 +86,7 @@ class User(db.Model):
     access = db.Column(db.Boolean, default=False)
     api_key = db.Column(db.String(255), unique=True)
 
-    # records = db.relationship("UserRecord", back_populates="user")
+    records = db.relationship("Record", secondary="user_records")
 
     def __init__(self, email, password=None):
         self.email = email
@@ -231,8 +231,3 @@ class Source(db.Model):
                     tracking=self.tracking,
                     room_id=self.room_id)
 
-
-assoc_table = db.Table('assoc_table',
-                       db.Column('user_id', db.Integer, db.ForeignKey('users.id')),
-                       db.Column('record_id',db.Integer, db.ForeignKey('records.id'))
-                       )
