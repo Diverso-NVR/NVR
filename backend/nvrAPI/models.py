@@ -67,6 +67,20 @@ class Record(db.Model):
         self.user_email = kwargs['creator']['email']
 
 
+    def to_dict(self):
+        return dict(id=self.id,
+            date=self.date,
+            start_time=self.start_time,
+            end_time=self.end_time,
+            event_name=self.event_name,
+            event_id=self.event_id,
+            drive_file_url=self.drive_file_url,
+            user_email=self.user_email,
+            room_name=self.room_name,
+            done=self.done,
+            processing=self.processing)
+
+
 class Channel(db.Model):
     __tablename__ = 'channels'
 
