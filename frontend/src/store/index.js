@@ -13,6 +13,7 @@ import {
   deleteAPIKey,
   getAPIKey,
   getRooms,
+  getRecords,
   createMontageEvent
 } from "@/api";
 import { isValidToken } from "@/utils";
@@ -108,6 +109,9 @@ const mutations = {
   },
   setRooms(state, payload) {
     state.rooms = payload;
+  },
+  setRecords(state, payload) {
+    state.records = payload;
   },
   setUsers(state, payload) {
     state.users = payload;
@@ -352,6 +356,7 @@ const actions = {
       commit("switchLoading");
     }
   },
+
   async updateKey({ commit, state }) {
     try {
       commit("switchLoading");
@@ -368,6 +373,17 @@ const actions = {
       commit("switchLoading");
       let res = await deleteAPIKey(state.user.email, state.jwt.token);
       await commit("setKey", { key: null });
+    } catch (error) {
+      commit("setError", error);
+    } finally {
+      commit("switchLoading");
+    }
+  },
+   async loadRecords({ commit, state }) {
+    try {
+      commit("switchLoading");
+      let res = await getRecords(state.jwt.token);
+      commit("setRecords", res.data);
     } catch (error) {
       commit("setError", error);
     } finally {

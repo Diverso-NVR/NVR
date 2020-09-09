@@ -111,6 +111,7 @@ export default {
     },
     async loadData(res) {
       await this.$store.dispatch("loadRooms");
+      await this.$store.dispatch("loadRecords");
       this.$router.push("/rooms");
       if (this.isAdmin) {
         await this.$store.dispatch("getUsers");
