@@ -25,14 +25,16 @@ def nvr_db_context(func):
     return wrapper
 
 
- class UserRecord(db.Model):
+class UserRecord(db.Model):
     __tablename__ = 'user_records'
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     record_id = db.Column(db.Integer, db.ForeignKey('records.id'))
 
-    user = db.relationship("User", backref=db.backref("user_records", cascade="all, delete-orphan"))
-    record = db.relationship("Record", backref=db.backref("user_records", cascade="all, delete-orphan"))
+    user = db.relationship("User", backref=db.backref(
+        "user_records", cascade="all, delete-orphan"))
+    record = db.relationship("Record", backref=db.backref(
+        "user_records", cascade="all, delete-orphan"))
 
 
 class Record(db.Model):
@@ -66,19 +68,18 @@ class Record(db.Model):
         self.room_name = kwargs['room_name']
         self.user_email = kwargs['creator']['email']
 
-
     def to_dict(self):
         return dict(id=self.id,
-            date=self.date,
-            start_time=self.start_time,
-            end_time=self.end_time,
-            event_name=self.event_name,
-            event_id=self.event_id,
-            drive_file_url=self.drive_file_url,
-            user_email=self.user_email,
-            room_name=self.room_name,
-            done=self.done,
-            processing=self.processing)
+                    date=self.date,
+                    start_time=self.start_time,
+                    end_time=self.end_time,
+                    event_name=self.event_name,
+                    event_id=self.event_id,
+                    drive_file_url=self.drive_file_url,
+                    user_email=self.user_email,
+                    room_name=self.room_name,
+                    done=self.done,
+                    processing=self.processing)
 
 
 class Channel(db.Model):
@@ -245,4 +246,3 @@ class Source(db.Model):
                     merge=self.audio,
                     tracking=self.tracking,
                     room_id=self.room_id)
-
