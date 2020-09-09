@@ -28,6 +28,7 @@ def nvr_db_context(func):
 class UserRecord(db.Model):
     __tablename__ = 'user_records'
 
+    id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     record_id = db.Column(db.Integer, db.ForeignKey('records.id'))
 
