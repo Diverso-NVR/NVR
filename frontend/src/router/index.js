@@ -37,6 +37,12 @@ const router = new Router({
       meta: { title: "Аудитории" }
     },
     {
+      path: "/records",
+      component: () => import("@/components/users/Records"),
+      beforeEnter: authRequired,
+      meta: { title: "Записи" }
+    },
+    {
       path: "/streaming",
       component: () => import("@/components/campus/Streaming"),
       beforeEnter: authRequired,

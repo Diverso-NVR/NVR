@@ -154,6 +154,7 @@ export default {
       if (this.isUserLoggedIn) {
         links = [
           { title: "Аудитории", icon: "view_list", url: "/rooms" },
+          { title: "Записи", icon: "video_library", url: "/records" },
           { title: "Стриминг", icon: "stream", url: "/streaming" }
         ];
         if (this.isAdmin) {
