@@ -233,10 +233,9 @@ class Source(db.Model):
     def update(self, **kwargs):
         #Всегда запрос с фронта
         self.is_changed_on_front = True
-        if not self.is_changed_on_front:
-            self.name = kwargs.get('name')
-            self.ip = kwargs.get('ip')
-            self.rtsp = kwargs.get('rtsp')  
+        self.name = kwargs.get('name')
+        self.ip = kwargs.get('ip')
+        self.rtsp = kwargs.get('rtsp')  
         self.name = kwargs.get('name')
         self.ip = kwargs.get('ip')
         self.port = kwargs.get('port')
