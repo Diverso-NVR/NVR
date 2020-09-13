@@ -226,8 +226,17 @@ class Source(db.Model):
     merge = db.Column(db.String(200))
     tracking = db.Column(db.String(200))
     room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
+    #Поскольку это часть nvr-core, то это всегда запросы с фронтенда (по крайней мере мне так кажется)
+    is_changed_on_front = db.Column(db.Boolean, default=True) 
+
 
     def update(self, **kwargs):
+        #Всегда запрос с фронта
+        self.is_changed_on_front = True
+        if not self.is_changed_on_front:
+            self.name = kwargs.get('name')
+            self.ip = kwargs.get('ip')
+            self.rtsp = kwargs.get('rtsp')  
         self.name = kwargs.get('name')
         self.ip = kwargs.get('ip')
         self.port = kwargs.get('port')
