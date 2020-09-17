@@ -25,14 +25,17 @@ def nvr_db_context(func):
     return wrapper
 
 
-# class UserRecord(db.Model):
-#    __tablename__ = 'user_records'
-#
-#    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-#    record_id = db.Column(db.Integer, db.ForeignKey('records.id'))
-#
-#    user = db.relationship("User", back_populates="records")
-#    record = db.relationship("Record", back_populates="users")
+class UserRecord(db.Model):
+    __tablename__ = 'user_records'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    record_id = db.Column(db.Integer, db.ForeignKey('records.id'))
+
+    user = db.relationship("User", backref=db.backref(
+        "user_records", cascade="all, delete-orphan"))
+    record = db.relationship("Record", backref=db.backref(
+        "user_records", cascade="all, delete-orphan"))
 
 
 class Record(db.Model):
@@ -51,11 +54,11 @@ class Record(db.Model):
 
     done = db.Column(db.Boolean, default=False)
     processing = db.Column(db.Boolean, default=False)
-    # drive_file_url = db.Column(db.String(300))
+    error = db.Column(db.Boolean, default=False)
 
     # room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
     # room = db.relationship("Room", back_populates='records')
-    # users = db.relationship("UserRecord", back_populates="record")
+    users = db.relationship("User", secondary="user_records")
 
     def update_from_calendar(self, **kwargs):
         self.event_id = kwargs.get('id')
@@ -65,6 +68,19 @@ class Record(db.Model):
         self.end_time = kwargs['end']['dateTime'].split('T')[1][:5]
         self.room_name = kwargs['room_name']
         self.user_email = kwargs['creator']['email']
+
+    def to_dict(self):
+        return dict(id=self.id,
+                    date=self.date,
+                    start_time=self.start_time,
+                    end_time=self.end_time,
+                    event_name=self.event_name,
+                    event_id=self.event_id,
+                    drive_file_url=self.drive_file_url,
+                    user_email=self.user_email,
+                    room_name=self.room_name,
+                    done=self.done,
+                    processing=self.processing)
 
 
 class Channel(db.Model):
@@ -86,7 +102,7 @@ class User(db.Model):
     access = db.Column(db.Boolean, default=False)
     api_key = db.Column(db.String(255), unique=True)
 
-    # records = db.relationship("UserRecord", back_populates="user")
+    records = db.relationship("Record", secondary="user_records")
 
     def __init__(self, email, password=None):
         self.email = email

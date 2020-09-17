@@ -13,7 +13,8 @@ import {
   deleteAPIKey,
   getAPIKey,
   getRooms,
-  createMontageEvent
+  getRecords,
+  createMontageEvent,
 } from "@/api";
 import { isValidToken } from "@/utils";
 
@@ -23,25 +24,25 @@ const state = {
   rooms: [],
   user: {},
   jwt: { token: localStorage.token || "" },
-  users: []
+  users: [],
 };
 const mutations = {
   TRACKING_CHANGE(state, message) {
-    let room = state.rooms.find(room => {
+    let room = state.rooms.find((room) => {
       return room.id === message.id;
     });
 
     room.tracking_state = message.tracking_state;
   },
   AUTO_CONTROL_CHANGE(state, message) {
-    let room = state.rooms.find(room => {
+    let room = state.rooms.find((room) => {
       return room.id === message.id;
     });
 
     room.auto_control = message.auto_control;
   },
   SET_STREAM_URL(state, message) {
-    let room = state.rooms.find(room => {
+    let room = state.rooms.find((room) => {
       return room.name === message.name;
     });
 
@@ -62,7 +63,7 @@ const mutations = {
     state.rooms.push(message.room);
   },
   EDIT_ROOM(state, message) {
-    let room = state.rooms.find(room => {
+    let room = state.rooms.find((room) => {
       return room.id === message.id;
     });
     room = message;
@@ -81,14 +82,14 @@ const mutations = {
     state.users.splice(i, 1);
   },
   CHANGE_ROLE(state, message) {
-    let user = state.users.find(user => {
+    let user = state.users.find((user) => {
       return user.id === message.id;
     });
 
     user.role = message.role;
   },
   GRANT_ACCESS(state, message) {
-    let user = state.users.find(user => {
+    let user = state.users.find((user) => {
       return user.id === message.id;
     });
     user.access = true;
@@ -109,15 +110,18 @@ const mutations = {
   setRooms(state, payload) {
     state.rooms = payload;
   },
+  setRecords(state, payload) {
+    state.records = payload;
+  },
   setUsers(state, payload) {
     state.users = payload;
-  }
+  },
 };
 const actions = {
   async emitTrackingStateChange({}, { room, tracking_state }) {
     await this._vm.$socket.client.emit("tracking_state_change", {
       id: room.id,
-      tracking_state
+      tracking_state,
     });
   },
   async socket_trackingStateChange({ commit }, message) {
@@ -141,7 +145,7 @@ const actions = {
   async emitAutoControlChange({}, { room, auto_control }) {
     await this._vm.$socket.client.emit("auto_control_change", {
       id: room.id,
-      auto_control
+      auto_control,
     });
   },
   async socket_autoControlChange({ commit }, message) {
@@ -191,7 +195,7 @@ const actions = {
   async emitChangeRole({}, { user }) {
     await this._vm.$socket.client.emit("change_role", {
       id: user.id,
-      role: user.role
+      role: user.role,
     });
   },
   socket_changeRole({ commit }, message) {
@@ -352,6 +356,7 @@ const actions = {
       commit("switchLoading");
     }
   },
+
   async updateKey({ commit, state }) {
     try {
       commit("switchLoading");
@@ -374,6 +379,17 @@ const actions = {
       commit("switchLoading");
     }
   },
+  async loadRecords({ commit, state }) {
+    try {
+      commit("switchLoading");
+      let res = await getRecords(state.user.email, state.jwt.token);
+      commit("setRecords", res.data);
+    } catch (error) {
+      commit("setError", error);
+    } finally {
+      commit("switchLoading");
+    }
+  },
   async getKey({ commit, state }) {
     try {
       let res = await getAPIKey(state.user.email, state.jwt.token);
@@ -381,7 +397,7 @@ const actions = {
     } catch (error) {
       commit("setError", error);
     }
-  }
+  },
 };
 const getters = {
   isAutheticated(state) {
@@ -389,15 +405,15 @@ const getters = {
   },
   user(state) {
     return state.user;
-  }
+  },
 };
 
 export default new Vuex.Store({
   modules: {
-    shared
+    shared,
   },
   state,
   mutations,
   actions,
-  getters
+  getters,
 });

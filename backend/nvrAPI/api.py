@@ -26,6 +26,7 @@ api = Blueprint('api', __name__)
 TRACKING_URL = os.environ.get('TRACKING_URL')
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
 STREAMING_URL = os.environ.get('STREAMING_URL')
+STREAMING_API_KEY = os.environ.get('STREAMING_API_KEY')
 GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
 VIDS_PATH = str(Path.home()) + '/vids/'
 
@@ -239,6 +240,8 @@ def glogin():
     return jsonify({'token': token.decode('UTF-8')}), 202
 
 # RESET PASS
+
+
 @api.route('/reset-pass/<email>', methods=['POST'])
 def send_reset_pass(email):
     user = User.query.filter_by(email=str(email)).first()
@@ -798,11 +801,11 @@ def streaming_start(current_user, room_name):
     camera_source = Source.query.filter_by(ip=camera_ip).first()
 
     try:
-        response = requests.post(f"{STREAMING_URL}/start/{room_name}", json={
-            "image_addr": sound_source.rtsp,
-            "sound_addr": camera_source.rtsp,
+        response = requests.post(f"{STREAMING_URL}/streams/{room_name}", json={
+            "camera_ip": camera_source.rtsp,
+            "sound_ip": sound_source.rtsp,
             'title': title
-        })
+        }, headers={'X-API-KEY': STREAMING_API_KEY})
         url = response.json()['url']
         room.stream_url = url
         db.session.commit()
@@ -825,8 +828,9 @@ def streaming_stop(current_user, room_name):
         return jsonify({"error": f"Stream is not running"}), 400
 
     try:
-        response = requests.post(
-            f'{STREAMING_URL}/stop/{room_name}')
+        response = requests.delete(
+            f'{STREAMING_URL}/streams/{room_name}',
+            headers={'X-API-KEY': STREAMING_API_KEY})
     except:
         return jsonify({"error": "Unable to stop stream"}), 500
     finally:
@@ -860,3 +864,11 @@ def auto_control(current_user, room_name):
 
     return jsonify({"message": f"Automatic control within room {room_name} \
                     has been set to {auto_control}"}), 200
+
+
+@api.route('/records/<user_email>', methods=['GET'])
+@auth_required
+def get_urls(current_user, user_email):
+    records = Record.query.filter(
+        Record.user_email == user_email).all()
+    return jsonify([rec.to_dict() for rec in records]), 200

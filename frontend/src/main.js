@@ -22,6 +22,7 @@ Vue.config.productionTip = false;
 if (store.getters.isAutheticated) {
   store.dispatch("setDataFromToken").then(userRole => {
     store.dispatch("loadRooms");
+    store.dispatch("loadRecords");
     if (isAdmin()) {
       store.dispatch("getUsers");
     }

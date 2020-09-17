@@ -61,6 +61,12 @@ export function getAPIKey(email, token) {
   });
 }
 
+export function getRecords(email, token) {
+  return axios.get(`${API_URL}/records/${email}`, {
+    headers: { Token: token }
+  });
+}
+
 //rooms
 export function getRooms(token) {
   return axios.get(`${API_URL}/rooms/`, {
