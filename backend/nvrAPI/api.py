@@ -680,6 +680,10 @@ def gcalendar_webhook():
 
     return jsonify({"message": "Room calendar events patched"}), 200
 
+# dev
+@api.route('/calendar-notifications-dev/', methods=["POST"])
+def gcalendar_webhook_dev():
+    return jsonify({"message": "Room calendar events patched"}), 200
 
 @api.route('/montage-event/<room_name>', methods=["POST"])
 @auth_required
