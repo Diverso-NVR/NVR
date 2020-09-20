@@ -228,6 +228,10 @@ def glogin():
         user.email_verified = True
         user.access = True
 
+        Thread(target=give_permissions, args=(
+                      current_app._get_current_object(), user.email)).start()
+
+
         db.session.add(user)
         db.session.commit()
 
