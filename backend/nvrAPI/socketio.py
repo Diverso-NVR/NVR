@@ -1,4 +1,6 @@
+import logging
 import os
+from functools import wraps
 from threading import Thread
 
 import requests
@@ -7,8 +9,8 @@ from flask_socketio import emit, Namespace
 
 from apis.calendar_api import create_calendar, delete_calendar, give_permissions
 from apis.drive_api import create_folder
-from .models import db, Room, Source, User, nvr_db_context
 from .email import send_email
+from .models import db, Room, Source, User, nvr_db_context
 
 TRACKING_URL = os.environ.get('TRACKING_URL')
 STREAMING_URL = os.environ.get('STREAMING_URL')
@@ -16,10 +18,23 @@ STREAMING_API_KEY = os.environ.get('STREAMING_API_KEY')
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
 
 
+def log_info(f):
+    @wraps(f)
+    def wrapper(*args):
+        logging.getLogger('flask.app').info(f"Emitted function {f.__name__} with args: {args}")
+
+        return f(*args)
+
+    return wrapper
+
+
 class NvrNamespace(Namespace):
+
+    @log_info
     def emit_error(self, err):
         emit("error", {"error": err})
 
+    @log_info
     def on_tracking_state_change(self, msg_json):
         room_id = msg_json['id']
         new_tracking_state = msg_json['tracking_state']
@@ -51,8 +66,9 @@ class NvrNamespace(Namespace):
 
         emit('tracking_state_change', {
             'id': room.id, 'tracking_state': room.tracking_state, 'room_name': room.name},
-            broadcast=True)
+             broadcast=True)
 
+    @log_info
     def on_auto_control_change(self, msg_json):
         room_id = msg_json['id']
         auto_control_enabled = msg_json['auto_control']
@@ -63,8 +79,9 @@ class NvrNamespace(Namespace):
 
         emit('auto_control_change', {
             'id': room.id, 'auto_control': room.auto_control, 'room_name': room.name},
-            broadcast=True)
+             broadcast=True)
 
+    @log_info
     def on_delete_room(self, msg_json):
         room_id = msg_json['id']
 
@@ -78,6 +95,7 @@ class NvrNamespace(Namespace):
 
         emit('delete_room', {'id': room.id, 'name': room.name}, broadcast=True)
 
+    @log_info
     def on_add_room(self, msg_json):
         room_name = msg_json['name']
 
@@ -105,6 +123,7 @@ class NvrNamespace(Namespace):
         room.calendar = create_calendar(room_name)
         db.session.commit()
 
+    @log_info
     def on_edit_room(self, msg_json):
         room_id = msg_json['id']
         room = Room.query.get(room_id)
@@ -122,6 +141,7 @@ class NvrNamespace(Namespace):
 
         emit('edit_room', {room.to_dict()}, broadcast=True)
 
+    @log_info
     def on_delete_user(self, msg_json):
         user = User.query.get(msg_json['id'])
         emit('delete_user', {'id': user.id}, broadcast=True)
@@ -135,6 +155,7 @@ class NvrNamespace(Namespace):
         db.session.delete(user)
         db.session.commit()
 
+    @log_info
     def on_change_role(self, msg_json):
         user = User.query.get(msg_json['id'])
         user.role = msg_json['role']
@@ -142,6 +163,7 @@ class NvrNamespace(Namespace):
 
         emit('change_role', {'id': user.id, 'role': user.role}, broadcast=True)
 
+    @log_info
     def on_grant_access(self, msg_json):
         user = User.query.get(msg_json['id'])
         user.access = True
@@ -160,6 +182,7 @@ class NvrNamespace(Namespace):
                    current_app._get_current_object(), user.email),
                daemon=True).start()
 
+    @log_info
     def on_streaming_start(self, msg_json):
         sound_ip = msg_json['soundIp']
         camera_ip = msg_json['cameraIp']
@@ -183,8 +206,9 @@ class NvrNamespace(Namespace):
             return
 
         emit('streaming_start', {
-             'name': room_name, 'stream_url': room.stream_url}, broadcast=True)
+            'name': room_name, 'stream_url': room.stream_url}, broadcast=True)
 
+    @log_info
     def on_streaming_stop(self, msg_json):
         room_name = msg_json['roomName']
 
