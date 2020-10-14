@@ -14,7 +14,7 @@ from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
 
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
-REDIS_HOST = os.environ.get('REDIS_HOST')
+REDIS_HOST = os.environ.get('REDIS_HOST', '127.0.0.1')
 
 
 def create_app(app_name="NVR_API"):

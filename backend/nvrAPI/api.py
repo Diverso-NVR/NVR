@@ -194,6 +194,9 @@ def login():
         return jsonify({'error': 'Администратор ещё не открыл доступ для этого аккаунта',
                         'authenticated': False}), 401
 
+    user.last_login = datetime.utcnow()
+    db.session.commit()
+
     token = jwt.encode({
         'sub': {'email': user.email, 'role': user.role},
         'iat': datetime.utcnow(),
@@ -229,11 +232,12 @@ def glogin():
         user.access = True
 
         Thread(target=give_permissions, args=(
-                      current_app._get_current_object(), user.email)).start()
-
+            current_app._get_current_object(), user.email)).start()
 
         db.session.add(user)
-        db.session.commit()
+
+    user.last_login = datetime.utcnow()
+    db.session.commit()
 
     token = jwt.encode({
         'sub': {'email': user.email, 'role': user.role},
@@ -688,9 +692,12 @@ def gcalendar_webhook():
     return jsonify({"message": "Room calendar events patched"}), 200
 
 # dev
+
+
 @api.route('/calendar-notifications-dev/', methods=["POST"])
 def gcalendar_webhook_dev():
     return jsonify({"message": "Room calendar events patched"}), 200
+
 
 @api.route('/montage-event/<room_name>', methods=["POST"])
 @auth_required

@@ -4,6 +4,7 @@
 
 import uuid
 from time import time, sleep
+from datetime import datetime
 
 import jwt
 from flask import current_app
@@ -101,6 +102,7 @@ class User(db.Model):
     email_verified = db.Column(db.Boolean, default=False)
     access = db.Column(db.Boolean, default=False)
     api_key = db.Column(db.String(255), unique=True)
+    last_login = db.Column(db.DateTime, default=datetime.utcnow)
 
     records = db.relationship("Record", secondary="user_records")
 
@@ -173,7 +175,8 @@ class User(db.Model):
                     role=self.role,
                     email_verified=self.email_verified,
                     access=self.access,
-                    api_key=self.api_key)
+                    api_key=self.api_key,
+                    last_login=self.last_login)
 
 
 class Room(db.Model):
