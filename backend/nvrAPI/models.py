@@ -9,6 +9,7 @@ import jwt
 from flask import current_app
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 
 db = SQLAlchemy()
 
@@ -226,16 +227,10 @@ class Source(db.Model):
     merge = db.Column(db.String(200))
     tracking = db.Column(db.String(200))
     room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
-    #Поскольку это часть nvr-core, то это всегда запросы с фронтенда (по крайней мере мне так кажется)
-    is_changed_on_front = db.Column(db.Boolean, default=True) 
-
+    time_editing = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    external_id = db.Column(db.Integer)
 
     def update(self, **kwargs):
-        #Всегда запрос с фронта
-        self.is_changed_on_front = True
-        self.name = kwargs.get('name')
-        self.ip = kwargs.get('ip')
-        self.rtsp = kwargs.get('rtsp')  
         self.name = kwargs.get('name')
         self.ip = kwargs.get('ip')
         self.port = kwargs.get('port')
@@ -244,6 +239,8 @@ class Source(db.Model):
         self.merge = kwargs.get('merge')
         self.tracking = kwargs.get('tracking')
         self.room_id = kwargs.get('room_id')
+        self.time_editing = datetime.utcnow()
+        self.external_id = kwargs.get('external_id')
 
     def to_dict(self):
         return dict(id=self.id,
@@ -254,4 +251,6 @@ class Source(db.Model):
                     audio=self.audio,
                     merge=self.audio,
                     tracking=self.tracking,
-                    room_id=self.room_id)
+                    room_id=self.room_id,
+                    time_editing=self.time_editing,
+                    external_id=self.external_id)
