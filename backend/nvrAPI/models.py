@@ -227,7 +227,7 @@ class Source(db.Model):
     merge = db.Column(db.String(200))
     tracking = db.Column(db.String(200))
     room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
-    time_editing = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    time_editing = db.Column(db.DateTime, default=datetime.utcnow)
     external_id = db.Column(db.Integer)
 
     def update(self, **kwargs):
