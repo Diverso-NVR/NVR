@@ -643,12 +643,16 @@ def manage_source(current_user, ip):
 def gcalendar_webhook():
     calendar_id = request.headers['X-Goog-Resource-Uri'].split('/')[6]
     calendar_id = calendar_id.replace('%40', '@')
-    events = get_events(calendar_id)
 
     room = Room.query.filter_by(calendar=calendar_id).first()
+    if not room:
+        return jsonify({"message": "No such room"}), 200
+
     records = Record.query.filter(
         Record.room_name == room.name,
         Record.event_id != None).all()
+    events = get_events(calendar_id)
+
     calendar_events = set(events.keys())
     db_events = {record.event_id for record in records}
 
