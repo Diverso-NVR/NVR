@@ -231,7 +231,7 @@ class Source(db.Model):
     tracking = db.Column(db.String(200))
     room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
     time_editing = db.Column(db.DateTime, default=datetime.utcnow)
-    external_id = db.Column(db.Integer)
+    external_id = db.Column(db.String(200))
 
     def update(self, **kwargs):
         self.name = kwargs.get('name')
