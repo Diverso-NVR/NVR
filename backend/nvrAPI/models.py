@@ -10,6 +10,7 @@ import jwt
 from flask import current_app
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 
 db = SQLAlchemy()
 
@@ -229,6 +230,8 @@ class Source(db.Model):
     merge = db.Column(db.String(200))
     tracking = db.Column(db.String(200))
     room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
+    time_editing = db.Column(db.DateTime, default=datetime.utcnow)
+    external_id = db.Column(db.Integer)
 
     def update(self, **kwargs):
         self.name = kwargs.get('name')
@@ -239,6 +242,8 @@ class Source(db.Model):
         self.merge = kwargs.get('merge')
         self.tracking = kwargs.get('tracking')
         self.room_id = kwargs.get('room_id')
+        self.time_editing = datetime.utcnow()
+        self.external_id = kwargs.get('external_id')
 
     def to_dict(self):
         return dict(id=self.id,
@@ -249,4 +254,6 @@ class Source(db.Model):
                     audio=self.audio,
                     merge=self.audio,
                     tracking=self.tracking,
-                    room_id=self.room_id)
+                    room_id=self.room_id,
+                    time_editing=self.time_editing,
+                    external_id=self.external_id)
