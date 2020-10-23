@@ -124,6 +124,12 @@
                   </v-layout>
                 </li>
 
+                <li class="flex-item subheading" data-label="Камера">
+                  <v-btn icon :href="props.item.drive" target="_blank" :loading="!props.item.drive">
+                    <v-icon medium>folder</v-icon>
+                  </v-btn>
+                </li>
+
                 <li
                   class="flex-item subheading key-elems"
                   v-if="isAdminOrEditor"
