@@ -653,21 +653,23 @@ def gcalendar_webhook():
         Record.event_id != None).all()
 
     events = get_events(calendar_id)
-    calendar_events = {item['id'] for item in events}
+    events = {item['id']: item for item in events}
+    calendar_events = set(events.keys())
     db_events = {record.event_id for record in records}
 
     new_events = calendar_events - db_events
     deleted_events = db_events - calendar_events
     events_to_check = calendar_events & db_events
 
-    for event in deleted_events:
-        record = Record.query.filter_by(event_id=event['id']).first()
+    for event_id in deleted_events:
+        record = Record.query.filter_by(event_id=event_id).first()
         if record.done or record.processing:
             continue
 
         db.session.delete(record)
 
-    for event in new_events:
+    for event_id in new_events:
+        event = events[event_id]
         start_date = event['start']['dateTime'].split('T')[0]
         end_date = event['end']['dateTime'].split('T')[0]
 
@@ -678,7 +680,8 @@ def gcalendar_webhook():
         new_record.update_from_calendar(**event, room_name=room.name)
         db.session.add(new_record)
 
-    for event in events_to_check:
+    for event_id in events_to_check:
+        event = events[event_id]
         if date.today().isoformat() != event['updated'].split('T')[0]:
             continue
 
