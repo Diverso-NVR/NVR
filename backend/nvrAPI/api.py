@@ -896,4 +896,6 @@ def get_event_from_calendar(current_user):
     start_time = datetime.fromtimestamp(float(request.args.get('s')))
     end_time = datetime.fromtimestamp(float(request.args.get('e')))
 
-    return get_events(ID, start_time, end_time), 200
+    events = get_events(ID, start_time, end_time)
+
+    return jsonify(events), 200
