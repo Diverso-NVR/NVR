@@ -893,7 +893,7 @@ def get_urls(current_user, user_email):
 def get_event_from_calendar(current_user):
     ID = "itas.miem.edu.ru_0b0isj85nd5ojr3nu7n2gmspoc@group.calendar.google.com"
 
-    start_time = datetime.fromtimestamp(request.args.get('s'))
-    end_time = datetime.fromtimestamp(request.args.get('e'))
+    start_time = datetime.fromtimestamp(float(request.args.get('s')))
+    end_time = datetime.fromtimestamp(float(request.args.get('e')))
 
     return get_events(ID, start_time, end_time), 200
