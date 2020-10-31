@@ -155,11 +155,11 @@ def delete_calendar(calendar_id: str) -> None:
             print(e)
 
 
-def get_events(calendar_id: str, 
-               start_time: datetime or None = None, 
+def get_events(calendar_id: str,
+               start_time: datetime or None = None,
                end_time: datetime or None = None) -> list:
 
-    if start_timestamp == None and end_timestamp == None:
+    if start_time == None and end_time == None:
         now = datetime.utcnow()
         start_time = now - timedelta(days=30)
         end_time = now + timedelta(days=30)
