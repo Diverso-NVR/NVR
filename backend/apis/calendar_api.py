@@ -155,26 +155,29 @@ def delete_calendar(calendar_id: str) -> None:
             print(e)
 
 
-def get_events(calendar_id: str) -> dict:
-    with lock:
+def get_events(calendar_id: str, 
+               start_time: datetime or None = None, 
+               end_time: datetime or None = None) -> list:
+
+    if start_timestamp == None and end_timestamp == None:
         now = datetime.utcnow()
-        time_min = now - timedelta(days=30)
-        time_max = now + timedelta(days=30)
-        events_result = []
+        start_time = now - timedelta(days=30)
+        end_time = now + timedelta(days=30)
 
-        page_token = None
-        while True:
-            events = calendar_service.events().list(
-                calendarId=calendar_id, pageToken=page_token,
-                timeMin=time_min.isoformat() + 'Z',
-                timeMax=time_max.isoformat() + 'Z',
-                singleEvents=True,
-                orderBy='startTime').execute()
+    events_result = []
+    page_token = None
+    while True:
+        events = calendar_service.events().list(
+            calendarId=calendar_id, pageToken=page_token,
+            timeMin=start_time.isoformat() + 'Z',
+            timeMax=end_time.isoformat() + 'Z',
+            singleEvents=True,
+            orderBy='startTime').execute()
 
-            page_token = events.get('nextPageToken')
-            events_result += events['items']
+        page_token = events.get('nextPageToken')
+        events_result += events['items']
 
-            if not page_token:
-                break
+        if not page_token:
+            break
 
-        return {event['id']: event for event in events_result}
+    return events_result

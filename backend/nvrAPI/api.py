@@ -651,9 +651,9 @@ def gcalendar_webhook():
     records = Record.query.filter(
         Record.room_name == room.name,
         Record.event_id != None).all()
-    events = get_events(calendar_id)
 
-    calendar_events = set(events.keys())
+    events = get_events(calendar_id)
+    calendar_events = {item['id'] for item in events}
     db_events = {record.event_id for record in records}
 
     new_events = calendar_events - db_events
@@ -695,9 +695,8 @@ def gcalendar_webhook():
 
     return jsonify({"message": "Room calendar events patched"}), 200
 
+
 # dev
-
-
 @api.route('/calendar-notifications-dev/', methods=["POST"])
 def gcalendar_webhook_dev():
     return jsonify({"message": "Room calendar events patched"}), 200
@@ -887,3 +886,14 @@ def get_urls(current_user, user_email):
     records = Record.query.filter(
         Record.user_email == user_email).all()
     return jsonify([rec.to_dict() for rec in records]), 200
+
+
+@api.route('/calendars/ruz', methods=['GET'])
+@auth_required
+def get_event_from_calendar(current_user):
+    ID = "itas.miem.edu.ru_0b0isj85nd5ojr3nu7n2gmspoc@group.calendar.google.com"
+
+    start_time = datetime.fromtimestamp(request.args.get('s'))
+    end_time = datetime.fromtimestamp(request.args.get('e'))
+
+    return get_events(ID, start_time, end_time), 200
