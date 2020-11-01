@@ -1,7 +1,56 @@
+import os
+import uuid
+from datetime import datetime, timedelta, date
+from functools import wraps
+from threading import Thread
+from pathlib import Path
+
+import traceback
+
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+
+import jwt
+import requests
+from flask import Blueprint, jsonify, request, current_app, render_template
+from flask_socketio import SocketIO
+
+from apis.calendar_api import create_calendar, delete_calendar, give_permissions, create_event_, get_events
+from apis.drive_api import create_folder, get_folders_by_name, upload
+from apis.ruz_api import get_room_ruzid
+from .email import send_verify_email, send_access_request_email, send_reset_pass_email
+from .models import db, Room, Source, User, Record, nvr_db_context
+
+from .decorators import json_data_required, auth_required, admin_only, admin_or_editor_only
+
+auth_api = Blueprint('auth_api', __name__)
+
+TRACKING_URL = os.environ.get('TRACKING_URL')
+NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
+STREAMING_URL = os.environ.get('STREAMING_URL')
+STREAMING_API_KEY = os.environ.get('STREAMING_API_KEY')
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
+VIDS_PATH = str(Path.home()) + '/vids/'
+
+
+socketio = SocketIO(message_queue='redis://',
+                    cors_allowed_origins=NVR_CLIENT_URL)
+
+
+def emit_event(event, data):
+    socketio.emit(event,
+                  data,
+                  broadcast=True,
+                  namespace='/websocket')
+
+merger_api = Blueprint('merger_api', __name__)
+
+
+
 from flask import Blueprint
 room_api = Blueprint('room_api', __name__)
 
-@api.route('/rooms/<room_name>', methods=['POST'])
+@room_api.route('/rooms/<room_name>', methods=['POST'])
 @auth_required
 @admin_or_editor_only
 def create_room(current_user, room_name):
@@ -34,13 +83,13 @@ def config_room(room_name):
     db.session.commit()
 
 
-@api.route('/rooms/', methods=['GET'])
+@room_api.route('/rooms/', methods=['GET'])
 @auth_required
 def get_rooms(current_user):
     return jsonify([r.to_dict() for r in Room.query.all()]), 200
 
 
-@api.route('/rooms/<room_name>', methods=['GET'])
+@room_api.route('/rooms/<room_name>', methods=['GET'])
 @auth_required
 def get_room(current_user, room_name):
     room = Room.query.filter_by(name=str(room_name)).first()
@@ -49,7 +98,7 @@ def get_room(current_user, room_name):
     return jsonify(room.to_dict()), 200
 
 
-@api.route('/rooms/<room_name>', methods=['DELETE'])
+@room_api.route('/rooms/<room_name>', methods=['DELETE'])
 @auth_required
 @admin_or_editor_only
 def delete_room(current_user, room_name):
@@ -67,7 +116,7 @@ def delete_room(current_user, room_name):
     return jsonify({"message": "Room deleted"}), 200
 
 
-@api.route("/rooms/<room_name>", methods=['PUT'])
+@room_api.route("/rooms/<room_name>", methods=['PUT'])
 @auth_required
 @admin_or_editor_only
 @json_data_required
@@ -96,7 +145,7 @@ def edit_room(current_user, room_name):
     return jsonify({"message": "Room edited"}), 200
 
 
-@api.route('/set-source/<room_name>/<source_type>/<path:ip>', methods=['POST'])
+@room_api.route('/set-source/<room_name>/<source_type>/<path:ip>', methods=['POST'])
 @auth_required
 @admin_or_editor_only
 def room_settings(current_user, room_name, source_type, ip):

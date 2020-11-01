@@ -36,14 +36,21 @@ def create_app(app_name="NVR_API"):
 
     cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-    from nvrAPI.api import api
-    from auth_api import auth_api
-    from google_api import google_api
+    from nvrAPI.merger_api import merger_api
+    from nvrAPI.google_api import google_api
+    from nvrAPI.auth_api import auth_api
+    from nvrAPI.room_api import room_api
+    from nvrAPI.source_api import source_api
+    from nvrApi.user_api import user_api
     
+    
+    app.register_blueprint(merger_api, url_prefix="/api")
+    app.register_blueprint(google_api, url_prefix="/api")
     app.register_blueprint(auth_api, url_prefix="/api")
-    app.register_blueprint(api, url_prefix="/api")
-    app.register_blueprint
-#here
+    app.register_blueprint(room_api, url_prefix="/api")
+    app.register_blueprint(source_api, url_prefix="/api")
+    app.register_blueprint(user_api, url_prefix="/api")
+    
     from nvrAPI.models import db, User
     db.init_app(app)
     # Create admin user if no in db

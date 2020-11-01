@@ -1,7 +1,50 @@
-from flask import Blueprint
+import os
+import uuid
+from datetime import datetime, timedelta, date
+from functools import wraps
+from threading import Thread
+from pathlib import Path
+
+import traceback
+
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+
+import jwt
+import requests
+from flask import Blueprint, jsonify, request, current_app, render_template
+from flask_socketio import SocketIO
+
+from apis.calendar_api import create_calendar, delete_calendar, give_permissions, create_event_, get_events
+from apis.drive_api import create_folder, get_folders_by_name, upload
+from apis.ruz_api import get_room_ruzid
+from .email import send_verify_email, send_access_request_email, send_reset_pass_email
+from .models import db, Room, Source, User, Record, nvr_db_context
+
+from .decorators import json_data_required, auth_required, admin_only, admin_or_editor_only
+
+
 google_api = Blueprint('google_api', __name__)
 
-@api.route('/gcalendar-event/<room_name>', methods=['POST'])
+TRACKING_URL = os.environ.get('TRACKING_URL')
+NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
+STREAMING_URL = os.environ.get('STREAMING_URL')
+STREAMING_API_KEY = os.environ.get('STREAMING_API_KEY')
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
+VIDS_PATH = str(Path.home()) + '/vids/'
+
+socketio = SocketIO(message_queue='redis://',
+                    cors_allowed_origins=NVR_CLIENT_URL)
+
+
+def emit_event(event, data):
+    socketio.emit(event,
+                  data,
+                  broadcast=True,
+                  namespace='/websocket')
+
+
+@google_api.route('/gcalendar-event/<room_name>', methods=['POST'])
 @auth_required
 @admin_or_editor_only
 @json_data_required
@@ -28,7 +71,7 @@ def create_calendar_event(current_user, room_name):
     return jsonify({'message': f"Successfully created event: {event_link}"}), 201
 
 
-@api.route('/gdrive-upload/<room_name>', methods=['POST'])
+@google_api.route('/gdrive-upload/<room_name>', methods=['POST'])
 @auth_required
 @admin_or_editor_only
 def upload_video_to_drive(current_user, room_name):
@@ -68,7 +111,7 @@ def upload_video_to_drive(current_user, room_name):
     return jsonify({"message": "Upload to disk started"}), 200
 
 
-@api.route('/gconfigure/<string:room_name>', methods=['POST'])
+@google_api.route('/gconfigure/<string:room_name>', methods=['POST'])
 @auth_required
 @admin_or_editor_only
 def create_drive_and_calendar(current_user, room_name):

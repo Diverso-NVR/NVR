@@ -1,6 +1,51 @@
+import os
+import uuid
+from datetime import datetime, timedelta, date
+from functools import wraps
+from threading import Thread
+from pathlib import Path
+
+import traceback
+
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+
+import jwt
+import requests
+from flask import Blueprint, jsonify, request, current_app, render_template
+from flask_socketio import SocketIO
+
+from apis.calendar_api import create_calendar, delete_calendar, give_permissions, create_event_, get_events
+from apis.drive_api import create_folder, get_folders_by_name, upload
+from apis.ruz_api import get_room_ruzid
+from .email import send_verify_email, send_access_request_email, send_reset_pass_email
+from .models import db, Room, Source, User, Record, nvr_db_context
+
+from .decorators import json_data_required, auth_required, admin_only, admin_or_editor_only
+
+auth_api = Blueprint('auth_api', __name__)
+
+TRACKING_URL = os.environ.get('TRACKING_URL')
+NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
+STREAMING_URL = os.environ.get('STREAMING_URL')
+STREAMING_API_KEY = os.environ.get('STREAMING_API_KEY')
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
+VIDS_PATH = str(Path.home()) + '/vids/'
+
+
+socketio = SocketIO(message_queue='redis://',
+                    cors_allowed_origins=NVR_CLIENT_URL)
+
+
+def emit_event(event, data):
+    socketio.emit(event,
+                  data,
+                  broadcast=True,
+                  namespace='/websocket')
+
 merger_api = Blueprint('merger_api', __name__)
 
-@api.route('/calendar-notifications/', methods=["POST"])
+@merger_api.route('/calendar-notifications/', methods=["POST"])
 def gcalendar_webhook():
     calendar_id = request.headers['X-Goog-Resource-Uri'].split('/')[6]
     calendar_id = calendar_id.replace('%40', '@')
@@ -53,7 +98,7 @@ def gcalendar_webhook():
     return jsonify({"message": "Room calendar events patched"}), 200
 
 
-@api.route('/montage-event/<room_name>', methods=["POST"])
+@merger_api.route('/montage-event/<room_name>', methods=["POST"])
 @auth_required
 @json_data_required
 def create_montage_event(current_user, room_name):
@@ -97,7 +142,7 @@ def create_montage_event(current_user, room_name):
     return jsonify({'message': f"Merge event '{event_name}' added to queue"}), 201
 
 
-@api.route('/tracking/<room_name>', methods=['POST'])
+@merger_api.route('/tracking/<room_name>', methods=['POST'])
 @auth_required
 @admin_or_editor_only
 @json_data_required
@@ -141,7 +186,7 @@ def tracking_manage(current_user, room_name):
         return jsonify({"error": str(e)}), 500
 
 
-@api.route('/streaming-start/<room_name>', methods=['POST'])
+@merger_api.route('/streaming-start/<room_name>', methods=['POST'])
 @auth_required
 @json_data_required
 def streaming_start(current_user, room_name):
@@ -180,7 +225,7 @@ def streaming_start(current_user, room_name):
     return jsonify({"message": "Streaming started", 'url': url}), 200
 
 
-@api.route('/streaming-stop/<room_name>', methods=['POST'])
+@merger_api.route('/streaming-stop/<room_name>', methods=['POST'])
 @auth_required
 @json_data_required
 def streaming_stop(current_user, room_name):
@@ -205,7 +250,7 @@ def streaming_stop(current_user, room_name):
     return jsonify({"message": "Streaming stopped"}), 200
 
 
-@api.route('/auto-control/<room_name>', methods=['POST'])
+@merger_api.route('/auto-control/<room_name>', methods=['POST'])
 @auth_required
 @admin_or_editor_only
 @json_data_required
@@ -231,7 +276,7 @@ def auto_control(current_user, room_name):
                     has been set to {auto_control}"}), 200
 
 
-@api.route('/records/<user_email>', methods=['GET'])
+@merger_api.route('/records/<user_email>', methods=['GET'])
 @auth_required
 def get_urls(current_user, user_email):
     records = Record.query.filter(

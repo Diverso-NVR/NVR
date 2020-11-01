@@ -1,8 +1,49 @@
-from flask import Blueprint
+import os
+import uuid
+from datetime import datetime, timedelta, date
+from functools import wraps
+from threading import Thread
+from pathlib import Path
+
+import traceback
+
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+
+import jwt
+import requests
+from flask import Blueprint, jsonify, request, current_app, render_template
+from flask_socketio import SocketIO
+
+from apis.calendar_api import create_calendar, delete_calendar, give_permissions, create_event_, get_events
+from apis.drive_api import create_folder, get_folders_by_name, upload
+from apis.ruz_api import get_room_ruzid
+from .email import send_verify_email, send_access_request_email, send_reset_pass_email
+from .models import db, Room, Source, User, Record, nvr_db_context
+
+from .decorators import json_data_required
 
 auth_api = Blueprint('auth_api', __name__)
 
-@api.route('/register', methods=['POST'])
+TRACKING_URL = os.environ.get('TRACKING_URL')
+NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
+STREAMING_URL = os.environ.get('STREAMING_URL')
+STREAMING_API_KEY = os.environ.get('STREAMING_API_KEY')
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
+VIDS_PATH = str(Path.home()) + '/vids/'
+
+
+socketio = SocketIO(message_queue='redis://',
+                    cors_allowed_origins=NVR_CLIENT_URL)
+
+
+def emit_event(event, data):
+    socketio.emit(event,
+                  data,
+                  broadcast=True,
+                  namespace='/websocket')
+
+@auth_api.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
     user = User(**data)
@@ -25,7 +66,7 @@ def register():
     return jsonify(user.to_dict()), 202
 
 
-@api.route('/verify-email/<token>', methods=['POST'])
+@auth_api.route('/verify-email/<token>', methods=['POST'])
 def verify_email(token):
     user = User.verify_token(token, 'verify_email')
     if not user:
@@ -59,7 +100,7 @@ def verify_email(token):
                            url=NVR_CLIENT_URL), 202
 
 
-@api.route('/login', methods=['POST'])
+@auth_api.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
     user = User.authenticate(**data)
@@ -83,7 +124,7 @@ def login():
     return jsonify({'token': token.decode('UTF-8')}), 202
 
 
-@api.route('/google-login', methods=['POST'])
+@auth_api.route('/google-login', methods=['POST'])
 def glogin():
     data = request.get_json()
     token = data.get('token')
@@ -121,7 +162,7 @@ def glogin():
 
 # RESET PASS
 
-@api.route('/reset-pass/<email>', methods=['POST'])
+@auth_api.route('/reset-pass/<email>', methods=['POST'])
 def send_reset_pass(email):
     user = User.query.filter_by(email=str(email)).first()
     if not user:
@@ -137,7 +178,7 @@ def send_reset_pass(email):
     return jsonify({"message": "Reset pass token generated"}), 200
 
 
-@api.route('/reset-pass/<token>', methods=['PUT'])
+@auth_api.route('/reset-pass/<token>', methods=['PUT'])
 @json_data_required
 def reset_pass(token):
     data = request.get_json()
