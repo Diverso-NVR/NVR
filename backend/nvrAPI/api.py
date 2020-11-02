@@ -26,9 +26,10 @@ NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
 STREAMING_URL = os.environ.get('STREAMING_URL')
 STREAMING_API_KEY = os.environ.get('STREAMING_API_KEY')
 GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
+REDIS_HOST = os.environ.get('REDIS_HOST', '127.0.0.1')
 VIDS_PATH = str(Path.home()) + '/vids/'
 
-socketio = SocketIO(message_queue='redis://',
+socketio = SocketIO(message_queue='redis://' + REDIS_HOST,
                     cors_allowed_origins=NVR_CLIENT_URL)
 
 
