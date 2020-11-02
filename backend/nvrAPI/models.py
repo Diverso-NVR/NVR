@@ -2,65 +2,56 @@
 - Data classes for application
 """
 
+import os
 import uuid
-from time import time, sleep
 from datetime import datetime
+from time import time, sleep
 
 import jwt
-from flask import current_app
-from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Column, String, Integer, Boolean, create_engine, ForeignKey, DateTime
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, relationship, backref
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
 
-db = SQLAlchemy()
-
-
-def nvr_db_context(func):
-    """
-    Decorator to provide functions access to db
-    """
-
-    def wrapper(app, *args, **kwargs):
-        with app.app_context():
-            return func(*args, **kwargs)
-
-    return wrapper
+Base = declarative_base()
+engine = create_engine(os.environ.get('SQLALCHEMY_DATABASE_URI'))
+Session = sessionmaker(bind=engine)
 
 
-class UserRecord(db.Model):
+class UserRecord(Base):
     __tablename__ = 'user_records'
 
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    record_id = db.Column(db.Integer, db.ForeignKey('records.id'))
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    record_id = Column(Integer, ForeignKey('records.id'))
 
-    user = db.relationship("User", backref=db.backref(
+    user = relationship("User", backref=backref(
         "user_records", cascade="all, delete-orphan"))
-    record = db.relationship("Record", backref=db.backref(
+    record = relationship("Record", backref=backref(
         "user_records", cascade="all, delete-orphan"))
 
 
-class Record(db.Model):
+class Record(Base):
     __tablename__ = 'records'
 
-    id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.String(100), nullable=False)
-    start_time = db.Column(db.String(100), nullable=False)
-    end_time = db.Column(db.String(100), nullable=False)
-    event_name = db.Column(db.String(200))
-    event_id = db.Column(db.String(200))
-    drive_file_url = db.Column(db.String(200))
+    id = Column(Integer, primary_key=True)
+    date = Column(String(100), nullable=False)
+    start_time = Column(String(100), nullable=False)
+    end_time = Column(String(100), nullable=False)
+    event_name = Column(String(200))
+    event_id = Column(String(200))
+    drive_file_url = Column(String(200))
     # Will be deleted later
-    user_email = db.Column(db.String(200), nullable=False)
-    room_name = db.Column(db.String(200), nullable=False)
+    user_email = Column(String(200), nullable=False)
+    room_name = Column(String(200), nullable=False)
 
-    done = db.Column(db.Boolean, default=False)
-    processing = db.Column(db.Boolean, default=False)
-    error = db.Column(db.Boolean, default=False)
+    done = Column(Boolean, default=False)
+    processing = Column(Boolean, default=False)
+    error = Column(Boolean, default=False)
 
-    # room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
-    # room = db.relationship("Room", back_populates='records')
-    users = db.relationship("User", secondary="user_records")
+    # room_id = Column(Integer, ForeignKey('rooms.id'))
+    # room = relationship("Room", back_populates='records')
+    users = relationship("User", secondary="user_records")
 
     def update_from_calendar(self, **kwargs):
         self.event_id = kwargs.get('id')
@@ -85,27 +76,27 @@ class Record(db.Model):
                     processing=self.processing)
 
 
-class Channel(db.Model):
+class Channel(Base):
     __tablename__ = 'channels'
 
-    id = db.Column(db.String(100), primary_key=True)
-    resource_id = db.Column(db.String(100))
-    room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
+    id = Column(String(100), primary_key=True)
+    resource_id = Column(String(100))
+    room_id = Column(Integer, ForeignKey('rooms.id'))
 
 
-class User(db.Model):
+class User(Base):
     __tablename__ = 'users'
 
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(255), default=None)
-    role = db.Column(db.String(50), default='user')
-    email_verified = db.Column(db.Boolean, default=False)
-    access = db.Column(db.Boolean, default=False)
-    api_key = db.Column(db.String(255), unique=True)
-    last_login = db.Column(db.DateTime, default=datetime.utcnow)
+    id = Column(Integer, primary_key=True)
+    email = Column(String(120), unique=True, nullable=False)
+    password = Column(String(255), default=None)
+    role = Column(String(50), default='user')
+    email_verified = Column(Boolean, default=False)
+    access = Column(Boolean, default=False)
+    api_key = Column(String(255), unique=True)
+    last_login = Column(DateTime, default=datetime.utcnow)
 
-    records = db.relationship("Record", secondary="user_records")
+    records = relationship("Record", secondary="user_records")
 
     def __init__(self, email, password=None):
         self.email = email
@@ -116,14 +107,15 @@ class User(db.Model):
         self.password = generate_password_hash(password, method='sha256')
 
     @classmethod
-    def authenticate(cls, **kwargs):
+    def authenticate(cls, session, **kwargs):
         email = kwargs.get('email')
         password = kwargs.get('password')
 
         if not email or not password:
             return None
 
-        user = cls.query.filter_by(email=email).first()
+        user = session.query(cls).filter_by(email=email).first()
+
         if not user or not user.password or not check_password_hash(user.password, password):
             return None
 
@@ -131,7 +123,11 @@ class User(db.Model):
 
     @classmethod
     def create_api_key(cls, user_id):
-        if cls.query.get(user_id).api_key:
+        session = Session()
+        api_key = session.query(cls).get(user_id).api_key
+        session.close()
+
+        if api_key:
             return
         return uuid.uuid4().hex
 
@@ -142,7 +138,7 @@ class User(db.Model):
         return jwt.encode(
             {key: self.id,
              'exp': time() + token_expiration},
-            current_app.config['SECRET_KEY'],
+            os.environ.get('SECRET_KEY'),
             algorithm='HS256').decode('utf-8')
 
     def delete_user_after_token_expiration(self, app, token_expiration: int) -> None:
@@ -151,24 +147,27 @@ class User(db.Model):
         """
         # TODO looks weird
         sleep(token_expiration)
-        with app.app_context():
-            user = User.query.get(self.id)
-            if not user.email_verified:
-                db.session.delete(user)
-                db.session.commit()
+        session = Session()
+        user = session.query(User).get(self.id)
+        if not user.email_verified:
+            session.delete(user)
+            session.commit()
+            session.close()
 
     @staticmethod
-    def verify_token(token: str, key: str):
+    def verify_token(session: Session, token: str, key: str):
         """
         Check if token is valid
         """
         try:
             id = jwt.decode(token,
-                            current_app.config['SECRET_KEY'],
+                            os.environ.get('SECRET_KEY'),
                             algorithms=['HS256'])[key]
         except:
             return
-        return User.query.get(id)
+
+        user = session.query(User).get(id)
+        return user
 
     def to_dict(self):
         return dict(id=self.id,
@@ -180,28 +179,28 @@ class User(db.Model):
                     last_login=self.last_login)
 
 
-class Room(db.Model):
+class Room(Base):
     __tablename__ = 'rooms'
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False, unique=True)
-    tracking_state = db.Column(db.Boolean, default=False)
-    ruz_id = db.Column(db.Integer)
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False, unique=True)
+    tracking_state = Column(Boolean, default=False)
+    ruz_id = Column(Integer)
 
-    # records = db.relationship('Record', back_populates='room')
-    sources = db.relationship('Source', backref='room', lazy=False)
-    channel = db.relationship("Channel", backref="room", uselist=False)
+    # records = relationship('Record', back_populates='room')
+    sources = relationship('Source', backref='room', lazy=False)
+    channel = relationship("Channel", backref="room", uselist=False)
 
-    drive = db.Column(db.String(200))
-    calendar = db.Column(db.String(200))
-    stream_url = db.Column(db.String(300))
+    drive = Column(String(200))
+    calendar = Column(String(200))
+    stream_url = Column(String(300))
 
-    sound_source = db.Column(db.String(100))
-    main_source = db.Column(db.String(100))
-    tracking_source = db.Column(db.String(100))
-    screen_source = db.Column(db.String(100))
+    sound_source = Column(String(100))
+    main_source = Column(String(100))
+    tracking_source = Column(String(100))
+    screen_source = Column(String(100))
 
-    auto_control = db.Column(db.Boolean, default=True)
+    auto_control = Column(Boolean, default=True)
 
     def to_dict(self):
         return dict(id=self.id,
@@ -218,20 +217,20 @@ class Room(db.Model):
                     auto_control=self.auto_control)
 
 
-class Source(db.Model):
+class Source(Base):
     __tablename__ = 'sources'
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), default='источник')
-    ip = db.Column(db.String(200))
-    port = db.Column(db.String(200))
-    rtsp = db.Column(db.String(200), default='no')
-    audio = db.Column(db.String(200))
-    merge = db.Column(db.String(200))
-    tracking = db.Column(db.String(200))
-    room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
-    time_editing = db.Column(db.DateTime, default=datetime.utcnow)
-    external_id = db.Column(db.String(200))
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), default='источник')
+    ip = Column(String(200))
+    port = Column(String(200))
+    rtsp = Column(String(200), default='no')
+    audio = Column(String(200))
+    merge = Column(String(200))
+    tracking = Column(String(200))
+    room_id = Column(Integer, ForeignKey('rooms.id'))
+    time_editing = Column(DateTime, default=datetime.utcnow)
+    external_id = Column(String(200))
 
     def update(self, **kwargs):
         self.name = kwargs.get('name')

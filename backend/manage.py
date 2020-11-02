@@ -6,12 +6,14 @@
 from flask import Flask
 from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager
+from flask_sqlalchemy import SQLAlchemy
 
-from nvrAPI.application import create_app
-from nvrAPI.models import db, Room, Source, Record
+from nvrAPI.models import Room, Source, Record
 
 app = Flask(__name__)
 app.config.from_object('nvrAPI.config.BaseConfig')
+
+db = SQLAlchemy()
 db.init_app(app)
 
 migrate = Migrate(app, db)
