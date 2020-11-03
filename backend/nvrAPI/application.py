@@ -70,7 +70,7 @@ def create_app(app_name="NVR_API"):
     from nvrAPI.socketio import NvrNamespace
     socketio = SocketIO(app,
                         message_queue='redis://' + REDIS_HOST,
-                        cors_allowed_origins='http://localhost:8080',
+                        cors_allowed_origins=NVR_CLIENT_URL,
                         async_mode='gevent',
                         # logger=True, engineio_logger=True
                         )
