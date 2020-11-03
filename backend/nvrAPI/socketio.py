@@ -203,7 +203,7 @@ class NvrNamespace(Namespace):
                                              user=user, url=NVR_CLIENT_URL))
 
         Thread(target=give_permissions,
-               args=(current_app._get_current_object(), user.email),
+               args=user.email,
                daemon=True).start()
 
     @log_info

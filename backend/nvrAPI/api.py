@@ -233,8 +233,7 @@ def glogin():
         user.email_verified = True
         user.access = True
 
-        Thread(target=give_permissions, args=(
-            current_app._get_current_object(), user.email)).start()
+        Thread(target=give_permissions, args=user.email).start()
 
         g.session.add(user)
 
@@ -302,8 +301,7 @@ def grant_access(current_user, user_id):
     user.access = True
     g.session.commit()
 
-    Thread(target=give_permissions, args=(
-        current_app._get_current_object(), user.email)).start()
+    Thread(target=give_permissions, args=user.email).start()
 
     emit_event('grant_access', {'id': user.id})
 
@@ -386,8 +384,8 @@ def create_calendar_event(current_user, room_name):
 
     try:
         event_link = create_event_(
-            current_app._get_current_object(), room_name=str(room_name),
-            start_time=start_time, end_time=end_time, summary=summary)
+            room_name=str(room_name), start_time=start_time,
+            end_time=end_time, summary=summary)
     except ValueError:
         return jsonify({'error': 'Format error: date format should be YYYY-MM-DDTHH:mm'}), 400
     except NameError:
