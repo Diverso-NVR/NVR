@@ -152,7 +152,7 @@ class User(Base):
         if not user.email_verified:
             session.delete(user)
             session.commit()
-            session.close()
+        session.close()
 
     @staticmethod
     def verify_token(session: Session, token: str, key: str):
