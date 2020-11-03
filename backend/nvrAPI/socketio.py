@@ -71,7 +71,7 @@ class NvrNamespace(Namespace):
 
         emit('tracking_state_change', {
             'id': room.id, 'tracking_state': room.tracking_state, 'room_name': room.name},
-             broadcast=True)
+            broadcast=True)
 
     @log_info
     def on_auto_control_change(self, msg_json):
@@ -86,7 +86,7 @@ class NvrNamespace(Namespace):
 
         emit('auto_control_change', {
             'id': room.id, 'auto_control': room.auto_control, 'room_name': room.name},
-             broadcast=True)
+            broadcast=True)
 
     @log_info
     def on_delete_room(self, msg_json):

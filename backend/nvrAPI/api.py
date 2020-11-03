@@ -64,7 +64,8 @@ def auth_required(f):
         if token:
             try:
                 data = jwt.decode(token, current_app.config['SECRET_KEY'])
-                user = session.query(User).filter_by(email=data['sub']['email']).first()
+                user = session.query(User).filter_by(
+                    email=data['sub']['email']).first()
                 session.close()
                 if not user:
                     return jsonify({'error': "User not found"}), 404
@@ -289,7 +290,8 @@ def reset_pass(token):
 @auth_required
 @admin_only
 def get_users(current_user):
-    users = [u.to_dict() for u in g.session.query(User).all() if u.email_verified]
+    users = [u.to_dict()
+             for u in g.session.query(User).all() if u.email_verified]
     return jsonify(users), 200
 
 

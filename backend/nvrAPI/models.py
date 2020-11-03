@@ -14,7 +14,7 @@ from sqlalchemy.orm import sessionmaker, relationship, backref
 from werkzeug.security import generate_password_hash, check_password_hash
 
 Base = declarative_base()
-engine = create_engine(os.environ.get('SQLALCHEMY_DATABASE_URI'))
+engine = create_engine(os.environ.get('DB_URL'))
 Session = sessionmaker(bind=engine)
 
 

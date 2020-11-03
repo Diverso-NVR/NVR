@@ -32,12 +32,15 @@ def create_app(app_name="NVR_API"):
     )
 
     @app.before_request
-    def before_request_func():
+    def before_request():
         g.session = Session()
 
     @app.teardown_request
-    def after_request_func():
-        g.session.close()
+    def teardown_request(exception):
+        try:
+            g.session.close()
+        except:
+            pass
 
     @limiter.request_filter
     def header_whitelist():
@@ -67,13 +70,13 @@ def create_app(app_name="NVR_API"):
     from nvrAPI.socketio import NvrNamespace
     socketio = SocketIO(app,
                         message_queue='redis://' + REDIS_HOST,
-                        cors_allowed_origins=NVR_CLIENT_URL,
+                        cors_allowed_origins='http://localhost:8080',
                         async_mode='gevent',
                         # logger=True, engineio_logger=True
                         )
     socketio.on_namespace(NvrNamespace('/websocket'))
 
-    @socktio.on_error_default
+    @socketio.on_error_default
     def default_error_handler(e):
         print(request.event["message"])
         print(request.event["args"])
