@@ -2,9 +2,10 @@
 - creates a Flask app instance and registers the database object
 """
 from gevent import monkey
+
 monkey.patch_all()
 
-from flask import Flask, request
+from flask import Flask, request, g
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from flask_limiter import Limiter
@@ -30,6 +31,17 @@ def create_app(app_name="NVR_API"):
         default_limits=["100/minute", "10/second"]
     )
 
+    @app.before_request
+    def before_request():
+        g.session = Session()
+
+    @app.teardown_request
+    def teardown_request(exception):
+        try:
+            g.session.close()
+        except:
+            pass
+
     @limiter.request_filter
     def header_whitelist():
         return request.headers.get("X-Goog-Resource-Uri") is not None
@@ -39,18 +51,18 @@ def create_app(app_name="NVR_API"):
     from nvrAPI.api import api
     app.register_blueprint(api, url_prefix="/api")
 
-    from nvrAPI.models import db, User
-    db.init_app(app)
-    # Create admin user if no in db
-    with app.app_context():
-        if User.query.all() == []:
-            user = User(email='admin@admin.com', password='nvr_admin')
-            user.access = True
-            user.email_verified = True
-            user.role = 'admin'
+    from nvrAPI.models import User, Session
 
-            db.session.add(user)
-            db.session.commit()
+    session = Session()
+    if session.query(User).all() == []:
+        user = User(email='admin@admin.com', password='nvr_admin')
+        user.access = True
+        user.email_verified = True
+        user.role = 'admin'
+
+        session.add(user)
+        session.commit()
+    session.close()
 
     from nvrAPI.email import mail
     mail.init_app(app)

@@ -1,25 +1,23 @@
 import os
+import traceback
 import uuid
 from datetime import datetime, timedelta, date
 from functools import wraps
-from threading import Thread
 from pathlib import Path
-
-import traceback
-
-from google.oauth2 import id_token
-from google.auth.transport import requests as google_requests
+from threading import Thread
 
 import jwt
 import requests
-from flask import Blueprint, jsonify, request, current_app, render_template
+from flask import Blueprint, jsonify, request, current_app, render_template, g
 from flask_socketio import SocketIO
+from google.auth.transport import requests as google_requests
+from google.oauth2 import id_token
 
 from apis.calendar_api import create_calendar, delete_calendar, give_permissions, create_event_, get_events
 from apis.drive_api import create_folder, get_folders_by_name, upload
 from apis.ruz_api import get_room_ruzid
 from .email import send_verify_email, send_access_request_email, send_reset_pass_email
-from .models import db, Room, Source, User, Record, nvr_db_context
+from .models import Session, Room, Source, User, Record
 
 api = Blueprint('api', __name__)
 
@@ -28,9 +26,10 @@ NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
 STREAMING_URL = os.environ.get('STREAMING_URL')
 STREAMING_API_KEY = os.environ.get('STREAMING_API_KEY')
 GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
+REDIS_HOST = os.environ.get('REDIS_HOST', '127.0.0.1')
 VIDS_PATH = str(Path.home()) + '/vids/'
 
-socketio = SocketIO(message_queue='redis://',
+socketio = SocketIO(message_queue='redis://' + REDIS_HOST,
                     cors_allowed_origins=NVR_CLIENT_URL)
 
 
@@ -61,10 +60,13 @@ def auth_required(f):
             'autheticated': False
         }
 
+        session = Session()
         if token:
             try:
                 data = jwt.decode(token, current_app.config['SECRET_KEY'])
-                user = User.query.filter_by(email=data['sub']['email']).first()
+                user = session.query(User).filter_by(
+                    email=data['sub']['email']).first()
+                session.close()
                 if not user:
                     return jsonify({'error': "User not found"}), 404
                 return f(user, *args, **kwargs)
@@ -77,7 +79,8 @@ def auth_required(f):
                 return jsonify({'error': "Server error"}), 500
         elif api_key:
             try:
-                user = User.query.filter_by(api_key=api_key).first()
+                user = session.query(User).filter_by(api_key=api_key).first()
+                session.close()
                 if not user:
                     return jsonify({'error': "Wrong API key"}), 400
                 return f(user, *args, **kwargs)
@@ -128,8 +131,8 @@ def register():
     user = User(**data)
 
     try:
-        db.session.add(user)
-        db.session.commit()
+        g.session.add(user)
+        g.session.commit()
     except:
         return jsonify({"error": 'Пользователь с данной почтой существует'}), 409
 
@@ -147,7 +150,7 @@ def register():
 
 @api.route('/verify-email/<token>', methods=['POST', 'GET'])
 def verify_email(token):
-    user = User.verify_token(token, 'verify_email')
+    user = User.verify_token(g.session, token, 'verify_email')
     if not user:
         return render_template('msg_template.html',
                                msg={'title': 'Подтверждение почты',
@@ -162,11 +165,11 @@ def verify_email(token):
                                url=NVR_CLIENT_URL), 409
 
     user.email_verified = True
-    db.session.commit()
+    g.session.commit()
 
     try:
         send_access_request_email(
-            [u.email for u in User.query.all() if u.role not in ['user', 'editor']], user)
+            [u.email for u in g.session.query(User).all() if u.role not in ['user', 'editor']], user)
     except Exception as e:
         traceback.print_exc()
         return "Server error", 500
@@ -182,7 +185,7 @@ def verify_email(token):
 @api.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
-    user = User.authenticate(**data)
+    user = User.authenticate(g.session, **data)
 
     if not user:
         return jsonify({'error': "Неверные данные", 'authenticated': False}), 401
@@ -195,7 +198,7 @@ def login():
                         'authenticated': False}), 401
 
     user.last_login = datetime.utcnow()
-    db.session.commit()
+    g.session.commit()
 
     token = jwt.encode({
         'sub': {'email': user.email, 'role': user.role},
@@ -225,19 +228,18 @@ def glogin():
     except ValueError:
         return jsonify({'error': "Bad token"}), 403
 
-    user = User.query.filter_by(email=email).first()
+    user = g.session.query(User).filter_by(email=email).first()
     if not user:
         user = User(email=email)
         user.email_verified = True
         user.access = True
 
-        Thread(target=give_permissions, args=(
-            current_app._get_current_object(), user.email)).start()
+        Thread(target=give_permissions, args=user.email).start()
 
-        db.session.add(user)
+        g.session.add(user)
 
     user.last_login = datetime.utcnow()
-    db.session.commit()
+    g.session.commit()
 
     token = jwt.encode({
         'sub': {'email': user.email, 'role': user.role},
@@ -247,12 +249,10 @@ def glogin():
 
     return jsonify({'token': token.decode('UTF-8')}), 202
 
-# RESET PASS
-
 
 @api.route('/reset-pass/<email>', methods=['POST'])
 def send_reset_pass(email):
-    user = User.query.filter_by(email=str(email)).first()
+    user = g.session.query(User).filter_by(email=str(email)).first()
     if not user:
         return jsonify({"error": "User doesn`t exist"}), 404
 
@@ -275,12 +275,12 @@ def reset_pass(token):
     if not new_pass:
         return jsonify({"error": "New password required"}), 400
 
-    user = User.verify_token(token, 'reset_pass')
+    user = User.verify_token(g.session, token, 'reset_pass')
     if not user:
         return jsonify({"error": "Invalid token"}), 403
 
     user.update_pass(new_pass)
-    db.session.commit()
+    g.session.commit()
 
     return jsonify({"message": "Password updated"}), 200
 
@@ -290,7 +290,8 @@ def reset_pass(token):
 @auth_required
 @admin_only
 def get_users(current_user):
-    users = [u.to_dict() for u in User.query.all() if u.email_verified]
+    users = [u.to_dict()
+             for u in g.session.query(User).all() if u.email_verified]
     return jsonify(users), 200
 
 
@@ -298,12 +299,11 @@ def get_users(current_user):
 @auth_required
 @admin_only
 def grant_access(current_user, user_id):
-    user = User.query.get(user_id)
+    user = g.session.query(User).get(user_id)
     user.access = True
-    db.session.commit()
+    g.session.commit()
 
-    Thread(target=give_permissions, args=(
-        current_app._get_current_object(), user.email)).start()
+    Thread(target=give_permissions, args=user.email).start()
 
     emit_event('grant_access', {'id': user.id})
 
@@ -314,9 +314,9 @@ def grant_access(current_user, user_id):
 @auth_required
 @admin_only
 def user_role(current_user, user_id):
-    user = User.query.get(user_id)
+    user = g.session.query(User).get(user_id)
     user.role = request.get_json()['role']
-    db.session.commit()
+    g.session.commit()
 
     emit_event('change_role', {'id': user.id, 'role': user.role})
 
@@ -327,9 +327,9 @@ def user_role(current_user, user_id):
 @auth_required
 @admin_only
 def delete_user(current_user, user_id):
-    user = User.query.get(user_id)
-    db.session.delete(user)
-    db.session.commit()
+    user = g.session.query(User).get(user_id)
+    g.session.delete(user)
+    g.session.commit()
 
     emit_event('delete_user', {'id': user.id})
 
@@ -339,7 +339,7 @@ def delete_user(current_user, user_id):
 @api.route('/api-key/<email>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 @auth_required
 def manage_api_key(current_user, email):
-    user = User.query.filter_by(email=email).first()
+    user = g.session.query(User).filter_by(email=email).first()
     if current_user.role == 'user' or email != current_user.email:
         return jsonify({'error': "Access error"}), 401
 
@@ -348,7 +348,7 @@ def manage_api_key(current_user, email):
             return jsonify({'error': 'Ключ API уже существует'}), 409
 
         user.api_key = uuid.uuid4().hex
-        db.session.commit()
+        g.session.commit()
 
         return jsonify({'key': user.api_key}), 201
 
@@ -357,13 +357,13 @@ def manage_api_key(current_user, email):
 
     if request.method == 'PUT':
         user.api_key = uuid.uuid4().hex
-        db.session.commit()
+        g.session.commit()
 
         return jsonify({'key': user.api_key}), 202
 
     if request.method == 'DELETE':
         user.api_key = None
-        db.session.commit()
+        g.session.commit()
 
         return jsonify({'message': "API key deleted"}), 200
 
@@ -386,8 +386,8 @@ def create_calendar_event(current_user, room_name):
 
     try:
         event_link = create_event_(
-            current_app._get_current_object(), room_name=str(room_name),
-            start_time=start_time, end_time=end_time, summary=summary)
+            room_name=str(room_name), start_time=start_time,
+            end_time=end_time, summary=summary)
     except ValueError:
         return jsonify({'error': 'Format error: date format should be YYYY-MM-DDTHH:mm'}), 400
     except NameError:
@@ -403,7 +403,7 @@ def upload_video_to_drive(current_user, room_name):
     if not request.files:
         return {"error": "No file provided"}, 400
 
-    room = Room.query.filter_by(name=str(room_name)).first()
+    room = g.session.query(Room).filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": f"Room '{room_name}' not found"}), 400
 
@@ -453,14 +453,14 @@ def create_room(current_user, room_name):
     if not room_name:
         return jsonify({"error": "Room name required"}), 400
 
-    room = Room.query.filter_by(name=room_name).first()
+    room = g.session.query(Room).filter_by(name=room_name).first()
     if room:
         return jsonify({"error": f"Room '{room_name}' already exist"}), 409
 
     room = Room(name=room_name)
     room.sources = []
-    db.session.add(room)
-    db.session.commit()
+    g.session.add(room)
+    g.session.commit()
 
     emit_event('add_room', {'room': room.to_dict()})
 
@@ -470,25 +470,28 @@ def create_room(current_user, room_name):
     return jsonify({'message': f"Started creating '{room_name}'"}), 204
 
 
-@nvr_db_context
 def config_room(room_name):
-    room = Room.query.filter_by(name=room_name).first()
+    session = Session()
+
+    room = session.query(Room).filter_by(name=room_name).first()
     room.drive = create_folder(room_name)
     room.calendar = create_calendar(room_name)
     room.ruz_id = get_room_ruzid(room_name)
-    db.session.commit()
+
+    session.commit()
+    session.close()
 
 
 @api.route('/rooms/', methods=['GET'])
 @auth_required
 def get_rooms(current_user):
-    return jsonify([r.to_dict() for r in Room.query.all()]), 200
+    return jsonify([r.to_dict() for r in g.session.query(Room).all()]), 200
 
 
 @api.route('/rooms/<room_name>', methods=['GET'])
 @auth_required
 def get_room(current_user, room_name):
-    room = Room.query.filter_by(name=str(room_name)).first()
+    room = g.session.query(Room).filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": "No room found with given room_name"}), 400
     return jsonify(room.to_dict()), 200
@@ -498,14 +501,14 @@ def get_room(current_user, room_name):
 @auth_required
 @admin_or_editor_only
 def delete_room(current_user, room_name):
-    room = Room.query.filter_by(name=str(room_name)).first()
+    room = g.session.query(Room).filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": "No room found with given room_name"}), 400
 
     Thread(target=delete_calendar, args=(room.calendar,)).start()
 
-    db.session.delete(room)
-    db.session.commit()
+    g.session.delete(room)
+    g.session.commit()
 
     emit_event('delete_room', {'id': room.id, 'name': room.name})
 
@@ -519,7 +522,7 @@ def delete_room(current_user, room_name):
 def edit_room(current_user, room_name):
     post_data = request.get_json()
 
-    room = Room.query.filter_by(name=str(room_name)).first()
+    room = g.session.query(Room).filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": "No room found with given 'room_name'"}), 400
     if not post_data.get('sources'):
@@ -527,14 +530,14 @@ def edit_room(current_user, room_name):
 
     for s in post_data['sources']:
         if s.get('id'):
-            source = Source.query.get(s['id'])
+            source = g.session.query(Source).get(s['id'])
             source.update(**s)
         else:
             source = Source(**s)
             source.room_id = room.id
-            db.session.add(source)
+            g.session.add(source)
 
-    db.session.commit()
+    g.session.commit()
 
     emit_event('edit_room', {room.to_dict()})
 
@@ -545,7 +548,7 @@ def edit_room(current_user, room_name):
 @auth_required
 @admin_or_editor_only
 def room_settings(current_user, room_name, source_type, ip):
-    room = Room.query.filter_by(name=str(room_name)).first()
+    room = g.session.query(Room).filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": "No room found with provided room_name"}), 400
 
@@ -565,7 +568,7 @@ def room_settings(current_user, room_name, source_type, ip):
     else:
         room.tracking_source = ip
 
-    db.session.commit()
+    g.session.commit()
 
     emit_event('edit_room', {room.to_dict()})
 
@@ -575,7 +578,7 @@ def room_settings(current_user, room_name, source_type, ip):
 @api.route("/sources/", methods=['GET'])
 @auth_required
 def get_sources(current_user):
-    return jsonify([s.to_dict() for s in Source.query.all()]), 200
+    return jsonify([s.to_dict() for s in g.session.query(Source).all()]), 200
 
 
 @api.route("/sources/<path:ip>", methods=['POST', 'GET', 'DELETE', 'PUT'])
@@ -587,21 +590,21 @@ def manage_source(current_user, ip):
         room_name = data.get('room_name')
         if not room_name:
             return jsonify({"error": "room_name required"}), 400
-        room = Room.query.filter_by(name=str(room_name)).first()
+        room = g.session.query(Room).filter_by(name=str(room_name)).first()
         if not room:
             return jsonify({"error": "No room found with provided room_name"}), 400
 
         data['room_id'] = room.id
         source = Source(ip=ip, **data)
-        db.session.add(source)
-        db.session.commit()
+        g.session.add(source)
+        g.session.commit()
 
         emit_event('edit_room', {'id': room.id, 'sources': [
             s.to_dict() for s in room.sources]})
 
         return jsonify({'message': 'Added'}), 201
 
-    for source in Source.query.all():
+    for source in g.session.query(Source).all():
         if ip in source.ip:
             break
     else:
@@ -613,11 +616,11 @@ def manage_source(current_user, ip):
         return jsonify(source.to_dict()), 200
 
     if request.method == 'DELETE':
-        db.session.delete(source)
-        db.session.commit()
+        g.session.delete(source)
+        g.session.commit()
 
         emit_event('edit_room', {'id': room_id, 'sources': [
-            s.to_dict() for s in Room.query.get(room_id).sources]})
+            s.to_dict() for s in g.session.query(Room).get(room_id).sources]})
 
         return jsonify({'message': 'Deleted'}), 200
 
@@ -626,14 +629,14 @@ def manage_source(current_user, ip):
         source_dict = source.to_dict()
         updated_source_dict = {**source_dict, **s}
 
-        db.session.delete(source)
+        g.session.delete(source)
 
         source = Source(**updated_source_dict)
-        db.session.add(source)
-        db.session.commit()
+        g.session.add(source)
+        g.session.commit()
 
         emit_event('edit_room', {'id': room_id, 'sources': [
-            s.to_dict() for s in Room.query.get(room_id).sources]})
+            s.to_dict() for s in g.session.query(Room).get(room_id).sources]})
 
         return jsonify({'message': 'Updated'}), 200
 
@@ -644,11 +647,11 @@ def gcalendar_webhook():
     calendar_id = request.headers['X-Goog-Resource-Uri'].split('/')[6]
     calendar_id = calendar_id.replace('%40', '@')
 
-    room = Room.query.filter_by(calendar=calendar_id).first()
+    room = g.session.query(Room).filter_by(calendar=calendar_id).first()
     if not room:
         return jsonify({"message": "No such room"}), 200
 
-    records = Record.query.filter(
+    records = g.session.query(Record).filter(
         Record.room_name == room.name,
         Record.event_id != None).all()
 
@@ -662,11 +665,11 @@ def gcalendar_webhook():
     events_to_check = calendar_events & db_events
 
     for event_id in deleted_events:
-        record = Record.query.filter_by(event_id=event_id).first()
+        record = g.session.query(Record).filter_by(event_id=event_id).first()
         if record.done or record.processing:
             continue
 
-        db.session.delete(record)
+        g.session.delete(record)
 
     for event_id in new_events:
         event = events[event_id]
@@ -678,21 +681,21 @@ def gcalendar_webhook():
 
         new_record = Record()
         new_record.update_from_calendar(**event, room_name=room.name)
-        db.session.add(new_record)
+        g.session.add(new_record)
 
     for event_id in events_to_check:
         event = events[event_id]
         if date.today().isoformat() != event['updated'].split('T')[0]:
             continue
 
-        record = Record.query.filter_by(event_id=event_id).first()
+        record = g.session.query(Record).filter_by(event_id=event_id).first()
         if record.done or record.processing:
             continue
 
         record.update_from_calendar(**event, room_name=room.name)
 
-    db.session.commit()
-    db.session.close()
+    g.session.commit()
+    g.session.close()
 
     return jsonify({"message": "Room calendar events patched"}), 200
 
@@ -715,7 +718,7 @@ def create_montage_event(current_user, room_name):
     end_time = json.get("end_time")
     user_email = json.get("user_email", current_user.email)
 
-    room = Room.query.filter_by(name=str(room_name)).first()
+    room = g.session.query(Room).filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": "No room found with given room_name"}), 400
 
@@ -740,9 +743,8 @@ def create_montage_event(current_user, room_name):
     record = Record(event_name=event_name, room_name=room.name, date=date,
                     start_time=start_time, end_time=end_time, user_email=user_email)
 
-    db.session.add(record)
-    db.session.commit()
-    db.session.close()
+    g.session.add(record)
+    g.session.commit()
 
     return jsonify({'message': f"Merge event '{event_name}' added to queue"}), 201
 
@@ -765,7 +767,7 @@ def tracking_manage(current_user, room_name):
         res = requests.get(f'{TRACKING_URL}/status', timeout=5)
         return jsonify(res.json()), 200
 
-    room = Room.query.filter_by(name=str(room_name)).first()
+    room = g.session.query(Room).filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": "No room found with given room_name"}), 400
 
@@ -781,7 +783,7 @@ def tracking_manage(current_user, room_name):
             res = requests.delete(f'{TRACKING_URL}/track')
 
         room.tracking_state = True if command == 'start' else False
-        db.session.commit()
+        g.session.commit()
 
         emit_event('tracking_state_change', {
             'id': room.id, 'tracking_state': room.tracking_state, 'room_name': room.name})
@@ -801,7 +803,7 @@ def streaming_start(current_user, room_name):
     camera_ip = data.get('camera_ip')
     title = data.get('title')
 
-    room = Room.query.filter_by(name=str(room_name)).first()
+    room = g.session.query(Room).filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": f"Room {room_name} not found"}), 404
     if room.stream_url:
@@ -812,8 +814,8 @@ def streaming_start(current_user, room_name):
     if not camera_ip:
         return jsonify({"error": "Camera ip not provided"}), 400
 
-    sound_source = Source.query.filter_by(ip=sound_ip).first()
-    camera_source = Source.query.filter_by(ip=camera_ip).first()
+    sound_source = g.session.query(Source).filter_by(ip=sound_ip).first()
+    camera_source = g.session.query(Source).filter_by(ip=camera_ip).first()
 
     try:
         response = requests.post(f"{STREAMING_URL}/streams/{room_name}", json={
@@ -823,7 +825,7 @@ def streaming_start(current_user, room_name):
         }, headers={'X-API-KEY': STREAMING_API_KEY})
         url = response.json()['url']
         room.stream_url = url
-        db.session.commit()
+        g.session.commit()
     except:
         return jsonify({"error": "Unable to start stream"}), 500
 
@@ -836,7 +838,7 @@ def streaming_start(current_user, room_name):
 def streaming_stop(current_user, room_name):
     data = request.get_json()
 
-    room = Room.query.filter_by(name=str(room_name)).first()
+    room = g.session.query(Room).filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": f"Room {room_name} not found"}), 404
     if not room.stream_url:
@@ -850,7 +852,7 @@ def streaming_stop(current_user, room_name):
         return jsonify({"error": "Unable to stop stream"}), 500
     finally:
         room.stream_url = None
-        db.session.commit()
+        g.session.commit()
 
     return jsonify({"message": "Streaming stopped"}), 200
 
@@ -867,12 +869,12 @@ def auto_control(current_user, room_name):
     if auto_control is None:
         return jsonify({"error": "Boolean value not provided"}), 400
 
-    room = Room.query.filter_by(name=str(room_name)).first()
+    room = g.session.query(Room).filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": f"Room {room_name} not found"}), 404
 
     room.auto_control = auto_control
-    db.session.commit()
+    g.session.commit()
 
     emit_event('auto_control_change', {
         'id': room.id, 'auto_control': room.auto_control, 'room_name': room.name})
@@ -884,8 +886,7 @@ def auto_control(current_user, room_name):
 @api.route('/records/<user_email>', methods=['GET'])
 @auth_required
 def get_urls(current_user, user_email):
-    records = Record.query.filter(
-        Record.user_email == user_email).all()
+    records = g.session.query(Record).filter_by(user_email=user_email).all()
     return jsonify([rec.to_dict() for rec in records]), 200
 
 

@@ -11,7 +11,7 @@ from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
-from nvrAPI.models import nvr_db_context, Room
+from nvrAPI.models import Session, Room
 
 lock = RLock()
 
@@ -40,13 +40,14 @@ if not creds or not creds.valid:
 calendar_service = build('calendar', 'v3', credentials=creds)
 
 
-@nvr_db_context
 def create_event_(room_name: str, start_time: str, end_time: str, summary: str) -> str:
     """
         format 2019-11-12T15:00
     """
     with lock:
-        room = Room.query.filter_by(name=room_name).first()
+        session = Session()
+        room = session.query(Room).filter_by(name=room_name).first()
+        session.close()
         if not room:
             raise NameError()
 
@@ -74,7 +75,6 @@ def create_event_(room_name: str, start_time: str, end_time: str, summary: str) 
         return event['htmlLink']
 
 
-@nvr_db_context
 def give_permissions(mail: str) -> None:
     """
     Give write permissions to user with 'mail'
@@ -88,7 +88,11 @@ def give_permissions(mail: str) -> None:
             'role': 'writer'
         }
 
-        for room in Room.query.all():
+        session = Session()
+        rooms = session.query(Room).all()
+        session.close()
+
+        for room in rooms:
             try:
                 calendar_service.acl().insert(
                     calendarId=room.calendar, body=rule).execute()
@@ -110,6 +114,7 @@ def give_permissions(mail: str) -> None:
 
 
 # TODO фикс присваивания ролей
+# TODO алё а кампуса то нет ёпт
 def create_calendar(room: str) -> str:
     """
     Creates calendar with name: 'room'
@@ -158,7 +163,6 @@ def delete_calendar(calendar_id: str) -> None:
 def get_events(calendar_id: str,
                start_time: datetime or None = None,
                end_time: datetime or None = None) -> list:
-
     if start_time == None and end_time == None:
         now = datetime.utcnow()
         start_time = now - timedelta(days=30)
