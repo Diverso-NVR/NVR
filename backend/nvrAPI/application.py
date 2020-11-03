@@ -41,7 +41,7 @@ def create_app(app_name="NVR_API"):
     from nvrAPI.auth_api import auth_api
     from nvrAPI.room_api import room_api
     from nvrAPI.source_api import source_api
-    from nvrApi.user_api import user_api
+    from nvrAPI.user_api import user_api
     
     
     app.register_blueprint(merger_api, url_prefix="/api")
@@ -54,26 +54,27 @@ def create_app(app_name="NVR_API"):
     from nvrAPI.models import db, User
     db.init_app(app)
     # Create admin user if no in db
-    with app.app_context():
-        if User.query.all() == []:
-            user = User(email='admin@admin.com', password='nvr_admin')
-            user.access = True
-            user.email_verified = True
-            user.role = 'admin'
+    # with app.app_context():
+    #     if User.query.all() == []:
+    #         user = User(email='admin@admin.com', password='nvr_admin')
+    #         user.access = True
+    #         user.email_verified = True
+    #         user.role = 'admin'
 
-            db.session.add(user)
-            db.session.commit()
+    #         db.session.add(user)
+    #         db.session.commit()
 
     from nvrAPI.email import mail
     mail.init_app(app)
 
     from nvrAPI.socketio import NvrNamespace
-    socketio = SocketIO(app,
-                        message_queue='redis://' + REDIS_HOST,
-                        cors_allowed_origins=NVR_CLIENT_URL,
-                        async_mode='gevent',
-                        # logger=True, engineio_logger=True
-                        )
+    # socketio = SocketIO(app,
+    #                     message_queue='redis://' + REDIS_HOST,
+    #                     cors_allowed_origins=NVR_CLIENT_URL,
+    #                     async_mode='gevent',
+    #                     # logger=True, engineio_logger=True
+    #                     )
+    socketio = SocketIO(app)
     socketio.on_namespace(NvrNamespace('/websocket'))
 
     @socketio.on_error_default
