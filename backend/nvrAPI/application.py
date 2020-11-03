@@ -5,7 +5,7 @@ from gevent import monkey
 
 monkey.patch_all()
 
-from flask import Flask, request
+from flask import Flask, request, g
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from flask_limiter import Limiter
@@ -30,6 +30,14 @@ def create_app(app_name="NVR_API"):
         key_func=get_remote_address,
         default_limits=["100/minute", "10/second"]
     )
+
+    @app.before_request
+    def before_request_func():
+        g.session = Session()
+
+    @app.teardown_request
+    def after_request_func():
+        g.session.close()
 
     @limiter.request_filter
     def header_whitelist():
@@ -65,7 +73,7 @@ def create_app(app_name="NVR_API"):
                         )
     socketio.on_namespace(NvrNamespace('/websocket'))
 
-    @socketio.on_error_default
+    @socktio.on_error_default
     def default_error_handler(e):
         print(request.event["message"])
         print(request.event["args"])

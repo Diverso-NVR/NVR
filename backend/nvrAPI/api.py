@@ -123,16 +123,6 @@ def json_data_required(f):
     return wrapper
 
 
-@api.before_request
-def before_request_func():
-    g.session = Session()
-
-
-@api.teardown_request
-def after_request_func():
-    g.session.close()
-
-
 # AUTHENTICATE
 @api.route('/register', methods=['POST'])
 def register():
