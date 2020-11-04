@@ -6,12 +6,14 @@ from datetime import datetime, date
 from pathlib import Path
 
 import requests
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, g
 
 from .socketio import emit_event
 
 from apis.calendar_api import get_events
-from .models import db, Room, Source, User, Record
+from .models import Session, Room, Source, User, Record
+
+
 
 from .decorators import json_data_required, auth_required, admin_or_editor_only
 
@@ -28,12 +30,17 @@ merger_api = Blueprint('merger_api', __name__)
 def gcalendar_webhook():
     calendar_id = request.headers['X-Goog-Resource-Uri'].split('/')[6]
     calendar_id = calendar_id.replace('%40', '@')
-    events = get_events(calendar_id)
 
-    room = Room.query.filter_by(calendar=calendar_id).first()
-    records = Record.query.filter(
+    room = g.session.query(Room).filter_by(calendar=calendar_id).first()
+    if not room:
+        return jsonify({"message": "No such room"}), 200
+
+    records = g.session.query(Record).filter(
         Record.room_name == room.name,
         Record.event_id != None).all()
+
+    events = get_events(calendar_id)
+    events = {item['id']: item for item in events}
     calendar_events = set(events.keys())
     db_events = {record.event_id for record in records}
 
@@ -42,11 +49,11 @@ def gcalendar_webhook():
     events_to_check = calendar_events & db_events
 
     for event_id in deleted_events:
-        record = Record.query.filter_by(event_id=event_id).first()
+        record = g.session.query(Record).filter_by(event_id=event_id).first()
         if record.done or record.processing:
             continue
 
-        db.session.delete(record)
+        g.session.delete(record)
 
     for event_id in new_events:
         event = events[event_id]
@@ -58,22 +65,28 @@ def gcalendar_webhook():
 
         new_record = Record()
         new_record.update_from_calendar(**event, room_name=room.name)
-        db.session.add(new_record)
+        g.session.add(new_record)
 
     for event_id in events_to_check:
         event = events[event_id]
         if date.today().isoformat() != event['updated'].split('T')[0]:
             continue
 
-        record = Record.query.filter_by(event_id=event_id).first()
+        record = g.session.query(Record).filter_by(event_id=event_id).first()
         if record.done or record.processing:
             continue
 
         record.update_from_calendar(**event, room_name=room.name)
 
-    db.session.commit()
-    db.session.close()
+    g.session.commit()
+    g.session.close()
 
+    return jsonify({"message": "Room calendar events patched"}), 200
+
+
+# dev
+@merger_api.route('/calendar-notifications-dev/', methods=["POST"])
+def gcalendar_webhook_dev():
     return jsonify({"message": "Room calendar events patched"}), 200
 
 
@@ -89,7 +102,7 @@ def create_montage_event(current_user, room_name):
     end_time = json.get("end_time")
     user_email = json.get("user_email", current_user.email)
 
-    room = Room.query.filter_by(name=str(room_name)).first()
+    room = g.session.query(Room).filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": "No room found with given room_name"}), 400
 
@@ -114,9 +127,8 @@ def create_montage_event(current_user, room_name):
     record = Record(event_name=event_name, room_name=room.name, date=date,
                     start_time=start_time, end_time=end_time, user_email=user_email)
 
-    db.session.add(record)
-    db.session.commit()
-    db.session.close()
+    g.session.add(record)
+    g.session.commit()
 
     return jsonify({'message': f"Merge event '{event_name}' added to queue"}), 201
 
@@ -139,7 +151,7 @@ def tracking_manage(current_user, room_name):
         res = requests.get(f'{TRACKING_URL}/status', timeout=5)
         return jsonify(res.json()), 200
 
-    room = Room.query.filter_by(name=str(room_name)).first()
+    room = g.session.query(Room).filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": "No room found with given room_name"}), 400
 
@@ -155,7 +167,7 @@ def tracking_manage(current_user, room_name):
             res = requests.delete(f'{TRACKING_URL}/track')
 
         room.tracking_state = True if command == 'start' else False
-        db.session.commit()
+        g.session.commit()
 
         emit_event('tracking_state_change', {
             'id': room.id, 'tracking_state': room.tracking_state, 'room_name': room.name})
@@ -175,7 +187,7 @@ def streaming_start(current_user, room_name):
     camera_ip = data.get('camera_ip')
     title = data.get('title')
 
-    room = Room.query.filter_by(name=str(room_name)).first()
+    room = g.session.query(Room).filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": f"Room {room_name} not found"}), 404
     if room.stream_url:
@@ -186,8 +198,8 @@ def streaming_start(current_user, room_name):
     if not camera_ip:
         return jsonify({"error": "Camera ip not provided"}), 400
 
-    sound_source = Source.query.filter_by(ip=sound_ip).first()
-    camera_source = Source.query.filter_by(ip=camera_ip).first()
+    sound_source = g.session.query(Source).filter_by(ip=sound_ip).first()
+    camera_source = g.session.query(Source).filter_by(ip=camera_ip).first()
 
     try:
         response = requests.post(f"{STREAMING_URL}/streams/{room_name}", json={
@@ -197,7 +209,7 @@ def streaming_start(current_user, room_name):
         }, headers={'X-API-KEY': STREAMING_API_KEY})
         url = response.json()['url']
         room.stream_url = url
-        db.session.commit()
+        g.session.commit()
     except:
         return jsonify({"error": "Unable to start stream"}), 500
 
@@ -210,7 +222,7 @@ def streaming_start(current_user, room_name):
 def streaming_stop(current_user, room_name):
     data = request.get_json()
 
-    room = Room.query.filter_by(name=str(room_name)).first()
+    room = g.session.query(Room).filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": f"Room {room_name} not found"}), 404
     if not room.stream_url:
@@ -224,7 +236,7 @@ def streaming_stop(current_user, room_name):
         return jsonify({"error": "Unable to stop stream"}), 500
     finally:
         room.stream_url = None
-        db.session.commit()
+        g.session.commit()
 
     return jsonify({"message": "Streaming stopped"}), 200
 
@@ -241,12 +253,12 @@ def auto_control(current_user, room_name):
     if auto_control is None:
         return jsonify({"error": "Boolean value not provided"}), 400
 
-    room = Room.query.filter_by(name=str(room_name)).first()
+    room = g.session.query(Room).filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": f"Room {room_name} not found"}), 404
 
     room.auto_control = auto_control
-    db.session.commit()
+    g.session.commit()
 
     emit_event('auto_control_change', {
         'id': room.id, 'auto_control': room.auto_control, 'room_name': room.name})
@@ -258,6 +270,18 @@ def auto_control(current_user, room_name):
 @merger_api.route('/records/<user_email>', methods=['GET'])
 @auth_required
 def get_urls(current_user, user_email):
-    records = Record.query.filter(
-        Record.user_email == user_email).all()
+    records = g.session.query(Record).filter_by(user_email=user_email).all()
     return jsonify([rec.to_dict() for rec in records]), 200
+
+
+@merger_api.route('/calendars/ruz', methods=['GET'])
+@auth_required
+def get_event_from_calendar(current_user):
+    ID = "itas.miem.edu.ru_0b0isj85nd5ojr3nu7n2gmspoc@group.calendar.google.com"
+
+    start_time = datetime.fromtimestamp(float(request.args.get('s')))
+    end_time = datetime.fromtimestamp(float(request.args.get('e')))
+
+    events = get_events(ID, start_time, end_time)
+
+    return jsonify(events), 200

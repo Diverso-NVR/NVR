@@ -11,8 +11,9 @@ class BaseConfig(object):
     Config variables for app
     """
     DEBUG = False
-    SECRET_KEY = 'supersecret'  # uuid.uuid4().hex  # for encryption and session management
-    SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI')
+    # uuid.uuid4().hex  # for encryption and session management
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+    DB_URL = os.environ.get('DB_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     MAIL_SERVER = os.environ.get('MAIL_SERVER')
     MAIL_PORT = int(os.environ.get('MAIL_PORT') or 25)

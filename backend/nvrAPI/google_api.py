@@ -4,13 +4,15 @@
 from threading import Thread
 from pathlib import Path
 
-from flask import Blueprint, jsonify, request, current_app
+from flask import Blueprint, jsonify, request, current_app, g
 
 
 
 from apis.calendar_api import create_calendar, create_event_
 from apis.drive_api import create_folder, get_folders_by_name, upload
-from .models import db, Room, User
+from .models import Session, Room, Source, User, Record
+
+
 
 from .decorators import json_data_required, auth_required, admin_or_editor_only
 
@@ -39,8 +41,8 @@ def create_calendar_event(current_user, room_name):
 
     try:
         event_link = create_event_(
-            current_app._get_current_object(), room_name=str(room_name),
-            start_time=start_time, end_time=end_time, summary=summary)
+            room_name=str(room_name), start_time=start_time,
+            end_time=end_time, summary=summary)
     except ValueError:
         return jsonify({'error': 'Format error: date format should be YYYY-MM-DDTHH:mm'}), 400
     except NameError:
@@ -56,7 +58,7 @@ def upload_video_to_drive(current_user, room_name):
     if not request.files:
         return {"error": "No file provided"}, 400
 
-    room = Room.query.filter_by(name=str(room_name)).first()
+    room = g.session.query(Room).filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": f"Room '{room_name}' not found"}), 400
 

@@ -9,14 +9,15 @@ import traceback
 
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
-
+from apis.calendar_api import give_permissions
 from .socketio import emit_event
 
 import jwt
-from flask import Blueprint, jsonify, request, current_app, render_template
+from flask import Blueprint, jsonify, request, current_app, render_template, g
 
 from .email import send_verify_email, send_access_request_email, send_reset_pass_email
-from .models import db, User
+from .models import Session, Room, Source, User, Record
+
 
 from .decorators import json_data_required
 
@@ -26,15 +27,14 @@ NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
 GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
 
 
-
 @auth_api.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
     user = User(**data)
 
     try:
-        db.session.add(user)
-        db.session.commit()
+        g.session.add(user)
+        g.session.commit()
     except:
         return jsonify({"error": 'Пользователь с данной почтой существует'}), 409
 
@@ -50,9 +50,9 @@ def register():
     return jsonify(user.to_dict()), 202
 
 
-@auth_api.route('/verify-email/<token>', methods=['POST'])
+@auth_api.route('/verify-email/<token>', methods=['POST', 'GET'])
 def verify_email(token):
-    user = User.verify_token(token, 'verify_email')
+    user = User.verify_token(g.session, token, 'verify_email')
     if not user:
         return render_template('msg_template.html',
                                msg={'title': 'Подтверждение почты',
@@ -67,11 +67,11 @@ def verify_email(token):
                                url=NVR_CLIENT_URL), 409
 
     user.email_verified = True
-    db.session.commit()
+    g.session.commit()
 
     try:
         send_access_request_email(
-            [u.email for u in User.query.all() if u.role not in ['user', 'editor']], user)
+            [u.email for u in g.session.query(User).all() if u.role not in ['user', 'editor']], user)
     except Exception as e:
         traceback.print_exc()
         return "Server error", 500
@@ -87,7 +87,7 @@ def verify_email(token):
 @auth_api.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
-    user = User.authenticate(**data)
+    user = User.authenticate(g.session, **data)
 
     if not user:
         return jsonify({'error': "Неверные данные", 'authenticated': False}), 401
@@ -98,6 +98,9 @@ def login():
     if not user.access:
         return jsonify({'error': 'Администратор ещё не открыл доступ для этого аккаунта',
                         'authenticated': False}), 401
+
+    user.last_login = datetime.utcnow()
+    g.session.commit()
 
     token = jwt.encode({
         'sub': {'email': user.email, 'role': user.role},
@@ -127,14 +130,18 @@ def glogin():
     except ValueError:
         return jsonify({'error': "Bad token"}), 403
 
-    user = User.query.filter_by(email=email).first()
+    user = g.session.query(User).filter_by(email=email).first()
     if not user:
         user = User(email=email)
         user.email_verified = True
         user.access = True
 
-        db.session.add(user)
-        db.session.commit()
+        Thread(target=give_permissions, args=user.email).start()
+
+        g.session.add(user)
+
+    user.last_login = datetime.utcnow()
+    g.session.commit()
 
     token = jwt.encode({
         'sub': {'email': user.email, 'role': user.role},
@@ -144,11 +151,10 @@ def glogin():
 
     return jsonify({'token': token.decode('UTF-8')}), 202
 
-# RESET PASS
 
 @auth_api.route('/reset-pass/<email>', methods=['POST'])
 def send_reset_pass(email):
-    user = User.query.filter_by(email=str(email)).first()
+    user = g.session.query(User).filter_by(email=str(email)).first()
     if not user:
         return jsonify({"error": "User doesn`t exist"}), 404
 
@@ -171,11 +177,13 @@ def reset_pass(token):
     if not new_pass:
         return jsonify({"error": "New password required"}), 400
 
-    user = User.verify_token(token, 'reset_pass')
+    user = User.verify_token(g.session, token, 'reset_pass')
     if not user:
         return jsonify({"error": "Invalid token"}), 403
 
     user.update_pass(new_pass)
-    db.session.commit()
+    g.session.commit()
 
     return jsonify({"message": "Password updated"}), 200
+
+

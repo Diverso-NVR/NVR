@@ -5,14 +5,16 @@ from threading import Thread
 from pathlib import Path
 
 
-from flask import Blueprint, jsonify, request, current_app
+from flask import Blueprint, jsonify, request, current_app, g
 
 from .socketio import emit_event
 
 from apis.calendar_api import create_calendar, delete_calendar
 from apis.drive_api import create_folder
 from apis.ruz_api import get_room_ruzid
-from .models import db, Room, Source, User, nvr_db_context
+from .models import Session, Room, Source, User, Record
+
+
 
 from .decorators import json_data_required, auth_required, admin_or_editor_only
 
@@ -28,14 +30,14 @@ def create_room(current_user, room_name):
     if not room_name:
         return jsonify({"error": "Room name required"}), 400
 
-    room = Room.query.filter_by(name=room_name).first()
+    room = g.session.query(Room).filter_by(name=room_name).first()
     if room:
         return jsonify({"error": f"Room '{room_name}' already exist"}), 409
 
     room = Room(name=room_name)
     room.sources = []
-    db.session.add(room)
-    db.session.commit()
+    g.session.add(room)
+    g.session.commit()
 
     emit_event('add_room', {'room': room.to_dict()})
 
@@ -45,25 +47,28 @@ def create_room(current_user, room_name):
     return jsonify({'message': f"Started creating '{room_name}'"}), 204
 
 
-@nvr_db_context
 def config_room(room_name):
-    room = Room.query.filter_by(name=room_name).first()
+    session = Session()
+
+    room = session.query(Room).filter_by(name=room_name).first()
     room.drive = create_folder(room_name)
     room.calendar = create_calendar(room_name)
     room.ruz_id = get_room_ruzid(room_name)
-    db.session.commit()
+
+    session.commit()
+    session.close()
 
 
 @room_api.route('/rooms/', methods=['GET'])
 @auth_required
 def get_rooms(current_user):
-    return jsonify([r.to_dict() for r in Room.query.all()]), 200
+    return jsonify([r.to_dict() for r in g.session.query(Room).all()]), 200
 
 
 @room_api.route('/rooms/<room_name>', methods=['GET'])
 @auth_required
 def get_room(current_user, room_name):
-    room = Room.query.filter_by(name=str(room_name)).first()
+    room = g.session.query(Room).filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": "No room found with given room_name"}), 400
     return jsonify(room.to_dict()), 200
@@ -73,14 +78,14 @@ def get_room(current_user, room_name):
 @auth_required
 @admin_or_editor_only
 def delete_room(current_user, room_name):
-    room = Room.query.filter_by(name=str(room_name)).first()
+    room = g.session.query(Room).filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": "No room found with given room_name"}), 400
 
     Thread(target=delete_calendar, args=(room.calendar,)).start()
 
-    db.session.delete(room)
-    db.session.commit()
+    g.session.delete(room)
+    g.session.commit()
 
     emit_event('delete_room', {'id': room.id, 'name': room.name})
 
@@ -94,7 +99,7 @@ def delete_room(current_user, room_name):
 def edit_room(current_user, room_name):
     post_data = request.get_json()
 
-    room = Room.query.filter_by(name=str(room_name)).first()
+    room = g.session.query(Room).filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": "No room found with given 'room_name'"}), 400
     if not post_data.get('sources'):
@@ -102,14 +107,14 @@ def edit_room(current_user, room_name):
 
     for s in post_data['sources']:
         if s.get('id'):
-            source = Source.query.get(s['id'])
+            source = g.session.query(Source).get(s['id'])
             source.update(**s)
         else:
             source = Source(**s)
             source.room_id = room.id
-            db.session.add(source)
+            g.session.add(source)
 
-    db.session.commit()
+    g.session.commit()
 
     emit_event('edit_room', {room.to_dict()})
 
@@ -120,7 +125,7 @@ def edit_room(current_user, room_name):
 @auth_required
 @admin_or_editor_only
 def room_settings(current_user, room_name, source_type, ip):
-    room = Room.query.filter_by(name=str(room_name)).first()
+    room = g.session.query(Room).filter_by(name=str(room_name)).first()
     if not room:
         return jsonify({"error": "No room found with provided room_name"}), 400
 
@@ -140,7 +145,7 @@ def room_settings(current_user, room_name, source_type, ip):
     else:
         room.tracking_source = ip
 
-    db.session.commit()
+    g.session.commit()
 
     emit_event('edit_room', {room.to_dict()})
 
