@@ -9,25 +9,23 @@ import traceback
 
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
-from apis.calendar_api import give_permissions
-from .socketio import emit_event
+from ..apis.calendar_api import give_permissions
+from ..socketio import emit_event
 
 import jwt
 from flask import Blueprint, jsonify, request, current_app, render_template, g
 
-from .email import send_verify_email, send_access_request_email, send_reset_pass_email
-from .models import Session, Room, Source, User, Record
+from ..email import send_verify_email, send_access_request_email, send_reset_pass_email
+from ..models import Session, Room, Source, User, Record
+from ..decorators import json_data_required
 
-
-from .decorators import json_data_required
-
-auth_api = Blueprint('auth_api', __name__)
+api = Blueprint('auth_api', __name__)
 
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
 GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
 
 
-@auth_api.route('/register', methods=['POST'])
+@api.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
     user = User(**data)
@@ -50,7 +48,7 @@ def register():
     return jsonify(user.to_dict()), 202
 
 
-@auth_api.route('/verify-email/<token>', methods=['POST', 'GET'])
+@api.route('/verify-email/<token>', methods=['POST', 'GET'])
 def verify_email(token):
     user = User.verify_token(g.session, token, 'verify_email')
     if not user:
@@ -84,7 +82,7 @@ def verify_email(token):
                            url=NVR_CLIENT_URL), 202
 
 
-@auth_api.route('/login', methods=['POST'])
+@api.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
     user = User.authenticate(g.session, **data)
@@ -111,7 +109,7 @@ def login():
     return jsonify({'token': token.decode('UTF-8')}), 202
 
 
-@auth_api.route('/google-login', methods=['POST'])
+@api.route('/google-login', methods=['POST'])
 def glogin():
     data = request.get_json()
     token = data.get('token')
@@ -152,7 +150,7 @@ def glogin():
     return jsonify({'token': token.decode('UTF-8')}), 202
 
 
-@auth_api.route('/reset-pass/<email>', methods=['POST'])
+@api.route('/reset-pass/<email>', methods=['POST'])
 def send_reset_pass(email):
     user = g.session.query(User).filter_by(email=str(email)).first()
     if not user:
@@ -168,7 +166,7 @@ def send_reset_pass(email):
     return jsonify({"message": "Reset pass token generated"}), 200
 
 
-@auth_api.route('/reset-pass/<token>', methods=['PUT'])
+@api.route('/reset-pass/<token>', methods=['PUT'])
 @json_data_required
 def reset_pass(token):
     data = request.get_json()

@@ -6,25 +6,18 @@ from pathlib import Path
 
 from flask import Blueprint, jsonify, request, current_app, g
 
+from ..apis.calendar_api import create_calendar, create_event_
+from ..apis.drive_api import create_folder, get_folders_by_name, upload
+from ..models import Session, Room, Source, User, Record
+from ..decorators import json_data_required, auth_required, admin_or_editor_only
 
 
-from apis.calendar_api import create_calendar, create_event_
-from apis.drive_api import create_folder, get_folders_by_name, upload
-from .models import Session, Room, Source, User, Record
-
-
-
-from .decorators import json_data_required, auth_required, admin_or_editor_only
-
-
-google_api = Blueprint('google_api', __name__)
+api = Blueprint('google_api', __name__)
 
 VIDS_PATH = str(Path.home()) + '/vids/'
 
 
-
-
-@google_api.route('/gcalendar-event/<room_name>', methods=['POST'])
+@api.route('/gcalendar-event/<room_name>', methods=['POST'])
 @auth_required
 @admin_or_editor_only
 @json_data_required
@@ -51,7 +44,7 @@ def create_calendar_event(current_user, room_name):
     return jsonify({'message': f"Successfully created event: {event_link}"}), 201
 
 
-@google_api.route('/gdrive-upload/<room_name>', methods=['POST'])
+@api.route('/gdrive-upload/<room_name>', methods=['POST'])
 @auth_required
 @admin_or_editor_only
 def upload_video_to_drive(current_user, room_name):
@@ -91,7 +84,7 @@ def upload_video_to_drive(current_user, room_name):
     return jsonify({"message": "Upload to disk started"}), 200
 
 
-@google_api.route('/gconfigure/<string:room_name>', methods=['POST'])
+@api.route('/gconfigure/<string:room_name>', methods=['POST'])
 @auth_required
 @admin_or_editor_only
 def create_drive_and_calendar(current_user, room_name):

@@ -7,23 +7,17 @@ from pathlib import Path
 
 from flask import Blueprint, jsonify, request, current_app, g
 
-from .socketio import emit_event
-
-from apis.calendar_api import create_calendar, delete_calendar
-from apis.drive_api import create_folder
-from apis.ruz_api import get_room_ruzid
-from .models import Session, Room, Source, User, Record
-
-
-
-from .decorators import json_data_required, auth_required, admin_or_editor_only
+from ..socketio import emit_event
+from ..apis.calendar_api import create_calendar, delete_calendar
+from ..apis.drive_api import create_folder
+from ..apis.ruz_api import get_room_ruzid
+from ..models import Session, Room, Source, User, Record
+from ..decorators import json_data_required, auth_required, admin_or_editor_only
 
 
+api = Blueprint('rooms_api', __name__)
 
-
-room_api = Blueprint('room_api', __name__)
-
-@room_api.route('/rooms/<room_name>', methods=['POST'])
+@api.route('/rooms/<room_name>', methods=['POST'])
 @auth_required
 @admin_or_editor_only
 def create_room(current_user, room_name):
@@ -59,13 +53,13 @@ def config_room(room_name):
     session.close()
 
 
-@room_api.route('/rooms/', methods=['GET'])
+@api.route('/rooms/', methods=['GET'])
 @auth_required
 def get_rooms(current_user):
     return jsonify([r.to_dict() for r in g.session.query(Room).all()]), 200
 
 
-@room_api.route('/rooms/<room_name>', methods=['GET'])
+@api.route('/rooms/<room_name>', methods=['GET'])
 @auth_required
 def get_room(current_user, room_name):
     room = g.session.query(Room).filter_by(name=str(room_name)).first()
@@ -74,7 +68,7 @@ def get_room(current_user, room_name):
     return jsonify(room.to_dict()), 200
 
 
-@room_api.route('/rooms/<room_name>', methods=['DELETE'])
+@api.route('/rooms/<room_name>', methods=['DELETE'])
 @auth_required
 @admin_or_editor_only
 def delete_room(current_user, room_name):
@@ -92,7 +86,7 @@ def delete_room(current_user, room_name):
     return jsonify({"message": "Room deleted"}), 200
 
 
-@room_api.route("/rooms/<room_name>", methods=['PUT'])
+@api.route("/rooms/<room_name>", methods=['PUT'])
 @auth_required
 @admin_or_editor_only
 @json_data_required
@@ -121,7 +115,7 @@ def edit_room(current_user, room_name):
     return jsonify({"message": "Room edited"}), 200
 
 
-@room_api.route('/set-source/<room_name>/<source_type>/<path:ip>', methods=['POST'])
+@api.route('/set-source/<room_name>/<source_type>/<path:ip>', methods=['POST'])
 @auth_required
 @admin_or_editor_only
 def room_settings(current_user, room_name, source_type, ip):

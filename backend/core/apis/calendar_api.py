@@ -11,7 +11,7 @@ from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
-from nvrAPI.models import Session, Room
+from core.models import Session, Room
 
 lock = RLock()
 
@@ -23,7 +23,6 @@ Setting up calendar
 creds = None
 token_path = '/creds/tokenCalendar.pickle'
 creds_path = '/creds/credentials.json'
-cr = '/nvrAPI/creds/credentials.json'
 
 if os.path.exists(token_path):
     with open(token_path, 'rb') as token:

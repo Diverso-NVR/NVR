@@ -7,22 +7,16 @@ from threading import Thread
 import requests
 from flask import Blueprint, jsonify, request, current_app,g
 
-from .socketio import emit_event
+from ..socketio import emit_event
 
-from apis.calendar_api import give_permissions
-from .models import Session, Room, Source, User, Record
-
-
-
-from .decorators import auth_required, admin_only
+from ..apis.calendar_api import give_permissions
+from ..models import Session, Room, Source, User, Record
+from ..decorators import auth_required, admin_only
 
 
+api = Blueprint('users_api', __name__)
 
-
-
-user_api = Blueprint('user_api', __name__)
-
-@user_api.route('/users', methods=['GET'])
+@api.route('/users', methods=['GET'])
 @auth_required
 @admin_only
 def get_users(current_user):
@@ -31,7 +25,7 @@ def get_users(current_user):
     return jsonify(users), 200
 
 
-@user_api.route('/users/<user_id>', methods=['PUT'])
+@api.route('/users/<user_id>', methods=['PUT'])
 @auth_required
 @admin_only
 def grant_access(current_user, user_id):
@@ -46,7 +40,7 @@ def grant_access(current_user, user_id):
     return jsonify({"message": "Access granted"}), 202
 
 
-@user_api.route('/users/roles/<user_id>', methods=['PUT'])
+@api.route('/users/roles/<user_id>', methods=['PUT'])
 @auth_required
 @admin_only
 def user_role(current_user, user_id):
@@ -59,7 +53,7 @@ def user_role(current_user, user_id):
     return jsonify({"message": "User role changed"}), 200
 
 
-@user_api.route('/users/<user_id>', methods=['DELETE'])
+@api.route('/users/<user_id>', methods=['DELETE'])
 @auth_required
 @admin_only
 def delete_user(current_user, user_id):
@@ -72,7 +66,7 @@ def delete_user(current_user, user_id):
     return jsonify({"message": "User deleted"}), 200
 
 
-@user_api.route('/api-key/<email>', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@api.route('/api-key/<email>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 @auth_required
 def manage_api_key(current_user, email):
     user = g.session.query(User).filter_by(email=email).first()

@@ -9,8 +9,8 @@ from flask_socketio import emit, Namespace
 
 from flask_socketio import SocketIO
 
-from apis.calendar_api import create_calendar, delete_calendar, give_permissions
-from apis.drive_api import create_folder
+from .apis.calendar_api import create_calendar, delete_calendar, give_permissions
+from .apis.drive_api import create_folder
 from .email import send_email
 from .models import Session, Room, Source, User
 
@@ -29,6 +29,7 @@ def emit_event(event, data):
                   data,
                   broadcast=True,
                   namespace='/websocket')
+
 def log_info(f):
     @wraps(f)
     def wrapper(*args):

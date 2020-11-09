@@ -8,14 +8,10 @@ from pathlib import Path
 import requests
 from flask import Blueprint, jsonify, request, g
 
-from .socketio import emit_event
-
-from apis.calendar_api import get_events
-from .models import Session, Room, Source, User, Record
-
-
-
-from .decorators import json_data_required, auth_required, admin_or_editor_only
+from ..socketio import emit_event
+from ..apis.calendar_api import get_events
+from ..models import Session, Room, Source, User, Record
+from ..decorators import json_data_required, auth_required, admin_or_editor_only
 
 
 TRACKING_URL = os.environ.get('TRACKING_URL')
@@ -24,9 +20,9 @@ STREAMING_API_KEY = os.environ.get('STREAMING_API_KEY')
 
 
 
-merger_api = Blueprint('merger_api', __name__)
+api = Blueprint('merger_api', __name__)
 
-@merger_api.route('/calendar-notifications/', methods=["POST"])
+@api.route('/calendar-notifications/', methods=["POST"])
 def gcalendar_webhook():
     calendar_id = request.headers['X-Goog-Resource-Uri'].split('/')[6]
     calendar_id = calendar_id.replace('%40', '@')
@@ -85,12 +81,12 @@ def gcalendar_webhook():
 
 
 # dev
-@merger_api.route('/calendar-notifications-dev/', methods=["POST"])
+@api.route('/calendar-notifications-dev/', methods=["POST"])
 def gcalendar_webhook_dev():
     return jsonify({"message": "Room calendar events patched"}), 200
 
 
-@merger_api.route('/montage-event/<room_name>', methods=["POST"])
+@api.route('/montage-event/<room_name>', methods=["POST"])
 @auth_required
 @json_data_required
 def create_montage_event(current_user, room_name):
@@ -133,7 +129,7 @@ def create_montage_event(current_user, room_name):
     return jsonify({'message': f"Merge event '{event_name}' added to queue"}), 201
 
 
-@merger_api.route('/tracking/<room_name>', methods=['POST'])
+@api.route('/tracking/<room_name>', methods=['POST'])
 @auth_required
 @admin_or_editor_only
 @json_data_required
@@ -177,7 +173,7 @@ def tracking_manage(current_user, room_name):
         return jsonify({"error": str(e)}), 500
 
 
-@merger_api.route('/streaming-start/<room_name>', methods=['POST'])
+@api.route('/streaming-start/<room_name>', methods=['POST'])
 @auth_required
 @json_data_required
 def streaming_start(current_user, room_name):
@@ -216,7 +212,7 @@ def streaming_start(current_user, room_name):
     return jsonify({"message": "Streaming started", 'url': url}), 200
 
 
-@merger_api.route('/streaming-stop/<room_name>', methods=['POST'])
+@api.route('/streaming-stop/<room_name>', methods=['POST'])
 @auth_required
 @json_data_required
 def streaming_stop(current_user, room_name):
@@ -241,7 +237,7 @@ def streaming_stop(current_user, room_name):
     return jsonify({"message": "Streaming stopped"}), 200
 
 
-@merger_api.route('/auto-control/<room_name>', methods=['POST'])
+@api.route('/auto-control/<room_name>', methods=['POST'])
 @auth_required
 @admin_or_editor_only
 @json_data_required
@@ -267,14 +263,14 @@ def auto_control(current_user, room_name):
                     has been set to {auto_control}"}), 200
 
 
-@merger_api.route('/records/<user_email>', methods=['GET'])
+@api.route('/records/<user_email>', methods=['GET'])
 @auth_required
 def get_urls(current_user, user_email):
     records = g.session.query(Record).filter_by(user_email=user_email).all()
     return jsonify([rec.to_dict() for rec in records]), 200
 
 
-@merger_api.route('/calendars/ruz', methods=['GET'])
+@api.route('/calendars/ruz', methods=['GET'])
 @auth_required
 def get_event_from_calendar(current_user):
     ID = "itas.miem.edu.ru_0b0isj85nd5ojr3nu7n2gmspoc@group.calendar.google.com"

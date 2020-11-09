@@ -2,22 +2,22 @@
 
 
 from pathlib import Path
+
 from flask import Blueprint, jsonify, request, g
-from .socketio import emit_event
-from .models import Session, Room, Source, User, Record
 
+from ..socketio import emit_event
+from ..models import Session, Room, Source, User, Record
+from ..decorators import auth_required, admin_or_editor_only
 
-from .decorators import auth_required, admin_or_editor_only
+api = Blueprint('source_api', __name__)
 
-source_api = Blueprint('source_api', __name__)
-
-@source_api.route("/sources/", methods=['GET'])
+@api.route("/sources/", methods=['GET'])
 @auth_required
 def get_sources(current_user):
     return jsonify([s.to_dict() for s in g.session.query(Source).all()]), 200
 
 
-@source_api.route("/sources/<path:ip>", methods=['POST', 'GET', 'DELETE', 'PUT'])
+@api.route("/sources/<path:ip>", methods=['POST', 'GET', 'DELETE', 'PUT'])
 @auth_required
 @admin_or_editor_only
 def manage_source(current_user, ip):
