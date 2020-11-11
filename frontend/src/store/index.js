@@ -371,7 +371,7 @@ const actions = {
   async deleteKey({ commit, state }) {
     try {
       commit("switchLoading");
-      let res = await deleteAPIKey(state.user.email, state.jwt.token);
+      await deleteAPIKey(state.user.email, state.jwt.token);
       await commit("setKey", { key: null });
     } catch (error) {
       commit("setError", error);

@@ -44,14 +44,20 @@
               <v-card-title primary-title>
                 <h3 class="title mb-0">
                   Ваш ключ API:
-                  <b class="subheading">{{ user.api_key }}</b>
+                  <b v-if="showKey"  class="subheading">{{ user.api_key }}</b>
+                  <b v-else class="subheading">{{"&#8226;".repeat(32)}}</b>
                 </h3>
+                <v-spacer></v-spacer>
+                <v-btn icon @click="showKey = !showKey">
+                  <v-icon>{{ showKey ? 'visibility_off' : 'visibility' }}</v-icon>
+                </v-btn>
               </v-card-title>
 
               <v-card-text>
                 <div class="subheading">
                   <div>API url: {{ API_URL }}</div>
-                  <div>Добавьте в headers вашего запроса: {"key": "{{ user.api_key }}"}</div>
+                  <div v-if="showKey">Добавьте в headers вашего запроса: {"key": "{{ user.api_key }}"}</div>
+                  <div v-else>Добавьте в headers вашего запроса: {"key": "{{"&#8226;".repeat(32)}}"}</div>
                 </div>
               </v-card-text>
 
@@ -116,6 +122,7 @@ export default {
     return {
       panel: [],
       API_URL: process.env.NVR_URL + "/api",
+      showKey: false,
       routes: [
         {
           name: "/login",
