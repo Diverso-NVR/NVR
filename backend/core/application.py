@@ -14,6 +14,8 @@ import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
 
+from core.models import Session
+
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
 REDIS_HOST = os.environ.get('REDIS_HOST', '127.0.0.1')
 
@@ -30,6 +32,8 @@ def create_app(app_name="NVR_API"):
         key_func=get_remote_address,
         default_limits=["100/minute", "10/second"]
     )
+
+    from core.models import Session
 
     @app.before_request
     def before_request():
@@ -66,17 +70,17 @@ def create_app(app_name="NVR_API"):
     from core.routes.users import api as users_api
     app.register_blueprint(users_api, url_prefix="/api")
     
-    from core.models import User, Session
-    session = Session()
-    if session.query(User).all() == []:
-        user = User(email='admin@admin.com', password='nvr_admin')
-        user.access = True
-        user.email_verified = True
-        user.role = 'admin'
+    # from core.models import User
+    # session = Session()
+    # if session.query(User).all() == []:
+    #     user = User(email='admin@admin.com', password='nvr_admin')
+    #     user.access = True
+    #     user.email_verified = True
+    #     user.role = 'admin'
 
-        session.add(user)
-        session.commit()
-    session.close()
+    #     session.add(user)
+    #     session.commit()
+    # session.close()
 
     from core.email import mail
     mail.init_app(app)
