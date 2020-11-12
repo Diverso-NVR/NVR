@@ -25,6 +25,17 @@ services:
       - '5001'
       - '5002'
     network_mode: host
+    
+  video_backend:
+    build: ./file_uploader
+    container_name: file_uploader
+    restart: always
+    volumes:
+      - ./file_uploader:/file_uploader
+      - ~/creds:/creds
+    expose:
+      - '5005'
+    network_mode: host  
 
   frontend:
     build:
@@ -41,3 +52,4 @@ services:
     expose:
       - '80'
     network_mode: host
+
