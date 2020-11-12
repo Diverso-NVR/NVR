@@ -32,8 +32,7 @@ if os.path.exists(token_path):
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                # creds_path, SCOPES)
-                cr, SCOPES)
+                creds_path, SCOPES)
             creds = flow.run_local_server(port=0)
         with open(token_path, 'wb') as token:
             pickle.dump(creds, token)
@@ -101,51 +100,32 @@ def give_permissions(mail: str) -> None:
                 print(e)
 
 
-# def delete_permissions(building, mail):
-#     calendars = calendar_service.calendarList().list(pageToken=None).execute()
-#     copy_perm = ""
-#     for item in calendars['items']:
-#         if item['summary'].split('-')[0] == building:
-#             copy_perm = item['id']
-#             break
-#     calendar = calendar_service.acl().list(
-#         calendarId=copy_perm).execute()
-
-#     # calendar_service.acl().delete(calendarId='primary', ruleId='ruleId').execute()
-
-
-# TODO фикс присваивания ролей
-# TODO алё а кампуса то нет ёпт
-def create_calendar(room: str) -> str:
+def create_calendar(users: list, room: str) -> str:
     """
     Creates calendar with name: 'room'
-    and grant access to all users from same campus
+    and grant access to all users
     """
     with lock:
         calendar_metadata = {
             'summary': room,
-            'timeZone': 'Europe/Moscow',
-            'location': CAMPUS
+            'timeZone': 'Europe/Moscow'
         }
 
-        calendars = calendar_service.calendarList().list(pageToken=None).execute()
-        copy_perm = ""
-        for item in calendars['items']:
-            if item.get('location') == CAMPUS:
-                copy_perm = item['id']
-                break
+        rule = {
+            "scope": {
+                "type": "user",
+                "value": ""
+            },
+            "role": "writer"
+        }
 
         created_calendar = calendar_service.calendars().insert(
             body=calendar_metadata).execute()
-
-        if copy_perm:
-            calendar = calendar_service.acl().list(
-                calendarId=copy_perm).execute()
-
-            for rule in calendar['items']:
-                if rule['role'] == 'writer':
-                    new_rule = calendar_service.acl().insert(
-                        calendarId=created_calendar["id"], body=rule).execute()
+        
+        for user in users:
+            rule['scope']['value'] = user
+            calendar_service.acl().insert(
+                calendarId=created_calendar["id"], body=rule).execute()
 
         return created_calendar["id"]  # calendarAPI link
 

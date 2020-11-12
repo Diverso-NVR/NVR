@@ -89,5 +89,8 @@ def upload_video_to_drive(current_user, room_name):
 @admin_or_editor_only
 def create_drive_and_calendar(current_user, room_name):
     drive = create_folder(room_name)
-    calendar = create_calendar(room_name)
+
+    users = g.session.query(User).all()
+    calendar = create_calendar([user.email for user in users], room_name)
+
     return jsonify({"drive": drive, "calendar": calendar}), 201

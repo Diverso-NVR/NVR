@@ -44,9 +44,11 @@ def create_room(current_user, room_name):
 def config_room(room_name):
     session = Session()
 
+    users = session.query(User).all()
+
     room = session.query(Room).filter_by(name=room_name).first()
     room.drive = create_folder(room_name)
-    room.calendar = create_calendar(room_name)
+    room.calendar = create_calendar([user.email for user in users], room_name)
     room.ruz_id = get_room_ruzid(room_name)
 
     session.commit()
