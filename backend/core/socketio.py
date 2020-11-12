@@ -163,6 +163,8 @@ class NvrNamespace(Namespace):
 
         for s in msg_json['sources']:
             source = session.query(Source).get(s['id'])
+            if not source:
+                source = Source()
             source.update(**s)
 
         session.commit()
