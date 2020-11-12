@@ -161,12 +161,22 @@ class NvrNamespace(Namespace):
         room.tracking_source = msg_json['tracking_source']
         room.sound_source = msg_json['sound_source']
 
+        # add, update
         for s in msg_json['sources']:
-            source = session.query(Source).get(s['id'])
-            if not source:
-                source = Source()
-            source.update(**s)
+            if not s.get('id'):
+                source = Source(**s)
+                source.room_id = room_id
+                session.add(source)
+            else:
+                source = session.query(Source).get(s['id'])
+                source.update(**s)
 
+        # delete
+        updated_sources = [source.get('id') for source in msg_json['sources']]
+        for s in room.sources:
+            if s.id not in updated_sources:
+                session.delete(s)
+        
         session.commit()
         session.close()
 
