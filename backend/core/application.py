@@ -27,11 +27,17 @@ def create_app(app_name="NVR_API"):
     app = Flask(app_name)
     app.config.from_object('core.config.BaseConfig')
 
+
     limiter = Limiter(
         app,
         key_func=get_remote_address,
         default_limits=["100/minute", "10/second"]
     )
+
+    @limiter.request_filter
+    def header_whitelist():
+        return request.headers.get("X-Goog-Resource-Uri") is not None
+
 
     from core.models import Session
 
@@ -46,11 +52,9 @@ def create_app(app_name="NVR_API"):
         except:
             pass
 
-    @limiter.request_filter
-    def header_whitelist():
-        return request.headers.get("X-Goog-Resource-Uri") is not None
 
     cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+
 
     from core.routes.merger import api as merger_api
     app.register_blueprint(merger_api, url_prefix="/api")
@@ -70,28 +74,31 @@ def create_app(app_name="NVR_API"):
     from core.routes.users import api as users_api
     app.register_blueprint(users_api, url_prefix="/api")
     
-    # from core.models import User
-    # session = Session()
-    # if session.query(User).all() == []:
-    #     user = User(email='admin@admin.com', password='nvr_admin')
-    #     user.access = True
-    #     user.email_verified = True
-    #     user.role = 'admin'
 
-    #     session.add(user)
-    #     session.commit()
-    # session.close()
+    from core.models import User
+    session = Session()
+    if session.query(User).all() == []:
+        user = User(email='admin@admin.com', password='nvr_admin')
+        user.access = True
+        user.email_verified = True
+        user.role = 'admin'
+
+        session.add(user)
+        session.commit()
+    session.close()
+
 
     from core.email import mail
     mail.init_app(app)
 
+
     from core.socketio import NvrNamespace
-    # socketio = SocketIO(app,
-    #                     message_queue='redis://' + REDIS_HOST,
-    #                     cors_allowed_origins=NVR_CLIENT_URL,
-    #                     async_mode='gevent',
-    #                     # logger=True, engineio_logger=True
-    #                     )
+    socketio = SocketIO(app,
+                        message_queue='redis://' + REDIS_HOST,
+                        cors_allowed_origins=NVR_CLIENT_URL,
+                        async_mode='gevent',
+                        # logger=True, engineio_logger=True
+                        )
     socketio = SocketIO(app)
     socketio.on_namespace(NvrNamespace('/websocket'))
 
@@ -99,6 +106,7 @@ def create_app(app_name="NVR_API"):
     def default_error_handler(e):
         print(request.event["message"])
         print(request.event["args"])
+
 
     # logging
     if not app.debug:
