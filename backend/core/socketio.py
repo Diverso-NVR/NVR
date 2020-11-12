@@ -7,8 +7,10 @@ import requests
 from flask import current_app, render_template
 from flask_socketio import emit, Namespace
 
-from apis.calendar_api import create_calendar, delete_calendar, give_permissions
-from apis.drive_api import create_folder
+from flask_socketio import SocketIO
+
+from .apis.calendar_api import create_calendar, delete_calendar, give_permissions
+from .apis.drive_api import create_folder
 from .email import send_email
 from .models import Session, Room, Source, User
 
@@ -17,6 +19,16 @@ STREAMING_URL = os.environ.get('STREAMING_URL')
 STREAMING_API_KEY = os.environ.get('STREAMING_API_KEY')
 NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
 
+
+socketio = SocketIO(message_queue='redis://',
+                    cors_allowed_origins=NVR_CLIENT_URL)
+
+
+def emit_event(event, data):
+    socketio.emit(event,
+                  data,
+                  broadcast=True,
+                  namespace='/websocket')
 
 def log_info(f):
     @wraps(f)

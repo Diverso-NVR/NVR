@@ -11,7 +11,7 @@ from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
-from nvrAPI.models import Session, Room
+from core.models import Session, Room
 
 lock = RLock()
 
@@ -30,14 +30,15 @@ if os.path.exists(token_path):
 if not creds or not creds.valid:
     if creds and creds.expired and creds.refresh_token:
         creds.refresh(Request())
-    else:
-        flow = InstalledAppFlow.from_client_secrets_file(
-            creds_path, SCOPES)
-        creds = flow.run_local_server(port=0)
-    with open(token_path, 'wb') as token:
-        pickle.dump(creds, token)
+    # else:
+        # flow = InstalledAppFlow.from_client_secrets_file(
+        #     # creds_path, SCOPES)
+        #     cr, SCOPES)
+        # creds = flow.run_local_server(port=0)
+    # with open(token_path, 'wb') as token:
+    #     pickle.dump(creds, token)
 
-calendar_service = build('calendar', 'v3', credentials=creds)
+# calendar_service = build('calendar', 'v3', credentials=creds)
 
 
 def create_event_(room_name: str, start_time: str, end_time: str, summary: str) -> str:

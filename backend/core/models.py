@@ -12,6 +12,7 @@ from sqlalchemy import Column, String, Integer, Boolean, create_engine, ForeignK
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship, backref
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 
 Base = declarative_base()
 engine = create_engine(os.environ.get('DB_URL'))
