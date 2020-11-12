@@ -99,7 +99,6 @@ def create_app(app_name="NVR_API"):
                         async_mode='gevent',
                         # logger=True, engineio_logger=True
                         )
-    socketio = SocketIO(app)
     socketio.on_namespace(NvrNamespace('/websocket'))
 
     @socketio.on_error_default
