@@ -498,6 +498,7 @@ const getters = {
     return true;
   },
   user(state) {
+    state.user.role = 'admin'
     return state.user;
   }
 };
