@@ -20,7 +20,11 @@
             </td>
 
             <td class="text-xs-center">
-              <v-btn icon target="_blank" href="https://calendar.google.com/calendar/r">
+              <v-btn 
+              icon 
+              target="_blank" 
+              :href="`https://calendar.google.com/calendar/u/0/r?cid=${props.item.calendar}`"
+              >
                 <v-icon>calendar_today</v-icon>
               </v-btn>
             </td>
@@ -77,7 +81,11 @@
                 >{{ props.item.name }}</li>
 
                 <li class="flex-item subheading" data-label="Календарь">
-                  <v-btn icon target="_blank" href="https://calendar.google.com/calendar/r">
+                  <v-btn 
+                  icon 
+                  target="_blank" 
+                  :href="`https://calendar.google.com/calendar/u/0/r?cid=${props.item.calendar}`"
+                  >
                     <v-icon medium>calendar_today</v-icon>
                   </v-btn>
                 </li>
