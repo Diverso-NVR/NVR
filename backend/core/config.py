@@ -11,7 +11,6 @@ class BaseConfig(object):
     """
 
     DEBUG = False
-    # uuid.uuid4().hex  # for encryption and session management
     SECRET_KEY = os.environ.get("SECRET_KEY")
     SQLALCHEMY_DATABASE_URI = DB_URL = os.environ.get("DB_URL")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
