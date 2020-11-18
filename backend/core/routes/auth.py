@@ -2,30 +2,29 @@
 
 
 import os
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 from threading import Thread
 
 import traceback
 
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
-from ..apis.calendar_api import give_permissions
 from ..socketio import emit_event
 
 import jwt
 from flask import Blueprint, jsonify, request, current_app, render_template, g
 
 from ..email import send_verify_email, send_access_request_email, send_reset_pass_email
-from ..models import Session, Room, Source, User, Record
+from ..models import User
 from ..decorators import json_data_required
 
-api = Blueprint('auth_api', __name__)
+api = Blueprint("auth_api", __name__)
 
-NVR_CLIENT_URL = os.environ.get('NVR_CLIENT_URL')
-GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
+NVR_CLIENT_URL = os.environ.get("NVR_CLIENT_URL")
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
 
 
-@api.route('/register', methods=['POST'])
+@api.route("/register", methods=["POST"])
 def register():
     data = request.get_json()
     user = User(**data)
@@ -33,100 +32,139 @@ def register():
     try:
         g.session.add(user)
         g.session.commit()
-    except:
-        return jsonify({"error": 'Пользователь с данной почтой существует'}), 409
+    except Exception:
+        return jsonify({"error": "Пользователь с данной почтой существует"}), 409
 
     token_expiration = 600
     try:
         send_verify_email(user, token_expiration)
-        Thread(target=user.delete_user_after_token_expiration,
-               args=(current_app._get_current_object(), token_expiration)).start()
-    except Exception as e:
+        Thread(
+            target=user.delete_user_after_token_expiration,
+            args=(current_app._get_current_object(), token_expiration),
+        ).start()
+    except Exception:
         traceback.print_exc()
         return jsonify({"error": "Server error"}), 500
 
     return jsonify(user.to_dict()), 202
 
 
-@api.route('/verify-email/<token>', methods=['POST', 'GET'])
+@api.route("/verify-email/<token>", methods=["POST", "GET"])
 def verify_email(token):
-    user = User.verify_token(g.session, token, 'verify_email')
+    user = User.verify_token(g.session, token, "verify_email")
     if not user:
-        return render_template('msg_template.html',
-                               msg={'title': 'Подтверждение почты',
-                                    'text': "Время на подтверждение вышло. Зарегистрируйтесь ещё раз"},
-                               url=NVR_CLIENT_URL), 404
+        return (
+            render_template(
+                "msg_template.html",
+                msg={
+                    "title": "Подтверждение почты",
+                    "text": "Время на подтверждение вышло. Зарегистрируйтесь ещё раз",
+                },
+                url=NVR_CLIENT_URL,
+            ),
+            404,
+        )
 
     if user.email_verified:
-        return render_template('msg_template.html',
-                               msg={'title': 'Подтверждение почты',
-                                    'text': "Почта уже подтверждена",
-                                    },
-                               url=NVR_CLIENT_URL), 409
+        return (
+            render_template(
+                "msg_template.html",
+                msg={
+                    "title": "Подтверждение почты",
+                    "text": "Почта уже подтверждена",
+                },
+                url=NVR_CLIENT_URL,
+            ),
+            409,
+        )
 
     user.email_verified = True
     g.session.commit()
 
     try:
         send_access_request_email(
-            [u.email for u in g.session.query(User).all() if u.role not in ['user', 'editor']], user)
-    except Exception as e:
+            [
+                u.email
+                for u in g.session.query(User).all()
+                if u.role not in ["user", "editor"]
+            ],
+            user,
+        )
+    except Exception:
         traceback.print_exc()
         return "Server error", 500
 
-    emit_event('new_user', {'user': user.to_dict()})
+    emit_event("new_user", {"user": user.to_dict()})
 
-    return render_template('msg_template.html',
-                           msg={'title': 'Подтверждение почты',
-                                'text': "Подтверждение успешно, ожидайте одобрения администратора"},
-                           url=NVR_CLIENT_URL), 202
+    return (
+        render_template(
+            "msg_template.html",
+            msg={
+                "title": "Подтверждение почты",
+                "text": "Подтверждение успешно, ожидайте одобрения администратора",
+            },
+            url=NVR_CLIENT_URL,
+        ),
+        202,
+    )
 
 
-@api.route('/login', methods=['POST'])
+@api.route("/login", methods=["POST"])
 def login():
     data = request.get_json()
     user = User.authenticate(g.session, **data)
 
     if not user:
-        return jsonify({'error': "Неверные данные", 'authenticated': False}), 401
+        return jsonify({"error": "Неверные данные", "authenticated": False}), 401
 
     if not user.email_verified:
-        return jsonify({'error': 'Почта не подтверждена', 'authenticated': False}), 401
+        return jsonify({"error": "Почта не подтверждена", "authenticated": False}), 401
 
     if not user.access:
-        return jsonify({'error': 'Администратор ещё не открыл доступ для этого аккаунта',
-                        'authenticated': False}), 401
+        return (
+            jsonify(
+                {
+                    "error": "Администратор ещё не открыл доступ для этого аккаунта",
+                    "authenticated": False,
+                }
+            ),
+            401,
+        )
 
     user.last_login = datetime.utcnow()
     g.session.commit()
 
-    token = jwt.encode({
-        'sub': {'email': user.email, 'role': user.role},
-        'iat': datetime.utcnow(),
-        'exp': datetime.utcnow() + timedelta(weeks=12)},
-        current_app.config['SECRET_KEY'])
+    token = jwt.encode(
+        {
+            "sub": {"email": user.email, "role": user.role},
+            "iat": datetime.utcnow(),
+            "exp": datetime.utcnow() + timedelta(weeks=12),
+        },
+        current_app.config["SECRET_KEY"],
+    )
 
-    return jsonify({'token': token.decode('UTF-8')}), 202
+    return jsonify({"token": token.decode("UTF-8")}), 202
 
 
-@api.route('/google-login', methods=['POST'])
+@api.route("/google-login", methods=["POST"])
 def glogin():
     data = request.get_json()
-    token = data.get('token')
+    token = data.get("token")
     if not token:
-        return jsonify({'error': "Bad request"}), 400
+        return jsonify({"error": "Bad request"}), 400
 
     try:
         idinfo = id_token.verify_oauth2_token(
-            token, google_requests.Request(), GOOGLE_CLIENT_ID)
+            token, google_requests.Request(), GOOGLE_CLIENT_ID
+        )
 
-        if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
-            raise ValueError('Wrong issuer.')
+        if idinfo["iss"] not in ["accounts.google.com", "https://accounts.google.com"]:
+            raise ValueError("Wrong issuer.")
 
-        email = idinfo['email']
+        email = idinfo["email"]
 
     except ValueError:
-        return jsonify({'error': "Bad token"}), 403
+        return jsonify({"error": "Bad token"}), 403
 
     user = g.session.query(User).filter_by(email=email).first()
     if not user:
@@ -134,23 +172,24 @@ def glogin():
         user.email_verified = True
         user.access = True
 
-        Thread(target=give_permissions, args=user.email).start()
-
         g.session.add(user)
 
     user.last_login = datetime.utcnow()
     g.session.commit()
 
-    token = jwt.encode({
-        'sub': {'email': user.email, 'role': user.role},
-        'iat': datetime.utcnow(),
-        'exp': datetime.utcnow() + timedelta(weeks=12)},
-        current_app.config['SECRET_KEY'])
+    token = jwt.encode(
+        {
+            "sub": {"email": user.email, "role": user.role},
+            "iat": datetime.utcnow(),
+            "exp": datetime.utcnow() + timedelta(weeks=12),
+        },
+        current_app.config["SECRET_KEY"],
+    )
 
-    return jsonify({'token': token.decode('UTF-8')}), 202
+    return jsonify({"token": token.decode("UTF-8")}), 202
 
 
-@api.route('/reset-pass/<email>', methods=['POST'])
+@api.route("/reset-pass/<email>", methods=["POST"])
 def send_reset_pass(email):
     user = g.session.query(User).filter_by(email=str(email)).first()
     if not user:
@@ -159,23 +198,23 @@ def send_reset_pass(email):
     token_expiration = 300
     try:
         send_reset_pass_email(user, token_expiration)
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
         return jsonify({"error": "Server error"}), 500
 
     return jsonify({"message": "Reset pass token generated"}), 200
 
 
-@api.route('/reset-pass/<token>', methods=['PUT'])
+@api.route("/reset-pass/<token>", methods=["PUT"])
 @json_data_required
 def reset_pass(token):
     data = request.get_json()
 
-    new_pass = data.get('new_pass')
+    new_pass = data.get("new_pass")
     if not new_pass:
         return jsonify({"error": "New password required"}), 400
 
-    user = User.verify_token(g.session, token, 'reset_pass')
+    user = User.verify_token(g.session, token, "reset_pass")
     if not user:
         return jsonify({"error": "Invalid token"}), 403
 
@@ -183,5 +222,3 @@ def reset_pass(token):
     g.session.commit()
 
     return jsonify({"message": "Password updated"}), 200
-
-
