@@ -14,7 +14,7 @@ import {
   getAPIKey,
   getRooms,
   getRecords,
-  createMontageEvent,
+  createMontageEvent
 } from "@/api";
 import { isValidToken } from "@/utils";
 
@@ -24,25 +24,25 @@ const state = {
   rooms: [],
   user: {},
   jwt: { token: localStorage.token || "" },
-  users: [],
+  users: []
 };
 const mutations = {
   TRACKING_CHANGE(state, message) {
-    let room = state.rooms.find((room) => {
+    let room = state.rooms.find(room => {
       return room.id === message.id;
     });
 
     room.tracking_state = message.tracking_state;
   },
   AUTO_CONTROL_CHANGE(state, message) {
-    let room = state.rooms.find((room) => {
+    let room = state.rooms.find(room => {
       return room.id === message.id;
     });
 
     room.auto_control = message.auto_control;
   },
   SET_STREAM_URL(state, message) {
-    let room = state.rooms.find((room) => {
+    let room = state.rooms.find(room => {
       return room.name === message.name;
     });
 
@@ -63,7 +63,7 @@ const mutations = {
     state.rooms.push(message.room);
   },
   EDIT_ROOM(state, message) {
-    let room = state.rooms.find((room) => {
+    let room = state.rooms.find(room => {
       return room.id === message.id;
     });
     room = message;
@@ -82,14 +82,14 @@ const mutations = {
     state.users.splice(i, 1);
   },
   CHANGE_ROLE(state, message) {
-    let user = state.users.find((user) => {
+    let user = state.users.find(user => {
       return user.id === message.id;
     });
 
     user.role = message.role;
   },
   GRANT_ACCESS(state, message) {
-    let user = state.users.find((user) => {
+    let user = state.users.find(user => {
       return user.id === message.id;
     });
     user.access = true;
@@ -115,13 +115,13 @@ const mutations = {
   },
   setUsers(state, payload) {
     state.users = payload;
-  },
+  }
 };
 const actions = {
   async emitTrackingStateChange({}, { room, tracking_state }) {
     await this._vm.$socket.client.emit("tracking_state_change", {
       id: room.id,
-      tracking_state,
+      tracking_state
     });
   },
   async socket_trackingStateChange({ commit }, message) {
@@ -145,7 +145,7 @@ const actions = {
   async emitAutoControlChange({}, { room, auto_control }) {
     await this._vm.$socket.client.emit("auto_control_change", {
       id: room.id,
-      auto_control,
+      auto_control
     });
   },
   async socket_autoControlChange({ commit }, message) {
@@ -195,7 +195,7 @@ const actions = {
   async emitChangeRole({}, { user }) {
     await this._vm.$socket.client.emit("change_role", {
       id: user.id,
-      role: user.role,
+      role: user.role
     });
   },
   socket_changeRole({ commit }, message) {
@@ -231,7 +231,82 @@ const actions = {
   async loadRooms({ commit, state }) {
     try {
       commit("switchLoading");
-      let res = await getRooms(state.jwt.token);
+      // let res = await getRooms(state.jwt.token);
+      let res = {
+        data: [
+          {
+            auto_control: true,
+            calendar:
+              "auditory.ru_tc7n0tiofie384h5jvbcq3cso0@group.calendar.google.com",
+            drive:
+              "https://drive.google.com/drive/u/1/folders/1qZNnDJpIBZI52CcEcwAJP69QR9LyIPi2",
+            id: 10,
+            main_source: "172.18.191.72",
+            name: "307",
+            screen_source: "172.18.191.71",
+            sound_source: "172.18.191.71",
+            sources: [
+              {
+                audio: "main",
+                external_id: "39726436535",
+                id: 180,
+                ip: "172.18.191.71",
+                merge: "main",
+                name: "\u041a\u043e\u0434\u0435\u0440",
+                port: "80",
+                room_id: 10,
+                rtsp: "rtsp://172.18.191.71/0",
+                time_editing: "Tue, 27 Oct 2020 10:53:43 GMT",
+                tracking: "backup"
+              },
+              {
+                audio: "no",
+                external_id: "96725436510",
+                id: 184,
+                ip: "172.18.191.73",
+                merge: "no",
+                name:
+                  "\u041b\u0435\u0432\u0430\u044f \u0443 \u043e\u043a\u043d\u0430",
+                port: "80",
+                room_id: 10,
+                rtsp: "rtsp://172.18.191.73:554/Streaming/Channels/1",
+                time_editing: "Tue, 27 Oct 2020 10:53:43 GMT",
+                tracking: "backup"
+              },
+              {
+                audio: "no",
+                external_id: "13024928121",
+                id: 177,
+                ip: "172.18.191.74",
+                merge: "no",
+                name: "\u041f\u0440\u0430\u0432\u0430\u044f",
+                port: "80",
+                room_id: 10,
+                rtsp: "rtsp://172.18.191.74:554/Streaming/Channels/1",
+                time_editing: "Tue, 27 Oct 2020 10:53:43 GMT",
+                tracking: "backup"
+              },
+              {
+                audio: "no",
+                external_id: "52425936257",
+                id: 182,
+                ip: "172.18.191.72",
+                merge: "no",
+                name: "\u041b\u0435\u0432\u0430\u044f",
+                port: "80",
+                room_id: 10,
+                rtsp: "rtsp://172.18.191.72:554/Streaming/Channels/1",
+                time_editing: "Tue, 27 Oct 2020 10:53:43 GMT",
+                tracking: "backup"
+              }
+            ],
+            stream_url: null,
+            tracking_source: "172.18.191.72",
+            tracking_state: false
+          }
+        ]
+      };
+
       commit("setRooms", res.data);
     } catch (error) {
       commit("setError", error);
@@ -382,7 +457,25 @@ const actions = {
   async loadRecords({ commit, state }) {
     try {
       commit("switchLoading");
-      let res = await getRecords(state.user.email, state.jwt.token);
+      // let res = await getRecords(state.user.email, state.jwt.token);
+      let res = {
+        data: [
+          {
+            date: "2020-09-01",
+            done: true,
+            drive_file_url:
+              "https://drive.google.com/file/d/1QoCbVyyAIu-_oIHr8jBr4Org_FQmJX8h/preview",
+            end_time: "14:20",
+            event_id: "02j3pfnmg3cut70t7rrcsdhrhk",
+            event_name: "testttt",
+            id: 203,
+            processing: false,
+            room_name: "305",
+            start_time: "13:00",
+            user_email: "dakudryavtsev@miem.hse.ru"
+          }
+        ]
+      };
       commit("setRecords", res.data);
     } catch (error) {
       commit("setError", error);
@@ -397,23 +490,25 @@ const actions = {
     } catch (error) {
       commit("setError", error);
     }
-  },
+  }
 };
 const getters = {
   isAutheticated(state) {
-    return isValidToken(state.jwt.token);
+    // return isValidToken(state.jwt.token);
+    return true;
   },
   user(state) {
+    state.user.role = 'admin'
     return state.user;
-  },
+  }
 };
 
 export default new Vuex.Store({
   modules: {
-    shared,
+    shared
   },
   state,
   mutations,
   actions,
-  getters,
+  getters
 });
