@@ -22,7 +22,9 @@
                     <li>Конфигурировать настройки комнаты</li>
                     <li>Запросить запись</li>
                     <li>Включить/Отключить трекинг</li>
-                    <li>Включить/Отключить автовозрат камер на default позиции</li>
+                    <li>
+                      Включить/Отключить автовозрат камер на default позиции
+                    </li>
                     <li>Запускать/Останавливать стриминг в YouTube</li>
                     <li>Управлять своим API-ключом</li>
                   </ul>
@@ -36,7 +38,8 @@
               depressed
               block
               color="info"
-            >Создать ключ API</v-btn>
+              >Создать ключ API</v-btn
+            >
           </template>
 
           <template v-else>
@@ -44,30 +47,52 @@
               <v-card-title primary-title>
                 <h3 class="title mb-0">
                   Ваш ключ API:
-                  <b v-if="showKey"  class="subheading">{{ user.api_key }}</b>
-                  <b v-else class="subheading">{{"&#8226;".repeat(32)}}</b>
+                  <b v-if="showKey" class="subheading">{{ user.api_key }}</b>
+                  <b v-else class="subheading">{{ "&#8226;".repeat(32) }}</b>
                 </h3>
                 <v-spacer></v-spacer>
                 <v-btn icon @click="showKey = !showKey">
-                  <v-icon>{{ showKey ? 'visibility_off' : 'visibility' }}</v-icon>
+                  <v-icon>{{
+                    showKey ? "visibility_off" : "visibility"
+                  }}</v-icon>
                 </v-btn>
               </v-card-title>
 
               <v-card-text>
                 <div class="subheading">
                   <div>API url: {{ API_URL }}</div>
-                  <div v-if="showKey">Добавьте в headers вашего запроса: {"key": "{{ user.api_key }}"}</div>
-                  <div v-else>Добавьте в headers вашего запроса: {"key": "{{"&#8226;".repeat(32)}}"}</div>
+                  <div v-if="showKey">
+                    Добавьте в headers вашего запроса: {"key": "{{
+                      user.api_key
+                    }}"}
+                  </div>
+                  <div v-else>
+                    Добавьте в headers вашего запроса: {"key": "{{
+                      "&#8226;".repeat(32)
+                    }}"}
+                  </div>
                 </div>
               </v-card-text>
 
               <v-card-actions>
-                <v-btn depressed color="warning" :loading="loader" @click="updateKey">Обновить</v-btn>
-                <v-btn depressed color="error" :loading="loader" @click="deleteKey">Удалить</v-btn>
+                <v-btn
+                  depressed
+                  color="warning"
+                  :loading="loader"
+                  @click="updateKey"
+                  >Обновить</v-btn
+                >
+                <v-btn
+                  depressed
+                  color="error"
+                  :loading="loader"
+                  @click="deleteKey"
+                  >Удалить</v-btn
+                >
               </v-card-actions>
             </v-card>
 
-            <div style="text-align:right">
+            <div style="text-align: right">
               <v-btn @click="all" icon>
                 <v-icon>list</v-icon>
               </v-btn>
@@ -87,15 +112,24 @@
                       <div class="subheading">{{ route.doc }}</div>
                     </v-card-text>
                   </v-card>
-                  <v-card v-if="route.request" :color="isDarkMode ? '#2d2d2d' : '#F5F5F5'">
+                  <v-card
+                    v-if="route.request"
+                    :color="isDarkMode ? '#2d2d2d' : '#F5F5F5'"
+                  >
                     <v-card-text>
                       <div class="font-weight-bold">Request</div>
                       <pre>{{ route.request }}</pre>
                     </v-card-text>
                   </v-card>
-                  <v-card v-if="route.responses" :color="isDarkMode ? '#2d2d2d' : '#F5F5F5'">
+                  <v-card
+                    v-if="route.responses"
+                    :color="isDarkMode ? '#2d2d2d' : '#F5F5F5'"
+                  >
                     <div class="font-weight-bold ml-3">Responses</div>
-                    <v-card-text v-for="(response, i) in route.responses" :key="i">
+                    <v-card-text
+                      v-for="(response, i) in route.responses"
+                      :key="i"
+                    >
                       <b>{{ response.code }}</b>
                       <pre>
                             {{ response.body }}
@@ -137,17 +171,17 @@ export default {
             {
               code: 202,
               body: `
-  {"token": string}`
+  {"token": string}`,
             },
             {
               code: 401,
               body: `
-  {"error": "Неверные данные", "authenticated": false}`
+  {"error": "Неверные данные", "authenticated": false}`,
             },
             {
               code: 401,
               body: `
-  {"error": "Почта не подтверждена", "authenticated": false}`
+  {"error": "Почта не подтверждена", "authenticated": false}`,
             },
             {
               code: 401,
@@ -155,9 +189,9 @@ export default {
   {
     "error": "Администратор ещё не открыл доступ для этого аккаунта",
     "authenticated": false
-  }`
-            }
-          ]
+  }`,
+            },
+          ],
         },
         {
           name: "/rooms/",
@@ -182,9 +216,9 @@ export default {
       "tracking_source": "admin:Supervisor@172.18.191.23",
       "tracking_state": false
     }
-  ]`
-            }
-          ]
+  ]`,
+            },
+          ],
         },
         {
           name: "/rooms/{room_name}",
@@ -207,14 +241,14 @@ export default {
     ],
     "tracking_source": "admin:Supervisor@172.18.191.23",
     "tracking_state": false
-  }`
+  }`,
             },
             {
               code: 400,
               body: `
-  Bad request`
-            }
-          ]
+  Bad request`,
+            },
+          ],
         },
         {
           name: "/rooms/{room_name}",
@@ -224,19 +258,19 @@ export default {
             {
               code: 201,
               body: `
-  {"message": "Started creating '{room_name}'"}`
+  {"message": "Started creating '{room_name}'"}`,
             },
             {
               code: 400,
               body: `
-  Bad request`
+  Bad request`,
             },
             {
               code: 409,
               body: `
-  {"error": "Room '{room_name}' already exist"}`
-            }
-          ]
+  {"error": "Room '{room_name}' already exist"}`,
+            },
+          ],
         },
         {
           name: "/rooms/{room_name}",
@@ -246,14 +280,14 @@ export default {
             {
               code: 200,
               body: `
-  {"message": "Room deleted"}`
+  {"message": "Room deleted"}`,
             },
             {
               code: 400,
               body: `
-  Bad request`
-            }
-          ]
+  Bad request`,
+            },
+          ],
         },
         {
           name: "/rooms/{room_name}",
@@ -267,9 +301,9 @@ export default {
             {
               code: 200,
               body: `
-  {"message": "Room edited"}`
-            }
-          ]
+  {"message": "Room edited"}`,
+            },
+          ],
         },
         {
           name: "/sources/",
@@ -292,9 +326,9 @@ export default {
       "name": "на доску",
       "room_id": 1
     }
-  ]`
-            }
-          ]
+  ]`,
+            },
+          ],
         },
         {
           name: "/sources/{ip}",
@@ -309,9 +343,9 @@ export default {
     "ip": "admin:Supervisor@172.18.199.30",
     "name": "у доски слева на зал",
     "room_id": 1
-  }`
-            }
-          ]
+  }`,
+            },
+          ],
         },
         {
           name: "/sources/{ip}",
@@ -329,14 +363,14 @@ export default {
             {
               code: 200,
               body: `
-  {"message": "Added"}`
+  {"message": "Added"}`,
             },
             {
               code: 400,
               body: `
-  Bad request`
-            }
-          ]
+  Bad request`,
+            },
+          ],
         },
         {
           name: "/sources/{ip}",
@@ -346,14 +380,14 @@ export default {
             {
               code: 200,
               body: `
-  {"message": "Deleted"}`
+  {"message": "Deleted"}`,
             },
             {
               code: 400,
               body: `
-  Bad request`
-            }
-          ]
+  Bad request`,
+            },
+          ],
         },
         {
           name: "/sources/{ip}",
@@ -372,14 +406,14 @@ export default {
             {
               code: 200,
               body: `
-  {"message": "Updated"}`
+  {"message": "Updated"}`,
             },
             {
               code: 400,
               body: `
-  Bad request`
-            }
-          ]
+  Bad request`,
+            },
+          ],
         },
         {
           name: "/auto-control/{room_name}",
@@ -392,19 +426,19 @@ export default {
             {
               code: 200,
               body: `
-  {"message": "Automatic control within room {room_name} has been set to {auto_control}"}`
+  {"message": "Automatic control within room {room_name} has been set to {auto_control}"}`,
             },
             {
               code: 400,
               body: `
-  {"error": "Boolean value not provided"}`
+  {"error": "Boolean value not provided"}`,
             },
             {
               code: 404,
               body: `
-  {"error": "Room {room_name} not found"}`
-            }
-          ]
+  {"error": "Room {room_name} not found"}`,
+            },
+          ],
         },
         {
           name: "/streaming-start/{room_name}",
@@ -422,14 +456,14 @@ export default {
               body: `
   {
     "message": "Streaming started"
-  }`
+  }`,
             },
             {
               code: 500,
               body: `
-  {"error": "Unable to start stream"}`
-            }
-          ]
+  {"error": "Unable to start stream"}`,
+            },
+          ],
         },
         {
           name: "/streaming-stop/{room_name}",
@@ -439,9 +473,9 @@ export default {
             {
               code: 200,
               body: `
-  {"message": "Streaming stopped"}`
-            }
-          ]
+  {"message": "Streaming stopped"}`,
+            },
+          ],
         },
         {
           name: "/set-source/{room_name}/{source_type}/{ip}",
@@ -452,14 +486,14 @@ export default {
             {
               code: 200,
               body: `
-  {"message": "Source set"}`
+  {"message": "Source set"}`,
             },
             {
               code: 400,
               body: `
-  Bad request`
-            }
-          ]
+  Bad request`,
+            },
+          ],
         },
         {
           name: "/gcalendar-event/{room_name}",
@@ -477,31 +511,14 @@ export default {
             {
               code: 201,
               body: `
-  {"message": "Successfully created event: {event_link}"}`
+  {"message": "Successfully created event: {event_link}"}`,
             },
             {
               code: 400,
               body: `
-  Bad request`
-            }
-          ]
-        },
-        {
-          name: "/gdrive-upload/{room_name}",
-          method: "POST",
-          doc: `Загружает переданный в запросе видео-файл в папку комнаты. Важно чтобы файл был в формате YYYY-MM-DD_HH:mm`,
-          responses: [
-            {
-              code: 201,
-              body: `
-  {"message": "Upload to disk started"}`
+  Bad request`,
             },
-            {
-              code: 400,
-              body: `
-  Bad request`
-            }
-          ]
+          ],
         },
         {
           name: "/montage-event/{room_name}",
@@ -521,14 +538,14 @@ export default {
             {
               code: 201,
               body: `
-  {"message": "Record event created"}`
+  {"message": "Record event created"}`,
             },
             {
               code: 400,
               body: `
-  Bad request`
-            }
-          ]
+  Bad request`,
+            },
+          ],
         },
         {
           name: "/tracking/{room_name}",
@@ -542,19 +559,19 @@ export default {
             {
               code: 200,
               body: `
-  {}`
+  {}`,
             },
             {
               code: 400,
               body: `
-  Bad request`
+  Bad request`,
             },
             {
               code: 500,
               body: `
-  {"error": string}`
-            }
-          ]
+  {"error": string}`,
+            },
+          ],
         },
         {
           name: "/api-key/{email}",
@@ -564,9 +581,9 @@ export default {
             {
               code: 201,
               body: `
-  {"key": string}`
-            }
-          ]
+  {"key": string}`,
+            },
+          ],
         },
         {
           name: "/api-key/{email}",
@@ -576,9 +593,9 @@ export default {
             {
               code: 200,
               body: `
-  {"key": string}`
-            }
-          ]
+  {"key": string}`,
+            },
+          ],
         },
         {
           name: "/api-key/{email}",
@@ -588,9 +605,9 @@ export default {
             {
               code: 202,
               body: `
-  {"key": string}`
-            }
-          ]
+  {"key": string}`,
+            },
+          ],
         },
         {
           name: "/api-key/{email}",
@@ -600,9 +617,9 @@ export default {
             {
               code: 200,
               body: `
-  {'message': "API key deleted"}`
-            }
-          ]
+  {'message': "API key deleted"}`,
+            },
+          ],
         },
         {
           name: "/calendars/ruz?s={timestamp}&e={timestamp}",
@@ -761,11 +778,11 @@ export default {
       ]
     }
   },
-]`
-            }
-          ]
-        }
-      ]
+]`,
+            },
+          ],
+        },
+      ],
     };
   },
   computed: {
@@ -777,7 +794,7 @@ export default {
     },
     user() {
       return this.$store.getters.user;
-    }
+    },
   },
   methods: {
     createKey() {
@@ -796,13 +813,13 @@ export default {
     all() {
       this.panel =
         this.panel.length !== this.routes.length
-          ? [...Array(this.routes.length).keys()].map(_ => true)
+          ? [...Array(this.routes.length).keys()].map((_) => true)
           : [];
-    }
+    },
   },
   beforeCreate() {
     this.$store.dispatch("getKey");
-  }
+  },
 };
 </script>
 

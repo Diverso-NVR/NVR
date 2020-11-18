@@ -67,8 +67,6 @@ class Record(Base, CommonMixin):
         self.date = kwargs["start"]["dateTime"].split("T")[0]
         self.start_time = kwargs["start"]["dateTime"].split("T")[1][:5]
         self.end_time = kwargs["end"]["dateTime"].split("T")[1][:5]
-        self.room_name = kwargs["room_name"]
-        self.user_email = kwargs["creator"]["email"]
 
     def to_dict(self):
         return dict(
@@ -79,18 +77,11 @@ class Record(Base, CommonMixin):
             event_name=self.event_name,
             event_id=self.event_id,
             drive_file_url=self.drive_file_url,
-            user_email=self.user_email,
-            room_name=self.room_name,
+            users=[user.to_dict() for user in self.users],
+            room=self.room.to_dict(),
             done=self.done,
             processing=self.processing,
         )
-
-
-class Channel(Base, CommonMixin):
-    __tablename__ = "channels"
-
-    resource_id = Column(String(100))
-    room_id = Column(Integer, ForeignKey("rooms.id"))
 
 
 class User(Base, CommonMixin):
@@ -187,7 +178,6 @@ class User(Base, CommonMixin):
             role=self.role,
             email_verified=self.email_verified,
             access=self.access,
-            api_key=self.api_key,
             last_login=self.last_login,
         )
 
@@ -230,6 +220,7 @@ class Room(Base, CommonMixin):
             auto_control=self.auto_control,
         )
 
+
 class OnlineRoom(Base, CommonMixin):
     __tablename__ = "online_rooms"
 
@@ -241,6 +232,7 @@ class OnlineRoom(Base, CommonMixin):
             name=self.name,
             calendar=self.calendar,
         )
+
 
 class Source(Base, CommonMixin):
     __tablename__ = "sources"

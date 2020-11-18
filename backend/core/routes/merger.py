@@ -9,7 +9,7 @@ from flask import Blueprint, jsonify, request, g
 
 from ..socketio import emit_event
 from ..apis.calendar_api import get_events
-from ..models import Room, Source, Record
+from ..models import Room, Source, Record, User
 from ..decorators import json_data_required, auth_required, admin_or_editor_only
 
 
@@ -60,7 +60,15 @@ def gcalendar_webhook():
         if start_date != end_date:
             continue
 
+        creator = (
+            g.session.query(User).filter_by(email=event["creator"]["email"]).first()
+        )
+        if not creator:
+            continue
+
         new_record = Record()
+        new_record.room = room
+        new_record.users.append(creator)
         new_record.update_from_calendar(**event, room_name=room.name)
         g.session.add(new_record)
 
@@ -78,12 +86,6 @@ def gcalendar_webhook():
     g.session.commit()
     g.session.close()
 
-    return jsonify({"message": "Room calendar events patched"}), 200
-
-
-# dev
-@api.route("/calendar-notifications-dev/", methods=["POST"])
-def gcalendar_webhook_dev():
     return jsonify({"message": "Room calendar events patched"}), 200
 
 
