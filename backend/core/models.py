@@ -202,7 +202,6 @@ class Room(Base, CommonMixin):
 
     records = relationship("Record", back_populates="room")
     sources = relationship("Source", backref="room", lazy=False)
-    channel = relationship("Channel", backref="room", uselist=False)
 
     def to_dict(self):
         return dict(
