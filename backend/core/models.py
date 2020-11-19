@@ -230,6 +230,7 @@ class Room(Base, CommonMixin):
             auto_control=self.auto_control,
         )
 
+
 class OnlineRoom(Base, CommonMixin):
     __tablename__ = "online_rooms"
 
@@ -241,6 +242,7 @@ class OnlineRoom(Base, CommonMixin):
             name=self.name,
             calendar=self.calendar,
         )
+
 
 class Source(Base, CommonMixin):
     __tablename__ = "sources"
