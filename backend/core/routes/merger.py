@@ -61,7 +61,15 @@ def gcalendar_webhook():
         if start_date != end_date:
             continue
 
+        creator = (
+            g.session.query(User).filter_by(email=event["creator"]["email"]).first()
+        )
+        if not creator:
+            continue
+
         new_record = Record()
+        new_record.room = room
+        new_record.users.append(creator)
         new_record.update_from_calendar(**event, room_name=room.name)
         g.session.add(new_record)
 
@@ -79,12 +87,6 @@ def gcalendar_webhook():
     g.session.commit()
     g.session.close()
 
-    return jsonify({"message": "Room calendar events patched"}), 200
-
-
-# dev
-@api.route("/calendar-notifications-dev/", methods=["POST"])
-def gcalendar_webhook_dev():
     return jsonify({"message": "Room calendar events patched"}), 200
 
 
@@ -291,8 +293,8 @@ def auto_control(current_user, room_name):
 
 
 @api.route("/calendars/ruz", methods=["GET"])
-# @auth_required
-def get_event_from_calendar():
+@auth_required
+def get_event_from_calendar(current_user):
     start_timestamp = request.args.get("s")
     end_timestamp = request.args.get("e")
     if start_timestamp is None or end_timestamp is None:

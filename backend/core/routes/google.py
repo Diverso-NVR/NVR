@@ -50,45 +50,6 @@ def create_calendar_event(current_user, room_name):
     return jsonify({"message": f"Successfully created event: {event_link}"}), 201
 
 
-@api.route("/gdrive-upload/<room_name>", methods=["POST"])
-@auth_required
-@admin_or_editor_only
-def upload_video_to_drive(current_user, room_name):
-    if not request.files:
-        return {"error": "No file provided"}, 400
-
-    room = g.session.query(Room).filter_by(name=str(room_name)).first()
-    if not room:
-        return jsonify({"error": f"Room '{room_name}' not found"}), 400
-
-    file = request.files["file"]
-    file_name = file.filename
-    file.save(VIDS_PATH + file_name)
-
-    try:
-        date = file_name.split("_")[0]
-        time = file_name.split("_")[1].split(".")[0]
-    except Exception:
-        return {"error": "Incorrect file name"}, 400
-
-    folder = ""
-
-    # TODO можно наверно через mimetype в функции но мне так лень и времени нет хочу сдохнуть
-    date_folders = get_folders_by_name(date)
-    time_folders = get_folders_by_name(time)
-    for folder_id, folder_parent_id in date_folders.items():
-        if folder_parent_id == room.drive.split("/")[-1]:
-            for f_id, fp_id in time_folders.items():
-                if fp_id == folder_id:
-                    folder = f_id
-    if not folder:
-        folder = room.drive.split("/")[-1]
-
-    Thread(target=upload, args=(VIDS_PATH + file_name, folder)).start()
-
-    return jsonify({"message": "Upload to disk started"}), 200
-
-
 @api.route("/gconfigure/<string:room_name>", methods=["POST"])
 @auth_required
 @admin_or_editor_only
