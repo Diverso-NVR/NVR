@@ -303,9 +303,17 @@ def get_event_from_calendar(current_user):
     start_time = datetime.fromtimestamp(float(start_timestamp))
     end_time = datetime.fromtimestamp(float(end_timestamp))
 
-    classes = {}
+    rooms = {}
     for room in get_all_rooms():
-        room_classes = get_classes(str(room["auditoriumOid"]), start_time, end_time)
-        classes[room["number"]] = [class_ for class_ in room_classes]
+        try:
+            room_number = int(room["number"])
+            room_ruz_id = str(room["auditoriumOid"])
+        except Exception:
+            continue
 
-    return jsonify(classes), 200
+        room_classes = get_classes(room_ruz_id, start_time, end_time)
+        rooms[room_number] = [class_ for class_ in room_classes]
+
+    rooms = {room: rooms[room] for room in rooms if rooms[room] != []}
+
+    return jsonify(rooms), 200
