@@ -138,10 +138,10 @@ def create_montage_event(current_user, room_name):
 
 
 @api.route("/tracking/<room_name>", methods=["POST"])
-@auth_required
-@admin_or_editor_only
+# @auth_required
+# @admin_or_editor_only
 @json_data_required
-def tracking_manage(current_user, room_name):
+def tracking_manage(room_name):
     post_data = request.get_json()
 
     command = post_data.get("command")
@@ -164,12 +164,11 @@ def tracking_manage(current_user, room_name):
 
     command = command.lower()
     try:
-        if command == "start":
-            res = requests.post(
-                f"{TRACKING_URL}/track", json={"ip": room.tracking_source}, timeout=5
-            )
-        else:
-            res = requests.delete(f"{TRACKING_URL}/track")
+        res = requests.post(
+            f"{TRACKING_URL}/track",
+            json={"command": command, "ip": room.tracking_source, "port": 80},
+            timeout=5,
+        )
 
         room.tracking_state = True if command == "start" else False
         g.session.commit()
