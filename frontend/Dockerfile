@@ -13,6 +13,6 @@ COPY . /frontend
 
 RUN npm run build
 
-COPY ./dist /tmp/dist
+RUN cp -RT /frontend/dist /tmp/dist
 
 ENTRYPOINT [ "sleep", "infinity" ]
