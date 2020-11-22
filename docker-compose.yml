@@ -41,6 +41,6 @@ services:
     env_file:
       - .env_nvr
     volumes:
-      - /usr/share/nginx/html:/frontend/dist
+      - ./frontend/dist:/frontend/dist
     network_mode: host
 
