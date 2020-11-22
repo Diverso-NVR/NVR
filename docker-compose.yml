@@ -16,7 +16,7 @@ services:
     env_file:
       - .env_nvr
     volumes:
-      - /run/nvr:/backend
+      - ./backend:/backend
       - ~/creds:/creds
     expose:
       - '5000'
