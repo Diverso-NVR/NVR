@@ -24,6 +24,17 @@ services:
       - '5000'
     network_mode: host
 
+  fileuploader:
+    build: ./fileuploader
+    container_name: fileuploader
+    restart: always
+    volumes:
+      - ./fileuploader:/fileuploader
+      - ~/creds:/creds
+    expose:
+      - '5005'
+    network_mode: host
+
   frontend:
     build:
       context: ./frontend
