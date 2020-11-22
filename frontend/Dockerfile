@@ -13,4 +13,4 @@ COPY . /frontend
 
 RUN npm run build
 
-CMD [ "sleep", "infinity" ]
+ENTRYPOINT "cp -RT /frontend/dist /tmp/dist"

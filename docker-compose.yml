@@ -40,7 +40,7 @@ services:
     container_name: nvr-frontend
     env_file:
       - .env_nvr
-#    volumes:
-#      - ./frontend/dist:/frontend/dist
+    volumes:
+      - ./frontend/dist:/tmp/dist
     network_mode: host
 
