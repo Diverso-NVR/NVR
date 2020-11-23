@@ -23,13 +23,15 @@ services:
     network_mode: host
 
   fileuploader:
+    depends_on:
+      - redis
     build: ./fileuploader
-    container_name: fileuploader
+    container_name: nvr-fileuploader
     volumes:
       - ./fileuploader:/fileuploader
       - ~/creds:/creds
     expose:
-      - '5005'
+      - '5500'
     network_mode: host
 
   frontend:
