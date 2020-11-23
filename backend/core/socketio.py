@@ -67,12 +67,16 @@ class NvrNamespace(Namespace):
         try:
             if new_tracking_state:
                 requests.post(
-                    f"{TRACKING_URL}/track",
-                    json={"ip": room.tracking_source},
-                    timeout=3,
-                )
+            f"{TRACKING_URL}/track",
+            json={"command": 'start', "ip": room.tracking_source, "port": 80},
+            timeout=5,
+        )
             else:
-                requests.delete(f"{TRACKING_URL}/track", timeout=3)
+                requests.post(
+                    f"{TRACKING_URL}/track",
+                    json={"command": 'stop'},
+                    timeout=5,
+                )
         except Exception:
             session.close()
             emit(
