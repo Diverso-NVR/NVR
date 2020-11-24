@@ -67,14 +67,14 @@ class NvrNamespace(Namespace):
         try:
             if new_tracking_state:
                 requests.post(
-            f"{TRACKING_URL}/track",
-            json={"command": 'start', "ip": room.tracking_source, "port": 80},
-            timeout=5,
-        )
+                    f"{TRACKING_URL}/track",
+                    json={"command": "start", "ip": room.tracking_source, "port": 80},
+                    timeout=5,
+                )
             else:
                 requests.post(
                     f"{TRACKING_URL}/track",
-                    json={"command": 'stop'},
+                    json={"command": "stop"},
                     timeout=5,
                 )
         except Exception:

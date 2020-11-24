@@ -1,14 +1,12 @@
 """Api for interacting with google"""
 
 
-from threading import Thread
 from pathlib import Path
 
-from flask import Blueprint, jsonify, request, g
+from flask import Blueprint, jsonify, request
 
 from ..apis.calendar_api import create_calendar, create_event_
-from ..apis.drive_api import create_folder, get_folders_by_name, upload
-from ..models import Room
+from ..apis.drive_api import create_folder
 from ..decorators import json_data_required, auth_required, admin_or_editor_only
 
 

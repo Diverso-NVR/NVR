@@ -10,7 +10,7 @@ from flask import Blueprint, jsonify, request, g
 from ..socketio import emit_event
 from ..apis.calendar_api import get_events
 from ..apis.ruz_api import get_all_rooms, get_classes
-from ..models import Room, Source, Record
+from ..models import Room, Source, Record, User
 from ..decorators import json_data_required, auth_required, admin_or_editor_only
 
 
@@ -33,7 +33,7 @@ def gcalendar_webhook():
 
     records = (
         g.session.query(Record)
-        .filter(Record.room_name == room.name, Record.event_id is not None)
+        .filter(Record.room_id == room.id, Record.event_id is not None)
         .all()
     )
 
@@ -70,7 +70,7 @@ def gcalendar_webhook():
         new_record = Record()
         new_record.room = room
         new_record.users.append(creator)
-        new_record.update_from_calendar(**event, room_name=room.name)
+        new_record.update_from_calendar(**event)
         g.session.add(new_record)
 
     for event_id in events_to_check:
@@ -82,7 +82,7 @@ def gcalendar_webhook():
         if record.done or record.processing:
             continue
 
-        record.update_from_calendar(**event, room_name=room.name)
+        record.update_from_calendar(**event)
 
     g.session.commit()
     g.session.close()
@@ -106,6 +106,10 @@ def create_montage_event(current_user, room_name):
     if not room:
         return jsonify({"error": "No room found with given room_name"}), 400
 
+    user = g.session.query(User).filter_by(email=str(user_email)).first()
+    if not user:
+        return jsonify({"error": "No user found with given user_email"}), 400
+
     if not date:
         return jsonify({"error": "'date' required"}), 400
     if not start_time:
@@ -124,12 +128,12 @@ def create_montage_event(current_user, room_name):
 
     record = Record(
         event_name=event_name,
-        room_name=room.name,
         date=date,
         start_time=start_time,
         end_time=end_time,
-        user_email=user_email,
     )
+    record.room = room
+    record.users.append(user)
 
     g.session.add(record)
     g.session.commit()
@@ -138,10 +142,10 @@ def create_montage_event(current_user, room_name):
 
 
 @api.route("/tracking/<room_name>", methods=["POST"])
-# @auth_required
-# @admin_or_editor_only
+@auth_required
+@admin_or_editor_only
 @json_data_required
-def tracking_manage(room_name):
+def tracking_manage(current_user, room_name):
     post_data = request.get_json()
 
     command = post_data.get("command")
