@@ -50,27 +50,17 @@ def create_app(app_name="NVR_API"):
     CORS(app, resources={r"/api/*": {"origins": "*"}})
 
     from core.routes.merger import api as merger_api
-
-    app.register_blueprint(merger_api, url_prefix="/api")
-
     from core.routes.google import api as google_api
-
-    app.register_blueprint(google_api, url_prefix="/api")
-
     from core.routes.auth import api as auth_api
-
-    app.register_blueprint(auth_api, url_prefix="/api")
-
     from core.routes.rooms import api as rooms_api
-
-    app.register_blueprint(rooms_api, url_prefix="/api")
-
     from core.routes.sources import api as sources_api
-
-    app.register_blueprint(sources_api, url_prefix="/api")
-
     from core.routes.users import api as users_api
 
+    app.register_blueprint(merger_api, url_prefix="/api")
+    app.register_blueprint(google_api, url_prefix="/api")
+    app.register_blueprint(auth_api, url_prefix="/api")
+    app.register_blueprint(rooms_api, url_prefix="/api")
+    app.register_blueprint(sources_api, url_prefix="/api")
     app.register_blueprint(users_api, url_prefix="/api")
 
     from core.models import User

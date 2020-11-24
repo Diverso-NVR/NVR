@@ -3,6 +3,7 @@
 
 import os
 from datetime import datetime, date
+import re
 
 import requests
 from flask import Blueprint, jsonify, request, g
@@ -10,7 +11,7 @@ from flask import Blueprint, jsonify, request, g
 from ..socketio import emit_event
 from ..apis.calendar_api import get_events
 from ..apis.ruz_api import get_all_rooms, get_classes
-from ..models import Room, Source, Record, User
+from ..models import Room, Source, Record, User, UserRecord
 from ..decorators import json_data_required, auth_required, admin_or_editor_only
 
 
@@ -22,7 +23,7 @@ STREAMING_API_KEY = os.environ.get("STREAMING_API_KEY")
 api = Blueprint("merger_api", __name__)
 
 
-@api.route("/calendar-notifications/", methods=["POST"])
+# @api.route("/calendar-notifications/", methods=["POST"])
 def gcalendar_webhook():
     calendar_id = request.headers["X-Goog-Resource-Uri"].split("/")[6]
     calendar_id = calendar_id.replace("%40", "@")
@@ -69,9 +70,13 @@ def gcalendar_webhook():
 
         new_record = Record()
         new_record.room = room
-        new_record.users.append(creator)
         new_record.update_from_calendar(**event)
         g.session.add(new_record)
+        g.session.commit()
+
+        user_record = UserRecord(user_id=creator.id, record_id=new_record.id)
+        g.session.add(user_record)
+        g.session.commit()
 
     for event_id in events_to_check:
         event = events[event_id]
@@ -85,7 +90,6 @@ def gcalendar_webhook():
         record.update_from_calendar(**event)
 
     g.session.commit()
-    g.session.close()
 
     return jsonify({"message": "Room calendar events patched"}), 200
 
@@ -133,9 +137,11 @@ def create_montage_event(current_user, room_name):
         end_time=end_time,
     )
     record.room = room
-    record.users.append(user)
-
     g.session.add(record)
+    g.session.commit()
+
+    user_record = UserRecord(user_id=user.id, record_id=record.id)
+    g.session.add(user_record)
     g.session.commit()
 
     return jsonify({"message": f"Merge event '{event_name}' added to queue"}), 201
