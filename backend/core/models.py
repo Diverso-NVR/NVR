@@ -232,12 +232,10 @@ class OnlineRoom(Base, CommonMixin):
 
     name = Column(String(100), nullable=False, unique=True)
     calendar = Column(String(200))
+    drive = Column(String(200))
 
     def to_dict(self):
-        return dict(
-            name=self.name,
-            calendar=self.calendar,
-        )
+        return dict(name=self.name, calendar=self.calendar, drive=self.drive)
 
 
 class Source(Base, CommonMixin):
