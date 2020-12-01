@@ -59,6 +59,7 @@ class Record(Base, CommonMixin):
     event_name = Column(String(200))
     event_id = Column(String(200), unique=True)
     drive_file_url = Column(String(200))
+    ruz_id = Column(Integer, unique=True)  # lessonOid from ruz API
 
     done = Column(Boolean, default=False)
     processing = Column(Boolean, default=False)
