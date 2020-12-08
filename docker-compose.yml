@@ -16,7 +16,7 @@ services:
     env_file:
       - .env_nvr
     volumes:
-      - ./backend:/backend
+      - /tmp:/backend
       - ~/creds:/creds
     expose:
       - '5000'
@@ -43,6 +43,6 @@ services:
     env_file:
       - .env_nvr
     volumes:
-      - ./frontend/dist:/tmp/dist
+      - /usr/share/nginx/html:/tmp/dist
     network_mode: host
 
