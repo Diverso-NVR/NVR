@@ -316,11 +316,10 @@ def get_event_from_calendar(current_user):
     for room in get_all_rooms():
         try:
             room_number = int(room["number"])
-            room_ruz_id = str(room["auditoriumOid"])
         except Exception:
             continue
 
-        room_classes = get_classes(room_ruz_id, start_time, end_time)
+        room_classes = get_classes(room_number, start_time, end_time)
         rooms[room_number] = [class_ for class_ in room_classes]
 
     rooms = {room: rooms[room] for room in rooms if rooms[room] != []}

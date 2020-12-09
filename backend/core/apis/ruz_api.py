@@ -2,7 +2,7 @@ import requests
 from datetime import datetime
 
 RUZ_API_URL = "http://92.242.58.221/ruzservice.svc"
-
+NVR_ERUDITE_API_URL = "https://nvr.miem.hse.ru/api/erudite"
 
 # building id МИЭМа = 92
 def get_all_rooms(building_id: int = 92) -> list:
@@ -30,28 +30,13 @@ def get_room_ruzid(room_name: int) -> int:
         return None
 
 
-def get_classes(ruz_room_id: str, start_time: datetime, end_time: datetime):
-    format = "%Y.%m.%d %H:%M"
+def get_classes(ruz_auditorium: str, start_time: datetime, end_time: datetime):
     params = dict(
+        ruz_auditorium=ruz_auditorium,
         fromdate=start_time.isoformat(),
         todate=end_time.isoformat(),
-        auditoriumoid=ruz_room_id,
     )
 
-    res = requests.get(f"{RUZ_API_URL}/lessons", params=params)
-    for class_ in res.json():
-        ruz_start_time = datetime.strptime(
-            class_["date"] + " " + class_["beginLesson"], format
-        )
-        ruz_end_time = datetime.strptime(
-            class_["date"] + " " + class_["endLesson"], format
-        )
-
-        if (
-            ruz_end_time >= start_time
-            and end_time >= ruz_start_time
-            and ruz_start_time >= start_time
-        ):
-            class_["startTime"] = ruz_start_time.isoformat()
-            class_["endTime"] = ruz_end_time.isoformat()
-            yield class_
+    res = requests.get(f"{NVR_ERUDITE_API_URL}/lessons", params=params)
+    for class_ in res.json()["data"]:
+        yield class_
