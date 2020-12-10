@@ -69,11 +69,6 @@
                 </v-radio-group>
               </td>
 			  <td class="text-xs-center">
-                <v-btn icon large @click.stop="showScheduleForm=true">
-                  <v-icon>photo_camera</v-icon>
-                </v-btn>				
-              </td>
-              <td class="text-xs-center">
                 <v-btn icon @click="del(props.item)">
                   <v-icon>delete</v-icon>
                 </v-btn>
@@ -111,12 +106,7 @@
                       <v-radio :value="props.item.ip"></v-radio>
                     </v-radio-group>
                   </li>
-				  <li class="flex-item subheading" data-label="Посмотреть">
-                    <v-btn icon large @click.stop="showScheduleForm=true">
-                      <v-icon medium>photo_camera</v-icon>
-                    </v-btn>
-                  </li>
-                  <li class="flex-item subheading" data-label="Удалить">
+				  <li class="flex-item subheading" data-label="Удалить">
                     <v-btn icon @click="del(props.item)">
                       <v-icon medium>delete</v-icon>
                     </v-btn>
@@ -133,7 +123,6 @@
             >Ничего не найдено по запросу "{{ search }}".</v-alert>
           </template>
         </v-data-table>
-		<ScheduleForm :visible="showScheduleForm" @close="showScheduleForm=false" />
         <app-add-source :room="roomCopy"></app-add-source>
       </v-layout>
     </v-card>
@@ -142,13 +131,11 @@
 
 <script>
 import AddSource from "./AddSource";
-import ScheduleForm from './ScheduleForm'
 
 export default {
   props: ["room"],
   components: {
     appAddSource: AddSource,
-	ScheduleForm,
   },
   data() {
     return {
@@ -159,7 +146,6 @@ export default {
       trackingSource: this.room.tracking_source,
       mainSource: this.room.main_source,
       screenSource: this.room.screen_source,
-	  showScheduleForm: false,
       headers: [
         {
           text: "Название",
@@ -201,12 +187,6 @@ export default {
           text: "Экран",
           value: "screen",
           sortable: true,
-          align: "center"
-        },
-		{
-          text: "Посмотреть",
-          value: "camera",
-          sortable: false,
           align: "center"
         },
         {
