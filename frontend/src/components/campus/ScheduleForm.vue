@@ -1,14 +1,12 @@
 <template>
-<v-dialog v-model="show" max-width="1500px" :dark="isDarkMode">
+<v-dialog v-model="show" height="1000px" width="1500px" :dark="isDarkMode">
 	<v-card>
-		<div id="media" max-width="1280px">
-			<div class="container">
-				<audio id="audio" autoplay></audio>
-				<video id="video" autoplay muted playsinline></video>
-			</div>
+		<div id="media" height="1000px" width="1280px">
+			<audio id="audio" autoplay></audio>
+			<video id="video" autoplay muted playsinline></video>
 		</div>
-		<v-btn color="black" id="startbutton" @click="start">Start</v-btn>
-		<v-btn color="black" id="stopbutton" style="display: none" @click="stop">Stop</v-btn>
+		<v-btn color="black" id="start" @click="start()">Start</v-btn>
+		<v-btn color="black" id="stop" @click="stop()" style="display: none">Stop</v-btn>
 		<v-card-actions>
 			<v-btn color="black" flat @click.stop="show=false">Закрыть</v-btn>
 		</v-card-actions>
@@ -80,7 +78,9 @@
 			},
 
 			start() {
-				var config = {sdpSemantics: 'unified-plan'};
+				var config = {
+					sdpSemantics: 'unified-plan'
+				};
 
 				config.iceServers = [{urls: ['stun:stun.l.google.com:19302']}];
 
@@ -95,19 +95,19 @@
 					}
 				});
 
-				document.getElementById('startbutton').style.display = 'none';
+				document.getElementById('start').style.display = 'none';
+				document.getElementById('stop').style.display = 'inline-block';
 				this.negotiate();
-				document.getElementById('stopbutton').style.display = 'inline-block';
 			},
 
 			stop() {
-				document.getElementById('stopbutton').style.display = 'none';
+				document.getElementById('stop').style.display = 'none';
 
 				// close peer connection
 				setTimeout(function() {
 					pc.close();
 				}, 500);
-				document.getElementById('startbutton').style.display = 'inline-block';
+				document.getElementById('start').style.display = 'inline-block';
 			},
 		},
 	}
