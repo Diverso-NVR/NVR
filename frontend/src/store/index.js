@@ -25,14 +25,19 @@ const state = {
   user: {},
   jwt: { token: localStorage.token || "" },
   users: [
-  {"access":true, "email":"ismailovasados@mail.ru", "email_verified": true, "id":105, "last_login": "Mon, 06 Nov 2020 14:30:00 GMT", "role":"admin"},
-  {"access":true, "email":"asad@yandex.ru", "email_verified": true, "id":106, "last_login": "Sun, 30 Apr 2019 01:00:15 GMT", "role":"user"},
-  {"access":true, "email":"bik123@gmail.com", "email_verified": true, "id":107, "last_login": "Sun, 26 Oct 2020 21:13:00 GMT", "role":"editor"},
-  {"access":true, "email":"tuturu@edu.hse.ru", "email_verified": true, "id":108, "last_login": "Tue, 06 Aug 2019 12:01:10 GMT", "role":"admin"},
-  {"access":true, "email":"gagaga@miem.hse.ru", "email_verified": true, "id":109, "last_login": "Fri, 09 Sep 2020 15:31:40 GMT", "role":"user"},
-  {"access":true, "email":"gugi@mail.ru", "email_verified": true, "id":110, "last_login": "Wed, 11 Mar 2020 18:20:06 GMT", "role":"editor"},
-  {"access":true, "email":"johny@gmail.com", "email_verified": true, "id":111, "last_login": "Mon, 13 Mai 2019 19:03:23 GMT", "role":"user"},
-  {"access":true, "email":"rori@hse.ru", "email_verified": true, "id":112, "last_login": "Thu, 01 Jun 2020 19:10:42 GMT", "role":"editor"}],
+  {"access":false, "email":"ismailovasados@mail.ru", "email_verified": true, "id":105, "last_login": "Mon, 06 Nov 2020 14:30:00 GMT", "role":"admin"},
+  {"access":false, "email":"aroma@yandex.ru", "email_verified": true, "id":106, "last_login": "Mon, 06 Nov 2020 14:30:00 GMT", "role":"admin"},
+  {"access":false, "email":"pampararam@mail.ru", "email_verified": true, "id":107, "last_login": "Mon, 06 Nov 2020 14:30:00 GMT", "role":"admin"},
+  {"access":false, "email":"vishka@gmail.com", "email_verified": true, "id":108, "last_login": "Mon, 06 Nov 2020 14:30:00 GMT", "role":"admin"},
+  {"access":false, "email":"pororo@mail.ru", "email_verified": true, "id":109, "last_login": "Mon, 06 Nov 2020 14:30:00 GMT", "role":"admin"},
+
+  {"access":true, "email":"asad@yandex.ru", "email_verified": true, "id":110, "last_login": "Sun, 30 Apr 2019 01:00:15 GMT", "role":"user"},
+  {"access":true, "email":"bik123@gmail.com", "email_verified": true, "id":111, "last_login": "Sun, 26 Oct 2020 21:13:00 GMT", "role":"editor"},
+  {"access":true, "email":"tuturu@edu.hse.ru", "email_verified": true, "id":112, "last_login": "Tue, 06 Aug 2019 12:01:10 GMT", "role":"admin"},
+  {"access":true, "email":"gagaga@miem.hse.ru", "email_verified": true, "id":113, "last_login": "Fri, 09 Sep 2020 15:31:40 GMT", "role":"user"},
+  {"access":true, "email":"gugi@mail.ru", "email_verified": true, "id":114, "last_login": "Wed, 11 Mar 2020 18:20:06 GMT", "role":"editor"},
+  {"access":true, "email":"johny@gmail.com", "email_verified": true, "id":115, "last_login": "Mon, 13 Mai 2019 19:03:23 GMT", "role":"user"},
+  {"access":true, "email":"rori@hse.ru", "email_verified": true, "id":116, "last_login": "Thu, 01 Jun 2020 19:10:42 GMT", "role":"editor"}],
 };
 const mutations = {
   TRACKING_CHANGE(state, message) {
