@@ -38,5 +38,5 @@ def get_classes(ruz_auditorium: str, start_time: datetime, end_time: datetime):
     )
 
     res = requests.get(f"{NVR_ERUDITE_API_URL}/lessons", params=params)
-    for class_ in res.json()["data"]:
+    for class_ in res.json():
         yield class_
