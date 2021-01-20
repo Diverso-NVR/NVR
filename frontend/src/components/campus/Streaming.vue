@@ -156,7 +156,7 @@ export default {
         free: "green lighten-3",
         busy: "red lighten-3"
       },
-      isMobile: false
+      isMobile: false,
     };
   },
   computed: mapState({
@@ -168,7 +168,7 @@ export default {
   }),
   methods: {
     onResize() {
-      this.isMobile = window.innerWidth < 769;
+      this.isMobile = window.innerWidth < 940;
     },
     startStream(room) {
       this.$store.dispatch("emitStreamingStart", {
@@ -209,11 +209,12 @@ export default {
 .mobile {
   color: #333;
 }
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 939px) {
   .mobile table.v-table tr {
     max-width: 100%;
     position: relative;
     display: block;
+    
   }
   .mobile table.v-table tr:nth-child(odd) {
     border-left: 6px solid;
@@ -233,7 +234,7 @@ export default {
     padding-right: 0.5em;
     text-align: center;
     display: block;
-    color: #999999;
+    color:hsla(0,0%,100%,.7);
   }
   .v-datatable__actions__select {
     width: 50%;
@@ -244,7 +245,7 @@ export default {
     background: transparent;
   }
   .v-select__selection.v-select__selection--comma {
-    margin-left: 30px;
+    margin-left: 13%;
   }
 }
 .flex-content {
@@ -261,12 +262,18 @@ export default {
   text-align: center;
   width: 50%;
   height: 75px;
-  font-weight: bold;
 }
 .key-elems {
   width: 100%;
 }
 .v-select__selection {
   padding-left: 30%;
+}
+table.v-table thead th, table.v-table tbody td, .subheading {
+  font-size: 15px;
+  font-weight: 400;
+}
+.v-input input{
+  text-align: center;
 }
 </style>
