@@ -63,19 +63,6 @@ def create_app(app_name="NVR_API"):
     app.register_blueprint(sources_api, url_prefix="/api")
     app.register_blueprint(users_api, url_prefix="/api")
 
-    from core.models import User
-
-    session = Session()
-    if session.query(User).all() == []:
-        user = User(email="admin@admin.com", password="nvr_admin")
-        user.access = True
-        user.email_verified = True
-        user.role = "admin"
-
-        session.add(user)
-        session.commit()
-    session.close()
-
     from core.email import mail
 
     mail.init_app(app)
