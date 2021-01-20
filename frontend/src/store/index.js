@@ -115,6 +115,12 @@ const mutations = {
   },
   setUsers(state, payload) {
     state.users = payload;
+  },
+  DateSort(state){
+    state.records.sort(function( a, b ){
+      var dateA = new Date(a.date), dateB = new Date(b.date)
+      return dateB-dateA
+    })
   }
 };
 const actions = {
@@ -389,6 +395,7 @@ const actions = {
     } finally {
       commit("switchLoading");
     }
+    commit("DateSort");
   },
   async getKey({ commit, state }) {
     try {
