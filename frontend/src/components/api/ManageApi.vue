@@ -97,8 +97,9 @@
                 <v-icon>list</v-icon>
               </v-btn>
             </div>
+			
             <v-expansion-panel expand v-model="panel">
-              <v-expansion-panel-content v-for="(route, i) in routes" :key="i">
+              <v-expansion-panel-content :id="i" v-for="(route, i) in routes" :key="i">
                 <template v-slot:header>
                   <div>
                     <b>{{ route.method }}</b>
@@ -109,7 +110,17 @@
                 <template>
                   <v-card :color="isDarkMode ? '#2d2d2d' : '#F5F5F5'">
                     <v-card-text>
-                      <div class="subheading">{{ route.doc }}</div>
+                      <div class="subheading">
+						{{ route.doc }}
+            <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn small v-on='on'  icon @click="copyText(i)">
+							<v-icon>link</v-icon>
+						</v-btn>	
+            </template>
+            <span>Скопировать ссылку на метод</span>
+          </v-tooltip>				  
+					  </div>
                     </v-card-text>
                   </v-card>
                   <v-card
@@ -795,6 +806,14 @@ export default {
     user() {
       return this.$store.getters.user;
     },
+	openPanel() {
+		let arr = [];
+		if (window.location.href.indexOf('#')>-1) {
+			for (let i=0; i<(Number(window.location.href.split("#")[1])); i++) arr.push(null);
+			arr.push(true);
+		}
+		return arr;
+	},
   },
   methods: {
     createKey() {
@@ -816,10 +835,28 @@ export default {
           ? [...Array(this.routes.length).keys()].map((_) => true)
           : [];
     },
+	
+	copyText(i) {
+		let textToCopy = window.location.href
+		if (textToCopy.indexOf('#')) {
+			textToCopy = textToCopy.split('#')[0]
+		}
+		textToCopy += '#'+i
+        navigator.clipboard.writeText(textToCopy);
+	}
+  },
+  mounted() {
+	this.panel = this.openPanel;
+  let el = this.$router.currentRoute.hash;
+    if (el){
+      el = el.replace('#', '');
+      console.log(el)
+      document.getElementById(el).scrollIntoView(el);
+    }
   },
   beforeCreate() {
     this.$store.dispatch("getKey");
-  },
+  }
 };
 </script>
 
