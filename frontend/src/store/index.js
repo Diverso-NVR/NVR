@@ -401,11 +401,9 @@ const actions = {
 };
 const getters = {
   isAutheticated(state) {
-    // return isValidToken(state.jwt.token);
-    return true;
+    return isValidToken(state.jwt.token);
   },
   user(state) {
-    state.user.role = 'admin'
     return state.user;
   }
 };
