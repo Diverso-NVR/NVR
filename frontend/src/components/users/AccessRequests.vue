@@ -71,5 +71,16 @@ export default {
       return this.$store.getters.loading;
     }
   }),
+  methods: {
+    onResize() {
+      this.isLarge = window.innerWidth < 1521;
+    },
+    grantAccess(user) {
+      this.$store.dispatch("emitGrantAccess", { user });
+    },
+    deleteUser(user) {
+      this.$store.dispatch("emitDeleteUser", { user });
+    }
+  }
 };
 </script>
