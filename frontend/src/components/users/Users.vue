@@ -6,62 +6,58 @@
 			<v-flex xs5>
 				<v-text-field
 					append-icon="search"
-					label="E-mail"
+					label="Search"
 					single-line
 					hide-details
-					@input="filterSearch"
+					v-model="search"
 				></v-text-field>
-			</v-flex>
-			<v-spacer></v-spacer>
-			<v-flex xs5>
-				<v-select
-					:items="roles"
-					label="Role"
-					@change="filterAuthor"
-				></v-select>
 			</v-flex>
 		</v-layout>
 		<v-data-table
 			:headers="headers"
 			:items="users"
-			class="elevation-4"
+			class="elevation-4 mt-2"
+      disable-initial-sort
 			hide-actions
 			:loading="loader"
-			:custom-sort="customSort"
-			:search="filters"
-			:custom-filter="customFilter"
+			:search="search"
 		>
         <template v-slot:items="props">
-          <td>
-            <div class="my-2">
-              <h3 class="subheading">{{ props.item.email }}</h3>
-              <div>{{ props.item.role }}</div>
-              <div
-                class="mt-2 time"
+          
+          <td class="text-xs-left"><h3 class="subheading mt-1">{{ props.item.email }}</h3>
+           <div
+                class="mt-1 mb-2 time"
                 :color="isDarkMode ? '#6a737d' : '#F5F5F5'"
               >
-                {{ lastLogin(props.item.last_login) }}
+                last online: {{ lastLogin(props.item.last_login) }}
               </div>
-            </div>
+
+           
           </td>
-          <td class="text-xs-center">
-            <div v-if="isLarge">
-              <v-btn icon color="warning" @click="changeRole(props.item)">
+          <td class="text-xs-left">
+            {{ props.item.role }}
+            
+          </td>
+          <td class="text-xs-left">
+
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn icon color="warning" v-on="on" @click="changeRole(props.item)">
                 <v-icon>supervisor_account</v-icon>
               </v-btn>
-              <v-btn icon color="error" @click="deleteUser(props.item)">
+            </template>
+            <span>Изменить роль</span>
+          </v-tooltip>
+
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn icon color="error" v-on="on" @click="deleteUser(props.item)">
                 <v-icon>block</v-icon>
               </v-btn>
-            </div>
-            <div v-else>
-              <v-btn color="warning" depressed @click="changeRole(props.item)"
-                >Изменить роль</v-btn
-              >
-              <v-btn color="error" depressed @click="deleteUser(props.item)"
-                >Удалить</v-btn
-              >
-            </div>
-          </td>
+            </template>
+            <span>Удалить</span>
+          </v-tooltip>
+        </td>
         </template>
         <template v-slot:no-data>
           <v-alert :value="true" color="primary" icon="info"
@@ -78,11 +74,7 @@ import { mapState } from "vuex";
 export default {
   data() {
     return {
-	   filters: {
-        search: '',
-        added_by: '',
-      },
-	  roles: ["","admin","user","editor"],
+      search: '',
       isLarge: false,
       options: {
         year: "numeric",
@@ -91,7 +83,17 @@ export default {
         hour: "numeric",
         minute: "numeric",
       },
-	  headers: [{text: 'Users', value: 'Users'}]
+      headers: [
+          {
+            text: 'Email',
+            align: 'left',
+            sortable: true,
+            value: 'email'
+          },
+          { text: 'Role', align: 'left',
+            sortable: true, value: 'role' },
+          { text: 'Actions',align: 'left', value: 'actions' },
+        ],
     };
   },
   computed: mapState({
@@ -110,56 +112,6 @@ export default {
     },
   }),
   methods: {
-	customSort(items, index, isDesc) {
-		if (index === "Users") {
-			items.sort((a, b) => {
-				if (!isDesc) {
-					return a.email < b.email ? -1 : 1;
-				} else {
-					return b.email < a.email ? -1 : 1;
-				}
-			});
-		}
-		return items;
-	},
-	
-	customFilter(items, filters, filter, headers) {
-        // Init the filter class.
-        const cf = new this.$MultiFilters(items, filters, filter, headers);
-
-        cf.registerFilter('search', function (searchWord, items) {
-          if (searchWord.trim() === '') return items;
-
-          return items.filter(item => {
-            return item.email.toLowerCase().includes(searchWord.toLowerCase());
-          }, searchWord);
-
-        });
-
-
-        cf.registerFilter('added_by', function (added_by, items) {
-          if (added_by.trim() === '') return items;
-
-          return items.filter(item => {
-            return item.role.toLowerCase() === added_by.toLowerCase();
-          }, added_by);
-
-        });
-
-        // Its time to run all created filters.
-        // Will be executed in the order thay were defined.
-        return cf.runFilters();
-    },
-
-
-    filterSearch(val) {
-		this.filters = this.$MultiFilters.updateFilters(this.filters, {search: val});
-    },
-
-    filterAuthor(val) {
-		this.filters = this.$MultiFilters.updateFilters(this.filters, {added_by: val});
-    },
-
     onResize() {
       this.isLarge = window.innerWidth < 1521;
     },

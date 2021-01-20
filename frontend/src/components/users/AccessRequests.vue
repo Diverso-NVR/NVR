@@ -8,7 +8,7 @@
 					label="E-mail"
 					single-line
 					hide-details
-					@input="filterSearch"
+					v-model="search"
 				></v-text-field>
 			</v-flex>
 		</v-layout>
@@ -17,29 +17,32 @@
 			class="elevation-4"
 			hide-actions hide-headers
 			:loading="loader"
-			:search="filters"
-			:custom-filter="customFilter">
+			:search="search">
         <template v-slot:items="props">
-          <td>
-            <div>
-              <h3 class="subheading">{{props.item.email}}</h3>
-              <div>{{ props.item.role }}</div>
-            </div>
+          <td class="text-xs-center subheading"> {{props.item.email}}
           </td>
-          <td class="text-xs-center">
-            <div v-if="isLarge">
-              <v-btn icon color="success" @click="grantAccess(props.item)">
+          <td>
+            <div class="text-xs-center">
+
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn icon color="success" v-on="on" @click="grantAccess(props.item)">
                 <v-icon>verified_user</v-icon>
               </v-btn>
-              <v-btn icon color="error" @click="deleteUser(props.item)">
+            </template>
+            <span>Подтвердить</span>
+          </v-tooltip>
+
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn icon color="error" v-on="on" @click="deleteUser(props.item)">
                 <v-icon>block</v-icon>
               </v-btn>
-            </div>
-            <div v-else>
-              <v-btn color="success" depressed @click="grantAccess(props.item)">Подтвердить</v-btn>
-              <v-btn color="error" depressed @click="deleteUser(props.item)">Отклонить</v-btn>
-            </div>
-          </td>
+            </template>
+            <span>Отклонить</span>
+          </v-tooltip>
+        </div>
+        </td>
         </template>
         <template v-slot:no-data>
           <v-alert :value="true" color="primary" icon="info">Нет новых запросов на доступ</v-alert>
@@ -55,9 +58,7 @@ import { mapState } from "vuex";
 export default {
   data() {
     return {
-	  filters: {
-        search: '',
-      },
+      search: "",
       isLarge: false
     };
   },
@@ -70,39 +71,5 @@ export default {
       return this.$store.getters.loading;
     }
   }),
-  methods: {
-	customFilter(items, filters, filter, headers) {
-        // Init the filter class.
-        const cf = new this.$MultiFilters(items, filters, filter, headers);
-
-        cf.registerFilter('search', function (searchWord, items) {
-          if (searchWord.trim() === '') return items;
-
-          return items.filter(item => {
-            return item.email.toLowerCase().includes(searchWord.toLowerCase());
-          }, searchWord);
-
-        });
-
-        // Its time to run all created filters.
-        // Will be executed in the order thay were defined.
-        return cf.runFilters();
-    },
-
-
-    filterSearch(val) {
-		this.filters = this.$MultiFilters.updateFilters(this.filters, {search: val});
-    },
-	
-    onResize() {
-      this.isLarge = window.innerWidth < 1521;
-    },
-    grantAccess(user) {
-      this.$store.dispatch("emitGrantAccess", { user });
-    },
-    deleteUser(user) {
-      this.$store.dispatch("emitDeleteUser", { user });
-    }
-  }
 };
 </script>
