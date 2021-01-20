@@ -2,6 +2,21 @@
   <v-app :dark="isDarkMode">
     <v-navigation-drawer v-if="isMedium" v-model="drawer" app absolute v-resize="onResize">
       <v-list style="margin-top:0px">
+        <template v-if="user.email">
+        <v-list-tile class="mb-2">
+          <v-list-tile-action>
+            <v-icon>account_circle</v-icon>
+          </v-list-tile-action>
+
+          <v-list-tile-content>
+            <v-list-tile-title>{{user.email}}</v-list-tile-title>
+            <v-list-tile-sub-title>{{user.role}}</v-list-tile-sub-title>
+          </v-list-tile-content>
+        </v-list-tile>
+
+        <v-divider></v-divider>
+        </template>
+
         <v-list-tile v-for="link of links" :key="link.title" :to="link.url">
           <v-list-tile-action>
             <v-icon>{{link.icon}}</v-icon>
@@ -26,6 +41,22 @@
 
     <v-navigation-drawer v-else app absolute v-resize="onResize" :mini-variant="!drawer">
       <v-list style="margin-top:70px">
+
+        <template v-if="user.email">
+        <v-list-tile class="mb-2">
+          <v-list-tile-action>
+            <v-icon>account_circle</v-icon>
+          </v-list-tile-action>
+
+          <v-list-tile-content>
+            <v-list-tile-title>{{user.email}}</v-list-tile-title>
+            <v-list-tile-sub-title>{{user.role}}</v-list-tile-sub-title>
+          </v-list-tile-content>
+        </v-list-tile>
+
+        <v-divider></v-divider>
+        </template>
+
         <v-list-tile v-for="link of links" :key="link.title" :to="link.url">
           <template v-if="link.url === '/access-requests' && usersRequests !== 0">
             <v-list-tile-action>
