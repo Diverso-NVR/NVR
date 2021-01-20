@@ -1,28 +1,48 @@
 <template>
   <v-layout align-center justify-center v-resize="onResize">
     <v-flex xs12 sm8 md6>
-      <v-data-table :items="users" class="elevation-4" hide-actions hide-headers :loading="loader">
+		<v-layout row wrap style="margin-bottom: 3%">
+			<v-flex xs5>
+				<v-text-field
+					append-icon="search"
+					label="E-mail"
+					single-line
+					hide-details
+					v-model="search"
+				></v-text-field>
+			</v-flex>
+		</v-layout>
+        <v-data-table
+			:items="users"
+			class="elevation-4"
+			hide-actions hide-headers
+			:loading="loader"
+			:search="search">
         <template v-slot:items="props">
-          <td>
-            <div>
-              <h3 class="subheading">{{props.item.email}}</h3>
-              <div>{{ props.item.role }}</div>
-            </div>
+          <td class="text-xs-center subheading"> {{props.item.email}}
           </td>
-          <td class="text-xs-center">
-            <div v-if="isLarge">
-              <v-btn icon color="success" @click="grantAccess(props.item)">
+          <td>
+            <div class="text-xs-center">
+
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn icon color="success" v-on="on" @click="grantAccess(props.item)">
                 <v-icon>verified_user</v-icon>
               </v-btn>
-              <v-btn icon color="error" @click="deleteUser(props.item)">
+            </template>
+            <span>Подтвердить</span>
+          </v-tooltip>
+
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn icon color="error" v-on="on" @click="deleteUser(props.item)">
                 <v-icon>block</v-icon>
               </v-btn>
-            </div>
-            <div v-else>
-              <v-btn color="success" depressed @click="grantAccess(props.item)">Подтвердить</v-btn>
-              <v-btn color="error" depressed @click="deleteUser(props.item)">Отклонить</v-btn>
-            </div>
-          </td>
+            </template>
+            <span>Отклонить</span>
+          </v-tooltip>
+        </div>
+        </td>
         </template>
         <template v-slot:no-data>
           <v-alert :value="true" color="primary" icon="info">Нет новых запросов на доступ</v-alert>
@@ -38,6 +58,7 @@ import { mapState } from "vuex";
 export default {
   data() {
     return {
+      search: "",
       isLarge: false
     };
   },
