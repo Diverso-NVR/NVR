@@ -8,9 +8,6 @@ import "vuetify/dist/vuetify.min.css";
 import store from "./store";
 import { isAdmin, isAdminOrEditor } from "@/utils";
 
-import './plugins/vuetify'
-import MultiFiltersPlugin from './plugins/MultiFilters' // <-- THIS
-
 import VueSocketIOExt from "vue-socket.io-extended";
 import io from "socket.io-client";
 
@@ -21,7 +18,6 @@ Vue.use(VueSocketIOExt, socket, { store });
 Vue.use(VSwitch);
 Vue.use(Vuetify);
 Vue.config.productionTip = false;
-Vue.use(MultiFiltersPlugin); // <-- THIS
 
 if (store.getters.isAutheticated) {
   store.dispatch("setDataFromToken").then(userRole => {
