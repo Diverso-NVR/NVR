@@ -3,13 +3,13 @@
 <v-layout align-center justify-center>
 <div v-if="!records || records.length === 0"> 
     <v-layout justify-center>
-      <v-flex xs12 sm8 md6 >
-        <v-alert  type= "warning" :value="true">В настоящий момент записи отсутствуют</v-alert>
+      <v-flex xs12 sm12 md12 >
+        <v-alert  type="info" :value="true">Вы ещё не запросили ни одной записи</v-alert>
       </v-flex>
     </v-layout>
   </div>
 	
-    <v-flex xs12 sm8 md6 >
+    <v-flex v-else xs12 sm8 md6 >
 		<v-layout row wrap class='mb-3'>
 			<v-flex xs5>
 				<v-text-field
