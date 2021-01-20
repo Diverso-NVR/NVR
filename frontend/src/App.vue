@@ -262,4 +262,8 @@ export default {
 .pointer {
   cursor: pointer;
 }
+.v-list__tile__title{
+  font-size: 15px;
+  font-weight: 400;
+}
 </style>

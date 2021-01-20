@@ -29,7 +29,7 @@
               </v-btn>
             </td>
             <td class="text-xs-center">
-              <v-btn icon :href="props.item.drive" target="_blank" :loading="!props.item.drive">
+              <v-btn icon :href="props.item.drive" target="_blank" :disabled="!props.item.drive">
                 <v-icon>folder</v-icon>
               </v-btn>
             </td>
@@ -91,7 +91,7 @@
                 </li>
 
                 <li class="flex-item subheading" data-label="Диск">
-                  <v-btn icon :href="props.item.drive" target="_blank" :loading="!props.item.drive">
+                  <v-btn icon :href="props.item.drive" target="_blank" :disabled="!props.item.drive">
                     <v-icon medium>folder</v-icon>
                   </v-btn>
                 </li>
