@@ -68,8 +68,7 @@
                   <v-radio :value="props.item.ip"></v-radio>
                 </v-radio-group>
               </td>
-
-              <td class="text-xs-center">
+			  <td class="text-xs-center">
                 <v-btn icon @click="del(props.item)">
                   <v-icon>delete</v-icon>
                 </v-btn>
@@ -107,7 +106,7 @@
                       <v-radio :value="props.item.ip"></v-radio>
                     </v-radio-group>
                   </li>
-                  <li class="flex-item subheading" data-label="Удалить">
+				  <li class="flex-item subheading" data-label="Удалить">
                     <v-btn icon @click="del(props.item)">
                       <v-icon medium>delete</v-icon>
                     </v-btn>
@@ -136,7 +135,7 @@ import AddSource from "./AddSource";
 export default {
   props: ["room"],
   components: {
-    appAddSource: AddSource
+    appAddSource: AddSource,
   },
   data() {
     return {

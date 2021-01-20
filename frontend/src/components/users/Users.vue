@@ -1,53 +1,72 @@
 <template>
-  <v-layout align-center justify-center v-resize="onResize">
+<v-layout align-center justify-center v-resize="onResize">
+	
     <v-flex xs12 sm8 md6>
-      <v-data-table
-        :items="users"
-        class="elevation-4"
-        hide-actions
-        hide-headers
-        :loading="loader"
-      >
+		<v-layout row wrap>
+			<v-flex xs5>
+				<v-text-field
+					append-icon="search"
+					label="Search"
+					single-line
+					hide-details
+					v-model="search"
+				></v-text-field>
+			</v-flex>
+		</v-layout>
+		<v-data-table
+			:headers="headers"
+			:items="users"
+			class="elevation-4 mt-2"
+      disable-initial-sort
+			hide-actions
+			:loading="loader"
+			:search="search"
+		>
         <template v-slot:items="props">
-          <td>
-            <div class="my-2">
-              <h3 class="subheading">{{ props.item.email }}</h3>
-              <div>{{ props.item.role }}</div>
-              <div
-                class="mt-2 time"
+          
+          <td class="text-xs-left"><h3 class="subheading mt-1">{{ props.item.email }}</h3>
+           <div
+                class="mt-1 mb-2 time"
                 :color="isDarkMode ? '#6a737d' : '#F5F5F5'"
               >
-                {{ lastLogin(props.item.last_login) }}
+                last online: {{ lastLogin(props.item.last_login) }}
               </div>
-            </div>
+
+           
           </td>
-          <td class="text-xs-center">
-            <div v-if="isLarge">
-              <v-btn icon color="warning" @click="changeRole(props.item)">
+          <td class="text-xs-left">
+            {{ props.item.role }}
+            
+          </td>
+          <td class="text-xs-left">
+
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn icon color="warning" v-on="on" @click="changeRole(props.item)">
                 <v-icon>supervisor_account</v-icon>
               </v-btn>
-              <v-btn icon color="error" @click="deleteUser(props.item)">
+            </template>
+            <span>Изменить роль</span>
+          </v-tooltip>
+
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn icon color="error" v-on="on" @click="deleteUser(props.item)">
                 <v-icon>block</v-icon>
               </v-btn>
-            </div>
-            <div v-else>
-              <v-btn color="warning" depressed @click="changeRole(props.item)"
-                >Изменить роль</v-btn
-              >
-              <v-btn color="error" depressed @click="deleteUser(props.item)"
-                >Удалить</v-btn
-              >
-            </div>
-          </td>
+            </template>
+            <span>Удалить</span>
+          </v-tooltip>
+        </td>
         </template>
         <template v-slot:no-data>
           <v-alert :value="true" color="primary" icon="info"
             >Список пользователей пуст</v-alert
           >
         </template>
-      </v-data-table>
+		</v-data-table>
     </v-flex>
-  </v-layout>
+</v-layout>
 </template>
 
 <script>
@@ -55,6 +74,7 @@ import { mapState } from "vuex";
 export default {
   data() {
     return {
+      search: '',
       isLarge: false,
       options: {
         year: "numeric",
@@ -63,6 +83,17 @@ export default {
         hour: "numeric",
         minute: "numeric",
       },
+      headers: [
+          {
+            text: 'Email',
+            align: 'left',
+            sortable: true,
+            value: 'email'
+          },
+          { text: 'Role', align: 'left',
+            sortable: true, value: 'role' },
+          { text: 'Actions',align: 'left', value: 'actions' },
+        ],
     };
   },
   computed: mapState({
