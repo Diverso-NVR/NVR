@@ -14,11 +14,11 @@
 			</v-flex>
 		</v-layout>
 		<v-data-table
-			:headers="headers"
 			:items="users"
 			class="elevation-4 mt-2"
       disable-initial-sort
 			hide-actions
+      :headers="headers"
 			:loading="loader"
 			:search="search"
 		>

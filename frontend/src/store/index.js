@@ -22,9 +22,10 @@ Vue.use(Vuex);
 
 const state = {
   rooms: [],
+  records: [],
   user: {},
   jwt: { token: localStorage.token || "" },
-  users: []
+  users: [],
 };
 const mutations = {
   TRACKING_CHANGE(state, message) {
@@ -117,6 +118,7 @@ const mutations = {
     state.users = payload;
   },
   DateSort(state){
+    if (state.records.length === 0) return;
     state.records.sort(function( a, b ){
       var dateA = new Date(a.date), dateB = new Date(b.date)
       return dateB-dateA
