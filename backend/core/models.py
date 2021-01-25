@@ -67,7 +67,7 @@ class Record(Base, CommonMixin):
 
     room_id = Column(Integer, ForeignKey("rooms.id"))
     room = relationship("Room", back_populates="records")
-    user_records = relationship("UserRecord", back_populates="record")
+    users = relationship("UserRecord", back_populates="record")
 
     def update_from_calendar(self, **kwargs):
         self.event_id = kwargs.get("id")
@@ -85,7 +85,7 @@ class Record(Base, CommonMixin):
             event_name=self.event_name,
             event_id=self.event_id,
             drive_file_url=self.drive_file_url,
-            users=[ur.user.to_dict() for ur in self.user_records],
+            users=[user.user.to_dict() for user in self.users],
             room=self.room.to_dict(),
             done=self.done,
             processing=self.processing,
@@ -103,7 +103,7 @@ class User(Base, CommonMixin):
     api_key = Column(String(255), unique=True)
     last_login = Column(DateTime, default=datetime.utcnow)
 
-    user_records = relationship("UserRecord", back_populates="user")
+    records = relationship("UserRecord", back_populates="user")
 
     def __init__(self, email, password=None):
         self.email = email
@@ -187,7 +187,7 @@ class User(Base, CommonMixin):
             email_verified=self.email_verified,
             access=self.access,
             last_login=self.last_login,
-            records=[ur.record.to_dict() for ur in self.user_records]
+            records=[record.record.to_dict() for record in self.records],
         )
 
 
