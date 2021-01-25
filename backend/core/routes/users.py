@@ -97,4 +97,4 @@ def manage_api_key(current_user, email):
 @auth_required
 def get_urls(current_user, user_email):
     user = g.session.query(User).filter_by(email=user_email).first()
-    return jsonify(user.to_dict()['records']), 200
+    return jsonify([u_rec.record.to_dict() for u_rec in user.records]), 200

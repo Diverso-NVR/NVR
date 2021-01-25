@@ -85,7 +85,6 @@ class Record(Base, CommonMixin):
             event_name=self.event_name,
             event_id=self.event_id,
             drive_file_url=self.drive_file_url,
-            users=[user.user.to_dict() for user in self.users],
             room=self.room.to_dict(),
             done=self.done,
             processing=self.processing,
@@ -187,7 +186,6 @@ class User(Base, CommonMixin):
             email_verified=self.email_verified,
             access=self.access,
             last_login=self.last_login,
-            records=[record.record.to_dict() for record in self.records],
         )
 
 
