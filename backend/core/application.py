@@ -5,14 +5,16 @@ from gevent import monkey
 
 monkey.patch_all()
 
+import logging
+from logging.handlers import SMTPHandler, RotatingFileHandler
+import os
+
 from flask import Flask, request, g
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-import logging
-from logging.handlers import SMTPHandler, RotatingFileHandler
-import os
+from prometheus_flask_exporter import PrometheusMetrics
 
 
 NVR_CLIENT_URL = os.environ.get("NVR_CLIENT_URL")
@@ -25,6 +27,8 @@ def create_app(app_name="NVR_API"):
     """
     app = Flask(app_name)
     app.config.from_object("core.config.BaseConfig")
+
+    PrometheusMetrics(app)
 
     limiter = Limiter(
         app, key_func=get_remote_address, default_limits=["100/minute", "10/second"]
