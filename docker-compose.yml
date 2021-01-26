@@ -7,11 +7,15 @@ services:
       - '6379'
     network_mode: host
 
-  backend:
+  app:
     depends_on:
       - redis
-    build: ./backend
-    container_name: nvr-backend
+    build:
+      context: .
+      dockerfile: build/Dockerfile
+      args:
+        NVR_CLIENT_URL: https://nvr.miem.hse.ru
+    container_name: nvr-app
     env_file:
       - .env_nvr
     volumes:
@@ -32,16 +36,3 @@ services:
     expose:
       - '5500'
     network_mode: host
-
-  frontend:
-    build:
-      context: ./frontend
-      args:
-        NVR_CLIENT_URL: https://nvr.miem.hse.ru
-    container_name: nvr-frontend
-    env_file:
-      - .env_nvr
-    volumes:
-      - ./frontend/dist:/tmp/dist
-    network_mode: host
-
