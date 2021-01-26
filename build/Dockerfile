@@ -1,4 +1,4 @@
-FROM node:latest as build-front
+FROM node:12.18.4 as build-front
 
 ARG NVR_CLIENT_URL
 
