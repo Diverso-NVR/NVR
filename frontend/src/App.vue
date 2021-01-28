@@ -201,6 +201,11 @@ export default {
               icon: "verified_user",
               url: "/access-requests"
             },
+            {
+              title: "Черный список",
+              icon: "sick",
+              url: "/black-list"
+            },
             { title: "API", icon: "code", url: "/manage-api" }
           ];
         } else if (this.isAdminOrEditor) {

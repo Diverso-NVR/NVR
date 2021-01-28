@@ -39,20 +39,6 @@
               <template v-slot:activator="{ on }">
                 <v-btn
                   icon
-                  color="warning"
-                  v-on="on"
-                  @click="changeRole(props.item)"
-                >
-                  <v-icon>supervisor_account</v-icon>
-                </v-btn>
-              </template>
-              <span>Изменить роль</span>
-            </v-tooltip>
-
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on }">
-                <v-btn
-                  icon
                   color="error"
                   v-on="on"
                   @click="deleteUser(props.item)"
@@ -62,16 +48,18 @@
               </template>
               <span>Удалить</span>
             </v-tooltip>
+
             <v-tooltip bottom>
               <template v-slot:activator="{ on }">
-                <v-btn icon color = "primary" v-on="on" @click="banUser(props.item)">
-                  <v-icon>lock</v-icon>
+                <v-btn icon color = "primary" v-on="on" @click="unblockUser(props.item)">
+                  <v-icon>lock_open</v-icon>
                 </v-btn>
               </template>
-              <span>Заблокировать</span>
+              <span>Разблокировать</span>
             </v-tooltip>
           </td>
         </template>
+
         <template v-slot:no-data>
           <v-alert :value="true" color="primary" icon="info"
             >Список пользователей пуст</v-alert
@@ -112,10 +100,10 @@ export default {
     users: (state) =>
       state.users.filter(
         (user) =>
-          user.access === true &&
-          user.email !== state.user.email &&
-          user.role !== "superadmin" &&
-          user.banned === false
+        user.access === true &&
+        user.email !== state.user.email &&
+        user.role !== "superadmin" &&
+        user.banned === true
       ),
     loader() {
       return this.$store.getters.loading;
@@ -128,21 +116,19 @@ export default {
     onResize() {
       this.isLarge = window.innerWidth < 1521;
     },
-    changeRole(user) {
-      if (user.role === "user") user.role = "editor";
-      else if (user.role === "editor") user.role = "admin";
-      else user.role = "user";
-      this.$store.dispatch("emitChangeRole", { user });
-    },
     deleteUser(user) {
       if (confirm("Вы уверены, что хотите удалить этого пользователя?")) {
         this.$store.dispatch("emitDeleteUser", { user });
       }
     },
-    banUser(user) {
-      if (user.banned === false);
-        this.$store.dispatch("emitBanUser", { user });
-
+    unblockUser(user) {
+       if (user.banned === true);
+          this.$store.dispatch("emitUnblockUser", { user });
+    },
+    User(user) {
+      if (confirm("Вы уверены, что хотите удалить этого пользователя?")) {
+        this.$store.dispatch("emitDeleteUser", { user });
+      }
     },
     lastLogin(timestamp) {
       let postDate = new Date(timestamp);

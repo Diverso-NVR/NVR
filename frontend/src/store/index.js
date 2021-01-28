@@ -14,9 +14,10 @@ import {
   getAPIKey,
   getRooms,
   getRecords,
-  createMontageEvent
+  createMontageEvent,
 } from "@/api";
 import { isValidToken } from "@/utils";
+import router from "@/router/index";
 
 Vue.use(Vuex);
 
@@ -29,21 +30,21 @@ const state = {
 };
 const mutations = {
   TRACKING_CHANGE(state, message) {
-    let room = state.rooms.find(room => {
+    let room = state.rooms.find((room) => {
       return room.id === message.id;
     });
 
     room.tracking_state = message.tracking_state;
   },
   AUTO_CONTROL_CHANGE(state, message) {
-    let room = state.rooms.find(room => {
+    let room = state.rooms.find((room) => {
       return room.id === message.id;
     });
 
     room.auto_control = message.auto_control;
   },
   SET_STREAM_URL(state, message) {
-    let room = state.rooms.find(room => {
+    let room = state.rooms.find((room) => {
       return room.name === message.name;
     });
 
@@ -64,7 +65,7 @@ const mutations = {
     state.rooms.push(message.room);
   },
   EDIT_ROOM(state, message) {
-    let room = state.rooms.find(room => {
+    let room = state.rooms.find((room) => {
       return room.id === message.id;
     });
     room = message;
@@ -82,15 +83,36 @@ const mutations = {
     });
     state.users.splice(i, 1);
   },
+  BAN_USER(state, message) {
+    let i;
+    state.users.forEach((user, index) => {
+      if (user.id === message.id) {
+        i = index;
+        return;
+      }
+    });
+    state.users[i].banned = true;
+  },
+  UNBLOCK_USER(state, message) {
+    let i;
+    state.users.forEach((user, index) => {
+      if (user.id === message.id) {
+        i = index;
+        return;
+      }
+    });
+    state.users[i].banned = false;
+  },
+
   CHANGE_ROLE(state, message) {
-    let user = state.users.find(user => {
+    let user = state.users.find((user) => {
       return user.id === message.id;
     });
 
     user.role = message.role;
   },
   GRANT_ACCESS(state, message) {
-    let user = state.users.find(user => {
+    let user = state.users.find((user) => {
       return user.id === message.id;
     });
     user.access = true;
@@ -117,19 +139,20 @@ const mutations = {
   setUsers(state, payload) {
     state.users = payload;
   },
-  DateSort(state){
+  DateSort(state) {
     if (state.records.length === 0) return;
-    state.records.sort(function( a, b ){
-      var dateA = new Date(a.date), dateB = new Date(b.date)
-      return dateB-dateA
-    })
-  }
+    state.records.sort(function (a, b) {
+      var dateA = new Date(a.date),
+        dateB = new Date(b.date);
+      return dateB - dateA;
+    });
+  },
 };
 const actions = {
   async emitTrackingStateChange({}, { room, tracking_state }) {
     await this._vm.$socket.client.emit("tracking_state_change", {
       id: room.id,
-      tracking_state
+      tracking_state,
     });
   },
   async socket_trackingStateChange({ commit }, message) {
@@ -153,7 +176,7 @@ const actions = {
   async emitAutoControlChange({}, { room, auto_control }) {
     await this._vm.$socket.client.emit("auto_control_change", {
       id: room.id,
-      auto_control
+      auto_control,
     });
   },
   async socket_autoControlChange({ commit }, message) {
@@ -203,12 +226,36 @@ const actions = {
   async emitChangeRole({}, { user }) {
     await this._vm.$socket.client.emit("change_role", {
       id: user.id,
-      role: user.role
+      role: user.role,
     });
   },
   socket_changeRole({ commit }, message) {
     commit("CHANGE_ROLE", message);
   },
+  async emitBanUser({ commit }, { user }) {
+    await this._vm.$socket.client.emit("ban_user", { id: user.id });
+    commit("setMessage", `Пользователь ${user.email} заблокирован`);
+  },
+  socket_blockUser({ commit }, message) {
+    commit("BAN_USER", message);
+  },
+  async emitUnblockUser({ commit }, { user }) {
+    await this._vm.$socket.client.emit("unblock_user", { id: user.id });
+    commit("setMessage", `Пользователь ${user.email} разблокирован`);
+  },
+  socket_unblockUser({ commit }, message) {
+    commit("UNBLOCK_USER", message);
+  },
+  async socket_checkOnline({ state, commit }, {}) {
+    await this._vm.$socket.client.emit("change_online", {
+      email: state.user.email,
+    });
+  },
+  async socket_kikUser({ state, commit }, {}) {
+    commit("clearUserData");
+    router.push("/login");
+  },
+
   async emitGrantAccess({}, { user }) {
     await this._vm.$socket.client.emit("grant_access", { id: user.id });
   },
@@ -406,7 +453,7 @@ const actions = {
     } catch (error) {
       commit("setError", error);
     }
-  }
+  },
 };
 const getters = {
   isAutheticated(state) {
@@ -414,15 +461,15 @@ const getters = {
   },
   user(state) {
     return state.user;
-  }
+  },
 };
 
 export default new Vuex.Store({
   modules: {
-    shared
+    shared,
   },
   state,
   mutations,
   actions,
-  getters
+  getters,
 });
