@@ -5,7 +5,6 @@ ARG NVR_CLIENT_URL
 WORKDIR /frontend
 
 COPY frontend/package.json /frontend
-COPY frontend/package-lock.json /frontend
 
 RUN npm install
 

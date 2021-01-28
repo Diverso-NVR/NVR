@@ -10,14 +10,13 @@ from ..socketio import emit_event
 from ..models import User
 from ..decorators import auth_required, admin_only
 
-
 api = Blueprint("users_api", __name__)
 
 
 @api.route("/users", methods=["GET"])
 @auth_required
 @admin_only
-def get_users(current_user):
+def get_users():
     users = [u.to_dict() for u in g.session.query(User).all() if u.email_verified]
     return jsonify(users), 200
 
@@ -42,9 +41,7 @@ def user_role(current_user, user_id):
     user = g.session.query(User).get(user_id)
     user.role = request.get_json()["role"]
     g.session.commit()
-
     emit_event("change_role", {"id": user.id, "role": user.role})
-
     return jsonify({"message": "User role changed"}), 200
 
 
@@ -55,9 +52,7 @@ def delete_user(current_user, user_id):
     user = g.session.query(User).get(user_id)
     g.session.delete(user)
     g.session.commit()
-
     emit_event("delete_user", {"id": user.id})
-
     return jsonify({"message": "User deleted"}), 200
 
 

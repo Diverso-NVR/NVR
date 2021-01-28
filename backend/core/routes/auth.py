@@ -131,6 +131,12 @@ def login():
             401,
         )
 
+    if user.banned:
+        return (
+            jsonify({"error": "Вам закрыт доступ к NVR", "authenticated": False}),
+            403,
+        )
+
     user.last_login = datetime.utcnow()
     g.session.commit()
 
@@ -142,7 +148,6 @@ def login():
         },
         current_app.config["SECRET_KEY"],
     )
-
     return jsonify({"token": token.decode("UTF-8")}), 202
 
 
@@ -152,7 +157,6 @@ def glogin():
     token = data.get("token")
     if not token:
         return jsonify({"error": "Bad request"}), 400
-
     try:
         idinfo = id_token.verify_oauth2_token(
             token, google_requests.Request(), GOOGLE_CLIENT_ID
@@ -160,23 +164,22 @@ def glogin():
 
         if idinfo["iss"] not in ["accounts.google.com", "https://accounts.google.com"]:
             raise ValueError("Wrong issuer.")
-
         email = idinfo["email"]
-
     except ValueError:
         return jsonify({"error": "Bad token"}), 403
-
     user = g.session.query(User).filter_by(email=email).first()
+    if user and user.banned:
+        return (
+            jsonify({"error": "Вам закрыт доступ к NVR", "authenticated": False}),
+            403,
+        )
     if not user:
         user = User(email=email)
         user.email_verified = True
         user.access = True
-
         g.session.add(user)
-
     user.last_login = datetime.utcnow()
     g.session.commit()
-
     token = jwt.encode(
         {
             "sub": {"email": user.email, "role": user.role},
@@ -185,7 +188,6 @@ def glogin():
         },
         current_app.config["SECRET_KEY"],
     )
-
     return jsonify({"token": token.decode("UTF-8")}), 202
 
 

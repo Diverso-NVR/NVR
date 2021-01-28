@@ -102,6 +102,8 @@ class User(Base, CommonMixin):
     api_key = Column(String(255), unique=True)
     last_login = Column(DateTime, default=datetime.utcnow)
 
+    banned = Column(Boolean, default=False)
+
     records = relationship("UserRecord", back_populates="user")
 
     def __init__(self, email, password=None):
@@ -186,6 +188,7 @@ class User(Base, CommonMixin):
             email_verified=self.email_verified,
             access=self.access,
             last_login=self.last_login,
+            banned=self.banned,
         )
 
 
