@@ -231,7 +231,6 @@ class NvrNamespace(Namespace):
         session.close()
         emit("change_role", {"id": user.id, "role": user.role}, broadcast=True)
 
-
     @log_info
     def on_ban_user(self, msg_json):
         session = Session()
@@ -241,7 +240,6 @@ class NvrNamespace(Namespace):
         session.commit()
         session.close()
 
-
     @log_info
     def on_unblock_user(self, msg_json):
         session = Session()
@@ -250,7 +248,6 @@ class NvrNamespace(Namespace):
         user.banned = False
         session.commit()
         session.close()
-
 
     @log_info
     def on_change_online(self, msg_json):
@@ -263,7 +260,6 @@ class NvrNamespace(Namespace):
         session.commit()
         session.close()
         emit("change_online", {"id": user.id}, broadcast=True)
-
 
     @log_info
     def on_grant_access(self, msg_json):

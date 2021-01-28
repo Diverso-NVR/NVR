@@ -9,8 +9,3 @@ if __name__ == "__main__":
     app, socketio, scheduler = create_app()
     check_users(scheduler)
     socketio.run(app)
-
-
-
-
-

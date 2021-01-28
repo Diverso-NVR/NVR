@@ -3,7 +3,6 @@
 
 import os
 from datetime import datetime, date
-import re
 
 import requests
 from flask import Blueprint, jsonify, request, g

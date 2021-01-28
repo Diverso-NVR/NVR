@@ -14,9 +14,6 @@ from flask_cors import CORS
 from flask_socketio import SocketIO
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-import logging
-from logging.handlers import SMTPHandler, RotatingFileHandler
-import os
 from flask_apscheduler import APScheduler
 from prometheus_flask_exporter import PrometheusMetrics
 
