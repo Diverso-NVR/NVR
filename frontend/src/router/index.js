@@ -61,6 +61,12 @@ const router = new Router({
       meta: { title: "Пользователи" }
     },
     {
+      path: "/black-list",
+      component: () => import("@/components/users/BlackList"),
+      beforeEnter: adminOnly,
+      meta: { title: "Черный список" }
+    },
+    {
       path: "/manage-api",
       component: () => import("@/components/api/ManageApi"),
       beforeEnter: adminOrEditor,

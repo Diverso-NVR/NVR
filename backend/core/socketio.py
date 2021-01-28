@@ -229,8 +229,41 @@ class NvrNamespace(Namespace):
 
         session.commit()
         session.close()
-
         emit("change_role", {"id": user.id, "role": user.role}, broadcast=True)
+
+
+    @log_info
+    def on_ban_user(self, msg_json):
+        session = Session()
+        user = session.query(User).get(msg_json["id"])
+        emit("block_user", {"id": user.id}, broadcast=True)
+        user.banned = True
+        session.commit()
+        session.close()
+
+
+    @log_info
+    def on_unblock_user(self, msg_json):
+        session = Session()
+        user = session.query(User).get(msg_json["id"])
+        emit("unblock_user", {"id": user.id}, broadcast=True)
+        user.banned = False
+        session.commit()
+        session.close()
+
+
+    @log_info
+    def on_change_online(self, msg_json):
+        session = Session()
+        email = msg_json["email"]
+        user = session.query(User).filter_by(email=email).first()
+        if user.banned == True:
+            emit("kik_user", {}, broadcast=True)
+
+        session.commit()
+        session.close()
+        emit("change_online", {"id": user.id}, broadcast=True)
+
 
     @log_info
     def on_grant_access(self, msg_json):

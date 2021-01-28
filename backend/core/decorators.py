@@ -15,6 +15,7 @@ def auth_required(f):
 
     @wraps(f)
     def _verify(*args, **kwargs):
+
         token = request.headers.get("Token", "")
         api_key = request.headers.get("key", "")
 
@@ -29,6 +30,8 @@ def auth_required(f):
                 session.close()
                 if not user:
                     return jsonify({"error": "User not found"}), 404
+                if user.banned:
+                    return jsonify({"error": "Access denied"}), 403
                 return f(user, *args, **kwargs)
             except jwt.ExpiredSignatureError:
                 return jsonify(expired_msg), 403
@@ -43,6 +46,8 @@ def auth_required(f):
                 session.close()
                 if not user:
                     return jsonify({"error": "Wrong API key"}), 400
+                if user.banned:
+                    return jsonify({"error": "Access denied"}), 403
                 return f(user, *args, **kwargs)
             except Exception:
                 traceback.print_exc()
