@@ -14,7 +14,7 @@ import {
   getAPIKey,
   getRooms,
   getRecords,
-  createMontageEvent,
+  createMontageEvent
 } from "@/api";
 import { isValidToken } from "@/utils";
 import router from "@/router/index";
@@ -26,25 +26,25 @@ const state = {
   records: [],
   user: {},
   jwt: { token: localStorage.token || "" },
-  users: [],
+  users: []
 };
 const mutations = {
   TRACKING_CHANGE(state, message) {
-    let room = state.rooms.find((room) => {
+    let room = state.rooms.find(room => {
       return room.id === message.id;
     });
 
     room.tracking_state = message.tracking_state;
   },
   AUTO_CONTROL_CHANGE(state, message) {
-    let room = state.rooms.find((room) => {
+    let room = state.rooms.find(room => {
       return room.id === message.id;
     });
 
     room.auto_control = message.auto_control;
   },
   SET_STREAM_URL(state, message) {
-    let room = state.rooms.find((room) => {
+    let room = state.rooms.find(room => {
       return room.name === message.name;
     });
 
@@ -65,7 +65,7 @@ const mutations = {
     state.rooms.push(message.room);
   },
   EDIT_ROOM(state, message) {
-    let room = state.rooms.find((room) => {
+    let room = state.rooms.find(room => {
       return room.id === message.id;
     });
     room = message;
@@ -91,6 +91,7 @@ const mutations = {
         return;
       }
     });
+
     state.users[i].banned = true;
   },
   UNBLOCK_USER(state, message) {
@@ -101,18 +102,21 @@ const mutations = {
         return;
       }
     });
-    state.users[i].banned = false;
+
+    try {
+      state.users[i].banned = false;
+    } catch (err) {}
   },
 
   CHANGE_ROLE(state, message) {
-    let user = state.users.find((user) => {
+    let user = state.users.find(user => {
       return user.id === message.id;
     });
 
     user.role = message.role;
   },
   GRANT_ACCESS(state, message) {
-    let user = state.users.find((user) => {
+    let user = state.users.find(user => {
       return user.id === message.id;
     });
     user.access = true;
@@ -141,18 +145,18 @@ const mutations = {
   },
   DateSort(state) {
     if (state.records.length === 0) return;
-    state.records.sort(function (a, b) {
+    state.records.sort(function(a, b) {
       var dateA = new Date(a.date),
         dateB = new Date(b.date);
       return dateB - dateA;
     });
-  },
+  }
 };
 const actions = {
   async emitTrackingStateChange({}, { room, tracking_state }) {
     await this._vm.$socket.client.emit("tracking_state_change", {
       id: room.id,
-      tracking_state,
+      tracking_state
     });
   },
   async socket_trackingStateChange({ commit }, message) {
@@ -176,7 +180,7 @@ const actions = {
   async emitAutoControlChange({}, { room, auto_control }) {
     await this._vm.$socket.client.emit("auto_control_change", {
       id: room.id,
-      auto_control,
+      auto_control
     });
   },
   async socket_autoControlChange({ commit }, message) {
@@ -226,7 +230,7 @@ const actions = {
   async emitChangeRole({}, { user }) {
     await this._vm.$socket.client.emit("change_role", {
       id: user.id,
-      role: user.role,
+      role: user.role
     });
   },
   socket_changeRole({ commit }, message) {
@@ -248,12 +252,13 @@ const actions = {
   },
   async socket_checkOnline({ state, commit }, {}) {
     await this._vm.$socket.client.emit("change_online", {
-      email: state.user.email,
+      email: state.user.email
     });
   },
-  async socket_kikUser({ state, commit }, {}) {
+  async socket_kickUser({ state, commit }) {
     commit("clearUserData");
     router.push("/login");
+    commit("setMessage", "Вам закрыт доступ в NVR");
   },
 
   async emitGrantAccess({}, { user }) {
@@ -453,7 +458,7 @@ const actions = {
     } catch (error) {
       commit("setError", error);
     }
-  },
+  }
 };
 const getters = {
   isAutheticated(state) {
@@ -461,15 +466,15 @@ const getters = {
   },
   user(state) {
     return state.user;
-  },
+  }
 };
 
 export default new Vuex.Store({
   modules: {
-    shared,
+    shared
   },
   state,
   mutations,
   actions,
-  getters,
+  getters
 });
