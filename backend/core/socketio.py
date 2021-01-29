@@ -255,7 +255,7 @@ class NvrNamespace(Namespace):
         email = msg_json["email"]
         user = session.query(User).filter_by(email=email).first()
         if user.banned == True:
-            emit("kik_user", {}, broadcast=True)
+            emit("kick_user", {})
 
         session.commit()
         session.close()
