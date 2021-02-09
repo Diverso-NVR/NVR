@@ -149,7 +149,7 @@ export default {
       this.$store.dispatch("emitBanUser", { user });
     },
     lastLogin(user) {
-      if (user.online === false) {
+      if (!user.online) {
         let postDate = new Date(user.last_login);
         return postDate.toLocaleString("ru", this.options);
       } else return "Online";
