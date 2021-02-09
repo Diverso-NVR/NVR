@@ -97,9 +97,13 @@
                 <v-icon>list</v-icon>
               </v-btn>
             </div>
-			
+
             <v-expansion-panel expand v-model="panel">
-              <v-expansion-panel-content :id="i" v-for="(route, i) in routes" :key="i">
+              <v-expansion-panel-content
+                :id="i"
+                v-for="(route, i) in routes"
+                :key="i"
+              >
                 <template v-slot:header>
                   <div>
                     <b>{{ route.method }}</b>
@@ -111,16 +115,16 @@
                   <v-card :color="isDarkMode ? '#2d2d2d' : '#F5F5F5'">
                     <v-card-text>
                       <div class="subheading">
-						{{ route.doc }}
-            <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn small v-on='on'  icon @click="copyText(i)">
-							<v-icon>link</v-icon>
-						</v-btn>	
-            </template>
-            <span>Скопировать ссылку на метод</span>
-          </v-tooltip>				  
-					  </div>
+                        {{ route.doc }}
+                        <v-tooltip bottom>
+                          <template v-slot:activator="{ on }">
+                            <v-btn small v-on="on" icon @click="copyText(i)">
+                              <v-icon>link</v-icon>
+                            </v-btn>
+                          </template>
+                          <span>Скопировать ссылку на метод</span>
+                        </v-tooltip>
+                      </div>
                     </v-card-text>
                   </v-card>
                   <v-card
@@ -632,167 +636,6 @@ export default {
             },
           ],
         },
-        {
-          name: "/calendars/ruz?s={timestamp}&e={timestamp}",
-          method: "GET",
-          doc: `Получить события РУЗ календаря за определенный интервал времени. params: s -- таймстамп начала интервал, e -- таймстамп конца интервала`,
-          responses: [
-            {
-              code: 200,
-              body: `
-[
-  [
-    {
-      "kind": "calendar#event",
-      "etag": etag,
-      "id": string,
-      "status": string,
-      "htmlLink": string,
-      "created": datetime,
-      "updated": datetime,
-      "summary": string,
-      "description": string,
-      "location": string,
-      "colorId": string,
-      "creator": {
-        "id": string,
-        "email": string,
-        "displayName": string,
-        "self": boolean
-      },
-      "organizer": {
-        "id": string,
-        "email": string,
-        "displayName": string,
-        "self": boolean
-      },
-      "start": {
-        "date": date,
-        "dateTime": datetime,
-        "timeZone": string
-      },
-      "end": {
-        "date": date,
-        "dateTime": datetime,
-        "timeZone": string
-      },
-      "endTimeUnspecified": boolean,
-      "recurrence": [
-        string
-      ],
-      "recurringEventId": string,
-      "originalStartTime": {
-        "date": date,
-        "dateTime": datetime,
-        "timeZone": string
-      },
-      "transparency": string,
-      "visibility": string,
-      "iCalUID": string,
-      "sequence": integer,
-      "attendees": [
-        {
-          "id": string,
-          "email": string,
-          "displayName": string,
-          "organizer": boolean,
-          "self": boolean,
-          "resource": boolean,
-          "optional": boolean,
-          "responseStatus": string,
-          "comment": string,
-          "additionalGuests": integer
-        }
-      ],
-      "attendeesOmitted": boolean,
-      "extendedProperties": {
-        "private": {
-          (key): string
-        },
-        "shared": {
-          (key): string
-        }
-      },
-      "hangoutLink": string,
-      "conferenceData": {
-        "createRequest": {
-          "requestId": string,
-          "conferenceSolutionKey": {
-            "type": string
-          },
-          "status": {
-            "statusCode": string
-          }
-        },
-        "entryPoints": [
-          {
-            "entryPointType": string,
-            "uri": string,
-            "label": string,
-            "pin": string,
-            "accessCode": string,
-            "meetingCode": string,
-            "passcode": string,
-            "password": string
-          }
-        ],
-        "conferenceSolution": {
-          "key": {
-            "type": string
-          },
-          "name": string,
-          "iconUri": string
-        },
-        "conferenceId": string,
-        "signature": string,
-        "notes": string,
-      },
-      "gadget": {
-        "type": string,
-        "title": string,
-        "link": string,
-        "iconLink": string,
-        "width": integer,
-        "height": integer,
-        "display": string,
-        "preferences": {
-          (key): string
-        }
-      },
-      "anyoneCanAddSelf": boolean,
-      "guestsCanInviteOthers": boolean,
-      "guestsCanModify": boolean,
-      "guestsCanSeeOtherGuests": boolean,
-      "privateCopy": boolean,
-      "locked": boolean,
-      "reminders": {
-        "useDefault": boolean,
-        "overrides": [
-          {
-            "method": string,
-            "minutes": integer
-          }
-        ]
-      },
-      "source": {
-        "url": string,
-        "title": string
-      },
-      "attachments": [
-        {
-          "fileUrl": string,
-          "title": string,
-          "mimeType": string,
-          "iconLink": string,
-          "fileId": string
-        }
-      ]
-    }
-  },
-]`,
-            },
-          ],
-        },
       ],
     };
   },
@@ -806,14 +649,15 @@ export default {
     user() {
       return this.$store.getters.user;
     },
-	openPanel() {
-		let arr = [];
-		if (window.location.href.indexOf('#')>-1) {
-			for (let i=0; i<(Number(window.location.href.split("#")[1])); i++) arr.push(null);
-			arr.push(true);
-		}
-		return arr;
-	},
+    openPanel() {
+      let arr = [];
+      if (window.location.href.indexOf("#") > -1) {
+        for (let i = 0; i < Number(window.location.href.split("#")[1]); i++)
+          arr.push(null);
+        arr.push(true);
+      }
+      return arr;
+    },
   },
   methods: {
     createKey() {
@@ -835,28 +679,28 @@ export default {
           ? [...Array(this.routes.length).keys()].map((_) => true)
           : [];
     },
-	
-	copyText(i) {
-		let textToCopy = window.location.href
-		if (textToCopy.indexOf('#')) {
-			textToCopy = textToCopy.split('#')[0]
-		}
-		textToCopy += '#'+i
-        navigator.clipboard.writeText(textToCopy);
-	}
+
+    copyText(i) {
+      let textToCopy = window.location.href;
+      if (textToCopy.indexOf("#")) {
+        textToCopy = textToCopy.split("#")[0];
+      }
+      textToCopy += "#" + i;
+      navigator.clipboard.writeText(textToCopy);
+    },
   },
   mounted() {
-	this.panel = this.openPanel;
-  let el = this.$router.currentRoute.hash;
-    if (el){
-      el = el.replace('#', '');
-      console.log(el)
+    this.panel = this.openPanel;
+    let el = this.$router.currentRoute.hash;
+    if (el) {
+      el = el.replace("#", "");
+      console.log(el);
       document.getElementById(el).scrollIntoView(el);
     }
   },
   beforeCreate() {
     this.$store.dispatch("getKey");
-  }
+  },
 };
 </script>
 

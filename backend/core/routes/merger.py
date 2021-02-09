@@ -9,7 +9,6 @@ from flask import Blueprint, jsonify, request, g
 
 from ..socketio import emit_event
 from ..apis.calendar_api import get_events
-from ..apis.ruz_api import get_all_rooms, get_classes
 from ..models import Room, Source, Record, User, UserRecord
 from ..decorators import json_data_required, auth_required, admin_or_editor_only
 
@@ -298,29 +297,3 @@ def auto_control(current_user, room_name):
         ),
         200,
     )
-
-
-@api.route("/calendars/ruz", methods=["GET"])
-@auth_required
-def get_event_from_calendar(current_user):
-    start_timestamp = request.args.get("s")
-    end_timestamp = request.args.get("e")
-    if start_timestamp is None or end_timestamp is None:
-        return jsonify({"message": "Start and end timestamp parameters required"}), 400
-
-    start_time = datetime.fromtimestamp(float(start_timestamp))
-    end_time = datetime.fromtimestamp(float(end_timestamp))
-
-    rooms = {}
-    for room in get_all_rooms():
-        try:
-            room_number = int(room["number"])
-        except Exception:
-            continue
-
-        room_classes = get_classes(room_number, start_time, end_time)
-        rooms[room_number] = [class_ for class_ in room_classes]
-
-    rooms = {room: rooms[room] for room in rooms if rooms[room] != []}
-
-    return jsonify(rooms), 200

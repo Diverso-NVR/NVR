@@ -1,8 +1,6 @@
 import requests
-from datetime import datetime
 
 RUZ_API_URL = "http://92.242.58.221/ruzservice.svc"
-NVR_ERUDITE_API_URL = "https://nvr.miem.hse.ru/api/erudite"
 
 # building id МИЭМа = 92
 def get_all_rooms(building_id: int = 92) -> list:
@@ -28,15 +26,3 @@ def get_room_ruzid(room_name: int) -> int:
         )
     except StopIteration:
         return None
-
-
-def get_classes(ruz_auditorium: str, start_time: datetime, end_time: datetime):
-    params = dict(
-        ruz_auditorium=ruz_auditorium,
-        fromdate=start_time.isoformat(),
-        todate=end_time.isoformat(),
-    )
-
-    res = requests.get(f"{NVR_ERUDITE_API_URL}/lessons", params=params)
-    for class_ in res.json():
-        yield class_
