@@ -17,8 +17,7 @@ from flask_limiter.util import get_remote_address
 from flask_apscheduler import APScheduler
 from prometheus_flask_exporter import PrometheusMetrics
 
-from ..core.online import check_users
-
+from .socketio import emit_event
 
 NVR_CLIENT_URL = os.environ.get("NVR_CLIENT_URL", "http://localhost:8080")
 REDIS_HOST = os.environ.get("REDIS_HOST", "127.0.0.1")
@@ -31,7 +30,22 @@ def create_app(app_name="NVR_API"):
     app = Flask(app_name)
     app.config.from_object("core.config.BaseConfig")
     scheduler = APScheduler()
-    check_users(scheduler)
+
+    scheduler.add_job(
+        id="kick_ban",
+        func=emit_event,
+        args=("kick_banned", {}),
+        trigger="interval",
+        seconds=5,
+    )
+    scheduler.add_job(
+        id="check",
+        func=emit_event,
+        args=("check_online", {}),
+        trigger="interval",
+        seconds=10,
+    )
+    scheduler.start()
 
     PrometheusMetrics(app)
 
