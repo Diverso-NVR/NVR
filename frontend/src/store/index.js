@@ -91,7 +91,6 @@ const mutations = {
         return;
       }
     });
-
     state.users[i].banned = true;
   },
   UNBLOCK_USER(state, message) {
@@ -102,12 +101,28 @@ const mutations = {
         return;
       }
     });
-
-    try {
-      state.users[i].banned = false;
-    } catch (err) {}
+    state.users[i].banned = false;
   },
-
+  CHECK_ONLINE(state, message) {
+    let i;
+    state.users.forEach((user, index) => {
+      if (user.id === message.id) {
+        i = index;
+        return;
+      }
+    });
+    state.users[i].online = true;
+  },
+  FALSE_ONLINE(state, message) {
+    let i;
+    state.users.forEach((user, index) => {
+      if (user.id === message.id) {
+        i = index;
+        return;
+      }
+    });
+    state.users[i].online = false;
+  },
   CHANGE_ROLE(state, message) {
     let user = state.users.find(user => {
       return user.id === message.id;
@@ -250,17 +265,26 @@ const actions = {
   socket_unblockUser({ commit }, message) {
     commit("UNBLOCK_USER", message);
   },
-  async socket_checkOnline({ state, commit }, {}) {
-    await this._vm.$socket.client.emit("change_online", {
+  async socket_kickBanned({ state, commit }, {}) {
+    await this._vm.$socket.client.emit("kick_banned", {
       email: state.user.email
     });
   },
-  async socket_kickUser({ state, commit }) {
-    commit("clearUserData");
-    router.push("/login");
-    commit("setMessage", "Вам закрыт доступ в NVR");
+  async socket_kickUser({ state, commit }, { email }) {
+    if (state.user.email === email) {
+      commit("clearUserData");
+      router.push("/login");
+      commit("setMessage", "Вам закрыт доступ в NVR");
+    }
   },
-
+  async socket_checkOnline({ state, commit }, {}) {
+    await this._vm.$socket.client.emit("check_online", {
+      email: state.user.email
+    });
+  },
+  async socket_showOnline({ state, commit }, message) {
+    commit("CHECK_ONLINE", message);
+  },
   async emitGrantAccess({}, { user }) {
     await this._vm.$socket.client.emit("grant_access", { id: user.id });
   },
@@ -402,8 +426,14 @@ const actions = {
       commit("switchLoading");
     }
   },
-  logout({ commit }) {
+  async logout({ commit, state }) {
+    await this._vm.$socket.client.emit("logout_online", {
+      email: state.user.email
+    });
     commit("clearUserData");
+  },
+  socket_falseOnline({ commit }, message) {
+    commit("FALSE_ONLINE", message);
   },
   async createKey({ commit, state }) {
     try {
