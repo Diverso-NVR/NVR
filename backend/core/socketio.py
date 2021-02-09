@@ -2,6 +2,7 @@ import logging
 import os
 from functools import wraps
 from threading import Thread
+from datetime import datetime
 
 import requests
 from flask import current_app, render_template
@@ -13,6 +14,7 @@ from .apis.calendar_api import create_calendar, delete_calendar
 from .apis.drive_api import create_folder
 from .email import send_email
 from .models import Session, Room, Source, User
+
 
 TRACKING_URL = os.environ.get("TRACKING_URL")
 STREAMING_URL = os.environ.get("STREAMING_URL")
@@ -230,6 +232,55 @@ class NvrNamespace(Namespace):
         session.commit()
         session.close()
         emit("change_role", {"id": user.id, "role": user.role}, broadcast=True)
+
+    @log_info
+    def on_ban_user(self, msg_json):
+        session = Session()
+        user = session.query(User).get(msg_json["id"])
+        emit("block_user", {"id": user.id}, broadcast=True)
+        user.banned = True
+        session.commit()
+        session.close()
+
+    @log_info
+    def on_unblock_user(self, msg_json):
+        session = Session()
+        user = session.query(User).get(msg_json["id"])
+        emit("unblock_user", {"id": user.id}, broadcast=True)
+        user.banned = False
+        session.commit()
+        session.close()
+
+    @log_info
+    def on_kick_banned(self, msg_json):
+        session = Session()
+        email = msg_json["email"]
+        user = session.query(User).filter_by(email=email).first()
+        if user.banned == True:
+            emit("kick_user", {"email": user.email}, broadcast=True)
+
+        session.commit()
+        session.close()
+        emit("kick_banned", {"id": user.id}, broadcast=True)
+
+    @log_info
+    def on_check_online(self, msg_json):
+        session = Session()
+        email = msg_json["email"]
+        user = session.query(User).filter_by(email=email).first()
+        emit("show_online", {"id": user.id}, broadcast=True)
+        user.last_login = datetime.utcnow()
+        session.commit()
+        session.close()
+
+    @log_info
+    def on_logout_online(self, msg_json):
+        session = Session()
+        email = msg_json["email"]
+        user = session.query(User).filter_by(email=email).first()
+        emit("false_online", {"id": user.id}, broadcast=True)
+        session.commit()
+        session.close()
 
     @log_info
     def on_ban_user(self, msg_json):

@@ -14,9 +14,9 @@ api = Blueprint("users_api", __name__)
 
 
 @api.route("/users", methods=["GET"])
-@auth_required
-@admin_only
-def get_users(current_user):
+# @auth_required
+# @admin_only
+def get_users():
     users = [u.to_dict() for u in g.session.query(User).all() if u.email_verified]
     return jsonify(users), 200
 
@@ -43,6 +43,26 @@ def user_role(current_user, user_id):
     g.session.commit()
     emit_event("change_role", {"id": user.id, "role": user.role})
     return jsonify({"message": "User role changed"}), 200
+
+
+@api.route("/users/ban/<user_id>", methods=["PUT"])
+@auth_required
+@admin_only
+def ban_user(current_user, user_id):
+    user = g.session.query(User).get(user_id)
+    g.session.commit()
+    emit_event("ban_user", {"id": user.id})
+    return jsonify({"message": "User was banned"}), 200
+
+
+@api.route("/users/unblock/<user_id>", methods=["PUT"])
+@auth_required
+@admin_only
+def unblock_user(current_user, user_id):
+    user = g.session.query(User).get(user_id)
+    g.session.commit()
+    emit_event("unblock_user", {"id": user.id})
+    return jsonify({"message": "User was unblocked"}), 200
 
 
 @api.route("/users/<user_id>", methods=["DELETE"])

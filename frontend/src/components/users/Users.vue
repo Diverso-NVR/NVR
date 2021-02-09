@@ -28,7 +28,7 @@
               class="mt-1 mb-2 time"
               :color="isDarkMode ? '#6a737d' : '#F5F5F5'"
             >
-              last online: {{ lastLogin(props.item.last_login) }}
+              Активность: {{ lastLogin(props.item) }}
             </div>
           </td>
           <td class="text-xs-left">
@@ -64,7 +64,12 @@
             </v-tooltip>
             <v-tooltip bottom>
               <template v-slot:activator="{ on }">
-                <v-btn icon color = "primary" v-on="on" @click="banUser(props.item)">
+                <v-btn
+                  icon
+                  color="primary"
+                  v-on="on"
+                  @click="banUser(props.item)"
+                >
                   <v-icon>lock</v-icon>
                 </v-btn>
               </template>
@@ -141,12 +146,13 @@ export default {
     },
     banUser(user) {
       if (user.banned === false);
-        this.$store.dispatch("emitBanUser", { user });
-
+      this.$store.dispatch("emitBanUser", { user });
     },
-    lastLogin(timestamp) {
-      let postDate = new Date(timestamp);
-      return postDate.toLocaleString("ru", this.options);
+    lastLogin(user) {
+      if (user.online === false) {
+        let postDate = new Date(user.last_login);
+        return postDate.toLocaleString("ru", this.options);
+      } else return "Online";
     },
   },
 };
