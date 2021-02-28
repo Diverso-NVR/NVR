@@ -17,7 +17,13 @@ api = Blueprint("users_api", __name__)
 @auth_required
 @admin_only
 def get_users(current_user):
-    users = [u.to_dict() for u in g.session.query(User).all() if u.email_verified]
+    users = [
+        u.to_dict()
+        for u in g.session.query(User).filter(
+            User.organization_id == current_user.organization_id
+        )
+        if u.email_verified
+    ]
     return jsonify(users), 200
 
 

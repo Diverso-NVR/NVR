@@ -17,23 +17,24 @@ SCOPES = "https://www.googleapis.com/auth/drive"
 """
 Setting up drive
 """
-creds = None
-token_path = "/creds/tokenDrive.pickle"
-creds_path = "/creds/credentials.json"
 
-if os.path.exists(token_path):
-    with open(token_path, "rb") as token:
-        creds = pickle.load(token)
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(creds_path, SCOPES)
-            creds = flow.run_local_server(port=0)
-        with open(token_path, "wb") as token:
-            pickle.dump(creds, token)
+# creds = None
+# token_path = "/creds/tokenDrive.pickle"
+# creds_path = "/creds/credentials.json"
 
-drive_service = build("drive", "v3", credentials=creds)
+# if os.path.exists(token_path):
+#     with open(token_path, "rb") as token:
+#         creds = pickle.load(token)
+#     if not creds or not creds.valid:
+#         if creds and creds.expired and creds.refresh_token:
+#             creds.refresh(Request())
+#         else:
+#             flow = InstalledAppFlow.from_client_secrets_file(creds_path, SCOPES)
+#             creds = flow.run_local_server(port=0)
+#         with open(token_path, "wb") as token:
+#             pickle.dump(creds, token)
+
+# drive_service = build("drive", "v3", credentials=creds)
 
 
 def create_folder(folder_name: str, folder_parent_id: str = "") -> str:

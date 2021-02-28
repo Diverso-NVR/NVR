@@ -12,7 +12,20 @@ api = Blueprint("source_api", __name__)
 @api.route("/sources/", methods=["GET"])
 @auth_required
 def get_sources(current_user):
-    return jsonify([s.to_dict() for s in g.session.query(Source).all()]), 200
+    organization_id = current_user.organization_id
+    current_rooms = g.session.query(Room).filter(
+        Room.organization_id == organization_id
+    )
+
+    return (
+        jsonify(
+            [
+                s.to_dict()
+                for s in g.session.query(Source).filter(Source.room in [current_rooms])
+            ]
+        ),
+        200,
+    )
 
 
 @api.route("/sources/<path:ip>", methods=["POST", "GET", "DELETE", "PUT"])

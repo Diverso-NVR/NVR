@@ -19,8 +19,7 @@ from .models import Session, Room, Source, User
 TRACKING_URL = os.environ.get("TRACKING_URL")
 STREAMING_URL = os.environ.get("STREAMING_URL")
 STREAMING_API_KEY = os.environ.get("STREAMING_API_KEY")
-NVR_CLIENT_URL = os.environ.get("NVR_CLIENT_URL")
-
+NVR_CLIENT_URL = os.environ.get("NVR_CLIENT_URL", "*")
 
 socketio = SocketIO(message_queue="redis://", cors_allowed_origins=NVR_CLIENT_URL)
 
@@ -32,9 +31,9 @@ def emit_event(event, data):
 def log_info(f):
     @wraps(f)
     def wrapper(*args):
-        logging.getLogger("flask.app").info(
-            f"Emitted function {f.__name__} with args: {args}"
-        )
+        # logging.getLogger("flask.app").info(
+        #     f"Emitted function {f.__name__} with args: {args}"
+        # )
 
         return f(*args)
 
@@ -261,14 +260,14 @@ class NvrNamespace(Namespace):
 
         session.commit()
         session.close()
-        emit("kick_banned", {"id": user.id}, broadcast=True)
+        # emit("kick_banned", {"id": user.id}, broadcast=True)
 
     @log_info
     def on_check_online(self, msg_json):
         session = Session()
         email = msg_json["email"]
         user = session.query(User).filter_by(email=email).first()
-        emit("show_online", {"id": user.id}, broadcast=True)
+        # emit("show_online", {"id": user.id}, broadcast=True)
         user.last_login = datetime.utcnow()
         session.commit()
         session.close()

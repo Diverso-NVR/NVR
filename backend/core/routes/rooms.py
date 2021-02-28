@@ -27,7 +27,7 @@ def create_room(current_user, room_name):
     if room:
         return jsonify({"error": f"Room '{room_name}' already exist"}), 409
 
-    room = Room(name=room_name)
+    room = Room(name=room_name, organization_id=current_user.organization_id)
     room.sources = []
     g.session.add(room)
     g.session.commit()
@@ -54,7 +54,9 @@ def config_room(room_name):
 @api.route("/rooms/", methods=["GET"])
 @auth_required
 def get_rooms(current_user):
-    rooms = g.session.query(Room).all()
+    rooms = g.session.query(Room).filter(
+        Room.organization_id == current_user.organization_id
+    )
     rooms = sorted(rooms, key=lambda room: len(room.sources), reverse=True)
 
     return (
@@ -67,8 +69,9 @@ def get_rooms(current_user):
 @auth_required
 def get_room(current_user, room_name):
     room = g.session.query(Room).filter_by(name=str(room_name)).first()
-    if not room:
+    if not room or room.organization_id != current_user.organization_id:
         return jsonify({"error": "No room found with given room_name"}), 400
+
     return jsonify(room.to_dict()), 200
 
 
@@ -77,7 +80,7 @@ def get_room(current_user, room_name):
 @admin_or_editor_only
 def delete_room(current_user, room_name):
     room = g.session.query(Room).filter_by(name=str(room_name)).first()
-    if not room:
+    if not room or room.organization_id != current_user.organization_id:
         return jsonify({"error": "No room found with given room_name"}), 400
 
     Thread(target=delete_calendar, args=(room.calendar,)).start()
@@ -98,7 +101,7 @@ def edit_room(current_user, room_name):
     post_data = request.get_json()
 
     room = g.session.query(Room).filter_by(name=str(room_name)).first()
-    if not room:
+    if not room or room.organization_id != current_user.organization_id:
         return jsonify({"error": "No room found with given 'room_name'"}), 400
     if not post_data.get("sources"):
         return jsonify({"error": "Sources array required"}), 400
@@ -124,7 +127,7 @@ def edit_room(current_user, room_name):
 @admin_or_editor_only
 def room_settings(current_user, room_name, source_type, ip):
     room = g.session.query(Room).filter_by(name=str(room_name)).first()
-    if not room:
+    if not room or room.organization_id != current_user.organization_id:
         return jsonify({"error": "No room found with provided room_name"}), 400
 
     source_type = source_type.lower()

@@ -24,6 +24,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 Base = declarative_base()
 engine = create_engine(os.environ.get("DB_URL"))
+
 Session = sessionmaker(bind=engine)
 
 
@@ -106,8 +107,11 @@ class User(Base, CommonMixin):
 
     records = relationship("UserRecord", back_populates="user")
 
-    def __init__(self, email, password=None):
+    organization_id = Column(Integer, ForeignKey("organizations.id"))
+
+    def __init__(self, email, organization_id, password=None):
         self.email = email
+        self.organization_id = organization_id
         if password:
             self.password = generate_password_hash(password, method="sha256")
 
@@ -213,6 +217,8 @@ class Room(Base, CommonMixin):
     records = relationship("Record", back_populates="room")
     sources = relationship("Source", backref="room", lazy=False)
 
+    organization_id = Column(Integer, ForeignKey("organizations.id"))
+
     def to_dict(self):
         return dict(
             id=self.id,
@@ -278,4 +284,19 @@ class Source(Base, CommonMixin):
             room_id=self.room_id,
             modified_at=self.modified_at,
             external_id=self.external_id,
+        )
+
+
+class Organization(Base, CommonMixin):
+    __tablename__ = "organizations"
+
+    name = Column(String(100))
+
+    users = relationship("User", backref="organization")
+    rooms = relationship("Room", backref="organization")
+
+    def to_dict(self):
+        return dict(
+            id=self.id,
+            name=self.name,
         )
