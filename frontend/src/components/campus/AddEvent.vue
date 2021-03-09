@@ -32,7 +32,10 @@
                     v-on="on"
                   ></v-text-field>
                 </template>
-                <v-date-picker v-model="date" @input="dateMenu = false"></v-date-picker>
+                <v-date-picker
+                  v-model="date"
+                  @input="dateMenu = false"
+                ></v-date-picker>
               </v-menu>
             </v-flex>
             <v-flex xs11 sm5>
@@ -105,7 +108,9 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="black" flat @click="modal = false">Закрыть</v-btn>
-        <v-btn color="black" flat :disabled="!valid" @click="addEvent()">Сохранить</v-btn>
+        <v-btn color="black" flat :disabled="!valid" @click="addEvent()"
+          >Сохранить</v-btn
+        >
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -118,11 +123,11 @@ export default {
     return {
       modal: false,
       valid: false,
-      fieldsRules: [v => !!v || "Обязательное поле"],
+      fieldsRules: [(v) => !!v || "Обязательное поле"],
       nameRules: [
-        v =>
+        (v) =>
           /^[^_\\\/!@#$%^&*]([a-zA-Z0-9 А-Яа-я()\-])*$/.test(v) ||
-          "Некорректное название"
+          "Некорректное название",
       ],
       eventName: "",
       date: new Date().toISOString().substr(0, 10),
@@ -130,13 +135,13 @@ export default {
       startTime: null,
       startTimeMenu: false,
       endTime: null,
-      endTimeMenu: false
+      endTimeMenu: false,
     };
   },
   computed: {
     isDarkMode() {
       return this.$store.getters.isDarkMode;
-    }
+    },
   },
   methods: {
     async addEvent() {
@@ -147,12 +152,12 @@ export default {
         event_name: this.eventName,
         date: this.date,
         start_time: this.startTime,
-        end_time: this.endTime
+        end_time: this.endTime,
       });
       this.date = new Date().toISOString().substr(0, 10);
       this.startTime = this.endTime = null;
       this.eventName = "";
-    }
-  }
+    },
+  },
 };
 </script>

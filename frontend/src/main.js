@@ -12,8 +12,8 @@ import VueSocketIOExt from "vue-socket.io-extended";
 import io from "socket.io-client";
 
 const SOCKET_URL = `${process.env.NVR_URL}/websocket`;
-const socket = io(SOCKET_URL);
-Vue.use(VueSocketIOExt, socket, { store });
+export const socket = io(SOCKET_URL);
+
 
 Vue.use(VSwitch);
 Vue.use(Vuetify);
@@ -21,8 +21,10 @@ Vue.config.productionTip = false;
 
 if (store.getters.isAutheticated) {
   store.dispatch("setDataFromToken").then(userRole => {
+    Vue.use(VueSocketIOExt, socket, { store });
     store.dispatch("loadRooms");
     store.dispatch("loadRecords");
+    store.dispatch("loadEruditeRecords")
     if (isAdmin()) {
       store.dispatch("getUsers");
     }

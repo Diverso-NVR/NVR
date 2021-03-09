@@ -209,7 +209,7 @@ export default {
           ],
         },
         {
-          name: "/rooms/",
+          name: "/rooms",
           method: "GET",
           doc: "Возвращает массив словарей данных о комнатах",
           responses: [
@@ -228,17 +228,15 @@ export default {
       "sources": [
         { "id": 110, "ip": "172.18.191.21/0", "name": "Трибуна", "room_id": 1 }
       ],
-      "tracking_source": "admin:Supervisor@172.18.191.23",
-      "tracking_state": false
     }
   ]`,
             },
           ],
         },
         {
-          name: "/rooms/{room_name}",
+          name: "/rooms/{room_id}",
           method: "GET",
-          doc: "Возвращает комнату с указанным room_name",
+          doc: "Возвращает комнату с указанным room_id",
           responses: [
             {
               code: 200,
@@ -254,8 +252,6 @@ export default {
     "sources": [
       { "id": 110, "ip": "172.18.191.21/0", "name": "Трибуна", "room_id": 1 }
     ],
-    "tracking_source": "admin:Supervisor@172.18.191.23",
-    "tracking_state": false
   }`,
             },
             {
@@ -266,31 +262,28 @@ export default {
           ],
         },
         {
-          name: "/rooms/{room_name}",
+          name: "/rooms",
           method: "POST",
-          doc: "Создаёт комнату с указанным room_name",
+          doc: "Создаёт комнату с указанным name",
+          request: `
+  {"name": str}`,
           responses: [
             {
               code: 201,
               body: `
-  {"message": "Started creating '{room_name}'"}`,
+  {"message": "Started creating '{room name}'"}`,
             },
             {
               code: 400,
               body: `
   Bad request`,
             },
-            {
-              code: 409,
-              body: `
-  {"error": "Room '{room_name}' already exist"}`,
-            },
           ],
         },
         {
-          name: "/rooms/{room_name}",
+          name: "/rooms/{room_id}",
           method: "DELETE",
-          doc: "Удаляет комнату с указанным room_name",
+          doc: "Удаляет комнату с указанным room_id",
           responses: [
             {
               code: 200,
@@ -305,133 +298,7 @@ export default {
           ],
         },
         {
-          name: "/rooms/{room_name}",
-          method: "PUT",
-          doc: "Изменяет данные об источниках в комнате с room_name",
-          request: `
-  {
-    "sources": []
-  }`,
-          responses: [
-            {
-              code: 200,
-              body: `
-  {"message": "Room edited"}`,
-            },
-          ],
-        },
-        {
-          name: "/sources/",
-          method: "GET",
-          doc: "Возвращает массив словарей данных об источниках",
-          responses: [
-            {
-              code: 200,
-              body: `
-  [
-    {
-      "id": 2,
-      "ip": "admin:Supervisor@172.18.199.30",
-      "name": "у доски слева на зал",
-      "room_id": 1
-    },
-    {
-      "id": 5,
-      "ip": "admin:Supervisor@172.18.199.42",
-      "name": "на доску",
-      "room_id": 1
-    }
-  ]`,
-            },
-          ],
-        },
-        {
-          name: "/sources/{ip}",
-          method: "GET",
-          doc: "Возвращает источник с указанным ip",
-          responses: [
-            {
-              code: 200,
-              body: `
-  {
-    "id": 2,
-    "ip": "admin:Supervisor@172.18.199.30",
-    "name": "у доски слева на зал",
-    "room_id": 1
-  }`,
-            },
-          ],
-        },
-        {
-          name: "/sources/{ip}",
-          method: "POST",
-          doc: "Создаёт источник с указанным ip. room_name - обязательное поле",
-          request: `
-  {
-    "room_name": string,
-    main_cam: bool,
-    "name": string,
-    "sound": string,
-    "tracking": bool
-  }`,
-          responses: [
-            {
-              code: 200,
-              body: `
-  {"message": "Added"}`,
-            },
-            {
-              code: 400,
-              body: `
-  Bad request`,
-            },
-          ],
-        },
-        {
-          name: "/sources/{ip}",
-          method: "DELETE",
-          doc: "Удаляет источник с указанным ip",
-          responses: [
-            {
-              code: 200,
-              body: `
-  {"message": "Deleted"}`,
-            },
-            {
-              code: 400,
-              body: `
-  Bad request`,
-            },
-          ],
-        },
-        {
-          name: "/sources/{ip}",
-          method: "PUT",
-          doc:
-            "Обновляет данные в источнике с указанным ip. room_name используется для соотношения источника к комнате",
-          request: `
-  {
-    "room_name": string,
-    "main_cam": bool,
-    "name": string,
-    "sound": string,
-    "tracking": bool
-  }`,
-          responses: [
-            {
-              code: 200,
-              body: `
-  {"message": "Updated"}`,
-            },
-            {
-              code: 400,
-              body: `
-  Bad request`,
-            },
-          ],
-        },
-        {
-          name: "/auto-control/{room_name}",
+          name: "/auto-control/{room_id}",
           method: "POST",
           doc:
             "Включает или отключает автоматический контроль камер в указанной комнате",
@@ -441,7 +308,7 @@ export default {
             {
               code: 200,
               body: `
-  {"message": "Automatic control within room {room_name} has been set to {auto_control}"}`,
+  {"message": "Automatic control within room {room name} has been set to {auto_control}"}`,
             },
             {
               code: 400,
@@ -451,92 +318,12 @@ export default {
             {
               code: 404,
               body: `
-  {"error": "Room {room_name} not found"}`,
+  {"error": "Room not found"}`,
             },
           ],
         },
         {
-          name: "/streaming-start/{room_name}",
-          method: "POST",
-          doc: `Запускает стрим`,
-          request: `
-  {
-    "sound_ip": string,
-    "camera_ip": string,
-    "title": string
-  }`,
-          responses: [
-            {
-              code: 200,
-              body: `
-  {
-    "message": "Streaming started"
-  }`,
-            },
-            {
-              code: 500,
-              body: `
-  {"error": "Unable to start stream"}`,
-            },
-          ],
-        },
-        {
-          name: "/streaming-stop/{room_name}",
-          method: "POST",
-          doc: `Останавливает стрим`,
-          responses: [
-            {
-              code: 200,
-              body: `
-  {"message": "Streaming stopped"}`,
-            },
-          ],
-        },
-        {
-          name: "/set-source/{room_name}/{source_type}/{ip}",
-          method: "POST",
-          doc:
-            "Меняет источник ответственный за source_type: [main - главная камера, screen - экран, sound - звук, track - трекинг]",
-          responses: [
-            {
-              code: 200,
-              body: `
-  {"message": "Source set"}`,
-            },
-            {
-              code: 400,
-              body: `
-  Bad request`,
-            },
-          ],
-        },
-        {
-          name: "/gcalendar-event/{room_name}",
-          method: "POST",
-          doc: `Создаёт событие в календаре в указанной комнате в указанное время. Формат дат: "YYYY-MM-DDTHH:mm", Например: ${new Date()
-            .toISOString()
-            .slice(0, 16)}`,
-          request: `
-  {
-    "start_time": string,
-    "end_time": string,
-    "summary": string
-  }`,
-          responses: [
-            {
-              code: 201,
-              body: `
-  {"message": "Successfully created event: {event_link}"}`,
-            },
-            {
-              code: 400,
-              body: `
-  Bad request`,
-            },
-          ],
-        },
-        {
-          name: "/montage-event/{room_name}",
+          name: "/montage-event/{room_id}",
           method: "POST",
           doc: `Создаёт событие на склеку материала в указанной комнате в указанный промежуток времени. Формат даты: "YYYY-MM-DD", Например: ${new Date()
             .toISOString()
@@ -559,80 +346,6 @@ export default {
               code: 400,
               body: `
   Bad request`,
-            },
-          ],
-        },
-        {
-          name: "/tracking/{room_name}",
-          method: "POST",
-          doc: `Взаимодействие с трекингом в указанной комнате. command принимает значения "start", "stop", "status"`,
-          request: `
-  {
-    "command": string
-  }`,
-          responses: [
-            {
-              code: 200,
-              body: `
-  {}`,
-            },
-            {
-              code: 400,
-              body: `
-  Bad request`,
-            },
-            {
-              code: 500,
-              body: `
-  {"error": string}`,
-            },
-          ],
-        },
-        {
-          name: "/api-key/{email}",
-          method: "POST",
-          doc: `Создаёт ключ API`,
-          responses: [
-            {
-              code: 201,
-              body: `
-  {"key": string}`,
-            },
-          ],
-        },
-        {
-          name: "/api-key/{email}",
-          method: "GET",
-          doc: `Возвращает ключ API`,
-          responses: [
-            {
-              code: 200,
-              body: `
-  {"key": string}`,
-            },
-          ],
-        },
-        {
-          name: "/api-key/{email}",
-          method: "PUT",
-          doc: `Обновляет ключ API`,
-          responses: [
-            {
-              code: 202,
-              body: `
-  {"key": string}`,
-            },
-          ],
-        },
-        {
-          name: "/api-key/{email}",
-          method: "DELETE",
-          doc: `Удаляет ключ API`,
-          responses: [
-            {
-              code: 200,
-              body: `
-  {'message': "API key deleted"}`,
             },
           ],
         },

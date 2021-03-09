@@ -138,7 +138,6 @@ def login():
         )
 
     user.last_login = datetime.utcnow()
-    g.session.commit()
 
     token = jwt.encode(
         {
@@ -148,6 +147,9 @@ def login():
         },
         current_app.config["SECRET_KEY"],
     )
+
+
+    g.session.commit()
     return jsonify({"token": token.decode("UTF-8")}), 202
 
 
@@ -179,7 +181,6 @@ def glogin():
         user.access = True
         g.session.add(user)
     user.last_login = datetime.utcnow()
-    g.session.commit()
     token = jwt.encode(
         {
             "sub": {"email": user.email, "role": user.role},
@@ -188,6 +189,7 @@ def glogin():
         },
         current_app.config["SECRET_KEY"],
     )
+    g.session.commit()
     return jsonify({"token": token.decode("UTF-8")}), 202
 
 

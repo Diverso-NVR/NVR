@@ -24,6 +24,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 Base = declarative_base()
 engine = create_engine(os.environ.get("DB_URL"))
+
 Session = sessionmaker(bind=engine)
 
 
@@ -106,8 +107,11 @@ class User(Base, CommonMixin):
 
     records = relationship("UserRecord", back_populates="user")
 
-    def __init__(self, email, password=None):
+    organization_id = Column(Integer, ForeignKey("organizations.id"))
+
+    def __init__(self, email, organization_id, password=None):
         self.email = email
+        self.organization_id = organization_id
         if password:
             self.password = generate_password_hash(password, method="sha256")
 
@@ -189,42 +193,39 @@ class User(Base, CommonMixin):
             access=self.access,
             last_login=self.last_login,
             banned=self.banned,
+            online=False,
         )
 
 
 class Room(Base, CommonMixin):
     __tablename__ = "rooms"
 
-    name = Column(String(100), nullable=False, unique=True)
+    name = Column(String(100), nullable=False)
     ruz_id = Column(Integer)
 
     drive = Column(String(200))
     calendar = Column(String(200))
-    stream_url = Column(String(300))
 
     sound_source = Column(String(100))
     main_source = Column(String(100))
-    tracking_source = Column(String(100))
     screen_source = Column(String(100))
 
     auto_control = Column(Boolean, default=True)
-    tracking_state = Column(Boolean, default=False)
 
     records = relationship("Record", back_populates="room")
     sources = relationship("Source", backref="room", lazy=False)
+
+    organization_id = Column(Integer, ForeignKey("organizations.id"))
 
     def to_dict(self):
         return dict(
             id=self.id,
             name=self.name,
-            tracking_state=self.tracking_state,
             sources=[source.to_dict() for source in self.sources],
             drive=self.drive,
             calendar=self.calendar,
-            stream_url=self.stream_url,
             sound_source=self.sound_source,
             main_source=self.main_source,
-            tracking_source=self.tracking_source,
             screen_source=self.screen_source,
             auto_control=self.auto_control,
         )
@@ -250,7 +251,6 @@ class Source(Base, CommonMixin):
     rtsp = Column(String(200), default="no")
     audio = Column(String(200))
     merge = Column(String(200))
-    tracking = Column(String(200))
     room_id = Column(Integer, ForeignKey("rooms.id"))
     external_id = Column(String(200))
 
@@ -261,7 +261,6 @@ class Source(Base, CommonMixin):
         self.rtsp = kwargs.get("rtsp")
         self.audio = kwargs.get("audio")
         self.merge = kwargs.get("merge")
-        self.tracking = kwargs.get("tracking")
         self.room_id = kwargs.get("room_id")
         self.external_id = kwargs.get("external_id")
 
@@ -274,8 +273,22 @@ class Source(Base, CommonMixin):
             rtsp=self.rtsp,
             audio=self.audio,
             merge=self.audio,
-            tracking=self.tracking,
             room_id=self.room_id,
             modified_at=self.modified_at,
             external_id=self.external_id,
+        )
+
+
+class Organization(Base, CommonMixin):
+    __tablename__ = "organizations"
+
+    name = Column(String(100), unique=True, nullable=False)
+
+    users = relationship("User", backref="organization")
+    rooms = relationship("Room", backref="organization")
+
+    def to_dict(self):
+        return dict(
+            id=self.id,
+            name=self.name,
         )
