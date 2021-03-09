@@ -1,9 +1,12 @@
 import Vue from "vue";
 import Vuex from "vuex";
 import shared from "./shared";
+import users from "./users";
+import rooms from "./rooms";
+import records from "./records";
+import login from "./login";
+
 import {
-  authenticate,
-  googleLog,
   register,
   sendResetEmail,
   resetPass,
@@ -14,7 +17,8 @@ import {
   getAPIKey,
   getRooms,
   getRecords,
-  createMontageEvent
+  createMontageEvent,
+  getEruditeRecords
 } from "@/api";
 import { isValidToken } from "@/utils";
 import router from "@/router/index";
@@ -22,120 +26,12 @@ import router from "@/router/index";
 Vue.use(Vuex);
 
 const state = {
-  rooms: [],
-  records: [],
   user: {},
   jwt: { token: localStorage.token || "" },
-  users: []
+  pageNumber: 0
 };
+
 const mutations = {
-  TRACKING_CHANGE(state, message) {
-    let room = state.rooms.find(room => {
-      return room.id === message.id;
-    });
-
-    room.tracking_state = message.tracking_state;
-  },
-  AUTO_CONTROL_CHANGE(state, message) {
-    let room = state.rooms.find(room => {
-      return room.id === message.id;
-    });
-
-    room.auto_control = message.auto_control;
-  },
-  SET_STREAM_URL(state, message) {
-    let room = state.rooms.find(room => {
-      return room.name === message.name;
-    });
-
-    room.stream_url = message.stream_url;
-  },
-  DELETE_ROOM(state, message) {
-    let i;
-    state.rooms.forEach((room, index) => {
-      if (room.id === message.id) {
-        i = index;
-        return;
-      }
-    });
-
-    state.rooms.splice(i, 1);
-  },
-  ADD_ROOM(state, message) {
-    state.rooms.push(message.room);
-  },
-  EDIT_ROOM(state, message) {
-    let room = state.rooms.find(room => {
-      return room.id === message.id;
-    });
-    room = message;
-  },
-  ADD_USER(state, message) {
-    state.users.push(message.user);
-  },
-  DELETE_USER(state, message) {
-    let i;
-    state.users.forEach((user, index) => {
-      if (user.id === message.id) {
-        i = index;
-        return;
-      }
-    });
-    state.users.splice(i, 1);
-  },
-  BAN_USER(state, message) {
-    let i;
-    state.users.forEach((user, index) => {
-      if (user.id === message.id) {
-        i = index;
-        return;
-      }
-    });
-    state.users[i].banned = true;
-  },
-  UNBLOCK_USER(state, message) {
-    let i;
-    state.users.forEach((user, index) => {
-      if (user.id === message.id) {
-        i = index;
-        return;
-      }
-    });
-    state.users[i].banned = false;
-  },
-  CHECK_ONLINE(state, message) {
-    let i;
-    state.users.forEach((user, index) => {
-      if (user.id === message.id) {
-        i = index;
-        return;
-      }
-    });
-    state.users[i].online = true;
-  },
-  FALSE_ONLINE(state, message) {
-    let i;
-    state.users.forEach((user, index) => {
-      if (user.id === message.id) {
-        i = index;
-        return;
-      }
-    });
-    state.users[i].online = false;
-  },
-  CHANGE_ROLE(state, message) {
-    let user = state.users.find(user => {
-      return user.id === message.id;
-    });
-
-    user.role = message.role;
-  },
-  GRANT_ACCESS(state, message) {
-    let user = state.users.find(user => {
-      return user.id === message.id;
-    });
-    user.access = true;
-  },
   setJwtToken(state, payload) {
     localStorage.token = payload.jwt.token;
     state.jwt = payload.jwt;
@@ -149,49 +45,12 @@ const mutations = {
   setKey(state, payload) {
     state.user.api_key = payload.key;
   },
-  setRooms(state, payload) {
-    state.rooms = payload;
-  },
-  setRecords(state, payload) {
-    state.records = payload;
-  },
-  setUsers(state, payload) {
-    state.users = payload;
-  },
-  DateSort(state) {
-    if (state.records.length === 0) return;
-    state.records.sort(function(a, b) {
-      var dateA = new Date(a.date),
-        dateB = new Date(b.date);
-      return dateB - dateA;
-    });
+  setBody(state, body) {
+    state.user.email = body.sub.email;
+    state.user.role = body.sub.role;
   }
 };
 const actions = {
-  async emitTrackingStateChange({}, { room, tracking_state }) {
-    await this._vm.$socket.client.emit("tracking_state_change", {
-      id: room.id,
-      tracking_state
-    });
-  },
-  async socket_trackingStateChange({ commit }, message) {
-    try {
-      await commit("TRACKING_CHANGE", message);
-      let msg = `Трекинг комнаты ${message.room_name}`;
-      msg += message.tracking_state ? " включён" : " отключён";
-      commit("setMessage", msg);
-    } catch (error) {
-      console.error(error);
-    }
-  },
-  async socket_trackingSwitchError({ commit }, message) {
-    try {
-      await commit("TRACKING_CHANGE", message);
-      await commit("setErrorFromText", message);
-    } catch (error) {
-      console.error(error);
-    }
-  },
   async emitAutoControlChange({}, { room, auto_control }) {
     await this._vm.$socket.client.emit("auto_control_change", {
       id: room.id,
@@ -285,6 +144,11 @@ const actions = {
   async socket_showOnline({ state, commit }, message) {
     commit("CHECK_ONLINE", message);
   },
+
+  async socket_checkSockets({ state, commit }, {}) {
+    commit("setMessage", "test sockets");
+  },
+
   async emitGrantAccess({}, { user }) {
     await this._vm.$socket.client.emit("grant_access", { id: user.id });
   },
@@ -294,20 +158,6 @@ const actions = {
   socket_newUser({ commit }, message) {
     commit("ADD_USER", message);
     commit("setMessage", "Новый запрос на доступ");
-  },
-  async emitStreamingStart({}, payload) {
-    await this._vm.$socket.client.emit("streaming_start", payload);
-  },
-  socket_streamingStart({ commit }, message) {
-    commit("setMessage", `Начат стрим в ${message.name}`);
-    commit("SET_STREAM_URL", message);
-  },
-  async emitStreamingStop({}, payload) {
-    await this._vm.$socket.client.emit("streaming_stop", payload);
-  },
-  socket_streamingStop({ commit }, message) {
-    commit("setMessage", `Остановлен стрим в ${message.name}`);
-    commit("SET_STREAM_URL", message);
   },
   socket_error({ commit }, message) {
     commit("setErrorFromText", message);
@@ -342,57 +192,7 @@ const actions = {
       commit("switchLoading");
     }
   },
-  async setDataFromToken({ commit, state }) {
-    try {
-      commit("switchLoading");
-      const tokenParts = localStorage.token.split(".");
-      const body = JSON.parse(atob(tokenParts[1]));
-      state.user.email = body.sub.email;
-      state.user.role = body.sub.role;
-      return body.sub.role;
-    } catch (error) {
-      commit("setError", error);
-      return "";
-    } finally {
-      commit("switchLoading");
-    }
-  },
-  async login({ commit, state }, userData) {
-    try {
-      commit("switchLoading");
-      let res = await authenticate(userData);
-      commit("setJwtToken", { jwt: res.data });
-      const tokenParts = res.data.token.split(".");
-      const body = JSON.parse(atob(tokenParts[1]));
-      state.user.email = body.sub.email;
-      state.user.role = body.sub.role;
-      localStorage.googleOAuth = false;
-      return body.sub.role;
-    } catch (error) {
-      commit("setError", error);
-      return "";
-    } finally {
-      commit("switchLoading");
-    }
-  },
-  async googleLogin({ commit, state }, userData) {
-    try {
-      commit("switchLoading");
-      let res = await googleLog(userData);
-      commit("setJwtToken", { jwt: res.data });
-      const tokenParts = res.data.token.split(".");
-      const body = JSON.parse(atob(tokenParts[1]));
-      state.user.email = body.sub.email;
-      state.user.role = body.sub.role;
-      localStorage.googleOAuth = true;
-      return body.sub.role;
-    } catch (error) {
-      commit("setError", error);
-      return "";
-    } finally {
-      commit("switchLoading");
-    }
-  },
+
   async register({ commit }, userData) {
     try {
       commit("switchLoading");
@@ -481,6 +281,17 @@ const actions = {
     }
     commit("DateSort");
   },
+  async loadEruditeRecords({ commit, state }) {
+    try {
+      commit("switchLoading");
+      let res = await getEruditeRecords(state.pageNumber);
+      commit("setEruditeRecords", res.data);
+    } catch (error) {
+      commit("setError", error);
+    } finally {
+      commit("switchLoading");
+    }
+  },
   async getKey({ commit, state }) {
     try {
       let res = await getAPIKey(state.user.email, state.jwt.token);
@@ -490,6 +301,7 @@ const actions = {
     }
   }
 };
+
 const getters = {
   isAutheticated(state) {
     return isValidToken(state.jwt.token);
@@ -501,7 +313,11 @@ const getters = {
 
 export default new Vuex.Store({
   modules: {
-    shared
+    shared,
+    users,
+    rooms,
+    records,
+    login
   },
   state,
   mutations,

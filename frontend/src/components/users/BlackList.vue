@@ -51,7 +51,12 @@
 
             <v-tooltip bottom>
               <template v-slot:activator="{ on }">
-                <v-btn icon color = "primary" v-on="on" @click="unblockUser(props.item)">
+                <v-btn
+                  icon
+                  color="primary"
+                  v-on="on"
+                  @click="unblockUser(props.item)"
+                >
                   <v-icon>lock_open</v-icon>
                 </v-btn>
               </template>
@@ -98,12 +103,12 @@ export default {
   },
   computed: mapState({
     users: (state) =>
-      state.users.filter(
+      state.users.users.filter(
         (user) =>
-        user.access === true &&
-        user.email !== state.user.email &&
-        user.role !== "superadmin" &&
-        user.banned === true
+          user.access === true &&
+          user.email !== state.user.email &&
+          user.role !== "superadmin" &&
+          user.banned === true
       ),
     loader() {
       return this.$store.getters.loading;
@@ -122,8 +127,8 @@ export default {
       }
     },
     unblockUser(user) {
-       if (user.banned === true);
-          this.$store.dispatch("emitUnblockUser", { user });
+      if (user.banned === true);
+      this.$store.dispatch("emitUnblockUser", { user });
     },
     User(user) {
       if (confirm("Вы уверены, что хотите удалить этого пользователя?")) {

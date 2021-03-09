@@ -1,29 +1,35 @@
 <template>
   <v-app :dark="isDarkMode">
-    <v-navigation-drawer v-if="isMedium" v-model="drawer" app absolute v-resize="onResize">
-      <v-list style="margin-top:0px">
+    <v-navigation-drawer
+      v-if="isMedium"
+      v-model="drawer"
+      app
+      absolute
+      v-resize="onResize"
+    >
+      <v-list style="margin-top: 0px">
         <template v-if="user.email">
-        <v-list-tile class="mb-2">
-          <v-list-tile-action>
-            <v-icon>account_circle</v-icon>
-          </v-list-tile-action>
+          <v-list-tile class="mb-2">
+            <v-list-tile-action>
+              <v-icon>account_circle</v-icon>
+            </v-list-tile-action>
 
-          <v-list-tile-content>
-            <v-list-tile-title>{{user.email}}</v-list-tile-title>
-            <v-list-tile-sub-title>{{user.role}}</v-list-tile-sub-title>
-          </v-list-tile-content>
-        </v-list-tile>
+            <v-list-tile-content>
+              <v-list-tile-title>{{ user.email }}</v-list-tile-title>
+              <v-list-tile-sub-title>{{ user.role }}</v-list-tile-sub-title>
+            </v-list-tile-content>
+          </v-list-tile>
 
-        <v-divider></v-divider>
+          <v-divider></v-divider>
         </template>
 
         <v-list-tile v-for="link of links" :key="link.title" :to="link.url">
           <v-list-tile-action>
-            <v-icon>{{link.icon}}</v-icon>
+            <v-icon>{{ link.icon }}</v-icon>
           </v-list-tile-action>
 
           <v-list-tile-content>
-            <v-list-tile-title>{{link.title}}</v-list-tile-title>
+            <v-list-tile-title>{{ link.title }}</v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
 
@@ -39,47 +45,54 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-navigation-drawer v-else app absolute v-resize="onResize" :mini-variant="!drawer">
-      <v-list style="margin-top:70px">
-
+    <v-navigation-drawer
+      v-else
+      app
+      absolute
+      v-resize="onResize"
+      :mini-variant="!drawer"
+    >
+      <v-list style="margin-top: 70px">
         <template v-if="user.email">
-        <v-list-tile class="mb-2">
-          <v-list-tile-action>
-            <v-icon>account_circle</v-icon>
-          </v-list-tile-action>
+          <v-list-tile class="mb-2">
+            <v-list-tile-action>
+              <v-icon>account_circle</v-icon>
+            </v-list-tile-action>
 
-          <v-list-tile-content>
-            <v-list-tile-title>{{user.email}}</v-list-tile-title>
-            <v-list-tile-sub-title>{{user.role}}</v-list-tile-sub-title>
-          </v-list-tile-content>
-        </v-list-tile>
+            <v-list-tile-content>
+              <v-list-tile-title>{{ user.email }}</v-list-tile-title>
+              <v-list-tile-sub-title>{{ user.role }}</v-list-tile-sub-title>
+            </v-list-tile-content>
+          </v-list-tile>
 
-        <v-divider></v-divider>
+          <v-divider></v-divider>
         </template>
 
         <v-list-tile v-for="link of links" :key="link.title" :to="link.url">
-          <template v-if="link.url === '/access-requests' && usersRequests !== 0">
+          <template
+            v-if="link.url === '/access-requests' && usersRequests !== 0"
+          >
             <v-list-tile-action>
               <v-badge>
                 <template v-slot:badge>
-                  <span>{{usersRequests}}</span>
+                  <span>{{ usersRequests }}</span>
                 </template>
-                <v-icon>{{link.icon}}</v-icon>
+                <v-icon>{{ link.icon }}</v-icon>
               </v-badge>
             </v-list-tile-action>
 
             <v-list-tile-content>
-              <v-list-tile-title>{{link.title}}</v-list-tile-title>
+              <v-list-tile-title>{{ link.title }}</v-list-tile-title>
             </v-list-tile-content>
           </template>
 
           <template v-else>
             <v-list-tile-action>
-              <v-icon>{{link.icon}}</v-icon>
+              <v-icon>{{ link.icon }}</v-icon>
             </v-list-tile-action>
 
             <v-list-tile-content>
-              <v-list-tile-title>{{link.title}}</v-list-tile-title>
+              <v-list-tile-title>{{ link.title }}</v-list-tile-title>
             </v-list-tile-content>
           </template>
         </v-list-tile>
@@ -87,7 +100,9 @@
     </v-navigation-drawer>
 
     <v-toolbar dark color="black" clipped-left>
-      <v-toolbar-side-icon @click.prevent="switchDrawer()"></v-toolbar-side-icon>
+      <v-toolbar-side-icon
+        @click.prevent="switchDrawer()"
+      ></v-toolbar-side-icon>
       <v-toolbar-side-icon class="ml-5" disabled>
         <v-img src="../static/logo.png" min-height="30" min-width="77"></v-img>
       </v-toolbar-side-icon>
@@ -119,7 +134,7 @@
         :value="true"
         color="error"
       >
-        {{error}}
+        {{ error }}
         <v-btn dark flat @click="closeError">Закрыть</v-btn>
       </v-snackbar>
     </template>
@@ -132,7 +147,7 @@
         :value="true"
         color="primary"
       >
-        {{message}}
+        {{ message }}
         <v-btn dark flat @click="closeMessage">Закрыть</v-btn>
       </v-snackbar>
     </template>
@@ -151,7 +166,7 @@ export default {
   data() {
     return {
       drawer: localStorage.drawer === "true" ? true : false,
-      isMedium: false
+      isMedium: false,
     };
   },
   computed: mapState({
@@ -176,9 +191,9 @@ export default {
     isDarkMode() {
       return this.$store.getters.isDarkMode;
     },
-    usersRequests: state =>
-      state.users.filter(
-        user => user.email_verified === true && user.access === false
+    usersRequests: (state) =>
+      state.users.users.filter(
+        (user) => user.email_verified === true && user.access === false
       ).length,
     links() {
       let links = [];
@@ -186,7 +201,11 @@ export default {
         links = [
           { title: "Аудитории", icon: "view_list", url: "/rooms" },
           { title: "Записи", icon: "video_library", url: "/records" },
-          { title: "Стриминг", icon: "stream", url: "/streaming" }
+          {
+            title: "Медиаархив",
+            icon: "class",
+            url: "/mediaarchive",
+          },
         ];
         if (this.isAdmin) {
           links = [
@@ -194,35 +213,35 @@ export default {
             {
               title: "Пользователи",
               icon: "supervised_user_circle",
-              url: "/users"
+              url: "/users",
             },
             {
               title: "Запросы на доступ",
               icon: "verified_user",
-              url: "/access-requests"
+              url: "/access-requests",
             },
             {
               title: "Черный список",
               icon: "sick",
-              url: "/black-list"
+              url: "/black-list",
             },
-            { title: "API", icon: "code", url: "/manage-api" }
+            { title: "API", icon: "code", url: "/manage-api" },
           ];
         } else if (this.isAdminOrEditor) {
           links = [
             ...links,
-            { title: "API", icon: "code", url: "/manage-api" }
+            { title: "API", icon: "code", url: "/manage-api" },
           ];
         }
       } else {
         links = [
           { title: "Вход", icon: "lock", url: "/login" },
-          { title: "Регистрация", icon: "account_circle", url: "/register" }
+          { title: "Регистрация", icon: "account_circle", url: "/register" },
         ];
       }
 
       return links;
-    }
+    },
   }),
   methods: {
     async switchColorMode() {
@@ -252,14 +271,14 @@ export default {
 
       await this.$store.dispatch("logout");
       await this.$router.push("/login");
-    }
+    },
   },
   beforeMount() {
     this.$store.dispatch("setColorMode");
   },
   mounted() {
     gapi.signin2.render("google-signin-button", {});
-  }
+  },
 };
 </script>
 
@@ -267,7 +286,7 @@ export default {
 .pointer {
   cursor: pointer;
 }
-.v-list__tile__title{
+.v-list__tile__title {
   font-size: 15px;
   font-weight: 400;
 }

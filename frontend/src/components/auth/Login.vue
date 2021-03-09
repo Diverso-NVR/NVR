@@ -1,3 +1,5 @@
+
+
 <template>
   <v-container fluid fill-height>
     <v-layout align-center justify-center>
@@ -38,7 +40,8 @@
               class="white--text"
               @click="onSubmit"
               :loading="loading"
-            >Вход</v-btn>
+              >Вход</v-btn
+            >
             <v-btn depressed @click="getEmail">Забыли пароль</v-btn>
           </v-card-actions>
           <div class="separator">или</div>
@@ -53,6 +56,10 @@
 </template>
 
 <script>
+import Vue from "vue";
+import VueSocketIOExt from "vue-socket.io-extended";
+import { socket } from '@/main';
+import store from "@/store";
 import { isAdmin, isAdminOrEditor } from "@/utils";
 
 export default {
@@ -63,16 +70,16 @@ export default {
       errorMsg: "",
       valid: false,
       emailRules: [
-        v => !!v || "Обязательное поле",
-        v =>
+        (v) => !!v || "Обязательное поле",
+        (v) =>
           /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v) ||
-          "Некорректный адрес почты"
+          "Некорректный адрес почты",
       ],
       passwordRules: [
-        v => !!v || "Обязательное поле",
-        v =>
-          (v && v.length >= 6) || "Пароль должен содержать не менее 6 символов"
-      ]
+        (v) => !!v || "Обязательное поле",
+        (v) =>
+          (v && v.length >= 6) || "Пароль должен содержать не менее 6 символов",
+      ],
     };
   },
   computed: {
@@ -84,16 +91,17 @@ export default {
     },
     isAdminOrEditor() {
       return isAdminOrEditor();
-    }
+    },
   },
   mounted() {
     gapi.signin2.render("google-signin-button", {
       // theme: "dark",
       scope: "profile email",
-      onsuccess: this.onSignIn
+      onsuccess: this.onSignIn,
     });
   },
   methods: {
+
     async onSignIn(user) {
       const email = user.getBasicProfile().getEmail();
       const token = user.getAuthResponse().id_token;
@@ -104,14 +112,16 @@ export default {
       if (this.$refs.form.validate()) {
         let res = await this.$store.dispatch("login", {
           email: this.email,
-          password: this.password
+          password: this.password,
         });
         if (res) await this.loadData();
       }
     },
     async loadData(res) {
+      Vue.use(VueSocketIOExt, socket, { store });
       await this.$store.dispatch("loadRooms");
       await this.$store.dispatch("loadRecords");
+      await this.$store.dispatch("loadEruditeRecords")
       this.$router.push("/rooms");
       if (this.isAdmin) {
         await this.$store.dispatch("getUsers");
@@ -122,8 +132,8 @@ export default {
     },
     getEmail() {
       this.$router.push("/reset-pass");
-    }
-  }
+    },
+  },
 };
 </script>
 
