@@ -8,7 +8,10 @@ from flask import Blueprint, jsonify, request, g
 from ..socketio import emit_event
 
 from ..models import User
-from ..decorators import auth_required, admin_only
+from ..decorators import auth_required, admin_only, json_data_required
+from ..email import send_registration_requests
+
+from threading import Thread
 
 api = Blueprint("users_api", __name__)
 
@@ -99,3 +102,59 @@ def manage_api_key(current_user, email):
 def get_urls(current_user, user_email):
     user = g.session.query(User).filter_by(email=user_email).first()
     return jsonify([u_rec.record.to_dict() for u_rec in user.records]), 200
+
+
+@api.route("/users", methods=["POST"])
+@auth_required
+@admin_only
+@json_data_required
+def invite_users(current_user):
+    organization_id = current_user.organization_id
+
+    emails = request.get_json()["email_list"]
+    new_users_role = request.get_json()["role"]
+
+    if new_users_role == "admin":
+        if current_user.role != "super_admin":
+            return jsonify({"error": "not enough rights"}), 403
+
+    # Format for emails_list:
+    # [
+    #  {'email': 'as@da.com'},
+    #  {'email': 'sa@da.com'}
+    # ]
+
+    already_registred_emails = []
+    new_users = []
+    for email in emails:
+        usr = User(email, organization_id)
+        usr.role = new_users_role
+        usr.email_verified = True
+        usr.access = True
+        try:
+            g.session.add(user)
+            g.session.commit()
+        except Exception:
+            already_registred_emails.append(email)
+
+        # Если успешно добавился в бд, поставим таймер на удаление
+        token_expiration = 600
+        try:
+            send_registration_requests(usr)
+            Thread(
+                target=user.delete_user_after_token_expiration,
+                args=(current_app._get_current_object(), token_expiration),
+            ).start()
+        except Exception:
+            traceback.print_exc()
+            return jsonify({"error": "Server error"}), 500
+
+    if len(already_registred_emails) > 0:
+        return jsonify(
+            {
+                "message": "Some users have been already registred, for others emails have been sent",
+                "registred_emails": f"{''.join(map(str, already_registred_emails))}",
+            }
+        )
+    else:
+        return jsonify({"message": "we have successfully sent emails"})

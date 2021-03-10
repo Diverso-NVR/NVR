@@ -141,13 +141,16 @@ def login():
 
     token = jwt.encode(
         {
-            "sub": {"email": user.email, "role": user.role, "org_name": user.organization.name},
+            "sub": {
+                "email": user.email,
+                "role": user.role,
+                "org_name": user.organization.name,
+            },
             "iat": datetime.utcnow(),
             "exp": datetime.utcnow() + timedelta(weeks=12),
         },
         current_app.config["SECRET_KEY"],
     )
-
 
     g.session.commit()
     return jsonify({"token": token.decode("UTF-8")}), 202
@@ -183,7 +186,11 @@ def glogin():
     user.last_login = datetime.utcnow()
     token = jwt.encode(
         {
-            "sub": {"email": user.email, "role": user.role, "org_name": user.organization.name},
+            "sub": {
+                "email": user.email,
+                "role": user.role,
+                "org_name": user.organization.name,
+            },
             "iat": datetime.utcnow(),
             "exp": datetime.utcnow() + timedelta(weeks=12),
         },
