@@ -6,7 +6,7 @@
         :items="rooms"
         class="elevation-4"
         :hide-headers="isMobile"
-        :class="{mobile: isMobile}"
+        :class="{ mobile: isMobile }"
         hide-actions
         disable-initial-sort
         :loading="loader"
@@ -20,33 +20,23 @@
             </td>
 
             <td class="text-xs-center">
-              <v-btn 
-              icon 
-              target="_blank" 
-              :href="`https://calendar.google.com/calendar/u/0/r?cid=${props.item.calendar}`"
+              <v-btn
+                icon
+                target="_blank"
+                :href="`https://calendar.google.com/calendar/u/0/r?cid=${props.item.calendar}`"
               >
                 <v-icon>calendar_today</v-icon>
               </v-btn>
             </td>
             <td class="text-xs-center">
-              <v-btn icon :href="props.item.drive" target="_blank" :disabled="!props.item.drive">
+              <v-btn
+                icon
+                :href="props.item.drive"
+                target="_blank"
+                :disabled="!props.item.drive"
+              >
                 <v-icon>folder</v-icon>
               </v-btn>
-            </td>
-            <td class="text-xs-center" v-if="isAdminOrEditor">
-              <v-layout row wrap justify-center>
-                <v-flex xs12 md2>
-                  <div class="text-xs-center">
-                    <v-switch
-                      v-model="props.item.tracking_state"
-                      class="switch-center"
-                      @change="trackingSwitch(props.item)"
-                      color="primary"
-                      hide-details
-                    ></v-switch>
-                  </div>
-                </v-flex>
-              </v-layout>
             </td>
 
             <td class="text-xs-center" v-if="isAdminOrEditor">
@@ -78,20 +68,27 @@
                 <li
                   class="flex-item subheading key-elems"
                   data-label="Аудитория"
-                >{{ props.item.name }}</li>
+                >
+                  {{ props.item.name }}
+                </li>
 
                 <li class="flex-item subheading" data-label="Календарь">
-                  <v-btn 
-                  icon 
-                  target="_blank" 
-                  :href="`https://calendar.google.com/calendar/u/0/r?cid=${props.item.calendar}`"
+                  <v-btn
+                    icon
+                    target="_blank"
+                    :href="`https://calendar.google.com/calendar/u/0/r?cid=${props.item.calendar}`"
                   >
                     <v-icon medium>calendar_today</v-icon>
                   </v-btn>
                 </li>
 
                 <li class="flex-item subheading" data-label="Диск">
-                  <v-btn icon :href="props.item.drive" target="_blank" :disabled="!props.item.drive">
+                  <v-btn
+                    icon
+                    :href="props.item.drive"
+                    target="_blank"
+                    :disabled="!props.item.drive"
+                  >
                     <v-icon medium>folder</v-icon>
                   </v-btn>
                 </li>
@@ -100,23 +97,11 @@
                   <app-add-event :room="props.item"></app-add-event>
                 </li>
 
-                <li class="flex-item subheading" v-if="isAdminOrEditor" data-label="Трекинг">
-                  <v-layout row wrap justify-center>
-                    <v-flex xs12 md2>
-                      <div class="text-xs-center">
-                        <v-switch
-                          v-model="props.item.tracking_state"
-                          class="switch-center"
-                          @change="trackingSwitch(props.item)"
-                          color="primary"
-                          hide-details
-                        ></v-switch>
-                      </div>
-                    </v-flex>
-                  </v-layout>
-                </li>
-
-                <li class="flex-item subheading" v-if="isAdminOrEditor" data-label="Автоуправление">
+                <li
+                  class="flex-item subheading"
+                  v-if="isAdminOrEditor"
+                  data-label="Автоуправление"
+                >
                   <v-layout row wrap justify-center>
                     <v-flex xs12 md2>
                       <div class="text-xs-center">
@@ -152,7 +137,10 @@
       </template>
       <v-layout row wrap class="addRoom" v-if="isAdminOrEditor">
         <v-flex xs6 sm4 md2>
-          <v-text-field v-model.trim="newRoom" label="Новая аудитория"></v-text-field>
+          <v-text-field
+            v-model.trim="newRoom"
+            label="Новая аудитория"
+          ></v-text-field>
         </v-flex>
         <v-btn dark depressed @click="addRoom">Добавить</v-btn>
       </v-layout>
@@ -197,10 +185,6 @@ export default {
         },
       ],
       newRoom: "",
-      background: {
-        free: "green lighten-3",
-        busy: "red lighten-3",
-      },
       isMobile: false,
     };
   },
@@ -209,7 +193,7 @@ export default {
     appAddEvent: AddEvent,
   },
   computed: mapState({
-    rooms: (state) => state.rooms,
+    rooms: (state) => state.rooms.rooms,
     user: (state) => state.user,
     loader() {
       return this.$store.getters.loading;
@@ -224,12 +208,6 @@ export default {
   methods: {
     onResize() {
       this.isMobile = window.innerWidth < 769;
-    },
-    trackingSwitch(room) {
-      this.$store.dispatch("emitTrackingStateChange", {
-        room,
-        tracking_state: room.tracking_state,
-      });
     },
     autoControlSwitch(room) {
       this.$store.dispatch("emitAutoControlChange", {
@@ -253,14 +231,8 @@ export default {
     if (this.isAdminOrEditor)
       this.headers.push(
         {
-          text: "Трекинг",
-          value: "montage",
-          sortable: true,
-          align: "center",
-        },
-        {
           text: "Автоуправление",
-          value: "tracking",
+          value: "autocontrol",
           sortable: true,
           align: "center",
         },

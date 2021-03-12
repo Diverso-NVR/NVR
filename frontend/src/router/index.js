@@ -43,10 +43,10 @@ const router = new Router({
       meta: { title: "Записи" }
     },
     {
-      path: "/streaming",
-      component: () => import("@/components/campus/Streaming"),
+      path: "/mediaarchive",
+      component: () => import("@/components/campus/Records"),
       beforeEnter: authRequired,
-      meta: { title: "Стриминг" }
+      meta: { title: "Медиаархив" }
     },
     {
       path: "/access-requests",

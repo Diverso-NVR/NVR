@@ -45,6 +45,13 @@ def create_app(app_name="NVR_API"):
         trigger="interval",
         seconds=10,
     )
+    # scheduler.add_job(
+    #     id="test",
+    #     func=emit_event,
+    #     args=("check_sockets", {}),
+    #     trigger="interval",
+    #     seconds=5,
+    # )
     scheduler.start()
 
     PrometheusMetrics(app)
@@ -73,18 +80,14 @@ def create_app(app_name="NVR_API"):
     CORS(app, resources={r"/api/*": {"origins": "*"}})
 
     from core.routes.merger import api as merger_api
-    from core.routes.google import api as google_api
     from core.routes.auth import api as auth_api
     from core.routes.rooms import api as rooms_api
-    from core.routes.sources import api as sources_api
     from core.routes.users import api as users_api
     from core.routes.organizations import api as organizations_api
 
     app.register_blueprint(merger_api, url_prefix="/api")
-    app.register_blueprint(google_api, url_prefix="/api")
     app.register_blueprint(auth_api, url_prefix="/api")
     app.register_blueprint(rooms_api, url_prefix="/api")
-    app.register_blueprint(sources_api, url_prefix="/api")
     app.register_blueprint(users_api, url_prefix="/api")
     app.register_blueprint(organizations_api, url_prefix="/api")
 

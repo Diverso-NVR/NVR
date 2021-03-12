@@ -67,9 +67,19 @@ export function getRecords(email, token) {
   });
 }
 
+export function getEruditeRecords(pageNumber) {
+  return axios.get(`${API_URL}/erudite/records`, {
+    params: {
+      page_number: pageNumber,
+      with_keywords_only: true,
+      ignore_autorec: true
+    }
+  });
+}
+
 //rooms
 export function getRooms(token) {
-  return axios.get(`${API_URL}/rooms/`, {
+  return axios.get(`${API_URL}/rooms`, {
     headers: { Token: token }
   });
 }

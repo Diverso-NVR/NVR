@@ -16,7 +16,7 @@
         <v-btn icon dark @click="modal = false">
           <v-icon>close</v-icon>
         </v-btn>
-        <v-toolbar-title>{{room.name}}</v-toolbar-title>
+        <v-toolbar-title>{{ room.name }}</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-toolbar-items>
           <v-btn dark flat @click="saveChanges(roomCopy)">Сохранить</v-btn>
@@ -24,7 +24,13 @@
       </v-toolbar>
       <v-card-text>
         <v-spacer></v-spacer>
-        <v-text-field v-model="search" append-icon="search" label="Поиск" single-line hide-details></v-text-field>
+        <v-text-field
+          v-model="search"
+          append-icon="search"
+          label="Поиск"
+          single-line
+          hide-details
+        ></v-text-field>
       </v-card-text>
       <v-layout v-resize="onResize" column>
         <v-data-table
@@ -32,7 +38,7 @@
           :items="roomCopy.sources"
           :search="search"
           :hide-headers="isMobile"
-          :class="{mobile: isMobile}"
+          :class="{ mobile: isMobile }"
           hide-actions
           class="elevation-4"
           disable-initial-sort
@@ -40,21 +46,25 @@
           <template v-slot:items="props" justify="space-around">
             <tr v-if="!isMobile">
               <td class="text-xs-center">
-                <v-text-field class="body-1" v-model.trim="props.item.name"></v-text-field>
+                <v-text-field
+                  class="body-1"
+                  v-model.trim="props.item.name"
+                ></v-text-field>
               </td>
               <td class="text-xs-center">
-                <v-text-field class="body-1" v-model.trim="props.item.ip"></v-text-field>
+                <v-text-field
+                  class="body-1"
+                  v-model.trim="props.item.ip"
+                ></v-text-field>
               </td>
               <td class="text-xs-center">
-                <v-text-field class="body-1" v-model.trim="props.item.rtsp"></v-text-field>
+                <v-text-field
+                  class="body-1"
+                  v-model.trim="props.item.rtsp"
+                ></v-text-field>
               </td>
               <td>
                 <v-radio-group class="v-c" v-model="soundSource">
-                  <v-radio :value="props.item.ip"></v-radio>
-                </v-radio-group>
-              </td>
-              <td>
-                <v-radio-group class="v-c" v-model="trackingSource">
                   <v-radio :value="props.item.ip"></v-radio>
                 </v-radio-group>
               </td>
@@ -77,22 +87,29 @@
             <tr v-else>
               <td>
                 <ul class="flex-content">
-                  <li class="flex-item key-elems subheading" data-label="Название">
-                    <v-text-field class="body-1" v-model.trim="props.item.name"></v-text-field>
+                  <li
+                    class="flex-item key-elems subheading"
+                    data-label="Название"
+                  >
+                    <v-text-field
+                      class="body-1"
+                      v-model.trim="props.item.name"
+                    ></v-text-field>
                   </li>
                   <li class="flex-item key-elems subheading" data-label="IP">
-                    <v-text-field class="body-1" v-model.trim="props.item.ip"></v-text-field>
+                    <v-text-field
+                      class="body-1"
+                      v-model.trim="props.item.ip"
+                    ></v-text-field>
                   </li>
                   <li class="flex-item key-elems subheading" data-label="RTSP">
-                    <v-text-field class="body-1" v-model.trim="props.item.rtsp"></v-text-field>
+                    <v-text-field
+                      class="body-1"
+                      v-model.trim="props.item.rtsp"
+                    ></v-text-field>
                   </li>
                   <li class="flex-item subheading" data-label="Звук">
                     <v-radio-group class="v-c" v-model="soundSource">
-                      <v-radio :value="props.item.ip"></v-radio>
-                    </v-radio-group>
-                  </li>
-                  <li class="flex-item subheading" data-label="Трекинг">
-                    <v-radio-group class="v-c" v-model="trackingSource">
                       <v-radio :value="props.item.ip"></v-radio>
                     </v-radio-group>
                   </li>
@@ -116,11 +133,9 @@
             </tr>
           </template>
           <template v-slot:no-results>
-            <v-alert
-              :value="true"
-              color="error"
-              icon="warning"
-            >Ничего не найдено по запросу "{{ search }}".</v-alert>
+            <v-alert :value="true" color="error" icon="warning"
+              >Ничего не найдено по запросу "{{ search }}".</v-alert
+            >
           </template>
         </v-data-table>
         <app-add-source :room="roomCopy"></app-add-source>
@@ -143,7 +158,6 @@ export default {
       search: "",
       isMobile: "",
       soundSource: this.room.sound_source,
-      trackingSource: this.room.tracking_source,
       mainSource: this.room.main_source,
       screenSource: this.room.screen_source,
       headers: [
@@ -151,57 +165,51 @@ export default {
           text: "Название",
           align: "center",
           sortable: true,
-          value: "name"
+          value: "name",
         },
         {
           text: "IP",
           value: "ip",
           sortable: true,
-          align: "center"
+          align: "center",
         },
         {
           text: "RTSP",
           value: "rtsp",
           sortable: true,
-          align: "center"
+          align: "center",
         },
         {
           text: "Звук",
           value: "sound",
           sortable: true,
-          align: "center"
-        },
-        {
-          text: "Трекинг",
-          value: "tracking",
-          sortable: true,
-          align: "center"
+          align: "center",
         },
         {
           text: "Главная камера",
           value: "main_cam",
           sortable: true,
-          align: "center"
+          align: "center",
         },
         {
           text: "Экран",
           value: "screen",
           sortable: true,
-          align: "center"
+          align: "center",
         },
         {
           text: "Удалить",
           value: "change",
           sortable: false,
-          align: "center"
-        }
-      ]
+          align: "center",
+        },
+      ],
     };
   },
   computed: {
     isDarkMode() {
       return this.$store.getters.isDarkMode;
-    }
+    },
   },
   methods: {
     onResize() {
@@ -218,22 +226,20 @@ export default {
           id: roomCopy.id,
           sources: roomCopy.sources,
           sound_source: this.soundSource,
-          tracking_source: this.trackingSource,
           main_source: this.mainSource,
-          screen_source: this.screenSource
+          screen_source: this.screenSource,
         })
         .then(() => {
           this.modal = false;
         });
-    }
+    },
   },
   created() {
     this.roomCopy = { ...this.room };
     this.soundSource = this.room.sound_source;
-    this.trackingSource = this.room.tracking_source;
     this.mainSource = this.room.main_source;
     this.screenSource = this.room.screen_source;
-  }
+  },
 };
 </script>
 

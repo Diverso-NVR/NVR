@@ -94,17 +94,3 @@ def json_data_required(f):
 
     return wrapper
 
-
-def one_organization(f):
-    @wraps(f)
-    def wrapper(user, *args, **kwargs):
-        url = request.path
-        url = url.split("/")
-        organization = (
-            url[-1] if len(url[-1]) > 0 else url[-2]
-        )  # Если запрос оканчивается на /
-        if organization != user.organization.name:
-            return jsonify({"error": "user does not have appropriate rights"}), 400
-        return f(user, *args, **kwargs)
-
-    return wrapper

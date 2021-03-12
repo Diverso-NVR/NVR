@@ -39,7 +39,8 @@
                 class="white--text"
                 @click="onSubmit"
                 :loading="loading"
-              >Отправить</v-btn>
+                >Отправить</v-btn
+              >
             </v-card-actions>
           </template>
           <template v-else>
@@ -63,34 +64,34 @@ export default {
       password: "",
       confirmPassword: "",
       passwordRules: [
-        v => !!v || "Обязательное поле",
-        v =>
-          (v && v.length >= 6) || "Пароль должен содержать не менее 6 символов"
+        (v) => !!v || "Обязательное поле",
+        (v) =>
+          (v && v.length >= 6) || "Пароль должен содержать не менее 6 символов",
       ],
       confirmPasswordRules: [
-        v => !!v || "Обязательное поле",
-        v => v === this.password || "Пароли должны совпадать"
-      ]
+        (v) => !!v || "Обязательное поле",
+        (v) => v === this.password || "Пароли должны совпадать",
+      ],
     };
   },
   computed: {
     loading() {
       return this.$store.getters.loading;
-    }
+    },
   },
   methods: {
     async onSubmit() {
       if (this.$refs.form.validate()) {
         await this.$store.dispatch("resetPass", {
           new_pass: this.password,
-          token: this.token
+          token: this.token,
         });
         this.$router.push("/");
       }
-    }
+    },
   },
   created() {
     this.tokenValid = isValidToken(this.token);
-  }
+  },
 };
 </script>

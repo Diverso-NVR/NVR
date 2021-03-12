@@ -115,7 +115,7 @@ export default {
   },
   computed: mapState({
     users: (state) =>
-      state.users.filter(
+      state.users.users.filter(
         (user) =>
           user.access === true &&
           user.email !== state.user.email &&

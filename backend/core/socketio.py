@@ -16,9 +16,6 @@ from .email import send_email
 from .models import Session, Room, Source, User
 
 
-TRACKING_URL = os.environ.get("TRACKING_URL")
-STREAMING_URL = os.environ.get("STREAMING_URL")
-STREAMING_API_KEY = os.environ.get("STREAMING_API_KEY")
 NVR_CLIENT_URL = os.environ.get("NVR_CLIENT_URL", "*")
 
 socketio = SocketIO(message_queue="redis://", cors_allowed_origins=NVR_CLIENT_URL)
@@ -44,65 +41,6 @@ class NvrNamespace(Namespace):
     @log_info
     def emit_error(self, err):
         emit("error", {"error": err})
-
-    @log_info
-    def on_tracking_state_change(self, msg_json):
-        room_id = msg_json["id"]
-        new_tracking_state = msg_json["tracking_state"]
-
-        session = Session()
-        room = session.query(Room).get(room_id)
-
-        if not room.tracking_source:
-            session.close()
-            emit(
-                "tracking_switch_error",
-                {
-                    "id": room.id,
-                    "tracking_state": room.tracking_state,
-                    "error": "Камера для трекинга не выбрана в настройках комнаты",
-                },
-            )
-            return
-
-        try:
-            if new_tracking_state:
-                requests.post(
-                    f"{TRACKING_URL}/track",
-                    json={"command": "start", "ip": room.tracking_source, "port": 80},
-                    timeout=5,
-                )
-            else:
-                requests.post(
-                    f"{TRACKING_URL}/track",
-                    json={"command": "stop"},
-                    timeout=5,
-                )
-        except Exception:
-            session.close()
-            emit(
-                "tracking_switch_error",
-                {
-                    "id": room.id,
-                    "tracking_state": room.tracking_state,
-                    "error": "Ошибка при запуске трекинга",
-                },
-            )
-            return
-
-        room.tracking_state = new_tracking_state
-        session.commit()
-        session.close()
-
-        emit(
-            "tracking_state_change",
-            {
-                "id": room.id,
-                "tracking_state": room.tracking_state,
-                "room_name": room.name,
-            },
-            broadcast=True,
-        )
 
     @log_info
     def on_auto_control_change(self, msg_json):
@@ -141,11 +79,6 @@ class NvrNamespace(Namespace):
         room_name = msg_json["name"]
 
         session = Session()
-        room = session.query(Room).filter_by(name=room_name).first()
-        if room:
-            session.close()
-            self.emit_error(f"Комната {room_name} уже существует")
-            return
 
         room = Room(name=room_name)
         room.drive = create_folder(room_name)
@@ -180,7 +113,6 @@ class NvrNamespace(Namespace):
 
         room.main_source = msg_json["main_source"]
         room.screen_source = msg_json["screen_source"]
-        room.tracking_source = msg_json["tracking_source"]
         room.sound_source = msg_json["sound_source"]
 
         # add, update
@@ -217,7 +149,6 @@ class NvrNamespace(Namespace):
                 recipients=[user.email],
                 html_body=render_template("email/access_deny.html", user=user),
             )
-
         session.delete(user)
         session.commit()
         session.close()
@@ -282,24 +213,6 @@ class NvrNamespace(Namespace):
         session.close()
 
     @log_info
-    def on_ban_user(self, msg_json):
-        session = Session()
-        user = session.query(User).get(msg_json["id"])
-        emit("block_user", {"id": user.id}, broadcast=True)
-        user.banned = True
-        session.commit()
-        session.close()
-
-    @log_info
-    def on_unblock_user(self, msg_json):
-        session = Session()
-        user = session.query(User).get(msg_json["id"])
-        emit("unblock_user", {"id": user.id}, broadcast=True)
-        user.banned = False
-        session.commit()
-        session.close()
-
-    @log_info
     def on_change_online(self, msg_json):
         session = Session()
         email = msg_json["email"]
@@ -329,63 +242,3 @@ class NvrNamespace(Namespace):
                 "email/access_approve.html", user=user, url=NVR_CLIENT_URL
             ),
         )
-
-    @log_info
-    def on_streaming_start(self, msg_json):
-        sound_ip = msg_json["soundIp"]
-        camera_ip = msg_json["cameraIp"]
-        room_name = msg_json["roomName"]
-        title = msg_json["title"]
-
-        session = Session()
-        room = session.query(Room).filter_by(name=str(room_name)).first()
-        sound_source = session.query(Source).filter_by(ip=sound_ip).first()
-        camera_source = session.query(Source).filter_by(ip=camera_ip).first()
-
-        try:
-            response = requests.post(
-                f"{STREAMING_URL}/streams/{room_name}",
-                json={
-                    "camera_ip": camera_source.rtsp,
-                    "sound_ip": sound_source.rtsp,
-                    "title": title,
-                },
-                headers={"X-API-KEY": STREAMING_API_KEY},
-            )
-            room.stream_url = response.json()["url"]
-            session.commit()
-        except Exception:
-            self.emit_error("Ошибка при запуске стрима")
-            return
-        finally:
-            session.close()
-
-        emit(
-            "streaming_start",
-            {"name": room_name, "stream_url": room.stream_url},
-            broadcast=True,
-        )
-
-    @log_info
-    def on_streaming_stop(self, msg_json):
-        room_name = msg_json["roomName"]
-
-        session = Session()
-        room = session.query(Room).filter_by(name=str(room_name)).first()
-
-        try:
-            requests.delete(
-                f"{STREAMING_URL}/streams/{room_name}",
-                headers={"X-API-KEY": STREAMING_API_KEY},
-            )
-        except Exception:
-            pass
-        finally:
-            room.stream_url = None
-            session.commit()
-            session.close()
-            emit(
-                "streaming_stop",
-                {"name": room_name, "stream_url": None},
-                broadcast=True,
-            )

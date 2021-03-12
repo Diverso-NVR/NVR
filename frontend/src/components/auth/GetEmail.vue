@@ -28,7 +28,8 @@
               class="white--text"
               @click="onSubmit"
               :loading="loading"
-            >Подтвердить</v-btn>
+              >Подтвердить</v-btn
+            >
           </v-card-actions>
         </v-card>
       </v-flex>
@@ -44,17 +45,17 @@ export default {
       errorMsg: "",
       valid: false,
       emailRules: [
-        v => !!v || "Обязательное поле",
-        v =>
+        (v) => !!v || "Обязательное поле",
+        (v) =>
           /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v) ||
-          "Некорректный адрес почты"
-      ]
+          "Некорректный адрес почты",
+      ],
     };
   },
   computed: {
     loading() {
       return this.$store.getters.loading;
-    }
+    },
   },
   methods: {
     async onSubmit() {
@@ -62,7 +63,7 @@ export default {
         let res = await this.$store.dispatch("sendResetEmail", this.email);
         this.$router.push("/login");
       }
-    }
-  }
+    },
+  },
 };
 </script>
