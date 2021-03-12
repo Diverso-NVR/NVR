@@ -191,14 +191,14 @@ class NvrNamespace(Namespace):
 
         session.commit()
         session.close()
-        # emit("kick_banned", {"id": user.id}, broadcast=True)
+        emit("kick_banned", {"id": user.id}, broadcast=True)
 
     @log_info
     def on_check_online(self, msg_json):
         session = Session()
         email = msg_json["email"]
         user = session.query(User).filter_by(email=email).first()
-        # emit("show_online", {"id": user.id}, broadcast=True)
+        emit("show_online", {"id": user.id}, broadcast=True)
         user.last_login = datetime.utcnow()
         session.commit()
         session.close()
