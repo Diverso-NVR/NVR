@@ -11,6 +11,7 @@ import {
   sendResetEmail,
   resetPass,
   getUsers,
+  inviteUsers,
   createAPIKey,
   updateAPIKey,
   deleteAPIKey,
@@ -181,6 +182,14 @@ const actions = {
       commit("setError", error);
     }
   },
+  async inviteUsers({ commit, state }, { emails, role }) {
+    try {
+      await inviteUsers(emails, role, state.jwt.token);
+      commit("setMessage", "Приглашения высланы");
+    } catch (error) {
+      commit("setError", error);
+    }
+  },
   async getUsers({ commit, state }) {
     try {
       commit("switchLoading");
@@ -192,7 +201,6 @@ const actions = {
       commit("switchLoading");
     }
   },
-
   async register({ commit }, userData) {
     try {
       commit("switchLoading");

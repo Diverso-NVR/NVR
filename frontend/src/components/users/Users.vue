@@ -11,6 +11,8 @@
             v-model="search"
           ></v-text-field>
         </v-flex>
+        <v-spacer></v-spacer>
+        <app-invite />
       </v-layout>
       <v-data-table
         :items="users"
@@ -89,6 +91,8 @@
 
 <script>
 import { mapState } from "vuex";
+import Invite from "./Invite";
+
 export default {
   data() {
     return {
@@ -112,6 +116,9 @@ export default {
         { text: "Actions", align: "left", value: "actions" },
       ],
     };
+  },
+  components: {
+    appInvite: Invite,
   },
   computed: mapState({
     users: (state) =>

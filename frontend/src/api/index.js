@@ -29,6 +29,16 @@ export function getUsers(token) {
   });
 }
 
+export function inviteUsers(emails, role, token) {
+  return axios.post(
+    `${API_URL}/users`,
+    { emails, role },
+    {
+      headers: { Token: token }
+    }
+  );
+}
+
 export function createAPIKey(email, token) {
   return axios.post(
     `${API_URL}/api-key/${email}`,
