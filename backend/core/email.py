@@ -68,14 +68,14 @@ def send_access_request_email(admins: list, user) -> None:
     )
 
 
-def send_registration_requests(user) -> None:
+def send_registration_requests(user, token_expiration: int) -> None:
 
     token = user.get_token(token_expiration, "reset_pass")
     url = f"{NVR_CLIENT_URL}/reset-pass/{token}"
 
     send_email(
-        "Приглашение для регистрации в NVR",
+        "[NVR] Приглашение для регистрации",
         sender=current_app.config["ADMINS"][0],
         recipients=[user.email],
-        html_body=render_template("email/reset_pass.html", user=user, url=url),
+        html_body=render_template("email/invite.html", user=user, url=url),
     )

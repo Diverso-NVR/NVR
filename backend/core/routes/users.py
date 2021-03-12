@@ -2,8 +2,9 @@
 
 
 import uuid
+import traceback
 
-from flask import Blueprint, jsonify, request, g
+from flask import Blueprint, jsonify, request, g, current_app
 
 from ..models import User
 from ..decorators import auth_required, admin_only, json_data_required
@@ -77,26 +78,15 @@ def get_urls(current_user, user_email):
 def invite_users(current_user):
     organization_id = current_user.organization_id
 
-    emails = request.get_json()["email_list"]
-    new_users_role = request.get_json()["role"]
-
-    if new_users_role == "admin":
-        if current_user.role != "super_admin":
-            return jsonify({"error": "not enough rights"}), 403
-
-    # Format for emails_list:
-    # [
-    #  {'email': 'as@da.com'},
-    #  {'email': 'sa@da.com'}
-    # ]
+    emails = request.get_json()["emails"]
+    role = request.get_json()["role"]
 
     already_registred_emails = []
-    new_users = []
     for email in emails:
-        usr = User(email, organization_id)
-        usr.role = new_users_role
-        usr.email_verified = True
-        usr.access = True
+        user = User(email, organization_id)
+        user.role = role
+        user.email_verified = True
+        user.access = True
         try:
             g.session.add(user)
             g.session.commit()
@@ -106,7 +96,7 @@ def invite_users(current_user):
         # Если успешно добавился в бд, поставим таймер на удаление
         token_expiration = 600
         try:
-            send_registration_requests(usr)
+            send_registration_requests(user, token_expiration)
             Thread(
                 target=user.delete_user_after_token_expiration,
                 args=(current_app._get_current_object(), token_expiration),
