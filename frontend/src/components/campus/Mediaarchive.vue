@@ -42,7 +42,11 @@
             {{ dateFormat(props.item.date + " " + props.item.start_time) }}
           </td>
           <td class="text-xs-center">
-            <v-dialog v-model="props.item.showKeywords" width="600px">
+            <v-dialog
+              v-model="props.item.showKeywords"
+              width="600px"
+              :dark="isDarkMode"
+            >
               <template v-slot:activator="{ on }">
                 <v-btn color="primary" depressed v-on="on">Открыть</v-btn>
               </template>
@@ -96,6 +100,9 @@ export default {
   },
   computed: mapState({
     records: (state) => state.records.eruditeRecords,
+    isDarkMode() {
+      return this.$store.getters.isDarkMode;
+    },
   }),
   methods: {
     dateFormat(date) {

@@ -141,6 +141,7 @@ class NvrNamespace(Namespace):
         session = Session()
         user = session.query(User).get(msg_json["id"])
         emit("delete_user", {"id": user.id}, broadcast=True)
+        emit("kick_user", {"email": user.email}, broadcast=True)
 
         if user.access is False:
             send_email(
@@ -149,6 +150,7 @@ class NvrNamespace(Namespace):
                 recipients=[user.email],
                 html_body=render_template("email/access_deny.html", user=user),
             )
+
         session.delete(user)
         session.commit()
         session.close()
