@@ -25,12 +25,16 @@
       >
         <template v-slot:items="props">
           <td class="text-xs-left">
-            <h3 class="subheading mt-1">{{ props.item.email }}</h3>
-            <div
-              class="mt-1 mb-2 time"
-              :color="isDarkMode ? '#6a737d' : '#F5F5F5'"
-            >
-              Активность: {{ lastLogin(props.item) }}
+            <h3 class="subheading mt-1 mb-2">{{ props.item.email }}</h3>
+            <div class="mt-1 mb-2">
+              <div
+                v-if="!props.item.online"
+                class="time"
+                :color="isDarkMode ? '#6a737d' : '#F5F5F5'"
+              >
+                Последняя активность: {{ lastLogin(props.item) }}
+              </div>
+              <span v-else class="font-weight-medium green--text">В сети</span>
             </div>
           </td>
           <td class="text-xs-left">
@@ -156,10 +160,9 @@ export default {
       this.$store.dispatch("emitBanUser", { user });
     },
     lastLogin(user) {
-      if (!user.online) {
-        let postDate = new Date(user.last_login);
-        return postDate.toLocaleString("ru", this.options);
-      } else return "Online";
+      let ts = Date.parse(user.last_login);
+      let postDate = new Date(ts);
+      return postDate.toLocaleString("ru", this.options);
     },
   },
 };

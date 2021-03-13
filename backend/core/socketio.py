@@ -198,7 +198,7 @@ class NvrNamespace(Namespace):
         session = Session()
         email = msg_json["email"]
         user = session.query(User).filter_by(email=email).first()
-        emit("show_online", {"user": user.to_dict()}, broadcast=True)
+        emit("show_online", user.to_dict(), broadcast=True)
         user.last_login = datetime.utcnow()
         session.commit()
         session.close()

@@ -191,7 +191,7 @@ class User(Base, CommonMixin):
             role=self.role,
             email_verified=self.email_verified,
             access=self.access,
-            last_login=self.last_login,
+            last_login=str(self.last_login),
             banned=self.banned,
             online=False,
         )
