@@ -111,7 +111,7 @@ export default {
       return formattedDate.toLocaleString("ru", this.options);
     },
   },
-  created() {
+  beforeMount() {
     this.records.forEach((record) => {
       record.showKeywords = false;
       if (record.url.includes("youtube")) {

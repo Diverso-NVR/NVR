@@ -63,6 +63,7 @@ export default {
   },
   methods: {
     inviteUsers() {
+      this.addEmail();
       if (this.emails.length !== 0) {
         this.$store.dispatch("inviteUsers", {
           emails: this.emails,
