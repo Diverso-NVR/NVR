@@ -40,12 +40,17 @@ export default {
     CHECK_ONLINE(state, message) {
       let i;
       state.users.forEach((user, index) => {
-        if (user.id === message.id) {
+        if (user.id === message.user.id) {
           i = index;
           return;
         }
       });
-      state.users[i].online = true;
+
+      if (typeof state.users[i] != "undefined") {
+        state.users[i].online = true;
+      } else {
+        state.users.push(message.user);
+      }
     },
     FALSE_ONLINE(state, message) {
       let i;

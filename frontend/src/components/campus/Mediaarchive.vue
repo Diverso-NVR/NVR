@@ -42,7 +42,7 @@
             {{ dateFormat(props.item.date + " " + props.item.start_time) }}
           </td>
           <td class="text-xs-center">
-            <v-dialog v-model="keywordsDialog" width="600px">
+            <v-dialog v-model="props.item.showKeywords" width="600px">
               <template v-slot:activator="{ on }">
                 <v-btn color="primary" depressed v-on="on">Открыть</v-btn>
               </template>
@@ -92,7 +92,6 @@ export default {
         minute: "numeric",
       },
       search: "",
-      keywordsDialog: false,
     };
   },
   computed: mapState({
@@ -107,6 +106,7 @@ export default {
   },
   created() {
     this.records.forEach((record) => {
+      record.showKeywords = false;
       if (record.url.includes("youtube")) {
         let arrayOfStrings = record.url.split("=");
         let record_id = arrayOfStrings[arrayOfStrings.length - 1];
