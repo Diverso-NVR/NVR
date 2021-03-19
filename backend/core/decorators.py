@@ -6,7 +6,6 @@ import traceback
 import jwt
 from flask_socketio import disconnect
 from flask import jsonify, request, current_app
-from sqlalchemy.orm import joinedload
 from .models import User, Session
 
 
@@ -28,12 +27,7 @@ def auth_required(f):
         if token:
             try:
                 data = jwt.decode(token, current_app.config["SECRET_KEY"])
-                user = (
-                    session.query(User)
-                    .options(joinedload(User.organization))
-                    .filter_by(email=data["sub"]["email"])
-                    .first()
-                )
+                user = session.query(User).filter_by(email=data["sub"]["email"]).first()
                 session.close()
                 if not user:
                     return jsonify({"error": "User not found"}), 404
@@ -68,8 +62,9 @@ def auth_required(f):
 def admin_only(f):
     @wraps(f)
     def wrapper(user, *args, **kwargs):
-        if user.role in ["user", "editor"]:
+        if user.role.name in ["user", "editor"]:
             return jsonify({"error": "Access error"}), 401
+
         return f(user, *args, **kwargs)
 
     return wrapper
@@ -78,8 +73,9 @@ def admin_only(f):
 def admin_or_editor_only(f):
     @wraps(f)
     def wrapper(user, *args, **kwargs):
-        if user.role == "user":
+        if user.role.name == "user":
             return jsonify({"error": "Access error"}), 401
+
         return f(user, *args, **kwargs)
 
     return wrapper
@@ -91,6 +87,7 @@ def json_data_required(f):
         post_data = request.get_json()
         if not post_data:
             return jsonify({"error": "json data required"}), 400
+
         return f(*args, **kwargs)
 
     return wrapper
@@ -100,31 +97,26 @@ def auth_socket_check(f):
     @wraps(f)
     def wrapper(self, msg_json, *args, **kwargs):
         session = Session()
-        token = msg_json["token"]
-        if token:
-            try:
-                data = jwt.decode(token, current_app.config["SECRET_KEY"])
-                user = (
-                    session.query(User)
-                    .options(joinedload(User.organization))
-                    .filter_by(email=data["sub"]["email"])
-                    .first()
-                )
-                session.close()
-                if not user:
-                    disconnect()
-                if user.banned:
-                    disconnect()
-                return f(self, msg_json, user, *args, **kwargs)
-            except jwt.ExpiredSignatureError:
-                disconnect()
-            except jwt.InvalidTokenError:
-                disconnect()
-            except Exception:
-                traceback.print_exc()
-                disconnect()
+        token = msg_json.get("token")
+        if not token:
+            disconnect()
 
-        disconnect()
+        try:
+            data = jwt.decode(token, current_app.config["SECRET_KEY"])
+            user = session.query(User).filter_by(email=data["sub"]["email"]).first()
+            session.close()
+            if not user:
+                disconnect()
+            if user.banned:
+                disconnect()
+            return f(self, msg_json, user, *args, **kwargs)
+        except jwt.ExpiredSignatureError:
+            disconnect()
+        except jwt.InvalidTokenError:
+            disconnect()
+        except Exception:
+            traceback.print_exc()
+            disconnect()
 
     return wrapper
 
@@ -132,17 +124,7 @@ def auth_socket_check(f):
 def admin_only_socket(f):
     @wraps(f)
     def wrapper(self, msg_json, user, *args, **kwargs):
-        session = Session()
-        token = msg_json["token"]
-        data = jwt.decode(token, current_app.config["SECRET_KEY"])
-        user = (
-            session.query(User)
-            .options(joinedload(User.organization))
-            .filter_by(email=data["sub"]["email"])
-            .first()
-        )
-        session.close()
-        if user.role in ["user", "editor"]:
+        if user.role.name in ["user", "editor"]:
             disconnect()
 
         return f(self, msg_json, user, *args, **kwargs)
@@ -153,18 +135,9 @@ def admin_only_socket(f):
 def admin_or_editor_only_socket(f):
     @wraps(f)
     def wrapper(self, msg_json, user, *args, **kwargs):
-        session = Session()
-        token = msg_json["token"]
-        data = jwt.decode(token, current_app.config["SECRET_KEY"])
-        user = (
-            session.query(User)
-            .options(joinedload(User.organization))
-            .filter_by(email=data["sub"]["email"])
-            .first()
-        )
-        session.close()
-        if user.role == "user":
+        if user.role.name == "user":
             disconnect()
+
         return f(self, msg_json, user, *args, **kwargs)
 
     return wrapper

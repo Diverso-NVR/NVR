@@ -13,7 +13,7 @@ from flask_socketio import SocketIO
 from .apis.calendar_api import create_calendar, delete_calendar
 from .apis.drive_api import create_folder
 from .email import send_email
-from .models import Session, Room, Source, User
+from .models import Session, Room, Source, User, Role
 from .decorators import (
     auth_socket_check,
     admin_only_socket,
@@ -188,11 +188,15 @@ class NvrNamespace(Namespace):
     def on_change_role(self, msg_json, current_user):
         session = Session()
         user = session.query(User).get(msg_json["id"])
-        user.role = msg_json["role"]
-        socket_room = current_user.organization_id
-        emit("change_role", {"id": user.id, "role": user.role}, room=socket_room)
+
+        role_name = msg_json["role"]
+        role_id = session.query(Role).filter_by(name=role_name).first().id
+        user.role_id = role_id
+
         session.commit()
         session.close()
+        socket_room = current_user.organization_id
+        emit("change_role", {"id": user.id, "role": user.role.name}, room=socket_room)
 
     @log_info
     @auth_socket_check

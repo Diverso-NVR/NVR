@@ -8,76 +8,76 @@ const router = new Router({
   routes: [
     {
       path: "/",
-      redirect: "/rooms",
+      redirect: "/rooms"
     },
     {
       path: "/login",
       component: () => import("@/components/auth/Login"),
-      meta: { title: "Вход" },
+      meta: { title: "Вход" }
     },
     {
       path: "/register",
       component: () => import("@/components/auth/Register"),
-      meta: { title: "Регистрация" },
+      meta: { title: "Регистрация" }
     },
     {
       path: "/reset-pass",
       component: () => import("@/components/auth/GetEmail"),
-      meta: { title: "Сброс пароля" },
+      meta: { title: "Сброс пароля" }
     },
     {
       path: "/reset-pass/:token",
       component: () => import("@/components/auth/ResetPass"),
-      meta: { title: "Сброс пароля" },
+      meta: { title: "Сброс пароля" }
     },
     {
       path: "/rooms",
       component: () => import("@/components/campus/Rooms"),
       beforeEnter: authRequired,
-      meta: { title: "Аудитории" },
+      meta: { title: "Аудитории" }
     },
     {
       path: "/records",
       component: () => import("@/components/users/Records"),
       beforeEnter: authRequired,
-      meta: { title: "Записи" },
+      meta: { title: "Записи" }
     },
     {
       path: "/mediaarchive",
       component: () => import("@/components/campus/Mediaarchive"),
       beforeEnter: authRequired,
-      meta: { title: "Медиаархив" },
+      meta: { title: "Медиаархив" }
     },
     {
       path: "/access-requests",
       component: () => import("@/components/users/AccessRequests"),
       beforeEnter: adminOnly,
-      meta: { title: "Запросы на доступ" },
+      meta: { title: "Запросы на доступ" }
     },
     {
       path: "/users",
       component: () => import("@/components/users/Users"),
       beforeEnter: adminOnly,
-      meta: { title: "Пользователи" },
+      meta: { title: "Пользователи" }
     },
     {
       path: "/black-list",
       component: () => import("@/components/users/BlackList"),
       beforeEnter: adminOnly,
-      meta: { title: "Черный список" },
+      meta: { title: "Черный список" }
     },
     {
       path: "/manage-api",
       component: () => import("@/components/api/ManageApi"),
       beforeEnter: adminOrEditor,
-      meta: { title: "API" },
+      meta: { title: "API" }
     },
     {
       path: "/*",
-      redirect: "/rooms",
-    },
+      redirect: "/rooms"
+    }
   ],
-  mode: "history",
+  mode: "history"
 });
 
 router.beforeEach((to, from, next) => {

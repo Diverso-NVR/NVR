@@ -14,7 +14,6 @@ import io from "socket.io-client";
 const SOCKET_URL = `${process.env.NVR_URL}/websocket`;
 export const socket = io(SOCKET_URL);
 
-
 Vue.use(VSwitch);
 Vue.use(Vuetify);
 Vue.config.productionTip = false;

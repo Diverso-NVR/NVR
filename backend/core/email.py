@@ -7,6 +7,7 @@ from premailer import transform
 
 
 NVR_CLIENT_URL = os.environ.get("NVR_CLIENT_URL")
+NOTIFICATION_EMAIL = os.environ.get("NOTIFICATION_EMAIL")
 mail = Mail()
 
 
