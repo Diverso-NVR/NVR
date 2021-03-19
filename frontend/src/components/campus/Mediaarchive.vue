@@ -106,7 +106,7 @@ export default {
   }),
   methods: {
     dateFormat(date) {
-      let ts = Date.parse(date);
+      let ts = Date.parse(date.replace(/-/g, "/"));
       let formattedDate = new Date(ts);
       return formattedDate.toLocaleString("ru", this.options);
     },
