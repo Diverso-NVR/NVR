@@ -97,7 +97,7 @@ class User(Base, CommonMixin):
 
     email = Column(String(120), unique=True, nullable=False)
     password = Column(String(255), default=None)
-    role = Column(String(50), default="user")
+    # role = Column(String(50), default="user")
     email_verified = Column(Boolean, default=False)
     access = Column(Boolean, default=False)
     api_key = Column(String(255), unique=True)
@@ -108,6 +108,7 @@ class User(Base, CommonMixin):
     records = relationship("UserRecord", back_populates="user")
 
     organization_id = Column(Integer, ForeignKey("organizations.id"))
+    role_id = Column(Integer, ForeignKey("roles.id"))
 
     def __init__(self, email, organization_id, password=None):
         self.email = email
@@ -166,6 +167,9 @@ class User(Base, CommonMixin):
         user = session.query(User).get(self.id)
         if not user.email_verified:
             session.delete(user)
+            if user.role.name == "super_admin":
+                org = session.query(Organization).get(user.organization_id)
+                session.delete(org)
             session.commit()
         session.close()
 
@@ -188,12 +192,12 @@ class User(Base, CommonMixin):
         return dict(
             id=self.id,
             email=self.email,
-            role=self.role,
             email_verified=self.email_verified,
             access=self.access,
             last_login=str(self.last_login),
             banned=self.banned,
             online=False,
+            role=self.role.name,
         )
 
 
@@ -292,3 +296,14 @@ class Organization(Base, CommonMixin):
             id=self.id,
             name=self.name,
         )
+
+
+class Role(Base, CommonMixin):
+    __tablename__ = "roles"
+
+    name = Column(String(50), unique=True)
+
+    users = relationship("User", backref="role")
+
+    def to_dict(self):
+        return dict(id=self.id, name=self.name)

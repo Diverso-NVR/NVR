@@ -29,7 +29,7 @@ def auth_required(f):
                 data = jwt.decode(token, current_app.config["SECRET_KEY"])
                 user = (
                     session.query(User)
-                    .options(joinedload(User.organization))
+                    .options(joinedload(User.organization), joinedload(User.role))
                     .filter_by(email=data["sub"]["email"])
                     .first()
                 )
@@ -67,7 +67,7 @@ def auth_required(f):
 def admin_only(f):
     @wraps(f)
     def wrapper(user, *args, **kwargs):
-        if user.role in ["user", "editor"]:
+        if user.role.name in ["user", "editor"]:
             return jsonify({"error": "Access error"}), 401
         return f(user, *args, **kwargs)
 
@@ -77,7 +77,7 @@ def admin_only(f):
 def admin_or_editor_only(f):
     @wraps(f)
     def wrapper(user, *args, **kwargs):
-        if user.role == "user":
+        if user.role.name == "user":
             return jsonify({"error": "Access error"}), 401
         return f(user, *args, **kwargs)
 
@@ -93,4 +93,3 @@ def json_data_required(f):
         return f(*args, **kwargs)
 
     return wrapper
-

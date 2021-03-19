@@ -13,7 +13,7 @@ from flask_socketio import SocketIO
 from .apis.calendar_api import create_calendar, delete_calendar
 from .apis.drive_api import create_folder
 from .email import send_email
-from .models import Session, Room, Source, User
+from .models import Session, Room, Source, User, Role
 
 
 NVR_CLIENT_URL = os.environ.get("NVR_CLIENT_URL", "*")
@@ -158,12 +158,16 @@ class NvrNamespace(Namespace):
     @log_info
     def on_change_role(self, msg_json):
         session = Session()
+
         user = session.query(User).get(msg_json["id"])
-        user.role = msg_json["role"]
+
+        role_name = msg_json["role"]
+        role_id = session.query(Role).filter_by(name=role_name).first().id
+        user.role_id = role_id
 
         session.commit()
         session.close()
-        emit("change_role", {"id": user.id, "role": user.role}, broadcast=True)
+        emit("change_role", {"id": user.id, "role": user.role.name}, broadcast=True)
 
     @log_info
     def on_ban_user(self, msg_json):

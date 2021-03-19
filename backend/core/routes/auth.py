@@ -85,8 +85,11 @@ def verify_email(token):
         send_access_request_email(
             [
                 u.email
-                for u in g.session.query(User).all()
-                if u.role not in ["user", "editor"]
+                for u in g.session.query(User)
+                .options(joinedload(User.role))
+                .filter_by(organization_id=user.organization_id)
+                .all()
+                if u.role.name not in ["user", "editor"]
             ],
             user,
         )
@@ -143,7 +146,7 @@ def login():
         {
             "sub": {
                 "email": user.email,
-                "role": user.role,
+                "role": user.role.name,
                 "org_name": user.organization.name,
             },
             "iat": datetime.utcnow(),
@@ -188,7 +191,7 @@ def glogin():
         {
             "sub": {
                 "email": user.email,
-                "role": user.role,
+                "role": user.role.name,
                 "org_name": user.organization.name,
             },
             "iat": datetime.utcnow(),

@@ -35,7 +35,7 @@ if os.path.exists(token_path):
         with open(token_path, "wb") as token:
             pickle.dump(creds, token)
 
-calendar_service = build("calendar", "v3", credentials=creds)
+# calendar_service = build("calendar", "v3", credentials=creds)
 
 
 def create_event_(room_name: str, start_time: str, end_time: str, summary: str) -> str:
