@@ -15,7 +15,7 @@ import jwt
 from flask import Blueprint, jsonify, request, current_app, render_template, g
 
 from ..email import send_verify_email, send_access_request_email, send_reset_pass_email
-from ..models import User
+from ..models import User, Role
 from ..decorators import json_data_required
 
 api = Blueprint("auth_api", __name__)
@@ -28,6 +28,7 @@ GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
 def register():
     data = request.get_json()
     user = User(**data)
+    user.role_id = g.session.query(Role).filter_by(name="user").first().id
 
     try:
         g.session.add(user)
@@ -139,8 +140,6 @@ def login():
             403,
         )
 
-    user.last_login = datetime.utcnow()
-
     token = jwt.encode(
         {
             "sub": {
@@ -162,8 +161,10 @@ def login():
 def glogin():
     data = request.get_json()
     token = data.get("token")
+
     if not token:
         return jsonify({"error": "Bad request"}), 400
+
     try:
         idinfo = id_token.verify_oauth2_token(
             token, google_requests.Request(), GOOGLE_CLIENT_ID
@@ -174,18 +175,21 @@ def glogin():
         email = idinfo["email"]
     except ValueError:
         return jsonify({"error": "Bad token"}), 403
+
     user = g.session.query(User).filter_by(email=email).first()
     if user and user.banned:
         return (
             jsonify({"error": "Вам закрыт доступ к NVR", "authenticated": False}),
             403,
         )
+
     if not user:
         user = User(email=email)
         user.email_verified = True
         user.access = True
+        user.role_id = g.session.query(Role).filter_by(name="user").first().id
         g.session.add(user)
-    user.last_login = datetime.utcnow()
+
     token = jwt.encode(
         {
             "sub": {
@@ -199,6 +203,7 @@ def glogin():
         current_app.config["SECRET_KEY"],
     )
     g.session.commit()
+
     return jsonify({"token": token.decode("UTF-8")}), 202
 
 
