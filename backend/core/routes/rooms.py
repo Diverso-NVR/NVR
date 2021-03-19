@@ -5,11 +5,11 @@ from threading import Thread
 
 from flask import Blueprint, jsonify, request, g
 
-from ..socketio import emit_event
+from ..socketio import emit_room
 from ..apis.calendar_api import create_calendar, delete_calendar
 from ..apis.drive_api import create_folder
 from ..apis.ruz_api import get_room_ruzid
-from ..models import Session, Room, Source
+from ..models import Session, Room
 from ..decorators import json_data_required, auth_required, admin_or_editor_only
 
 
@@ -22,14 +22,14 @@ api = Blueprint("rooms_api", __name__)
 @json_data_required
 def create_room(current_user):
     data = request.get_json()
-    room_name = data.get('name')
+    room_name = data.get("name")
     if not room_name:
         return jsonify({"error": "Room name required"}), 400
 
     room = Room(name=room_name, organization_id=current_user.organization_id)
     room.sources = []
-    
-    emit_event("add_room", {"room": room.to_dict()})
+
+    emit_room("add_room", {"room": room.to_dict()}, current_user.organization_id)
 
     Thread(target=config_room, args=(room.id)).start()
     g.session.add(room)
@@ -87,6 +87,8 @@ def delete_room(current_user, room_id):
     g.session.delete(room)
     g.session.commit()
 
-    emit_event("delete_room", {"id": room.id, "name": room.name})
+    emit_room(
+        "delete_room", {"id": room.id, "name": room.name}, current_user.organization_id
+    )
 
     return jsonify({"message": "Room deleted"}), 200

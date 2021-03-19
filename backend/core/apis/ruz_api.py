@@ -2,6 +2,7 @@ import requests
 
 RUZ_API_URL = "http://92.242.58.221/ruzservice.svc"
 
+
 # building id МИЭМа = 92
 def get_all_rooms(building_id: int = 92) -> list:
     try:
