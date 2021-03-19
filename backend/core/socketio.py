@@ -192,11 +192,11 @@ class NvrNamespace(Namespace):
         role_name = msg_json["role"]
         role_id = session.query(Role).filter_by(name=role_name).first().id
         user.role_id = role_id
+        socket_room = current_user.organization_id
+        emit("change_role", {"id": user.id, "role": user.role.name}, room=socket_room)
 
         session.commit()
         session.close()
-        socket_room = current_user.organization_id
-        emit("change_role", {"id": user.id, "role": user.role.name}, room=socket_room)
 
     @log_info
     @auth_socket_check
