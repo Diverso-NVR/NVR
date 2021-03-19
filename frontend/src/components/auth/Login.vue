@@ -110,6 +110,7 @@ export default {
     },
     async onSubmit() {
       if (this.$refs.form.validate()) {
+
         let res = await this.$store.dispatch("login", {
           email: this.email,
           password: this.password,
@@ -121,7 +122,8 @@ export default {
       Vue.use(VueSocketIOExt, socket, { store });
       await this.$store.dispatch("loadRooms");
       await this.$store.dispatch("loadRecords");
-      await this.$store.dispatch("loadEruditeRecords")
+      await this.$store.dispatch("loadEruditeRecords");
+      await this.$store.dispatch("joinRoom");
       this.$router.push("/rooms");
       if (this.isAdmin) {
         await this.$store.dispatch("getUsers");

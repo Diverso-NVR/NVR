@@ -274,7 +274,6 @@ class Source(Base, CommonMixin):
             audio=self.audio,
             merge=self.audio,
             room_id=self.room_id,
-            modified_at=self.modified_at,
             external_id=self.external_id,
         )
 

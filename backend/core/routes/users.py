@@ -66,7 +66,7 @@ def manage_api_key(current_user, email):
 def get_urls(current_user, user_email):
     if user_email != current_user.email:
         return jsonify({"error": "Access error"}), 403
-        
+
     user = g.session.query(User).filter_by(email=user_email).first()
     return jsonify([u_rec.record.to_dict() for u_rec in user.records]), 200
 
