@@ -116,17 +116,18 @@ export default {
         if (res) await this.loadData();
       }
     },
-    async loadData(res) {
+    loadData(res) {
       Vue.use(VueSocketIOExt, socket, { store });
+      this.$store.dispatch("joinRoom");
       this.$router.push("/rooms");
-      await this.$store.dispatch("loadRooms");
-      await this.$store.dispatch("loadRecords");
-      await this.$store.dispatch("loadEruditeRecords");
+      this.$store.dispatch("loadRooms");
+      this.$store.dispatch("loadRecords");
+      this.$store.dispatch("loadEruditeRecords");
       if (this.isAdmin) {
-        await this.$store.dispatch("getUsers");
+        this.$store.dispatch("getUsers");
       }
       if (this.isAdminOrEditor) {
-        await this.$store.dispatch("getKey");
+        this.$store.dispatch("getKey");
       }
     },
     getEmail() {

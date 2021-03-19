@@ -14,7 +14,6 @@ import io from "socket.io-client";
 const SOCKET_URL = `${process.env.NVR_URL}/websocket`;
 export const socket = io(SOCKET_URL);
 
-
 Vue.use(VSwitch);
 Vue.use(Vuetify);
 Vue.config.productionTip = false;
@@ -24,7 +23,8 @@ if (store.getters.isAutheticated) {
     Vue.use(VueSocketIOExt, socket, { store });
     store.dispatch("loadRooms");
     store.dispatch("loadRecords");
-    store.dispatch("loadEruditeRecords")
+    store.dispatch("loadEruditeRecords");
+    store.dispatch("joinRoom");
     if (isAdmin()) {
       store.dispatch("getUsers");
     }

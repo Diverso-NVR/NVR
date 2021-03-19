@@ -3,11 +3,10 @@
 
 from datetime import datetime
 
-import requests
 from flask import Blueprint, jsonify, request, g
 
-from ..socketio import emit_event
-from ..models import Room, Source, Record, User, UserRecord
+from ..socketio import emit_room
+from ..models import Room, Record, User, UserRecord
 from ..decorators import json_data_required, auth_required, admin_or_editor_only
 
 
@@ -85,9 +84,10 @@ def auto_control(current_user, room_id):
     room.auto_control = auto_control
     g.session.commit()
 
-    emit_event(
+    emit_room(
         "auto_control_change",
         {"id": room.id, "auto_control": room.auto_control, "room_name": room.name},
+        current_user.organization_id,
     )
 
     return (

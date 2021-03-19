@@ -52,10 +52,11 @@ const mutations = {
   }
 };
 const actions = {
-  async emitAutoControlChange({}, { room, auto_control }) {
+  async emitAutoControlChange({ state }, { room, auto_control }) {
     await this._vm.$socket.client.emit("auto_control_change", {
       id: room.id,
-      auto_control
+      auto_control,
+      token: state.jwt.token
     });
   },
   async socket_autoControlChange({ commit }, message) {
@@ -68,8 +69,11 @@ const actions = {
       console.error(error);
     }
   },
-  async emitDeleteRoom({}, { room }) {
-    await this._vm.$socket.client.emit("delete_room", { id: room.id });
+  async emitDeleteRoom({ state }, { room }) {
+    await this._vm.$socket.client.emit("delete_room", {
+      id: room.id,
+      token: state.jwt.token
+    });
   },
   socket_deleteRoom({ commit }, message) {
     try {
@@ -77,8 +81,11 @@ const actions = {
       commit("setMessage", `Комната ${message.name} удалена`);
     } catch (error) {}
   },
-  async emitAddRoom({ commit }, { name }) {
-    await this._vm.$socket.client.emit("add_room", { name });
+  async emitAddRoom({ state, commit }, { name }) {
+    await this._vm.$socket.client.emit("add_room", {
+      name,
+      token: state.jwt.token
+    });
   },
   socket_addRoom({ commit }, message) {
     try {
@@ -88,38 +95,52 @@ const actions = {
       console.error(error);
     }
   },
-  async emitEditRoom({ commit }, payload) {
-    await this._vm.$socket.client.emit("edit_room", payload);
+  async emitEditRoom({ state, commit }, payload) {
+    await this._vm.$socket.client.emit("edit_room", {
+      payload: payload,
+      token: state.jwt.token
+    });
     commit("setMessage", "Изменения сохранены");
   },
   socket_editRoom({ commit }, message) {
     commit("EDIT_ROOM", message);
   },
-  async emitDeleteUser({ commit }, { user }) {
-    await this._vm.$socket.client.emit("delete_user", { id: user.id });
+  async emitDeleteUser({ state, commit }, { user }) {
+    await this._vm.$socket.client.emit("delete_user", {
+      id: user.id,
+      token: state.jwt.token
+    });
     commit("setMessage", `Пользователь ${user.email} удалён`);
   },
   socket_deleteUser({ commit }, message) {
     commit("DELETE_USER", message);
   },
-  async emitChangeRole({}, { user }) {
+  async emitChangeRole({ state }, { user }) {
     await this._vm.$socket.client.emit("change_role", {
       id: user.id,
-      role: user.role
+      role: user.role,
+      token: state.jwt.token
     });
   },
   socket_changeRole({ commit }, message) {
     commit("CHANGE_ROLE", message);
   },
-  async emitBanUser({ commit }, { user }) {
-    await this._vm.$socket.client.emit("ban_user", { id: user.id });
+  async emitBanUser({ state, commit }, { user }) {
+    await this._vm.$socket.client.emit("ban_user", {
+      id: user.id,
+      token: state.jwt.token
+    });
     commit("setMessage", `Пользователь ${user.email} заблокирован`);
   },
+
   socket_blockUser({ commit }, message) {
     commit("BAN_USER", message);
   },
-  async emitUnblockUser({ commit }, { user }) {
-    await this._vm.$socket.client.emit("unblock_user", { id: user.id });
+  async emitUnblockUser({ state, commit }, { user }) {
+    await this._vm.$socket.client.emit("unblock_user", {
+      id: user.id,
+      token: state.jwt.token
+    });
     commit("setMessage", `Пользователь ${user.email} разблокирован`);
   },
   socket_unblockUser({ commit }, message) {
@@ -127,7 +148,8 @@ const actions = {
   },
   async socket_kickBanned({ state, commit }, {}) {
     await this._vm.$socket.client.emit("kick_banned", {
-      email: state.user.email
+      email: state.user.email,
+      token: state.jwt.token
     });
   },
   async socket_kickUser({ state, commit }, { email }) {
@@ -139,19 +161,18 @@ const actions = {
   },
   async socket_checkOnline({ state, commit }, {}) {
     await this._vm.$socket.client.emit("check_online", {
-      email: state.user.email
+      email: state.user.email,
+      token: state.jwt.token
     });
   },
   async socket_showOnline({ state, commit }, message) {
     commit("CHECK_ONLINE", message);
   },
-
-  async socket_checkSockets({ state, commit }, {}) {
-    commit("setMessage", "test sockets");
-  },
-
-  async emitGrantAccess({}, { user }) {
-    await this._vm.$socket.client.emit("grant_access", { id: user.id });
+  async emitGrantAccess({ state }, { user }) {
+    await this._vm.$socket.client.emit("grant_access", {
+      id: user.id,
+      token: state.jwt.token
+    });
   },
   socket_grantAccess({ commit }, message) {
     commit("GRANT_ACCESS", message);
@@ -162,6 +183,9 @@ const actions = {
   },
   socket_error({ commit }, message) {
     commit("setErrorFromText", message);
+  },
+  async joinRoom({ state, commit }) {
+    await this._vm.$socket.client.emit("join_room", { token: state.jwt.token });
   },
   async loadRooms({ commit, state }) {
     try {
@@ -236,7 +260,8 @@ const actions = {
   },
   async logout({ commit, state }) {
     await this._vm.$socket.client.emit("logout_online", {
-      email: state.user.email
+      email: state.user.email,
+      token: state.jwt.token
     });
     commit("clearUserData");
   },

@@ -9,7 +9,7 @@ import traceback
 
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
-from ..socketio import emit_event
+from ..socketio import emit_room
 
 import jwt
 from flask import Blueprint, jsonify, request, current_app, render_template, g
@@ -96,7 +96,7 @@ def verify_email(token):
         traceback.print_exc()
         return "Server error", 500
 
-    emit_event("new_user", {"user": user.to_dict()})
+    emit_room("new_user", {"user": user.to_dict()}, room=user.organization_id)
 
     return (
         render_template(
