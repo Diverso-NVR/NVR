@@ -41,13 +41,6 @@ def send_verify_email(user, token_expiration: int) -> None:
         recipients=[user.email],
         html_body=render_template("email/verify_email.html", user=user, url=url),
     )
-    if user.role.name == "super_admin":
-        send_email(
-            "[NVR] Новая организация",
-            sender=current_app.config["ADMINS"][0],
-            recipients=[NOTIFICATION_EMAIL],
-            # html_body=
-        )
 
 
 def send_reset_pass_email(user, token_expiration: int) -> None:

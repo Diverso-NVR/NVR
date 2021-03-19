@@ -131,6 +131,7 @@ export default {
           user.access === true &&
           user.email !== state.user.email &&
           user.role !== "superadmin" &&
+          user.role !== "service" &&
           user.banned === false
       ),
     loader() {
@@ -145,6 +146,7 @@ export default {
       this.isLarge = window.innerWidth < 1521;
     },
     changeRole(user) {
+      console.log(user);
       if (user.role === "user") user.role = "editor";
       else if (user.role === "editor") user.role = "admin";
       else user.role = "user";

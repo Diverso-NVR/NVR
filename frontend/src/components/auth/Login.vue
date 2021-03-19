@@ -58,7 +58,7 @@
 <script>
 import Vue from "vue";
 import VueSocketIOExt from "vue-socket.io-extended";
-import { socket } from '@/main';
+import { socket } from "@/main";
 import store from "@/store";
 import { isAdmin, isAdminOrEditor } from "@/utils";
 
@@ -101,7 +101,6 @@ export default {
     });
   },
   methods: {
-
     async onSignIn(user) {
       const email = user.getBasicProfile().getEmail();
       const token = user.getAuthResponse().id_token;
@@ -119,10 +118,10 @@ export default {
     },
     async loadData(res) {
       Vue.use(VueSocketIOExt, socket, { store });
+      this.$router.push("/rooms");
       await this.$store.dispatch("loadRooms");
       await this.$store.dispatch("loadRecords");
-      await this.$store.dispatch("loadEruditeRecords")
-      this.$router.push("/rooms");
+      await this.$store.dispatch("loadEruditeRecords");
       if (this.isAdmin) {
         await this.$store.dispatch("getUsers");
       }

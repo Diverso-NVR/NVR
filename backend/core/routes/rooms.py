@@ -22,13 +22,13 @@ api = Blueprint("rooms_api", __name__)
 @json_data_required
 def create_room(current_user):
     data = request.get_json()
-    room_name = data.get('name')
+    room_name = data.get("name")
     if not room_name:
         return jsonify({"error": "Room name required"}), 400
 
     room = Room(name=room_name, organization_id=current_user.organization_id)
     room.sources = []
-    
+
     emit_event("add_room", {"room": room.to_dict()})
 
     Thread(target=config_room, args=(room.id)).start()

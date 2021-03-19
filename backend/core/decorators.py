@@ -27,12 +27,7 @@ def auth_required(f):
         if token:
             try:
                 data = jwt.decode(token, current_app.config["SECRET_KEY"])
-                user = (
-                    session.query(User)
-                    .options(joinedload(User.organization), joinedload(User.role))
-                    .filter_by(email=data["sub"]["email"])
-                    .first()
-                )
+                user = session.query(User).filter_by(email=data["sub"]["email"]).first()
                 session.close()
                 if not user:
                     return jsonify({"error": "User not found"}), 404

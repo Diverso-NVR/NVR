@@ -28,9 +28,9 @@ def emit_event(event, data):
 def log_info(f):
     @wraps(f)
     def wrapper(*args):
-        # logging.getLogger("flask.app").info(
-        #     f"Emitted function {f.__name__} with args: {args}"
-        # )
+        logging.getLogger("flask.app").info(
+            f"Emitted function {f.__name__} with args: {args}"
+        )
 
         return f(*args)
 
@@ -158,7 +158,6 @@ class NvrNamespace(Namespace):
     @log_info
     def on_change_role(self, msg_json):
         session = Session()
-
         user = session.query(User).get(msg_json["id"])
 
         role_name = msg_json["role"]

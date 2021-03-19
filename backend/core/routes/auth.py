@@ -86,7 +86,6 @@ def verify_email(token):
             [
                 u.email
                 for u in g.session.query(User)
-                .options(joinedload(User.role))
                 .filter_by(organization_id=user.organization_id)
                 .all()
                 if u.role.name not in ["user", "editor"]

@@ -3,7 +3,6 @@
 
 import uuid
 import traceback
-import json
 
 from flask import Blueprint, jsonify, request, g, current_app
 
@@ -20,12 +19,6 @@ api = Blueprint("users_api", __name__)
 @auth_required
 @admin_only
 def get_users(current_user):
-    # users = g.session.query(User).all()
-    # roles = g.session.query(Role).all()
-    # for usr in users:
-    #     usr.role_id = g.session.query(Role).filter_by(name=usr.role).first().id
-    # g.session.commit()
-
     users = [
         u.to_dict()
         for u in g.session.query(User).filter(
@@ -74,8 +67,7 @@ def get_urls(current_user, user_email):
     if user_email != current_user.email:
         return jsonify({"error": "Access error"}), 403
 
-    user = g.session.query(User).filter_by(email=user_email).first()
-    return jsonify([u_rec.record.to_dict() for u_rec in user.records]), 200
+    return jsonify([u_rec.record.to_dict() for u_rec in current_user.records]), 200
 
 
 @api.route("/users", methods=["POST"])
@@ -125,8 +117,7 @@ def invite_users(current_user):
 
 
 @api.route("/roles", methods=["GET"])
-def get_all_roles():
+@auth_required
+def get_all_roles(current_user):
     roles = g.session.query(Role).all()
-    a = list(map(lambda role: role.to_dict(), roles))
-    return json.dumps(a)
-    return 0
+    return jsonify([role.to_dict() for role in roles])

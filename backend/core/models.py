@@ -97,7 +97,6 @@ class User(Base, CommonMixin):
 
     email = Column(String(120), unique=True, nullable=False)
     password = Column(String(255), default=None)
-    # role = Column(String(50), default="user")
     email_verified = Column(Boolean, default=False)
     access = Column(Boolean, default=False)
     api_key = Column(String(255), unique=True)
@@ -105,10 +104,13 @@ class User(Base, CommonMixin):
 
     banned = Column(Boolean, default=False)
 
-    records = relationship("UserRecord", back_populates="user")
+    records = relationship("UserRecord", back_populates="user", lazy="joined")
 
     organization_id = Column(Integer, ForeignKey("organizations.id"))
+    organization = relationship("Organization", back_populates="users", lazy="joined")
+
     role_id = Column(Integer, ForeignKey("roles.id"))
+    role = relationship("Role", back_populates="users", lazy="joined")
 
     def __init__(self, email, organization_id, password=None):
         self.email = email
@@ -167,9 +169,6 @@ class User(Base, CommonMixin):
         user = session.query(User).get(self.id)
         if not user.email_verified:
             session.delete(user)
-            if user.role.name == "super_admin":
-                org = session.query(Organization).get(user.organization_id)
-                session.delete(org)
             session.commit()
         session.close()
 
@@ -217,9 +216,10 @@ class Room(Base, CommonMixin):
     auto_control = Column(Boolean, default=True)
 
     records = relationship("Record", back_populates="room")
-    sources = relationship("Source", backref="room", lazy=False)
+    sources = relationship("Source", backref="room")
 
     organization_id = Column(Integer, ForeignKey("organizations.id"))
+    organization = relationship("Organization", back_populates="rooms", lazy="joined")
 
     def to_dict(self):
         return dict(
@@ -288,8 +288,8 @@ class Organization(Base, CommonMixin):
 
     name = Column(String(100), unique=True, nullable=False)
 
-    users = relationship("User", backref="organization")
-    rooms = relationship("Room", backref="organization")
+    users = relationship("User", back_populates="organization")
+    rooms = relationship("Room", back_populates="organization")
 
     def to_dict(self):
         return dict(
@@ -303,7 +303,7 @@ class Role(Base, CommonMixin):
 
     name = Column(String(50), unique=True)
 
-    users = relationship("User", backref="role")
+    users = relationship("User", back_populates="role")
 
     def to_dict(self):
         return dict(id=self.id, name=self.name)
