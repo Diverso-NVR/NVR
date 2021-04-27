@@ -222,7 +222,6 @@ class NvrNamespace(Namespace):
         session.commit()
         session.close()
 
-    @log_info
     @auth_socket_check
     def on_kick_banned(self, msg_json, current_user):
         session = Session()
@@ -234,7 +233,6 @@ class NvrNamespace(Namespace):
 
         session.close()
 
-    @log_info
     @auth_socket_check
     def on_check_online(self, msg_json, current_user):
         session = Session()
