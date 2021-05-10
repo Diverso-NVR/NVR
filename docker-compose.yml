@@ -7,6 +7,31 @@ services:
       - '6379'
     network_mode: host
 
+  cadvisor:
+    depends_on:
+      - redis
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    ports:
+      - 8080:8080
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - 9090:9090
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - cadvisor
+
   app:
     depends_on:
       - redis
@@ -19,20 +44,22 @@ services:
     env_file:
       - .env_nvr
     volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
       - ./backend:/backend
       - ~/creds:/creds
+      - ~/env_files:/env_files
     expose:
       - '5000'
     network_mode: host
 
-  fileuploader:
-    depends_on:
-      - redis
-    build: ./fileuploader
-    container_name: nvr-fileuploader
-    volumes:
-      - ./fileuploader:/fileuploader
-      - ~/creds:/creds
-    expose:
-      - '5500'
-    network_mode: host
+#  fileuploader:
+#    depends_on:
+#      - redis
+#    build: ./fileuploader
+#    container_name: nvr-fileuploader
+#    volumes:
+#      - ./fileuploader:/fileuploader
+#      - ~/creds:/creds
+#    expose:
+#      - '5500'
+#    network_mode: host

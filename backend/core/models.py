@@ -3,9 +3,9 @@
 """
 
 import os
+import time
 import uuid
 from datetime import datetime
-import time
 
 import jwt
 from sqlalchemy import (
@@ -18,8 +18,8 @@ from sqlalchemy import (
     DateTime,
 )
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.sql.expression import func
 from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.sql.expression import func
 from werkzeug.security import generate_password_hash, check_password_hash
 
 Base = declarative_base()
@@ -131,9 +131,9 @@ class User(Base, CommonMixin):
 
         user = session.query(cls).filter_by(email=email).first()
         if (
-            not user
-            or not user.password
-            or not check_password_hash(user.password, password)
+                not user
+                or not user.password
+                or not check_password_hash(user.password, password)
         ):
             return None
 
@@ -287,8 +287,8 @@ class Organization(Base, CommonMixin):
 
     name = Column(String(100), unique=True, nullable=False)
 
-    users = relationship("User", back_populates="organization")
-    rooms = relationship("Room", back_populates="organization")
+    users = relationship("User", back_populates="organizations")
+    rooms = relationship("Room", back_populates="organizations")
 
     def to_dict(self):
         return dict(
@@ -306,3 +306,38 @@ class Role(Base, CommonMixin):
 
     def to_dict(self):
         return dict(id=self.id, name=self.name)
+
+
+class Autorecord(Base, CommonMixin):
+    __tablename__ = "autorecords"
+
+    name = Column(String(100), unique=True, nullable=False)
+    days = Column(String(100))
+    duration = Column(Integer)
+    record_start = Column(Integer)
+    record_end = Column(Integer)
+    upload_without_sound = Column(Integer)
+    user_id = Column(Integer, ForeignKey("users.id"))
+
+    user = relationship("User", back_populates="autorecords")
+
+    def update(self, autorec):
+        self.name = autorec.name
+        self.days = autorec.days
+        self.duration = autorec.duration
+        self.record_start = autorec.record_start
+        self.record_end = autorec.record_end
+        self.upload_without_sound = autorec.upload_without_sound
+        self.user_id = autorec.user_id
+
+    def to_dict(self):
+        return dict(
+            id=self.id,
+            name=self.name,
+            days=self.days,
+            duration=self.duration,
+            record_start=self.record_start,
+            record_end=self.record_end,
+            upload_without_sound=self.upload_without_sound,
+            user_id=self.user_id
+        )

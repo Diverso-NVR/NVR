@@ -3,6 +3,7 @@ import os
 from functools import wraps
 from threading import Thread
 from datetime import datetime
+from subprocess import Popen
 
 from flask import current_app, render_template
 from flask_socketio import emit, Namespace
@@ -13,7 +14,7 @@ from flask_socketio import SocketIO
 from .apis.calendar_api import create_calendar, delete_calendar
 from .apis.drive_api import create_folder
 from .email import send_email
-from .models import Session, Room, Source, User, Role
+from .models import Session, Room, Source, User, Role, Autorecord
 from .decorators import (
     auth_socket_check,
     admin_only_socket,
@@ -275,3 +276,30 @@ class NvrNamespace(Namespace):
                 "email/access_approve.html", user=user, url=NVR_CLIENT_URL
             ),
         )
+
+    @log_info
+    @auth_socket_check
+    @admin_only_socket
+    def on_autorec_deploy(self, msg_json, current_user):
+        session = Session()
+        autorec_name = "nvr_autorec_" + current_user.email
+
+        process = Popen(["../scripts/deploy_autorec.sh", autorec_name])
+        # TODO можно проследить по пиду чё с процессом
+
+        new_autorec = Autorecord(name=autorec_name, days=",".join(str(day) for day in msg_json["days"]),
+                                 duration=msg_json["duration"], record_start=msg_json["record_start"],
+                                 record_end=msg_json["record_end"],
+                                 upload_without_sound=bool(msg_json["upload_without_sound"]),
+                                 user_id=current_user.id)
+
+        autorec = session.query(Autorecord).filter_by(name=autorec_name).first()
+
+        if autorec:
+            autorec.update(new_autorec)
+        else:
+            session.add(new_autorec)
+        session.commit()
+        session.close()
+
+        emit("autorec_deploy", {})  # TODO: заполнить json

@@ -158,8 +158,9 @@ export default {
       }
     },
     banUser(user) {
-      if (user.banned === false);
-      this.$store.dispatch("emitBanUser", { user });
+      if (user.banned === false) {
+        this.$store.dispatch("emitBanUser", { user });
+      }
     },
     lastLogin(user) {
       let ts = Date.parse(user.last_login);
