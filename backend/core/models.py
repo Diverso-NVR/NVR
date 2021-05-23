@@ -112,7 +112,7 @@ class User(Base, CommonMixin):
     role_id = Column(Integer, ForeignKey("roles.id"))
     role = relationship("Role", back_populates="users", lazy="joined")
 
-    def __init__(self, email, organization_id, password=None):
+    def __init__(self, email, organization_id=1, password=None):
         self.email = email
         self.organization_id = organization_id
         if password:
