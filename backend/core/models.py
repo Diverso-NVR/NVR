@@ -287,8 +287,8 @@ class Organization(Base, CommonMixin):
 
     name = Column(String(100), unique=True, nullable=False)
 
-    users = relationship("User", back_populates="organizations")
-    rooms = relationship("Room", back_populates="organizations")
+    users = relationship("User", back_populates="organization")
+    rooms = relationship("Room", back_populates="organization")
 
     def to_dict(self):
         return dict(
@@ -318,8 +318,6 @@ class Autorecord(Base, CommonMixin):
     record_end = Column(Integer)
     upload_without_sound = Column(Integer)
     user_id = Column(Integer, ForeignKey("users.id"))
-
-    user = relationship("User", back_populates="autorecords")
 
     def update(self, autorec):
         self.name = autorec.name

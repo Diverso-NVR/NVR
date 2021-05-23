@@ -106,3 +106,9 @@ export function createMontageEvent(
     }
   );
 }
+
+export function getAutorecParams(token) {
+  return axios.get(`${API_URL}/autorec-config`, {
+    headers: { Token: token}
+  });
+}

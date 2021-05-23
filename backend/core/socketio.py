@@ -282,7 +282,7 @@ class NvrNamespace(Namespace):
     @admin_only_socket
     def on_autorec_deploy(self, msg_json, current_user):
         session = Session()
-        autorec_name = "nvr_autorec_" + current_user.email
+        autorec_name = "nvr_autorec_" + current_user.email.replace("@", "_")
 
         process = Popen(["../scripts/deploy_autorec.sh", autorec_name])
         # TODO можно проследить по пиду чё с процессом

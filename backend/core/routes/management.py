@@ -25,7 +25,7 @@ default_days = {
 time_pattern = re.compile("^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$")
 
 
-@api.route("/deploy-autorec", methods=["PUT"])
+@api.route("/autorec-deploy", methods=["PUT"])
 @auth_required
 @admin_only
 def deploy_autorec(current_user):
@@ -52,7 +52,7 @@ def deploy_autorec(current_user):
 
     upload_without_sound: bool = bool(body["upload_without_sound"])
 
-    autorec_name = "nvr_autorec_" + current_user.email
+    autorec_name = "nvr_autorec_" + current_user.email.replace("@", "_")
 
     if not create_env_file(autorec_name, days, duration,
                            record_start, record_end,
@@ -77,11 +77,11 @@ def deploy_autorec(current_user):
     return jsonify({"message": "Deployment started"}, 200)
 
 
-@api.route("/monitoring", methods=["GET"])
+@api.route("/autorec-monitoring", methods=["GET"])
 @auth_required
 @admin_only
 def get_monitoring_link(current_user):
-    autorec_name = "nvr_autorec_" + current_user.email
+    autorec_name = "nvr_autorec_" + current_user.email.replace("@", "_")
 
     autorec = g.session.query(Autorecord).filter_by(name=autorec_name).first()
 
@@ -93,11 +93,11 @@ def get_monitoring_link(current_user):
     return redirect(os.environ.get("C_ADVISOR_URL") + "/docker/" + container_id, 302)
 
 
-@api.route("/config", methods=["GET"])
+@api.route("/autorec-config", methods=["GET"])
 @auth_required
 @admin_only
 def get_autorecord_config(current_user):
-    autorec = g.session.query(Autorecord).filter_by(name="nvr_autorec_" + current_user.email).first()
+    autorec = g.session.query(Autorecord).filter_by(name="nvr_autorec_" + current_user.email.replace("@", "_")).first()
 
     if not autorec:
         return jsonify({"error": "No active autorecord instance"}, 404)

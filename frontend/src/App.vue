@@ -216,6 +216,11 @@ export default {
               url: "/users",
             },
             {
+              title: "Управление сервисами",
+              icon: "build",
+              url: "/management",
+            },
+            {
               title: "Запросы на доступ",
               icon: "verified_user",
               url: "/access-requests",

@@ -68,7 +68,7 @@ const router = new Router({
     },
     {
       path: "/management",
-      component: () => import("@/components/management/Management"),
+      component: () => import("@/components/service/Management"),
       beforeEnter: adminOnly,
       meta: { title: "Управление сервисами"}
     },

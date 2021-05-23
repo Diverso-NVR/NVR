@@ -31,10 +31,10 @@
                     <v-checkbox label="Загружать видео без звука"></v-checkbox>
                   </v-flex>
                   <div>
-                    <v-btn color="primary" :click="hui()">
+                    <v-btn color="primary" :click="deploy()">
                       Развернуть приложение
                     </v-btn>
-                    <v-btn :click="hui()"> Мониторинг </v-btn>
+                    <v-btn :click="monitoring()"> Мониторинг </v-btn>
                   </div>
                 </v-container>
               </v-form>
@@ -50,13 +50,13 @@
 <script>
 export default {
   methods: {
-    norm() {
+    deploy() {
       this.$store.dispatch(
         "setMessage",
         "Сервис автоматической записи развернут"
       );
     },
-    hui() {
+    monitoring() {
       this.$store.dispatch("setError", {
         response: {
           data: {
