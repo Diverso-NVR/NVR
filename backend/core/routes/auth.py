@@ -189,6 +189,7 @@ def glogin():
         user.access = True
         user.role_id = g.session.query(Role).filter_by(name="user").first().id
         g.session.add(user)
+        g.session.commit()
 
     token = jwt.encode(
         {
