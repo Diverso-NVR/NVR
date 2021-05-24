@@ -109,6 +109,22 @@ export function createMontageEvent(
 
 export function getAutorecParams(token) {
   return axios.get(`${API_URL}/autorec-config`, {
-    headers: { Token: token}
+    headers: { Token: token }
   });
+}
+
+export function getMonitoringLink(token) {
+  return axios.get(`${API_URL}/autorec-monitoring`, {
+    headers: { Token: token }
+  });
+}
+
+export function autorecDeploy({ days, record_start, record_end, duration, upload_without_sound }, token) {
+  return axios.put(
+      `${API_URL}/autorec-deploy`,
+    { days, record_start, record_end, duration, upload_without_sound },
+    {
+      headers: { Token: token }
+    }
+  );
 }

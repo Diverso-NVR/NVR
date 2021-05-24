@@ -13,28 +13,26 @@
                 <v-container>
                   <v-layout row wrap>
                     <v-flex xs12 sm6 md3>
-                      <v-text-field label="Дни записи"></v-text-field>
+                      <v-text-field label="Дни записи" v-model="params.days"></v-text-field>
                     </v-flex>
                     <v-flex xs12 sm6 md3>
-                      <v-text-field label="Время начала записи"></v-text-field>
+                      <v-text-field label="Время начала записи" v-model="params.record_start"></v-text-field>
                     </v-flex>
                     <v-flex xs12 sm6 md3>
-                      <v-text-field label="Время конца записи"></v-text-field>
+                      <v-text-field label="Время конца записи" v-model="params.record_end"></v-text-field>
                     </v-flex>
                     <v-flex xs12 sm6 md3>
-                      <v-text-field
-                        label="Длительность одного видео"
-                      ></v-text-field>
+                      <v-text-field label="Длительность одного видео" v-model="params.duration"></v-text-field>
                     </v-flex>
                   </v-layout>
                   <v-flex xs12 sm6 md3>
-                    <v-checkbox label="Загружать видео без звука"></v-checkbox>
+                    <v-checkbox label="Загружать видео без звука" v-model="params.upload_without_sound"></v-checkbox>
                   </v-flex>
                   <div>
-                    <v-btn color="primary" :click="deploy()">
+                    <v-btn color="primary" @click="deploy">
                       Развернуть приложение
                     </v-btn>
-                    <v-btn :click="monitoring()"> Мониторинг </v-btn>
+                    <v-btn @click="monitoring"> Мониторинг</v-btn>
                   </div>
                 </v-container>
               </v-form>
@@ -49,22 +47,66 @@
 
 <script>
 export default {
+  data() {
+    return {
+      params: {
+        days: "",
+        record_start: "",
+        record_end: "",
+        duration: "",
+        upload_without_sound: false
+      }
+    };
+  },
   methods: {
     deploy() {
       this.$store.dispatch(
-        "setMessage",
-        "Сервис автоматической записи развернут"
-      );
+        "deployAutorec",
+        {
+          days: this.params.days,
+          record_start: this.params.record_start,
+          record_end: this.params.record_end,
+          duration: this.params.duration,
+          upload_without_sound: this.params.upload_without_sound
+        }
+      ).then(res => {
+        this.$store.dispatch(
+          "setMessage",
+          "Сервис автоматической записи развернут"
+        );
+      }).catch(error => {
+        this.$store.dispatch("setError", {
+          response: {
+            data: {
+              error: "Ошибка развертывания приложения",
+            },
+          },
+        });
+      });
     },
     monitoring() {
-      this.$store.dispatch("setError", {
-        response: {
-          data: {
-            error: "Приложение ещё не развернуто",
+      this.$store.dispatch(
+        "getMonitoring"
+      ).then(res => {
+        this.$router.push(res.data.link);
+      }).catch(error => {
+        this.$store.dispatch("setError", {
+          response: {
+            data: {
+              error: "Приложение ещё не развернуто",
+            },
           },
-        },
+        });
       });
     },
   },
+  created() {
+    this.$store.dispatch(
+      "getAutorecParameters"
+    ).then(res => {
+      this.params = res.data;
+    }).catch(error => {
+    });
+  }
 };
 </script>

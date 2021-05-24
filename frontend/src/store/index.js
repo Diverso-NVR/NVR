@@ -19,10 +19,13 @@ import {
   getRooms,
   getRecords,
   createMontageEvent,
-  getEruditeRecords
+  getEruditeRecords,
+  getMonitoringLink,
+  getAutorecParams
 } from "@/api";
 import { isValidToken } from "@/utils";
 import router from "@/router/index";
+import {autorecDeploy} from "../api";
 
 Vue.use(Vuex);
 
@@ -331,6 +334,30 @@ const actions = {
       await commit("setKey", res.data);
     } catch (error) {
       commit("setError", error);
+    }
+  },
+  getMonitoring({ commit, state }) {
+    try {
+      return getMonitoringLink(state.jwt.token);
+    } catch (error) {
+      commit("setError", error);
+    }
+  },
+  getAutorecParameters({ commit, state }) {
+    try {
+      return getAutorecParams(state.jwt.token);
+    } catch (error) {
+      commit("setError", error);
+    }
+  },
+  deployAutorec({ commit, state }, payload) {
+    try {
+      commit("switchLoading");
+      return autorecDeploy(payload, state.jwt.token);
+    } catch (error) {
+      commit("setError", error);
+    } finally {
+      commit("switchLoading");
     }
   }
 };

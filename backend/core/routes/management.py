@@ -42,13 +42,13 @@ def deploy_autorec(current_user):
     duration: int = body["duration"]
 
     if duration < 10:
-        return jsonify({"error": "Duration cannot be less that 10 minutes"}, 400)
+        return jsonify({"error": "Duration cannot be less that 10 minutes"}), 400
 
     record_start: int = body["record_start"]
     record_end: int = body["record_end"]
 
     if record_start < 0 or record_start > record_end:
-        return jsonify({"error": "Wrong start/end parameters"}, 400)
+        return jsonify({"error": "Wrong start/end parameters"}), 400
 
     upload_without_sound: bool = bool(body["upload_without_sound"])
 
@@ -57,7 +57,7 @@ def deploy_autorec(current_user):
     if not create_env_file(autorec_name, days, duration,
                            record_start, record_end,
                            upload_without_sound):
-        return jsonify({"error": f"Error while creating environment file .env_nvr_autorec_{current_user.email}"}, 400)
+        return jsonify({"error": f"Error while creating environment file .env_nvr_autorec_{current_user.email}"}), 400
 
     call(["../scripts/deploy_autorec.sh", autorec_name])
 
@@ -73,7 +73,7 @@ def deploy_autorec(current_user):
         g.session.add(new_autorec)
     g.session.commit()
 
-    return jsonify({"message": "Deployment started"}, 200)
+    return jsonify({"message": "Deployment ended"}), 200
 
 
 @api.route("/autorec-monitoring", methods=["GET"])
@@ -85,11 +85,11 @@ def get_monitoring_link(current_user):
     autorec = g.session.query(Autorecord).filter_by(name=autorec_name).first()
 
     if not autorec:
-        return jsonify({"error": "No active autorecord instance"}, 404)
+        return jsonify({"error": "No active autorecord instance"}), 404
 
     container_id = check_output(["docker", "inspect", "--format=\"{{.Id}}\"", autorec_name])
 
-    return jsonify({"link": os.environ.get("C_ADVISOR_URL") + "/docker/" + container_id}, 200)
+    return jsonify({"link": os.environ.get("C_ADVISOR_URL") + "/docker/" + container_id}), 200
 
 
 @api.route("/autorec-config", methods=["GET"])
@@ -99,9 +99,9 @@ def get_autorecord_config(current_user):
     autorec = g.session.query(Autorecord).filter_by(name="nvr_autorec_" + current_user.email.replace("@", "_")).first()
 
     if not autorec:
-        return jsonify({"error": "No active autorecord instance"}, 404)
+        return jsonify({"error": "No active autorecord instance"}), 404
 
-    return jsonify(autorec.to_dict(), 200)
+    return jsonify(autorec.to_dict()), 200
 
 
 def create_env_file(autorec_name: str, days: Set, duration: int,
