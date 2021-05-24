@@ -1,6 +1,6 @@
 import os
 import re
-from subprocess import Popen, check_output
+from subprocess import call, check_output
 from typing import Set
 
 from flask import Blueprint, jsonify, request, g, redirect
@@ -59,8 +59,7 @@ def deploy_autorec(current_user):
                            upload_without_sound):
         return jsonify({"error": f"Error while creating environment file .env_nvr_autorec_{current_user.email}"}, 400)
 
-    process = Popen(["../scripts/deploy_autorec.sh", autorec_name])
-    # TODO можно проследить по пиду чё с процессом
+    call(["../scripts/deploy_autorec.sh", autorec_name])
 
     new_autorec = Autorecord(name=autorec_name, days=",".join(str(day) for day in days),
                              duration=duration, record_start=record_start, record_end=record_end,
@@ -90,7 +89,7 @@ def get_monitoring_link(current_user):
 
     container_id = check_output(["docker", "inspect", "--format=\"{{.Id}}\"", autorec_name])
 
-    return redirect(os.environ.get("C_ADVISOR_URL") + "/docker/" + container_id, 302)
+    return jsonify({"link": os.environ.get("C_ADVISOR_URL") + "/docker/" + container_id}, 200)
 
 
 @api.route("/autorec-config", methods=["GET"])

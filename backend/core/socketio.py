@@ -1,26 +1,24 @@
 import logging
 import os
-from functools import wraps
-from threading import Thread
 from datetime import datetime
-from subprocess import Popen
+from functools import wraps
+from subprocess import call
+from threading import Thread
 
 from flask import current_app, render_template
-from flask_socketio import emit, Namespace
-
-from flask_socketio import join_room
 from flask_socketio import SocketIO
+from flask_socketio import emit, Namespace
+from flask_socketio import join_room
 
 from .apis.calendar_api import create_calendar, delete_calendar
 from .apis.drive_api import create_folder
-from .email import send_email
-from .models import Session, Room, Source, User, Role, Autorecord
 from .decorators import (
     auth_socket_check,
     admin_only_socket,
     admin_or_editor_only_socket,
 )
-
+from .email import send_email
+from .models import Session, Room, Source, User, Role, Autorecord
 
 NVR_CLIENT_URL = os.environ.get("NVR_CLIENT_URL", "*")
 
@@ -284,8 +282,7 @@ class NvrNamespace(Namespace):
         session = Session()
         autorec_name = "nvr_autorec_" + current_user.email.replace("@", "_")
 
-        process = Popen(["../scripts/deploy_autorec.sh", autorec_name])
-        # TODO можно проследить по пиду чё с процессом
+        call(["../scripts/deploy_autorec.sh", autorec_name])
 
         new_autorec = Autorecord(name=autorec_name, days=",".join(str(day) for day in msg_json["days"]),
                                  duration=msg_json["duration"], record_start=msg_json["record_start"],
