@@ -3,7 +3,7 @@ import re
 from subprocess import call, check_output
 from typing import Set
 
-from flask import Blueprint, jsonify, request, g, redirect
+from flask import Blueprint, jsonify, request, g
 
 from ..decorators import auth_required, admin_only
 from ..models import Autorecord
