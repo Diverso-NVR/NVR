@@ -128,3 +128,9 @@ export function autorecDeploy({ days, record_start, record_end, duration, upload
     }
   );
 }
+
+export function autorecDelete(token) {
+  return axios.delete(`${API_URL}/autorec-delete`, {
+    headers: { Token: token }
+  });
+}

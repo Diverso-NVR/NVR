@@ -33,6 +33,7 @@
                       Развернуть приложение
                     </v-btn>
                     <v-btn @click="monitoring"> Мониторинг</v-btn>
+                    <v-btn @click="delete_autorec"> Удалить запущенное приложение</v-btn>
                   </div>
                 </v-container>
               </v-form>
@@ -88,7 +89,9 @@ export default {
       this.$store.dispatch(
         "getMonitoring"
       ).then(res => {
-        this.$router.push(res.data.link);
+        console.log(res.data.monitoring_link);
+
+        window.location.replace(res.data.monitoring_link)
       }).catch(error => {
         this.$store.dispatch("setError", {
           response: {
@@ -99,6 +102,24 @@ export default {
         });
       });
     },
+    delete_autorec() {
+      this.$store.dispatch(
+        "deleteAutorec"
+      ).then(res => {
+        this.$store.dispatch(
+          "setMessage",
+          "Сервис автоматической записи удален"
+        );
+      }).catch(error => {
+        this.$store.dispatch("setError", {
+          response: {
+            data: {
+              error: "Сервис не существует или при его удалении произошла ошибка",
+            },
+          },
+        });
+      });
+    }
   },
   created() {
     this.$store.dispatch(

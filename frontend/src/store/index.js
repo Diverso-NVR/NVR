@@ -21,11 +21,12 @@ import {
   createMontageEvent,
   getEruditeRecords,
   getMonitoringLink,
-  getAutorecParams
+  getAutorecParams,
+  autorecDeploy,
+  autorecDelete
 } from "@/api";
 import { isValidToken } from "@/utils";
 import router from "@/router/index";
-import {autorecDeploy} from "../api";
 
 Vue.use(Vuex);
 
@@ -354,6 +355,16 @@ const actions = {
     try {
       commit("switchLoading");
       return autorecDeploy(payload, state.jwt.token);
+    } catch (error) {
+      commit("setError", error);
+    } finally {
+      commit("switchLoading");
+    }
+  },
+  deleteAutorec({ commit, state }) {
+    try {
+      commit("switchLoading");
+      return autorecDelete(state.jwt.token);
     } catch (error) {
       commit("setError", error);
     } finally {

@@ -8,7 +8,8 @@ docker run -d \
  -it \
  --restart on-failure \
  --name $container_name \
- --env-file /env_files/.env_$container_name \
+ -e ENV_FILE_PATH=/env_files/.env_$container_name \
  --net=host \
  -v /creds:/autorecord/creds \
+ -v /env_files:/env_files:ro \
  registry.miem.hse.ru/nvr/autorecord/autorec:latest

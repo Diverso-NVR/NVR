@@ -20,7 +20,6 @@ default_days = {
     "sunday"
 }
 
-
 # Паттерн для валидации подстрок HH:MM - в текущей реализации не нужен, но пусть лежит на всякий
 time_pattern = re.compile("^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$")
 
@@ -82,6 +81,30 @@ def deploy_autorec(current_user):
     return jsonify({"error": "Deployment error"}), 400
 
 
+@api.route("/autorec-delete", methods=["DELETE"])
+@auth_required
+@admin_only
+def autorec_delete(current_user):
+    autorec_name = "nvr_autorec_" + current_user.email.replace("@", "_")
+
+    autorec = g.session.query(Autorecord).filter_by(name=autorec_name).first()
+
+    if not autorec:
+        return jsonify({"error": "No active autorecord instance"}), 404
+
+    g.session.delete(autorec)
+    g.session.commit()
+
+    scripts_dir = os.getcwd().split("routes")[0] + "/core/scripts"
+
+    process = Popen([f"{scripts_dir}/delete_autorec.sh", autorec_name])
+    process.communicate()
+
+    if process.returncode == 0:
+        return jsonify({"message": "Autorecord instance was successfully deleted"}), 200
+
+    return jsonify({"error": "Deletion error"}), 400
+
 
 @api.route("/autorec-monitoring", methods=["GET"])
 @auth_required
@@ -94,9 +117,11 @@ def get_monitoring_link(current_user):
     if not autorec:
         return jsonify({"error": "No active autorecord instance"}), 404
 
-    container_id = check_output(["docker", "inspect", "--format=\"{{.Id}}\"", autorec_name])
+    container_id = str(check_output(["docker", "inspect", "--format=\"{{.Id}}\"", autorec_name])).split("\"")[1]
 
-    return jsonify({"link": os.environ.get("C_ADVISOR_URL") + "/docker/" + container_id}), 200
+    print("Container id: " + container_id)
+
+    return jsonify({"monitoring_link": os.environ.get("C_ADVISOR_URL") + "/containers/docker/" + container_id}), 200
 
 
 @api.route("/autorec-config", methods=["GET"])
@@ -118,17 +143,17 @@ def create_env_file(autorec_name: str, days: Set, duration: int,
 
     try:
         env_file.writelines([
-            "GOOGLE_DRIVE_TOKEN_PATH=/autorecord/creds/tokenDrive.pickle",
-            "GOOGLE_DRIVE_SCOPES=[\"https://www.googleapis.com/auth/drive\"]",
-            "PSQL_URL=" + os.environ.get("DB_URL"),
-            "NVR_API_URL=" + os.environ.get("NVR_API_URL"),
-            "NVR_API_KEY=" + os.environ.get("NVR_API_KEY"),
-            "LOGURU_LEVEL=INFO",
-            "RECORD_DAYS=[{}]".format(", ".join(str(day) for day in days)),
-            "RECORD_DURATION=" + str(duration),
-            "RECORD_START=" + str(record_start),
-            "RECORD_END=" + str(record_end),
-            "UPLOAD_WITHOUT_SOUND=" + str(upload_without_sound)
+            "GOOGLE_DRIVE_TOKEN_PATH=/autorecord/creds/tokenDrive.pickle\n",
+            "GOOGLE_DRIVE_SCOPES=[\"https://www.googleapis.com/auth/drive\"]\n",
+            "PSQL_URL=" + os.environ.get("DB_URL") + "\n",
+            "NVR_API_URL=" + os.environ.get("NVR_API_URL") + "\n",
+            "NVR_API_KEY=" + os.environ.get("NVR_API_KEY") + "\n",
+            "LOGURU_LEVEL=INFO\n",
+            "RECORD_DAYS={{ {} }}\n".format(", ".join(str(day)[0:3] for day in days)),
+            "RECORD_DURATION=" + str(duration) + "\n",
+            "RECORD_START=" + str(record_start) + "\n",
+            "RECORD_END=" + str(record_end) + "\n",
+            "UPLOAD_WITHOUT_SOUND=" + str(upload_without_sound) + "\n"
         ])
     except:
         return False
