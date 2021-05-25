@@ -274,29 +274,3 @@ class NvrNamespace(Namespace):
                 "email/access_approve.html", user=user, url=NVR_CLIENT_URL
             ),
         )
-
-    @log_info
-    @auth_socket_check
-    @admin_only_socket
-    def on_autorec_deploy(self, msg_json, current_user):
-        session = Session()
-        autorec_name = "nvr_autorec_" + current_user.email.replace("@", "_")
-
-        call(["../scripts/deploy_autorec.sh", autorec_name])
-
-        new_autorec = Autorecord(name=autorec_name, days=",".join(str(day) for day in msg_json["days"]),
-                                 duration=msg_json["duration"], record_start=msg_json["record_start"],
-                                 record_end=msg_json["record_end"],
-                                 upload_without_sound=bool(msg_json["upload_without_sound"]),
-                                 user_id=current_user.id)
-
-        autorec = session.query(Autorecord).filter_by(name=autorec_name).first()
-
-        if autorec:
-            autorec.update(new_autorec)
-        else:
-            session.add(new_autorec)
-        session.commit()
-        session.close()
-
-        emit("autorec_deploy", {})  # TODO: заполнить json

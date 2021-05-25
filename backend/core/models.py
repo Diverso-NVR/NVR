@@ -15,7 +15,7 @@ from sqlalchemy import (
     Boolean,
     create_engine,
     ForeignKey,
-    DateTime,
+    DateTime
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
@@ -316,7 +316,7 @@ class Autorecord(Base, CommonMixin):
     duration = Column(Integer)
     record_start = Column(Integer)
     record_end = Column(Integer)
-    upload_without_sound = Column(Integer)
+    upload_without_sound = Column(Boolean)
     user_id = Column(Integer, ForeignKey("users.id"))
 
     def update(self, autorec):

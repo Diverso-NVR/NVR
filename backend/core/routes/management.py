@@ -1,6 +1,6 @@
 import os
 import re
-from subprocess import call, check_output
+from subprocess import Popen, check_output
 from typing import Set
 
 from flask import Blueprint, jsonify, request, g
@@ -34,10 +34,10 @@ def deploy_autorec(current_user):
     if not body:
         return jsonify({"error", "No request body provided"}), 400
 
-    days: Set[str] = body["record_days"]
+    days: Set[str] = set(body["days"].replace(" ", "").split(","))
 
     if not all(x in default_days for x in days):
-        return jsonify({"error": "Error in field 'record_days'"}), 400
+        return jsonify({"error": "Error in field 'days'"}), 400
 
     duration: int = body["duration"]
 
@@ -59,21 +59,28 @@ def deploy_autorec(current_user):
                            upload_without_sound):
         return jsonify({"error": f"Error while creating environment file .env_nvr_autorec_{current_user.email}"}), 400
 
-    call(["../scripts/deploy_autorec.sh", autorec_name])
+    scripts_dir = os.getcwd().split("routes")[0] + "/core/scripts"
 
-    new_autorec = Autorecord(name=autorec_name, days=",".join(str(day) for day in days),
-                             duration=duration, record_start=record_start, record_end=record_end,
-                             upload_without_sound=upload_without_sound, user_id=current_user.id)
+    process = Popen([f"{scripts_dir}/deploy_autorec.sh", autorec_name])
+    process.communicate()
 
-    autorec = g.session.query(Autorecord).filter_by(name=autorec_name).first()
+    if process.returncode == 0:
+        new_autorec = Autorecord(name=autorec_name, days=",".join(str(day) for day in days),
+                                 duration=duration, record_start=record_start, record_end=record_end,
+                                 upload_without_sound=upload_without_sound, user_id=current_user.id)
 
-    if autorec:
-        autorec.update(new_autorec)
-    else:
-        g.session.add(new_autorec)
-    g.session.commit()
+        autorec = g.session.query(Autorecord).filter_by(name=autorec_name).first()
 
-    return jsonify({"message": "Deployment ended"}), 200
+        if autorec:
+            autorec.update(new_autorec)
+        else:
+            g.session.add(new_autorec)
+        g.session.commit()
+
+        return jsonify({"message": "Deployment ended"}), 200
+
+    return jsonify({"error": "Deployment error"}), 400
+
 
 
 @api.route("/autorec-monitoring", methods=["GET"])

@@ -64,9 +64,9 @@ export default {
         "deployAutorec",
         {
           days: this.params.days,
-          record_start: this.params.record_start,
-          record_end: this.params.record_end,
-          duration: this.params.duration,
+          record_start: parseInt(this.params.record_start),
+          record_end: parseInt(this.params.record_end),
+          duration: parseInt(this.params.duration),
           upload_without_sound: this.params.upload_without_sound
         }
       ).then(res => {
